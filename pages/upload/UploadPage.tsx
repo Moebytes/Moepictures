@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
-import {useNavigate} from "react-router-dom"
+import {useNavigate, useParams} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -43,13 +43,12 @@ import PostSong from "../../components/image/PostSong"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagSelector, useFlagActions, useLayoutSelector, useSearchActions, 
 useSearchSelector, useCacheSelector, useCacheActions, useFilterActions} from "../../store"
-import JSZip from "jszip"
 import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
 import permissions from "../../structures/Permissions"
 import xButton from "../../assets/icons/x-button-magenta.png"
 import path from "path"
-import {Post, PostType, PostRating, PostStyle, UploadTag, UploadImage, UnverifiedPost} from "../../types/Types"
+import {Post, PostFull, PostType, PostRating, PostStyle, UploadTag, UploadImage, UnverifiedPost, SourceFile, UploadableParams, ChildPost} from "../../types/Types"
 import "./styles/uploadpage.less"
 
 let enterLinksTimer = null as any
@@ -57,14 +56,19 @@ let saucenaoTimeout = false
 let tagsTimer = null as any
 let caretPosition = 0
 
-const UploadPage: React.FunctionComponent = (props) => {
+interface Props {
+    edit?: boolean
+    unverified?: boolean
+}
+
+const UploadPage: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
     const {sourceHook} = useFlagSelector()
-    const {setRedirect, setSourceHook} = useFlagActions()
+    const {setRedirect, setPostFlag, setSourceHook} = useFlagActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
@@ -127,7 +131,13 @@ const UploadPage: React.FunctionComponent = (props) => {
     const [tagX, setTagX] = useState(0)
     const [tagY, setTagY] = useState(0)
     const [metaActive, setMetaActive] = useState(false)
+    const [originalID, setOriginalID] = useState("")
     const [danbooruLink, setDanbooruLink] = useState("")
+    const [post, setPost] = useState(null as PostFull | UnverifiedPost | null)
+    const [needsPermission, setNeedsPermission] = useState(false)
+    const [postLocked, setPostLocked] = useState(false)
+    const [edited, setEdited] = useState(false)
+    const [reason, setReason] = useState("")
     const [hideGuidelines, setHideGuidelines] = useState(false)
     const [pending, setPending] = useState([] as UnverifiedPost[])
     const [currentLive2D, setCurrentLive2D] = useState(false)
@@ -138,6 +148,186 @@ const UploadPage: React.FunctionComponent = (props) => {
     const metaTagRef = useRef<HTMLInputElement>(null!)
     const rawTagRef = useRef<HTMLTextAreaElement>(null!)
     const navigate = useNavigate()
+    const {id: postID, slug} = useParams() as {id: string, slug: string}
+
+    useEffect(() => {
+        if (!session.cookie) return
+        if (postID) functions.post.processRedirects(post, postID, slug, navigate, session, setSessionFlag)
+    }, [post, session])
+
+    const updatePost = async () => {
+        let post = undefined as PostFull | UnverifiedPost | undefined
+        try {
+            if (props.unverified) {
+                post = await functions.http.get("/api/post/unverified", {postID}, session, setSessionFlag)
+            } else {
+                post = await functions.http.get("/api/post", {postID}, session, setSessionFlag) as PostFull
+            }
+        } catch (e: any) {
+            if (String(e).includes("401")) return
+        }
+        if (!post) return functions.dom.replaceLocation("/404")
+        setPost(post)
+    }
+
+    const updateFields = async () => {
+        if (!post) return
+        setPostLocked(post.locked ?? false)
+        if ("originalID" in post) setOriginalID(post.originalID)
+        setType(post.type)
+        setRating(post.rating)
+        setStyle(post.style)
+        setSourceTitle(post.title || "")
+        setSourceEnglishTitle(post.englishTitle || "")
+        setSourceArtist(post.artist || "")
+        setSourceCommentary(post.commentary || "")
+        setSourceEnglishCommentary(post.englishCommentary || "")
+        setSourceMirrors(post.mirrors ? Object.values(post.mirrors).join("\n") : "")
+        if (post.posted) setSourceDate(functions.date.formatDate(new Date(post.posted), true))
+        setSourceLink(post.source || "")
+        setSourceBookmarks(String(post.bookmarks) || "")
+        setSourceBuyLink(post.buyLink || "")
+        setSourcePixivTags(post.pixivTags?.join(", ") || "")
+        setSourceDrawingTools(post.drawingTools?.join(", ") || "")
+        setSourceImageCount(String(post.sourceImageCount) || "")
+        setSourceUserProfile(post.userProfile || "")
+        let parentPost = undefined as ChildPost | undefined 
+        if (props.unverified) {
+            parentPost = await functions.http.get("/api/post/parent/unverified", {postID}, session, setSessionFlag)
+        } else {
+            parentPost = await functions.http.get("/api/post/parent", {postID}, session, setSessionFlag)
+        }
+        if (parentPost) setParentID(parentPost.parentID)
+
+        let files = [] as File[]
+        let links = [] as string[]
+        let upscaledFiles = [] as File[]
+        let upscaledLinks = [] as string[]
+        for (let i = 0; i < post.images.length; i++) {
+            let imageLink = props.unverified ? functions.link.getUnverifiedImageLink(post.images[i]) 
+                : functions.link.getImageLink(post.images[i])
+            let response = await fetch(functions.util.appendURLParams(imageLink, {upscaled: false}), {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
+            if (response.byteLength) {
+                const decrypted = await functions.crypto.decryptBuffer(response, imageLink, session)
+                const blob = new Blob([new Uint8Array(decrypted)])
+                const file: SourceFile = new File([blob], path.basename(imageLink))
+                file.altSource = post.images[i].altSource
+                file.directLink = post.images[i].directLink
+                files.push(file)
+                links.push(imageLink)
+            }
+            let upscaledImageLink = props.unverified ? functions.link.getUnverifiedImageLink(post.images[i], true) 
+                : functions.link.getImageLink(post.images[i], true)
+            let upscaledResponse = await fetch(functions.util.appendURLParams(upscaledImageLink, {upscaled: true}), {headers: {"x-force-upscale": "true"}}).then((r) => r.arrayBuffer())
+            if (upscaledResponse.byteLength) {
+                const decrypted = await functions.crypto.decryptBuffer(upscaledResponse, upscaledImageLink, session)
+                const upscaledBlob = new Blob([new Uint8Array(decrypted)])
+                const upscaledFile: SourceFile = new File([upscaledBlob], path.basename(upscaledImageLink))
+                upscaledFile.altSource = post.images[i].altSource
+                upscaledFile.directLink = post.images[i].directLink
+                upscaledFiles.push(upscaledFile)
+                upscaledLinks.push(upscaledImageLink)
+            }
+        }
+        await validate(files, links, false)
+        await validate(upscaledFiles, upscaledLinks, true)
+
+        const parsedTags = props.unverified ? await functions.tag.parseTagsUnverified([post as UnverifiedPost]) 
+            : await functions.tag.parseTags([post], session, setSessionFlag)
+        const tagCategories = await functions.tag.tagCategories(parsedTags, session, setSessionFlag)
+
+        let artists = [{}] as UploadTag[]
+        for (let i = 0; i < tagCategories.artists.length; i++) {
+            if (!artists[i]) artists[i] = {}
+            artists[i].tag = tagCategories.artists[i].tag
+            if (tagCategories.artists[i].image) {
+                try {
+                    const imageLink = functions.util.removeQueryParams(functions.link.getTagLink("artist", tagCategories.artists[i].image!, tagCategories.artists[i].imageHash))
+                    artists[i].image = imageLink
+                    const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer()).catch(() => null)
+                    if (!arrayBuffer) throw "bad"
+                    artists[i].ext = path.extname(imageLink).replace(".", "")
+                    artists[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                } catch {
+                    if (props.unverified) {
+                        const imageLink = functions.link.getUnverifiedTagLink("artist", tagCategories.artists[i].image!)
+                        artists[i].image = imageLink
+                        const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
+                        artists[i].ext = path.extname(imageLink).replace(".", "")
+                        artists[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                    }
+                }
+            }
+        }
+        setArtists(artists)
+
+        let characters = [{}] as UploadTag[]
+        for (let i = 0; i < tagCategories.characters.length; i++) {
+            if (!characters[i]) characters[i] = {}
+            characters[i].tag = tagCategories.characters[i].tag
+            if (tagCategories.characters[i].image) {
+                try {
+                    const imageLink = functions.util.removeQueryParams(functions.link.getTagLink("character", tagCategories.characters[i].image!, tagCategories.characters[i].imageHash))
+                    characters[i].image = imageLink
+                    const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer()).catch(() => null)
+                    if (!arrayBuffer) throw "bad"
+                    characters[i].ext = path.extname(imageLink).replace(".", "")
+                    characters[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                } catch {
+                    if (props.unverified) {
+                        const imageLink = functions.link.getUnverifiedTagLink("character", tagCategories.characters[i].image!)
+                        characters[i].image = imageLink
+                        const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
+                        characters[i].ext = path.extname(imageLink).replace(".", "")
+                        characters[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                    }
+                }
+            }
+        }
+        setCharacters(characters)
+
+        let series = [{}] as UploadTag[]
+        for (let i = 0; i < tagCategories.series.length; i++) {
+            if (!series[i]) series[i] = {}
+            series[i].tag = tagCategories.series[i].tag
+            if (tagCategories.series[i].image) {
+                try {
+                    const imageLink = functions.util.removeQueryParams(functions.link.getTagLink("series", tagCategories.series[i].image!, tagCategories.series[i].imageHash))
+                    series[i].image = imageLink
+                    const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer()).catch(() => null)
+                    if (!arrayBuffer) throw "bad"
+                    series[i].ext = path.extname(imageLink).replace(".", "")
+                    series[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                } catch {
+                    if (props.unverified) {
+                        const imageLink = functions.link.getUnverifiedTagLink("series", tagCategories.series[i].image!)
+                        series[i].image = imageLink
+                        const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
+                        series[i].ext = path.extname(imageLink).replace(".", "")
+                        series[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                    }
+                }
+            }
+        }
+        setSeries(series)
+        setMetaTags(tagCategories.meta.map((m) => m.tag).join(" "))
+        setRawTags(functions.tag.parseTagGroupsField(tagCategories.tags.map((t) => t.tag), post.tagGroups))
+        setEdited(false)
+    }
+
+    useEffect(() => {
+        if (!edited) setEdited(true)
+    }, [type, rating, style, sourceTitle, sourceArtist, sourceCommentary, sourceEnglishCommentary, sourceMirrors, sourceEnglishTitle,
+        sourceLink, sourceBookmarks, sourceBuyLink, sourcePixivTags, sourceDrawingTools, sourceUserProfile, sourceImageCount, sourceDate, 
+        originalFiles, upscaledFiles, artists, characters, series, rawTags])
+
+    useEffect(() => {
+        if (props.edit && postID) updatePost()
+    }, [postID, session])
+
+    useEffect(() => {
+        if (post) updateFields()
+    }, [post])
 
     const parseLinkParam = async () => {
         const linkParam = new URLSearchParams(window.location.search).get("link")
@@ -170,15 +360,19 @@ const UploadPage: React.FunctionComponent = (props) => {
     }, [hideGuidelines])
 
     useEffect(() => {
-        document.title = i18n.buttons.upload
+        if (props.edit) {
+            if (props.unverified) {
+                document.title = i18n.pages.edit.unverifiedTitle
+            } else {
+                document.title = i18n.pages.edit.title
+            }
+        } else {
+            document.title = i18n.buttons.upload
+        }
     }, [i18n])
 
     useEffect(() => {
-        if (mobile) {
-            setRelative(true)
-        } else {
-            setRelative(false)
-        }
+        setRelative(mobile ? true : false)
     }, [mobile])
 
     const updatePending = async () => {
@@ -189,7 +383,11 @@ const UploadPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         if (!session.username) {
-            setRedirect("/upload")
+            if (props.edit) {
+                setRedirect(`/edit-post/${postID}/${slug}`)
+            } else {
+                setRedirect("/upload")
+            }
             navigate("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         }
@@ -197,6 +395,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     }, [session])
 
     const getSimilar = async () => {
+        if (props.edit) return
         let currentFiles = getCurrentFiles()
         if (currentFiles[currentIndex]) {
             const img = currentFiles[currentIndex]
@@ -222,7 +421,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         }
     }, [uploadDropFiles])
 
-    const validate = async (files: File[], links?: string[]) => {
+    const validate = async (files: File[], links?: string[], forceUpscale?: boolean) => {
         let {images, error} = await functions.image.validateImages(files, links, session, i18n)
         if (error) {
             setUploadError(true)
@@ -233,10 +432,18 @@ const UploadPage: React.FunctionComponent = (props) => {
         } else {
             setCurrentImg(images[0].link)
             setCurrentIndex(0)
-            if (showUpscaled) {
-                setUpscaledFiles((prev) => [...prev, ...images])
+            if (forceUpscale !== undefined) {
+                if (forceUpscale) {
+                    setUpscaledFiles((prev) => [...prev, ...images])
+                } else {
+                    setOriginalFiles((prev) => [...prev, ...images])
+                }
             } else {
-                setOriginalFiles((prev) => [...prev, ...images])
+                if (showUpscaled) {
+                    setUpscaledFiles((prev) => [...prev, ...images])
+                } else {
+                    setOriginalFiles((prev) => [...prev, ...images])
+                }
             }
         }
     }
@@ -254,6 +461,7 @@ const UploadPage: React.FunctionComponent = (props) => {
 
     const reset = () => {
         setParentID("")
+        setOriginalID("")
         setGroupName("")
         setSourceTitle("")
         setSourceEnglishTitle("")
@@ -714,6 +922,13 @@ const UploadPage: React.FunctionComponent = (props) => {
             await functions.timeout(3000)
             return setSubmitError(false)
         }
+        if (props.edit && !edited && !permissions.isMod(session)) {
+            setSubmitError(true)
+            if (!submitErrorRef.current) await functions.timeout(20)
+            submitErrorRef.current!.innerText = i18n.pages.edit.noEdits
+            await functions.timeout(3000)
+            return setSubmitError(false)
+        }
         const upscaledMB = upscaledFiles.reduce((acc, obj) => acc + obj.size, 0) / (1024*1024)
         const originalMB = originalFiles.reduce((acc, obj) => acc + obj.size, 0) / (1024*1024)
         const MB = upscaledMB + originalMB
@@ -721,6 +936,13 @@ const UploadPage: React.FunctionComponent = (props) => {
             setSubmitError(true)
             if (!submitErrorRef.current) await functions.timeout(20)
             submitErrorRef.current!.innerText = i18n.pages.upload.sizeLimit
+            await functions.timeout(3000)
+            return setSubmitError(false)
+        }
+        if (props.edit && !reason && !permissions.isMod(session)) {
+            setSubmitError(true)
+            if (!submitErrorRef.current) await functions.timeout(20)
+            submitErrorRef.current!.innerText = i18n.pages.edit.reasonRequired
             await functions.timeout(3000)
             return setSubmitError(false)
         }
@@ -756,25 +978,65 @@ const UploadPage: React.FunctionComponent = (props) => {
             tags,
             tagGroups,
             duplicates: dupPosts.length ? true : false
+        } as UploadableParams
+        if (props.edit) {
+            if (props.unverified) {
+                data.unverifiedID = postID
+                data.postID = originalID
+            } else {
+                data.postID = postID
+                data.reason = reason
+            }
         }
         setSubmitError(true)
         if (!submitErrorRef.current) await functions.timeout(20)
         submitErrorRef.current!.innerText = i18n.buttons.submitting
         try {
-            if (permissions.isCurator(session)) {
-                await functions.http.post("/api/post/upload", data, session, setSessionFlag)
+            if (props.edit) {
+                if (props.unverified) {
+                    await functions.http.put("/api/post/edit/unverified", data, session, setSessionFlag)
+                } else {
+                    if (permissions.isContributor(session)) {
+                        await functions.http.put("/api/post/edit", data, session, setSessionFlag)
+                    } else {
+                        await functions.http.put("/api/post/edit/unverified", data, session, setSessionFlag)
+                        setNeedsPermission(true)
+                    }
+                }
             } else {
-                await functions.http.post("/api/post/upload/unverified", data, session, setSessionFlag)
+                if (permissions.isCurator(session)) {
+                    await functions.http.post("/api/post/upload", data, session, setSessionFlag)
+                } else {
+                    await functions.http.post("/api/post/upload/unverified", data, session, setSessionFlag)
+                }
+
             }
             setSubmitted(true)
+            functions.cache.clearCache()
             return setSubmitError(false)
         } catch (err: any) {
-            let errMsg = i18n.pages.upload.error
-            if (err.message.includes("Invalid images")) errMsg = i18n.pages.upload.errorImages
-            if (!submitErrorRef.current) await functions.timeout(20)
-            submitErrorRef.current!.innerText = errMsg
-            await functions.timeout(3000)
-            return setSubmitError(false)
+            if (String(err)?.includes("403")) {
+                try {
+                    await functions.http.put("/api/post/edit/unverified", data, session, setSessionFlag)
+                    setNeedsPermission(true)
+                    setSubmitted(true)
+                    return setSubmitError(false)
+                } catch (err: any) {
+                    let errMsg = i18n.pages.upload.error
+                    if (err.message.includes("Invalid images")) errMsg = i18n.pages.upload.errorImages
+                    if (!submitErrorRef.current) await functions.timeout(20)
+                    submitErrorRef.current!.innerText = errMsg
+                    await functions.timeout(3000)
+                    return setSubmitError(false)
+                }
+            } else {
+                let errMsg = i18n.pages.upload.error
+                if (err.message.includes("Invalid images")) errMsg = i18n.pages.upload.errorImages
+                if (!submitErrorRef.current) await functions.timeout(20)
+                submitErrorRef.current!.innerText = errMsg
+                await functions.timeout(3000)
+                return setSubmitError(false)
+            }
         }
     }
 
@@ -918,6 +1180,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         setCurrentDupIndex(0)
         setShowLinksInput(false)
         setSubmitted(false)
+        setNeedsPermission(false)
     }
 
     useEffect(() => {
@@ -1015,6 +1278,11 @@ const UploadPage: React.FunctionComponent = (props) => {
 
     const handleMetaTagClick = (tag: string) => {
         setMetaTags((prev: string) => functions.render.insertAtCaret(prev, caretPosition, tag))
+    }
+
+    const openPost = async (event: React.MouseEvent) => {
+        if (props.unverified) return navigate(`/unverified/post/${postID}`)
+        functions.post.openPost(postID, event, navigate, session, setSessionFlag)
     }
 
     useEffect(() => {
@@ -1217,11 +1485,28 @@ const UploadPage: React.FunctionComponent = (props) => {
         setImgChangeFlag(true)
     }
 
+    const currentImages = () => {
+        if (props.edit && !props.unverified) return getCurrentFiles().map((u) => functions.util.appendURLParams(u.link, {upscaled: showUpscaled}))
+        return getCurrentFiles().map((u) => u.link)
+    }
+
     const getUploadJSX = () => {
         if (session.banned) {
             return (
                 <>
-                <span className="upload-ban-text">{i18n.pages.upload.banText}</span>
+                <span className="upload-ban-text">{props.edit ? i18n.pages.edit.banText : i18n.pages.upload.banText}</span>
+                <button className="upload-button" onClick={() => navigate(-1)}
+                style={{width: "max-content", marginTop: "10px", marginLeft: "10px", backgroundColor: "var(--banText)"}}>
+                        <span className="upload-button-submit-text">←{i18n.buttons.back}</span>
+                </button>
+                </>
+            )
+        }
+
+        if (postLocked) {
+            return (
+                <>
+                <span className="upload-ban-text">{i18n.pages.edit.locked}</span>
                 <button className="upload-button" onClick={() => navigate(-1)}
                 style={{width: "max-content", marginTop: "10px", marginLeft: "10px", backgroundColor: "var(--banText)"}}>
                         <span className="upload-button-submit-text">←{i18n.buttons.back}</span>
@@ -1247,23 +1532,33 @@ const UploadPage: React.FunctionComponent = (props) => {
             <>
             <div className="upload">
                 <div className="upload-container-row" style={{alignItems: "center"}}>
-                    <span className="upload-heading">{i18n.buttons.upload}</span>
-                    <img className="upload-heading-icon" src={hideGuidelines ? downloadIcon : uploadIcon} onClick={() => setHideGuidelines((prev) => !prev)}/>
+                    <span className="upload-heading">{props.edit ? i18n.pages.edit.title : i18n.buttons.upload}</span>
+                    {!props.edit ? <img className="upload-heading-icon" src={hideGuidelines ? downloadIcon : uploadIcon} onClick={() => setHideGuidelines((prev) => !prev)}/> : null}
                 </div>
                 {submitted ?
                 <div className="upload-container">
                     <div className="upload-container-row">
-                        {permissions.isMod(session) ?
+                        {props.edit ? 
+                        /* Edit */
+                        needsPermission ?
+                        <span className="upload-text-alt">{i18n.pages.edit.submitHeadingApproval}</span> :
+                        <span className="upload-text-alt">{i18n.pages.edit.submitHeading}</span> : 
+                        /* Upload */
+                        permissions.isMod(session) ?
                         <span className="upload-text-alt">{i18n.pages.upload.submitHeading}</span> :
                         <span className="upload-text-alt">{i18n.pages.upload.submitHeadingApproval}</span>}
                     </div> 
                     <div className="upload-container-row" style={{marginTop: "10px"}}>
+                        {props.edit ?
+                        <button className="upload-button" onClick={(event) => {openPost(event); setPostFlag(postID)}}>
+                                <span className="upload-button-text">←{i18n.buttons.back}</span>
+                        </button> :
                         <button className="upload-button" onClick={resetAll}>
                                 <span className="upload-button-text">←{i18n.pages.upload.submitMore}</span>
-                        </button>
+                        </button>}
                     </div>
                 </div> : <>
-                {!hideGuidelines ? <div className="upload-guidelines">
+                {!hideGuidelines && !props.edit ? <div className="upload-guidelines">
                     <span className="upload-guideline">{i18n.pages.upload.guidelines.line1}<span className="upload-guideline-link" onClick={() => navigate(`/help#uploading`)}>{i18n.pages.upload.guidelines.uploadingGuidelines}</span></span>
                     <span className="upload-guideline">{i18n.pages.upload.guidelines.line2}<span className="upload-guideline-link" onClick={() => navigate(`/help#compressing`)}>{i18n.pages.upload.guidelines.compressingGuide}</span></span>
                     <span className="upload-guideline">{i18n.pages.upload.guidelines.line3}<span className="upload-guideline-link" onClick={() => navigate(`/help#upscaling`)}>{i18n.pages.upload.guidelines.upscalingGuide}</span></span>
@@ -1359,7 +1654,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             <div className="upload-row">
                 {getCurrentFiles().length > 1 ? 
                 <div className="upload-container">
-                    <Carousel images={getCurrentFiles().map((u) => u.link)} set={set} index={currentIndex} unlimited={true}/>
+                    <Carousel images={currentImages()} set={set} index={currentIndex} unlimited={true}/>
                     {getPostJSX()}
                 </div>
                 : getPostJSX()}
@@ -1615,6 +1910,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                     <ContentEditable innerRef={rawTagRef} className="upload-textarea" spellCheck={false} html={rawTags} onChange={(event) => {setCaretPosition(rawTagRef.current); setRawTags(event.target.value)}} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
                 </div>
             </div>
+            {props.edit && !props.unverified ?
+            <div className="upload-row">
+                <span className="upload-text">{i18n.pages.edit.editReason}: </span>
+                <input style={{width: "100%"}} className="upload-input-wide2" type="text" value={reason} onChange={(event) => setReason(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+            </div> : null}
             {newTags.length ? <>
             <span className="upload-heading">{i18n.labels.newTags}</span>
             <div className="upload-container">
@@ -1623,9 +1923,18 @@ const UploadPage: React.FunctionComponent = (props) => {
             </> : null}
             <div className="upload-center-row">
                 {submitError ? <span ref={submitErrorRef} className="submit-error-text"></span> : null}
+                {props.edit ? 
+                <div className="upload-submit-button-container">
+                    <button className="upload-button" onClick={(event) => openPost(event)}>
+                            <span className="upload-button-submit-text">{i18n.buttons.cancel}</span>
+                    </button>
+                    <button className="upload-button" onClick={() => submit()}>
+                            <span className="upload-button-submit-text">{i18n.buttons.edit}</span>
+                    </button>
+                </div> :
                 <button className="upload-button" onClick={() => submit()}>
                         <span className="upload-button-submit-text">{i18n.buttons.submit}</span>
-                </button>
+                </button>}
             </div>
             </>}
             </div>

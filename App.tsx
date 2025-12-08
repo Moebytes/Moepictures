@@ -34,7 +34,6 @@ import VerifyLoginSuccessPage from "./pages/settings/VerifyLoginSuccessPage"
 import ChangePasswordPage from "./pages/settings/ChangePasswordPage"
 import ResetPasswordPage from "./pages/settings/ResetPasswordPage"
 import ForgotPasswordPage from "./pages/settings/ForgotPasswordPage"
-import EditPostPage from "./pages/upload/EditPostPage"
 import UserPage from "./pages/item/UserPage"
 import TagPage from "./pages/item/TagPage"
 import GroupPage from "./pages/item/GroupPage"
@@ -46,7 +45,6 @@ import HistoryPage from "./pages/history/HistoryPage"
 import UnverifiedPostPage from "./pages/item/UnverifiedPostPage"
 import functions from "./functions/Functions"
 import ModQueuePage from "./pages/search/ModQueuePage"
-import EditUnverifiedPostPage from "./pages/upload/EditUnverifiedPostPage"
 import NoteHistoryPage from "./pages/history/NoteHistoryPage"
 import ForumPage from "./pages/search/ForumPage"
 import ForumPostsPage from "./pages/search/ForumPostsPage"
@@ -327,8 +325,8 @@ const App: React.FunctionComponent = (props) => {
                 <Route path="/post/:id/:slug" element={<PostPage/>}/>
                 <Route path="/post/:id/:slug/reader" element={<ReaderPage/>}/>
                 <Route path="/unverified/post/:id" element={<UnverifiedPostPage/>}/>
-                <Route path="/edit-post/:id/:slug" element={<EditPostPage/>}/>
-                <Route path="/unverified/edit-post/:id" element={<EditUnverifiedPostPage/>}/>
+                <Route path="/edit-post/:id/:slug" element={<UploadPage edit={true}/>}/>
+                <Route path="/unverified/edit-post/:id" element={<UploadPage edit={true} unverified={true}/>}/>
                 <Route path="/help" element={<HelpPage/>}/>
                 <Route path="/forum" element={<ForumPage/>}/>
                 <Route path="/posts/:username" element={<ForumPostsPage/>}/>

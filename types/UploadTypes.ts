@@ -90,8 +90,10 @@ export interface UnverifiedUploadParams extends Omit<UploadParams, "unverifiedID
 
 export interface UnverifiedEditParams extends Omit<UploadParams, "noImageUpdate" | "sourceLinks"> {
     postID: string
-    reason?: string
+    reason?: string | null
 }
+
+export type UploadableParams = UploadParams & EditParams & UnverifiedUploadParams & UnverifiedEditParams
 
 export type UploadPostEndpoint<T extends string> = 
     T extends "/api/post/upload" ? {params: UploadParams, response: string} :

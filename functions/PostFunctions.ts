@@ -98,7 +98,7 @@ export default class PostFunctions {
         }
     }
 
-    public static processRedirects = async (post: PostFull | PostSearch | PostHistory | null, postID: string, slug: string, navigate: NavigateFunction, 
+    public static processRedirects = async (post: PostFull | PostSearch | PostHistory | UnverifiedPost | null, postID: string, slug: string, navigate: NavigateFunction, 
         session: Session, setSessionFlag: (value: boolean) => void) => {
         if (!post || postID !== post.postID) return
         slug = decodeURIComponent(slug).trim()
