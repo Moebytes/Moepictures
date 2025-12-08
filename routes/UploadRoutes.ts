@@ -64,6 +64,20 @@ const populateChunkBytes = async (originalChunks: ImageChunk[], upscaledChunks: 
   await populateChunkItem(upscaledChunks)
 }
 
+const clearChunkBytes = async (originalChunks: ImageChunk[], upscaledChunks: ImageChunk[]) => {
+  const clearChunkItem = async (chunkItem: ImageChunk[]) => {
+    for (const chunk of chunkItem) {
+      if (process.env.REDIS === "on") {
+        await sql.removeCache(chunk.fileID)
+      } else {
+        imageChunks.delete(chunk.fileID)
+      }
+    }
+  }
+  await clearChunkItem(originalChunks)
+  await clearChunkItem(upscaledChunks)
+}
+
 const CreateRoutes = (app: Express) => {
   app.post("/api/post/image-chunk", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
@@ -115,6 +129,7 @@ const CreateRoutes = (app: Express) => {
 
         await populateChunkBytes(imageChunks, upscaledChunks)
         let {images, upscaledImages} = functions.byte.mergeChunks(imageChunks, upscaledChunks)
+        await clearChunkBytes(imageChunks, upscaledChunks)
 
         artists = functions.tag.cleanTags(artists, "artists")
         characters = functions.tag.cleanTags(characters, "characters")
@@ -189,6 +204,7 @@ const CreateRoutes = (app: Express) => {
 
         await populateChunkBytes(imageChunks, upscaledChunks)
         let {images, upscaledImages} = functions.byte.mergeChunks(imageChunks, upscaledChunks)
+        await clearChunkBytes(imageChunks, upscaledChunks)
 
         artists = functions.tag.cleanTags(artists, "artists")
         characters = functions.tag.cleanTags(characters, "characters")
@@ -305,6 +321,7 @@ const CreateRoutes = (app: Express) => {
 
         await populateChunkBytes(imageChunks, upscaledChunks)
         let {images, upscaledImages} = functions.byte.mergeChunks(imageChunks, upscaledChunks)
+        await clearChunkBytes(imageChunks, upscaledChunks)
 
         artists = functions.tag.cleanTags(artists, "artists")
         characters = functions.tag.cleanTags(characters, "characters")
@@ -372,6 +389,7 @@ const CreateRoutes = (app: Express) => {
 
         await populateChunkBytes(imageChunks, upscaledChunks)
         let {images, upscaledImages} = functions.byte.mergeChunks(imageChunks, upscaledChunks)
+        await clearChunkBytes(imageChunks, upscaledChunks)
         
         artists = functions.tag.cleanTags(artists, "artists")
         characters = functions.tag.cleanTags(characters, "characters")

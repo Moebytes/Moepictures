@@ -123,6 +123,11 @@ export default class SQLQuery {
     return result ? JSON.parse(result) : null
   }
 
+  /** Remove cache */
+  public static removeCache = async (cacheKey: string) => {
+    await redis.del(cacheKey).catch(() => null)
+  }
+
   /** Invalidate cache */
   public static invalidateCache = async (cacheEndpoint: string) => {
     try {
