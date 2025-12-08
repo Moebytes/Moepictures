@@ -85,6 +85,8 @@ const CreateRoutes = (app: Express) => {
         if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
         if (req.session.banned) return void res.status(403).send("You are banned")
         if (!chunk?.bytes?.length) return void res.status(400).send("No chunk bytes")
+        const MB = new Uint8Array(chunk.bytes).byteLength / (1024*1024)
+        if (MB > 100) return void res.status(400).send("Chunk size exceeded")
 
         if (process.env.REDIS === "on") {
           let chunks = await sql.getCache(chunk.fileID) as ImageChunk[]
