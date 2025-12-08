@@ -1006,7 +1006,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                     <span className="tag">{i18n.sidebar.flipParent}</span>
                                 </span>
                             </div> : null}
-                            {permissions.isMod(session) && (props.post.type !== "image" && props.post.type !== "comic") ? 
+                            {permissions.isMod(session) ? 
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={editThumbnail}>
                                     <img className="mobileinfo-icon" src={snapshotIcon} style={{filter: getFilter()}}/>

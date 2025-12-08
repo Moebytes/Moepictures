@@ -57,7 +57,7 @@ export default class CryptoFunctions {
             return cacheUrl
         }
         if (await functions.file.isUgoira(img)) {
-            const url = await functions.video.ugoiraThumbnail(decryptedImg)
+            const url = await functions.anim.ugoiraThumbnail(decryptedImg)
             let cacheUrl = `${url}#${path.extname(img)}`
             functions.cache.cachedThumbs.set(cacheKey, cacheUrl)
             return cacheUrl

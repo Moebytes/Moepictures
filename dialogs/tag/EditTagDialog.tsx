@@ -105,7 +105,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                         let url = URL.createObjectURL(file)
                         let croppedURL = ""
                         if (gif) {
-                            const gifData = await functions.video.extractGIFFrames(bytes.buffer)
+                            const gifData = await functions.anim.extractGIFFrames(bytes.buffer)
                             let frameArray = [] as ArrayBuffer[] 
                             let delayArray = [] as number[]
                             for (let i = 0; i < gifData.length; i++) {
@@ -116,7 +116,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                             }
                             const firstURL = await functions.image.crop(gifData[0].frame.toDataURL(), 1, false)
                             const {width, height} = await functions.image.imageDimensions(firstURL)
-                            const buffer = await functions.video.encodeGIF(frameArray, delayArray, width, height)
+                            const buffer = await functions.anim.encodeGIF(frameArray, delayArray, width, height)
                             const blob = new Blob([new Uint8Array(buffer)])
                             croppedURL = URL.createObjectURL(blob)
                         } else {

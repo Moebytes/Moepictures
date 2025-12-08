@@ -1349,8 +1349,9 @@ const PostRoutes = (app: Express) => {
             for (const thumb of thumbnails) {
                 const image = post.images.find((image) => image.order === thumb.order)
                 if (!image) continue
-                const thumbBuffer = functions.byte.base64ToBuffer(thumb.thumbnail)
-                const thumbnailFilename = `${postID}-${thumb.order}.${thumb.thumbnailExt}`
+                let buffer = functions.byte.base64ToBuffer(thumb.thumbnail)
+                const {thumbBuffer, thumbnailExt} = await serverFunctions.util.processThumbnail(buffer, thumb.thumbnailExt)
+                const thumbnailFilename = `${postID}-${thumb.order}.${thumbnailExt}`
                 let thumbPath = functions.link.getThumbnailImagePath(image.type, thumbnailFilename)
                 if (unverified) {
                     if (image.thumbnail) {
@@ -1367,6 +1368,42 @@ const PostRoutes = (app: Express) => {
                     await serverFunctions.files.uploadFile(thumbPath, thumbBuffer, r18)
                     await sql.post.updateImage(image.imageID, "thumbnail", thumbnailFilename)
                 }
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/thumbnail/regenerate", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            let {postID} = req.body as {postID: string}
+            if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
+            let post = await sql.post.post(postID)
+            if (!post) return void res.status(400).send("Invalid postID")
+            let r18 = functions.post.isR18(post.rating)
+
+            for (const image of post.images) {
+                // Only support regeneration on images
+                if (image.type !== "image" && image.type !== "comic") continue
+
+                const imagePath = functions.link.getImagePath(image.type, image.postID, image.order, image.filename)
+                const buffer = await serverFunctions.files.getFile(imagePath, false, r18, image.pixelHash)
+                let ext = path.extname(image.filename).replace(".", "")
+
+                const {thumbBuffer, thumbnailExt} = await serverFunctions.util.processThumbnail(buffer, ext)
+                const thumbnailFilename = `${postID}-${image.order}.${thumbnailExt}`
+                let thumbPath = functions.link.getThumbnailImagePath(image.type, thumbnailFilename)
+                if (image.thumbnail) {
+                    const oldThumbnail = functions.link.getThumbnailImagePath(image.type, image.thumbnail)
+                    await serverFunctions.files.deleteFile(oldThumbnail, r18)
+                }
+                await serverFunctions.files.uploadFile(thumbPath, thumbBuffer, r18)
+                await sql.post.updateImage(image.imageID, "thumbnail", thumbnailFilename)
+                
             }
             res.status(200).send("Success")
         } catch (e) {

@@ -195,11 +195,14 @@ export default class ServerUpload {
                     }
                 }
             }
-            if (image.thumbnail) {
-                if (functions.byte.isBase64(image.thumbnail)) {
-                    thumbBuffer = functions.byte.base64ToBuffer(image.thumbnail)
+            if (original.thumbnail) {
+                if (functions.byte.isBase64(original.thumbnail) && "thumbnailExt" in original) {
+                    let buffer = functions.byte.base64ToBuffer(original.thumbnail)
+                    const processedThumb = await serverFunctions.util.processThumbnail(buffer, original.thumbnailExt)
+                    thumbBuffer = processedThumb.thumbBuffer
+                    original.thumbnailExt = processedThumb.thumbnailExt
                 } else {
-                    let thumbnailImagePath = functions.link.getThumbnailImagePath((image as Image).type, image.thumbnail)
+                    let thumbnailImagePath = functions.link.getThumbnailImagePath((original as Image).type, original.thumbnail)
                     if (unverifiedImages) {
                         thumbBuffer = await serverFunctions.files.getUnverifiedFile(thumbnailImagePath)
                     } else {

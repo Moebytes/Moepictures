@@ -229,9 +229,9 @@ const PostPage: React.FunctionComponent = () => {
             if (!historyPost) return functions.dom.replaceLocation("/404")
             let images = [] as string[]
             if (session.upscaledImages && historyPost.upscaledImages?.length) {
-                images = historyPost.upscaledImages.map((i) => functions.link.getHistoryImageLink(i))
+                images = historyPost.upscaledImages.map((i) => functions.link.getRawImageLink(i))
             } else {
-                images = historyPost.images.map((i) => functions.link.getHistoryImageLink(i))
+                images = historyPost.images.map((i) => functions.link.getRawImageLink(i))
             }
             setImages(images)
             if (images[order-1]) {

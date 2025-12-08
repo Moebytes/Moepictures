@@ -1,5 +1,5 @@
 import functions from "./Functions"
-import {Session, Image} from "../types/Types"
+import {Session, Image, PostFull, PostSearch, UnverifiedPost} from "../types/Types"
 
 export default class LinkFunctions {
     public static getImagePath = (folder: string, postID: string, order: number, filename: string) => {
@@ -23,10 +23,6 @@ export default class LinkFunctions {
         return `history/post/${postID}/upscaled/${key}/${postID}-${order}-${filename}`
     }
 
-    public static getHistoryImageLink = (historyFile: string) => {
-        return `${window.location.protocol}//${window.location.host}/${historyFile}`
-    }
-
     public static getImageLink = (image: Image, upscaled?: boolean) => {
         if (!image.filename && !image.upscaledFilename) return ""
         let filename = upscaled ? image.upscaledFilename || image.filename : image.filename
@@ -48,19 +44,13 @@ export default class LinkFunctions {
 
     public static getThumbnailLink = (image: Image, sizeType: string, session: Session, mobile?: boolean, forceLive?: boolean) => {
         if (!image.thumbnail && !image.filename) return ""
-        let size = 265
-        if (sizeType === "tiny") size = 350
-        if (sizeType === "small") size = 400
-        if (sizeType === "medium") size = 600
-        if (sizeType === "large") size = 750
-        if (sizeType === "massive") size = 1000
-        if (mobile) size = Math.floor(size / 2)
         let originalFilename = `${image.postID}-${image.order}-${encodeURIComponent(image.filename)}`
         let filename = image.thumbnail || originalFilename
         if (forceLive) return this.getImageLink(image, false)
         if (image.type === "image" || image.type === "comic") {
-            // Generating the image thumbnails seems too heavy for now
-            return this.getImageLink(image, false)
+            if (sizeType === "massive" && !mobile) {
+                return this.getImageLink(image, false)
+            }
         }
         if (image.type === "animation" || image.type === "video") {
             if (session.liveAnimationPreview && !mobile && !functions.file.isZip(originalFilename)) return this.getImageLink(image, false)
@@ -68,36 +58,27 @@ export default class LinkFunctions {
         if (image.type === "model" || image.type === "live2d") {
             if (session.liveModelPreview && !mobile) return this.getImageLink(image, false)
         }
-        const link = `${window.location.protocol}//${window.location.host}/thumbnail/${size}/${image.type}/${encodeURIComponent(filename)}`
+        const link = `${window.location.protocol}//${window.location.host}/thumbnail/${image.type}/${encodeURIComponent(filename)}`
         return functions.util.appendURLParams(link, {hash: image.pixelHash})
     }
 
     public static getRawThumbnailLink = (filename: string, sizeType: string, mobile?: boolean) => {
         if (filename.startsWith(window.location.protocol)) return filename
         if (!filename) return ""
-        let size = 265
-        if (sizeType === "tiny") size = 350
-        if (sizeType === "small") size = 400
-        if (sizeType === "medium") size = 600
-        if (sizeType === "large") size = 750
-        if (sizeType === "massive") size = 1000
-        if (mobile) size = Math.floor(size / 2)
-        return `${window.location.protocol}//${window.location.host}/${`thumbnail/${size}/${filename}`}`
+        if (sizeType === "massive" && !mobile) {
+            return this.getRawImageLink(filename)
+        }
+        return `${window.location.protocol}//${window.location.host}/thumbnail/${filename}`
     }
 
     public static getUnverifiedThumbnailLink = (image: Image, sizeType: string, session: Session, mobile?: boolean) => {
         if (!image.thumbnail && !image.filename) return ""
-        let size = 265
-        if (sizeType === "tiny") size = 350
-        if (sizeType === "small") size = 400
-        if (sizeType === "medium") size = 600
-        if (sizeType === "large") size = 750
-        if (sizeType === "massive") size = 1000
-        if (mobile) size = Math.floor(size / 2)
         let originalFilename = `${image.postID}-${image.order}-${encodeURIComponent(image.filename)}`
         let filename = image.thumbnail || originalFilename
         if (image.type === "image" || image.type === "comic") {
-            return this.getUnverifiedImageLink(image, false)
+            if (sizeType === "massive" && !mobile) {
+                return this.getUnverifiedImageLink(image, false)
+            }
         }
         if (image.type === "animation" || image.type === "video") {
             if (session.liveAnimationPreview && !mobile && !functions.file.isZip(originalFilename)) filename = originalFilename
@@ -105,7 +86,7 @@ export default class LinkFunctions {
         if (image.type === "model" || image.type === "live2d") {
             if (session.liveModelPreview && !mobile) filename = originalFilename
         }
-        const link = `${window.location.protocol}//${window.location.host}/thumbnail/${size}/unverified/${image.type}/${filename}`
+        const link = `${window.location.protocol}//${window.location.host}/thumbnail/unverified/${image.type}/${filename}`
         return functions.util.appendURLParams(link, {hash: image.pixelHash, upscaled: false})
     }
 

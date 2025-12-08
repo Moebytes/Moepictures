@@ -270,6 +270,7 @@ export type PostPostEndpoint<T extends string> =
     T extends "/api/post/upscale" ? {params: PostUpscaleParams, response: string} :
     T extends "/api/post/appeal" ? {params: {postID: string, reason: string}, response: string} :
     T extends "/api/post/metadata" ? {params: {postID: string, order: number}, response: PostMetadata} :
+    T extends "/api/thumbnail/regenerate" ? {params: {postID: string}, response: string} :
     never
 
 export type PostPutEndpoint<T extends string> = 

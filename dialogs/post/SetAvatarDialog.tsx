@@ -121,11 +121,11 @@ const SetAvatarDialog: React.FunctionComponent = (props) => {
             let gifData = [] as GIFFrame[]
             const arrayBuffer = await fetch(image).then((r) => r.arrayBuffer())
             if (functions.file.isGIF(images[0])) {
-                gifData = await functions.video.extractGIFFrames(arrayBuffer)
+                gifData = await functions.anim.extractGIFFrames(arrayBuffer)
             } else if (functions.file.isWebP(images[0])) {
-                gifData = await functions.video.extractAnimatedWebpFrames(arrayBuffer)
+                gifData = await functions.anim.extractAnimatedWebpFrames(arrayBuffer)
             } else if (functions.file.isPNG(images[0])) {
-                gifData = await functions.video.extractAnimatedPngFrames(arrayBuffer)
+                gifData = await functions.anim.extractAnimatedPngFrames(arrayBuffer)
             }
             let frameArray = [] as ArrayBuffer[] 
             let delayArray = [] as number[]
@@ -145,7 +145,7 @@ const SetAvatarDialog: React.FunctionComponent = (props) => {
                 delayArray.push(gifData[i].delay)
             }
             const {width, height} = await functions.image.imageDimensions(firstURL)
-            const buffer = await functions.video.encodeGIF(frameArray, delayArray, width, height)
+            const buffer = await functions.anim.encodeGIF(frameArray, delayArray, width, height)
             const blob = new Blob([new Uint8Array(buffer)])
             croppedURL = URL.createObjectURL(blob)
         } else {

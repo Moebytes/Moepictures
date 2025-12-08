@@ -140,6 +140,21 @@ export default class ServerUtil {
         return phash(buffer).then((hash: string) => functions.byte.binaryToHex(hash))
     }
 
+    public static processThumbnail = async (buffer: Buffer, ext: string, size = 500) => {
+        if (ext === "jpg" || ext === "jpeg") {
+            const thumbBuffer = await sharp(buffer, {animated: false, limitInputPixels: false})
+            .resize(size, size, {fit: "inside"})
+            .jpeg({optimiseScans: true, trellisQuantisation: true, quality: 95})
+            .toBuffer()
+            return {thumbBuffer, thumbnailExt: "jpg"}
+        } else {
+            const thumbBuffer = await sharp(buffer, {animated: false, limitInputPixels: false})
+            .resize(size, size, {fit: "inside"})
+            .webp().toBuffer()
+            return {thumbBuffer, thumbnailExt: "webp"}
+        }
+    }
+
     public static localImageBuffer = async (link: string) => {
         const img = await loadImage(link)
         const canvas = createCanvas(img.width, img.height)

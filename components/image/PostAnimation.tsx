@@ -53,7 +53,7 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
         const decryptedImage = await functions.crypto.decryptItem(props.anim!, session)
         if (!decryptedImage) return
         if (functions.file.isZip(props.anim)) {
-            const firstFrame = await functions.video.ugoiraThumbnail(decryptedImage)
+            const firstFrame = await functions.anim.ugoiraThumbnail(decryptedImage)
             setBackFrame(firstFrame)
             setImg(firstFrame)
             setZip(decryptedImage)
@@ -99,7 +99,7 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
     const parseGIF = async () => {
         const start = new Date()
         const arrayBuffer = await getCurrentBuffer(!session.upscaledImages)
-        const frames = await functions.video.extractGIFFrames(arrayBuffer)
+        const frames = await functions.anim.extractGIFFrames(arrayBuffer)
         setGIFData(frames)
         const end = new Date()
         const seconds = (end.getTime() - start.getTime()) / 1000
@@ -111,7 +111,7 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
         const arrayBuffer = await getCurrentBuffer(!session.upscaledImages)
         const animated = functions.file.isAnimatedWebp(arrayBuffer)
         if (!animated) return 
-        const frames = await functions.video.extractAnimatedWebpFrames(arrayBuffer)
+        const frames = await functions.anim.extractAnimatedWebpFrames(arrayBuffer)
         setGIFData(frames)
         const end = new Date()
         const seconds = (end.getTime() - start.getTime()) / 1000
@@ -123,7 +123,7 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
         const arrayBuffer = await getCurrentBuffer(!session.upscaledImages)
         const animated = functions.file.isAnimatedPng(arrayBuffer)
         if (!animated) return 
-        const frames = await functions.video.extractAnimatedPngFrames(arrayBuffer)
+        const frames = await functions.anim.extractAnimatedPngFrames(arrayBuffer)
         setGIFData(frames)
         const end = new Date()
         const seconds = (end.getTime() - start.getTime()) / 1000
@@ -133,7 +133,7 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
     const parseUgoira = async () => {
         const start = new Date()
         const arrayBuffer = await getCurrentBuffer(!session.upscaledImages)
-        const frames = await functions.video.extractUgoiraFrames(arrayBuffer)
+        const frames = await functions.anim.extractUgoiraFrames(arrayBuffer)
         setGIFData(frames)
         const end = new Date()
         const seconds = (end.getTime() - start.getTime()) / 1000
@@ -167,7 +167,7 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
         if (!animationRef.current || !imageRef.current) return
         if (gifData) {
             if (paused && !dragging) return clearTimeout(timeout)
-            const adjustedData = functions.video.gifSpeed(gifData, speed)
+            const adjustedData = functions.anim.gifSpeed(gifData, speed)
             const gifCanvas = animationRef.current
             gifCanvas.style.opacity = "1"
             const landscape = gifCanvas.width >= gifCanvas.height
@@ -260,7 +260,7 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
             setEncodingOverlay(true)
             setPaused(true)
             await functions.timeout(50)
-            const adjustedData = functions.video.gifSpeed(gifData, speed)
+            const adjustedData = functions.anim.gifSpeed(gifData, speed)
             let frames = [] as ArrayBuffer[]
             let delays = [] as number[]
             for (let i = 0; i < adjustedData.length; i++) {
@@ -273,7 +273,7 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
                 frames = frames.reverse()
                 delays = delays.reverse()
             }
-            const buffer = await functions.video.encodeGIF(frames, delays, gifData[0].frame.width, 
+            const buffer = await functions.anim.encodeGIF(frames, delays, gifData[0].frame.width, 
             gifData[0].frame.height, {transparentColor: "#000000"})
             const blob = new Blob([new Uint8Array(buffer)])
             setEncodingOverlay(false)

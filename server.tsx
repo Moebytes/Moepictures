@@ -256,7 +256,7 @@ for (let i = 0; i < folders.length; i++) {
     }
   })
 
-  app.get(`/thumbnail/:size/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
+  app.get(`/thumbnail/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const referer = req.headers.referer || req.headers.referrer as string
       if (!serverFunctions.util.isAllowedReferer(referer)) return res.status(403).end()
@@ -265,7 +265,7 @@ for (let i = 0; i < folders.length; i++) {
       if (mimeType) res.setHeader("Content-Type", mimeType)
       res.setHeader("Last-Modified", lastModified)
       res.setHeader("Cache-Control", "public, max-age=2678400")
-      const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, ""))
+      const key = decodeURIComponent(req.path.replace(`/thumbnail/`, ""))
       let r18 = false
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (!noCache.includes(folders[i]) && postID) {
@@ -293,18 +293,6 @@ for (let i = 0; i < folders.length; i++) {
         res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
         body = await imageLock(body)
         return res.status(200).send(body)
-      }
-      if (mimeType?.includes("image")) {
-        const metadata = await sharp(body).metadata()
-        if (metadata.pages === 1) {
-          console.log(metadata.format)
-          let width = Math.min(1000, Number(req.params.size))
-          const ratio = metadata.height! / width
-          body = await sharp(body, {animated: false, limitInputPixels: false})
-          .resize(Math.round(metadata.width! / ratio), width, {fit: "fill", kernel: "cubic"})
-          .toBuffer()
-          contentLength = body.byteLength
-        }
       }
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
         if (!permissions.noEncryption(req.session) && !req.session.publicKey) return res.status(401).end()
@@ -379,14 +367,14 @@ for (let i = 0; i < folders.length; i++) {
     }
   })
 
-  app.get(`/thumbnail/:size/unverified/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
+  app.get(`/thumbnail/unverified/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const referer = req.headers.referer || req.headers.referrer as string
       if (!serverFunctions.util.isAllowedReferer(referer)) return res.status(403).end()
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
       res.setHeader("Cache-Control", "public, max-age=2678400")
-      const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, "").replace("unverified/", ""))
+      const key = decodeURIComponent(req.path.replace(`/thumbnail/unverified/`, ""))
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (!noCache.includes(folders[i]) && postID) {
         const post = await sql.post.unverifiedPost(postID)
@@ -404,17 +392,6 @@ for (let i = 0; i < folders.length; i++) {
         res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
         const noImg = await imageMissing()
         return res.status(200).send(noImg)
-      }
-      if (mimeType?.includes("image")) {
-        const metadata = await sharp(body).metadata()
-        if (metadata.pages === 1) {
-          let width = Math.min(1000, Number(req.params.size))
-          const ratio = metadata.height! / width
-          body = await sharp(body, {animated: false, limitInputPixels: false})
-          .resize(Math.round(metadata.width! / ratio), width, {fit: "fill", kernel: "cubic"})
-          .toBuffer()
-          contentLength = body.byteLength
-        }
       }
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")

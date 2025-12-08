@@ -1,3 +1,4 @@
+import AnimationFunctions from "./AnimationFunctions"
 import AudioFunctions from "./AudioFunctions"
 import ByteFunctions from "./ByteFunctions"
 import CacheFunctions from "./CacheFunctions"
@@ -23,6 +24,7 @@ import VideoFunctions from "./VideoFunctions"
 import {PostRating, Post} from "../types/Types"
 
 export default class Functions {
+    public static anim = AnimationFunctions
     public static audio = AudioFunctions
     public static byte = ByteFunctions
     public static cache = CacheFunctions

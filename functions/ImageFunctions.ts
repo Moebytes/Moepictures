@@ -57,7 +57,7 @@ export default class ImageFunctions {
         if (await functions.file.isLive2D(link)) {
             dimensions = await functions.model.live2dDimensions(link)
         } else if (await functions.file.isUgoira(link)) {
-            dimensions = await functions.video.ugoiraDimensions(link)
+            dimensions = await functions.anim.ugoiraDimensions(link)
         } else if (functions.file.isVideo(link)) {
             dimensions = await functions.video.videoDimensions(link)
         } else if (functions.file.isModel(link)) {
@@ -76,7 +76,7 @@ export default class ImageFunctions {
         if (await functions.file.isLive2D(link)) {
             thumbnail = await functions.model.live2dScreenshot(link)
         } else if (await functions.file.isUgoira(link)) {
-            thumbnail = await functions.video.ugoiraThumbnail(link)
+            thumbnail = await functions.anim.ugoiraThumbnail(link)
         } else if (functions.file.isVideo(link)) {
             thumbnailExt = "jpg"
             thumbnail = await functions.video.videoThumbnail(link)
@@ -86,11 +86,10 @@ export default class ImageFunctions {
             thumbnailExt = "jpg"
             thumbnail = await functions.audio.songCover(link)
         } else {
-            /* Disable thumbnails for images
             const bytes = await fetch(link).then((r) => r.arrayBuffer())
-            const result = functions.bufferFileType(bytes)?.[0] || {}
+            const result = functions.byte.bufferFileType(bytes)?.[0] || {}
             thumbnailExt = result.typename || "jpg"
-            thumbnail = link*/
+            thumbnail = link
         }
         thumbnail = await functions.image.resize(thumbnail, thumbnailExt)
         return {thumbnail, thumbnailExt}
@@ -187,7 +186,7 @@ export default class ImageFunctions {
                 let url = URL.createObjectURL(file)
                 let croppedURL = ""
                 if (gif) {
-                    const gifData = await functions.video.extractGIFFrames(new Uint8Array(bytes).buffer)
+                    const gifData = await functions.anim.extractGIFFrames(new Uint8Array(bytes).buffer)
                     let frameArray = [] as ArrayBuffer[] 
                     let delayArray = [] as number[]
                     for (let i = 0; i < gifData.length; i++) {
@@ -198,7 +197,7 @@ export default class ImageFunctions {
                     }
                     const firstURL = await this.crop(gifData[0].frame.toDataURL(), 1, false)
                     const {width, height} = await this.imageDimensions(firstURL)
-                    const buffer = await functions.video.encodeGIF(frameArray, delayArray, width, height)
+                    const buffer = await functions.anim.encodeGIF(frameArray, delayArray, width, height)
                     const blob = new Blob([new Uint8Array(buffer)])
                     croppedURL = URL.createObjectURL(blob)
                 } else {
@@ -216,7 +215,7 @@ export default class ImageFunctions {
         return null
     }
 
-    public static resize = async (image: string, ext = "png", size = 1000) => {
+    public static resize = async (image: string, ext = "png", size = 500) => {
         if (!image) return ""
         const img = new window.Image()
         await new Promise<void>((resolve, reject) => {
@@ -292,7 +291,7 @@ export default class ImageFunctions {
                 let width = img.width
                 let height = img.height
                 try {
-                    let duration = await functions.video.animationDuration(image)
+                    let duration = await functions.anim.animationDuration(image)
                     const r = await fetch(image).then((r) => r.arrayBuffer())
                     const size = r.byteLength 
                     resolve({width, height, size, duration})

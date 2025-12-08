@@ -100,7 +100,7 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
     const parseGIF = async () => {
         const start = new Date()
         const arrayBuffer = await getCurrentBuffer(true)
-        const frames = await functions.video.extractGIFFrames(arrayBuffer)
+        const frames = await functions.anim.extractGIFFrames(arrayBuffer)
         setGIFData(frames)
         const end = new Date()
         const seconds = (end.getTime() - start.getTime()) / 1000
@@ -112,7 +112,7 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
         const arrayBuffer = await getCurrentBuffer(true)
         const animated = functions.file.isAnimatedWebp(arrayBuffer)
         if (!animated) return 
-        const frames = await functions.video.extractAnimatedWebpFrames(arrayBuffer)
+        const frames = await functions.anim.extractAnimatedWebpFrames(arrayBuffer)
         setGIFData(frames)
         const end = new Date()
         const seconds = (end.getTime() - start.getTime()) / 1000
@@ -124,7 +124,7 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
         const arrayBuffer = await getCurrentBuffer(true)
         const animated = functions.file.isAnimatedPng(arrayBuffer)
         if (!animated) return 
-        const frames = await functions.video.extractAnimatedPngFrames(arrayBuffer)
+        const frames = await functions.anim.extractAnimatedPngFrames(arrayBuffer)
         setGIFData(frames)
         const end = new Date()
         const seconds = (end.getTime() - start.getTime()) / 1000
@@ -134,7 +134,7 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
     const parseUgoira = async () => {
         const start = new Date()
         const arrayBuffer = await getCurrentBuffer(true)
-        const frames = await functions.video.extractUgoiraFrames(arrayBuffer)
+        const frames = await functions.anim.extractUgoiraFrames(arrayBuffer)
         setGIFData(frames)
         const end = new Date()
         const seconds = (end.getTime() - start.getTime()) / 1000
@@ -144,7 +144,7 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
     useEffect(() => {
         if (!gifData) return
         if (imageLoaded) {
-            const adjustedData = functions.video.gifSpeed(gifData, speed)
+            const adjustedData = functions.anim.gifSpeed(gifData, speed)
             const pixelateCanvas = pixelateRef.current
             if (pixelateCanvas && animationRef.current) {
                 pixelateCanvas.width = animationRef.current.width

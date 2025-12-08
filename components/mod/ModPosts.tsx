@@ -92,7 +92,7 @@ const ModPosts: React.FunctionComponent = (props) => {
             } else if (await functions.file.isLive2D(img)) {
                 src = await functions.model.live2dScreenshot(img)
             } else if (await functions.file.isUgoira(img)) {
-                src = await functions.video.ugoiraThumbnail(img)
+                src = await functions.anim.ugoiraThumbnail(img)
             } else if (functions.file.isAudio(img)) {
                 src = await functions.audio.songCover(img)
             }
