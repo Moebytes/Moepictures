@@ -186,7 +186,6 @@ let folders = [...originalFolders, ...originalFolders.map((folder) => `${folder}
 let encrypted = [...originalEncrypted, ...originalEncrypted.map((folder) => `${folder}-upscaled`)]
 
 const lastModified = new Date().toUTCString()
-const allowedReferer = ["moepictures.net", "moepictures.moe"]
 
 for (let i = 0; i < folders.length; i++) {
   app.get(`/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
