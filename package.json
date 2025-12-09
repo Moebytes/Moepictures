@@ -6,17 +6,10 @@
   "scripts": {
     "start": "npm run build && node --max-old-space-size=8192 dist/server/server.js",
     "build": "npm run clean && rsbuild build --config rsbuild.client.ts && rsbuild build --config rsbuild.server.ts",
-    "wasm": "emcmake cmake -DCMAKE_BUILD_TYPE=Release -B structures/build -S structures && cmake --build structures/build",
-    "napi": "cmake-js compile",
     "pm2": "pm2 start ecosystem.config.js --env production",
     "ssh": "dotenv -e .env -- sh -c 'ssh -i \"$SSH_KEY_PATH\" \"$SSH_USER\"@\"$SSH_HOST\"'",
     "sitemap": "node sitemap.ts",
     "clean": "del-cli ./dist"
-  },
-  "binary": {
-    "napi_versions": [
-      8
-    ]
   },
   "keywords": [
     "moe",
@@ -53,7 +46,6 @@
     "@types/react-router-dom": "^5.3.3",
     "@types/react-slider": "^1.3.6",
     "@types/three": "^0.148.0",
-    "cmake-js": "^7.3.1",
     "del-cli": "^6.0.0",
     "dotenv-cli": "^8.0.0",
     "javascript-obfuscator": "^4.1.1",

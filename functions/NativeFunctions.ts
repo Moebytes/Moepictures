@@ -2,24 +2,6 @@ import functions from "./Functions"
 import {Session} from "../types/Types"
 
 export default class NativeFunctions {
-    private static wasmModule: Promise<any> | null = null
-
-    private static getWasmModule = async () => {
-        if (!this.wasmModule) {
-            // @ts-ignore
-            this.wasmModule = await window.Module()
-        }
-        return this.wasmModule
-    }
-
-    // Unused... The JS version is actually faster since it avoids expensive conversion to and from JSON strings.
-    public static parseSpaceEnabledSearchNative = async (query: string, session: Session, setSessionFlag: (value: boolean) => void) => {
-        if (!query) return query
-        let savedTags = await functions.cache.tagCountsCache(session, setSessionFlag)
-        const nativeFunctions = await this.getWasmModule()
-        return nativeFunctions.ccall("parseSpaceEnabledSearch", "string", ["string", "string"], [query, JSON.stringify(savedTags)])
-    }
-
     public static permutations(query: string) {
         const sliced = query.split(/ +/g)
         
