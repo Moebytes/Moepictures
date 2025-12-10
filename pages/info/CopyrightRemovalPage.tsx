@@ -4,13 +4,11 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import XButton from "../../assets/icons/x-button.png"
 import functions from "../../functions/Functions"
 import checkbox from "../../assets/icons/checkbox.png"
 import checkboxChecked from "../../assets/icons/checkbox-checked.png"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
-import {FileUpload} from "../../types/Types"
 import {stripIndents} from "common-tags"
 import "./styles/contactpage.less"
 

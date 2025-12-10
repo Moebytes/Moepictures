@@ -1,5 +1,5 @@
 import fileType from "magic-bytes.js"
-import {UploadImage, ImageChunk, Session} from "../types/Types"
+import {UploadImage, ImageChunk, Session, Optional} from "../types/Types"
 import functions from "./Functions"
 
 export default class ByteFunctions {
@@ -60,52 +60,47 @@ export default class ByteFunctions {
     }
 
     public static chunkImages = (images: UploadImage[], upscaledImages: UploadImage[]) => {
-        let imageChunks = [] as ImageChunk[]
-        let upscaledChunks = [] as ImageChunk[]
+        const chunkSize = 50 * 1024 * 1024
 
-        const chunkSize = 20 * 1024 * 1024
+        const chunkBytes = (images: UploadImage[]) => {
+            let chunks = [] as ImageChunk[]
 
-        for (let i = 0; i < images.length; i++) {
-            let randKey = Math.random().toString(36).slice(2) + Date.now().toString(36)
-            let img = images[i]
-            let bytes = img.bytes
+            for (let i = 0; i < images.length; i++) {
+                let fileID = Math.random().toString(36).slice(2) + Date.now().toString(36)
+                let img = images[i]
+                let bytes = img.bytes
 
-            for (let start = 0, i = 0; start < bytes.length; start += chunkSize, i++) {
-                let chunk = {...img} as ImageChunk
-                chunk.fileID = randKey
-                chunk.index = i + 1
-                chunk.bytes = bytes.slice(start, start + chunkSize)
-                imageChunks.push(chunk)
+                for (let start = 0, i = 0; start < bytes.length; start += chunkSize, i++) {
+                    let chunk = {...img} as ImageChunk
+                    chunk.fileID = fileID
+                    chunk.index = i + 1
+                    chunk.bytes = bytes.slice(start, start + chunkSize)
+                    chunks.push(chunk)
+                }
             }
+
+            return chunks
         }
 
-        for (let i = 0; i < upscaledImages.length; i++) {
-            let randKey = Math.random().toString(36).slice(2) + Date.now().toString(36)
-            let img = upscaledImages[i]
-            let bytes = img.bytes
-
-            for (let start = 0, i = 0; start < bytes.length; start += chunkSize, i++) {
-                let chunk = {...img} as ImageChunk
-                chunk.fileID = randKey
-                chunk.index = i + 1
-                chunk.bytes = bytes.slice(start, start + chunkSize)
-                upscaledChunks.push(chunk)
-            }
-        }
+        let imageChunks = chunkBytes(images)
+        let upscaledChunks = chunkBytes(upscaledImages)
 
         return {imageChunks, upscaledChunks}
     }
 
     public static uploadChunks = async (originalChunks: ImageChunk[], upscaledChunks: ImageChunk[], 
         session: Session, setSessionFlag?: (value: boolean) => void) => {
-        for (const chunk of originalChunks) {
-            await functions.http.post("/api/post/image-chunk", {chunk}, session, setSessionFlag)
-            delete chunk.bytes
+        const sendChunks = async (chunks: ImageChunk[]) => {
+            for (const chunk of chunks) {
+                const form = new FormData()
+                form.append("bytes", new Blob([new Uint8Array(chunk.bytes!)]))
+                delete chunk.bytes
+                form.append("metadata", JSON.stringify({...chunk}))
+                await functions.http.postForm("/api/post/image-chunk", form, session, setSessionFlag)
+            }
         }
-        for (const chunk of upscaledChunks) {
-            await functions.http.post("/api/post/image-chunk", {chunk}, session, setSessionFlag)
-            delete chunk.bytes
-        }
+        await sendChunks(originalChunks)
+        await sendChunks(upscaledChunks)
     }
 
     public static mergeChunks = (imageChunks: ImageChunk[], upscaledChunks: ImageChunk[]) => {
@@ -123,18 +118,28 @@ export default class ByteFunctions {
             for (const [_, chunks] of fileMap) {
                 chunks.sort((a, b) => a.index - b.index)
 
-                let bytes = [] as number[]
-
-                for (const section of chunks) {
-                    if (section.bytes) bytes = bytes.concat(section.bytes)
+                let size = 0
+                for (const chunk of chunks) {
+                    size += chunk.bytes!.length
                 }
 
-                const img = {...chunks[0]}
-                // @ts-ignore
+                const bytes = new Uint8Array(size)
+
+                let offset = 0
+                for (const chunk of chunks) {
+                    bytes.set(chunk.bytes!, offset)
+                    offset += chunk.bytes!.length
+                }
+
+                const img = {...chunks[0]} as Optional<ImageChunk>
+                delete img.bytes
                 delete img.fileID
-                // @ts-ignore
                 delete img.index
-                images.push({...img, bytes})
+
+                // The code works the same for Uint8Array and number[]. 
+                // The files handled here may be too large to convert to 
+                // number[], so it is kept as Uint8Array. 
+                images.push({...img, bytes} as any)
             }
 
             return images

@@ -57,29 +57,6 @@ export interface Attachment {
     content: Buffer
 }
 
-export interface FileUpload {
-    name: string
-    bytes: number[]
-}
-
-export interface ContactParams {
-    email: string
-    subject: string 
-    message: string 
-    files?: FileUpload[]
-}
-
-export interface CopyrightParams {
-    name: string 
-    email: string 
-    artistTag: string 
-    socialMediaLinks: string 
-    postLinks: string 
-    removeAllRequest: boolean 
-    proofLinks?: string
-    files?: {name: string, bytes: number[]}[]
-}
-
 export interface WDTaggerResponse {
     tags: string[]
     characters: string[]
@@ -202,8 +179,6 @@ export type MiscPostEndpoint<T extends string> =
     T extends "/api/misc/proxy-images" ? {params: {url: string}, response: {data: number[]}[]} :
     T extends "/api/misc/translate" ? {params: string[], response: string[]} :
     T extends "/api/misc/romajinize" ? {params: string[], response: string[]} :
-    T extends "/api/misc/contact" ? {params: ContactParams, response: string} :
-    T extends "/api/misc/copyright" ? {params: CopyrightParams, response: string} :
     T extends "/api/misc/wdtagger" ? {params: number[], response: WDTaggerResponse} :
     T extends "/api/misc/ocr" ? {params: number[], response: OCRResponse[]} :
     T extends "/api/misc/segmentate" ? {params: number[], response: ArrayBuffer} :

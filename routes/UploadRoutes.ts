@@ -4,9 +4,15 @@ import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
 import rateLimit from "express-rate-limit"
+import multer from "multer"
 import {UploadParams, EditParams, UnverifiedUploadParams, UnverifiedEditParams, 
 PostFull, UnverifiedPost, ApproveParams, SourceData, ChildPost, ImageChunk} from "../types/Types"
 import {addToGroup} from "./GroupRoutes"
+
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {fileSize: 100 * 1024 * 1024}
+})
 
 const uploadLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -79,14 +85,19 @@ const clearChunkBytes = async (originalChunks: ImageChunk[], upscaledChunks: Ima
 }
 
 const CreateRoutes = (app: Express) => {
-  app.post("/api/post/image-chunk", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
+  app.post("/api/post/image-chunk", upload.single("bytes"), csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        let {chunk} = req.body as {chunk: ImageChunk}
+        let {metadata} = req.body
         if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
         if (req.session.banned) return void res.status(403).send("You are banned")
-        if (!chunk?.bytes?.length) return void res.status(400).send("No chunk bytes")
-        const MB = new Uint8Array(chunk.bytes).byteLength / (1024*1024)
+        const bytes = req.file?.buffer
+        if (!bytes?.byteLength) return void res.status(400).send("No chunk bytes")
+        const MB = bytes.byteLength / (1024*1024)
         if (MB > 100) return void res.status(400).send("Chunk size exceeded")
+
+        let chunk = JSON.parse(metadata) as ImageChunk
+        if (!chunk.fileID || !chunk.index) return void res.status(400).send("Missing fileID or index")
+        chunk.bytes = [...bytes]
 
         if (process.env.REDIS === "on") {
           let chunks = await sql.getCache(chunk.fileID) as ImageChunk[]

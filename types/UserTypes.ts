@@ -1,6 +1,14 @@
 import {PostRating, UserRole, PostSearch, Favgroup, CommentSort, CommentSearch, Ban, SearchHistory,
 ForumPostSearch} from "./Types"
 
+export type Require<T> = {
+    [K in keyof T]-?: T[K]
+}
+
+export type Optional<T> = {
+    [K in keyof T]?: T[K]
+}
+
 export interface TinyUser {
     username: string
     role: UserRole
@@ -50,10 +58,6 @@ export interface User extends PrunedUser {
     showR18?: boolean
     premiumExpiration?: string | null
     lastNameChange?: string | null
-}
-
-type Require<T> = {
-    [K in keyof T]-?: T[K]
 }
 
 export interface Session extends Require<Omit<User, "password" | "ip">> {

@@ -123,7 +123,7 @@ export type UploadPostEndpoint<T extends string> =
     T extends "/api/post/split" ? {params: {postID: string, order: number | null, mergeSubsequent?: boolean}, response: string} :
     T extends "/api/post/join" ? {params: {postID: string, nested: boolean}, response: string} :
     T extends "/api/post/flip" ? {params: {postID: string}, response: string} :
-    T extends "/api/post/image-chunk" ? {params: {chunk: ImageChunk}, response: string} :
+    T extends "/api/post/image-chunk" ? {params: FormData, response: string} :
     never
 
 export type UploadPutEndpoint<T extends string> = 

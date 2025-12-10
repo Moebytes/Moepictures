@@ -132,6 +132,23 @@ export default class HTTPFunctions {
         }
     }
 
+    public static postForm = async <T extends string>(endpoint: T, data: PostEndpoint<T>["params"], session: Session, 
+        setSessionFlag?: (value: boolean) => void) => {
+        const headers = {"x-csrf-token": session.csrfToken}
+        try {
+            let body = data as FormData
+            let response = await fetch(endpoint, {method: "POST", headers, credentials: "include", body})
+            let text = await response.text()
+            if (!response.ok) throw new Error(text)
+            try {
+                text = JSON.parse(text)
+            } catch {}
+            return text as PostEndpoint<T>["response"]
+        } catch (err: any) {
+            return Promise.reject(err)
+        }
+    }
+
     public static put = async <T extends string>(endpoint: T, data: PutEndpoint<T>["params"], session: Session, 
         setSessionFlag?: (value: boolean) => void) => {
         const headers = {"Content-Type": "application/json", "x-csrf-token": session.csrfToken}

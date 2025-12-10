@@ -174,7 +174,7 @@ export default class ServerUtil {
         return imagePath
     }
 
-    public static isAnime = async (bytes: number[]) => {
+    public static isAnime = async (bytes: number[] | Uint8Array) => {
         const buffer = Buffer.from(bytes)
         const imagePath = await this.dumpImage(buffer)
 
