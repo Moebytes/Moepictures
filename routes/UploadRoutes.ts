@@ -40,17 +40,24 @@ const modLimiter = rateLimit({
 	legacyHeaders: false
 })
 
-let imageChunks = new Map<string, {chunks: ImageChunk[], expires: number}>()
+const imageChunks = new Map<string, {chunks: ImageChunk[], expires: number}>()
 const chunkLifetime = 10 * 60 * 1000
+const userChunks = new Map<string, {fileID: string, index: number, size: number, expires: number}[]>()
+const userMemoryLimit = 500 * 1024 * 1024
 
-if (process.env.REDIS === "off") {
-  setInterval(() => {
-    const now = Date.now()
-    for (const [fileID, item] of imageChunks) {
-      if (item.expires < now) imageChunks.delete(fileID)
+setInterval(() => {
+  const now = Date.now()
+  for (const [fileID, item] of imageChunks) {
+    if (item.expires < now) imageChunks.delete(fileID)
+  }
+  for (const [username, items] of userChunks) {
+    let active = [] as {fileID: string, index: number, size: number, expires: number}[]
+    for (const item of items) {
+      if (item.expires >= now) active.push(item)
     }
-  }, 60000)
-}
+    userChunks.set(username, active)
+  }
+}, 60000)
 
 const populateChunkBytes = async (originalChunks: ImageChunk[], upscaledChunks: ImageChunk[]) => {
   const populateChunkItem = async (chunkItem: ImageChunk[]) => {
@@ -72,20 +79,24 @@ const populateChunkBytes = async (originalChunks: ImageChunk[], upscaledChunks: 
 
 const clearChunkBytes = async (originalChunks: ImageChunk[], upscaledChunks: ImageChunk[]) => {
   const clearChunkItem = async (chunkItem: ImageChunk[]) => {
+    let username = chunkItem[0].username ?? ""
+    let userItems = userChunks.get(username) || []
     for (const chunk of chunkItem) {
       if (process.env.REDIS === "on") {
         await sql.removeCache(chunk.fileID)
       } else {
         imageChunks.delete(chunk.fileID)
       }
+      userItems = userItems.filter((c) => !(c.fileID === chunk.fileID && c.index === chunk.index))
     }
+    if (username) userChunks.set(username, userItems)
   }
   await clearChunkItem(originalChunks)
   await clearChunkItem(upscaledChunks)
 }
 
 const CreateRoutes = (app: Express) => {
-  app.post("/api/post/image-chunk", upload.single("bytes"), csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
+  app.post("/api/post/image-chunk", upload.single("bytes"), csrfProtection, modLimiter, async (req: Request, res: Response) => {
       try {
         let {metadata} = req.body
         if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
@@ -95,14 +106,21 @@ const CreateRoutes = (app: Express) => {
         const MB = bytes.byteLength / (1024*1024)
         if (MB > 100) return void res.status(400).send("Chunk size exceeded")
 
+        let userItems = userChunks.get(req.session.username) || []
+        let userMemory = userItems.reduce((a, c) => a + c.size, 0)
+        if (userMemory + bytes.byteLength > userMemoryLimit) return void res.status(400).send("Memory limit exceeded")
+
         let chunk = JSON.parse(metadata) as ImageChunk
         if (!chunk.fileID || !chunk.index) return void res.status(400).send("Missing fileID or index")
         chunk.bytes = [...bytes]
+        chunk.username = req.session.username
 
+        let added = true
         if (process.env.REDIS === "on") {
           let chunks = await sql.getCache(chunk.fileID) as ImageChunk[]
           if (chunks) {
             const exists = chunks.find((c) => c.index === chunk.index)
+            if (exists) added = false
             if (!exists) await sql.setCache(chunk.fileID, [...chunks, chunk], 600)
           } else {
               await sql.setCache(chunk.fileID, [chunk], 600)
@@ -111,6 +129,7 @@ const CreateRoutes = (app: Express) => {
           let item = imageChunks.get(chunk.fileID)
           if (item) {
             const exists = item.chunks.find((c) => c.index === chunk.index)
+            if (exists) added = false
             if (!exists) item.chunks.push(chunk)
             item.expires = Date.now() + chunkLifetime
           } else {
@@ -119,6 +138,11 @@ const CreateRoutes = (app: Express) => {
               expires: Date.now() + chunkLifetime
             })
           }
+        }
+
+        if (added) {
+          userItems.push({fileID: chunk.fileID, index: chunk.index, size: bytes.byteLength, expires: Date.now() + chunkLifetime})
+          userChunks.set(req.session.username, userItems)
         }
         
         res.status(200).send("Success")

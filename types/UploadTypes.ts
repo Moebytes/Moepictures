@@ -48,6 +48,7 @@ export interface ImageChunk {
     duration?: number
     groupName?: string
     parentID?: string
+    username?: string
 }
 
 export interface UploadImage {
