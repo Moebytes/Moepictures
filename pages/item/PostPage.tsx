@@ -699,7 +699,6 @@ const PostPage: React.FunctionComponent = () => {
             tags={tagCategories?.tags} meta={tagCategories?.meta} tagGroups={tagGroupCategories}/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="post-container">
-                    {/* <AdBanner/> */}
                     {historyID || noteID ? getHistoryButtons() : null}
                     {post && images.length > 1 ?
                     <div className="carousel-container">
@@ -719,6 +718,7 @@ const PostPage: React.FunctionComponent = () => {
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.englishCommentary}/> : null}
                     {post && artistPosts.length ? <ArtistWorks posts={artistPosts}/> : null}
                     {post ? <Comments post={post}/> : null}
+                    {/*<AdBanner/>*/}
                     {post && tagCategories ? <Related post={post} tag={tagCategories.characters[0]?.tag} 
                     fallback={[tagCategories.series[0]?.tag, tagCategories.artists[0]?.tag]}/> : null}
                     <Footer/>

@@ -423,9 +423,9 @@ export default class ShaderFunctions {
         return tex
     }
 
-    public static createEmptyTexture = (gl: WebGLRenderingContext, width: number, height: number) => {
-        const empty = new Uint8Array(width * height * 4)
-        return this.createTexture(gl, gl.LINEAR, empty, width, height)
+    public static createEmptyTexture = (gl: WebGLRenderingContext) => {
+        const empty = new Uint8Array(gl.canvas.width * gl.canvas.height * 4)
+        return this.createTexture(gl, gl.LINEAR, empty, gl.canvas.width, gl.canvas.height)
     }
 
     public static createBuffer = (gl: WebGLRenderingContext, data: Float32Array) => {
@@ -438,11 +438,6 @@ export default class ShaderFunctions {
     public static bindTexture = (gl: WebGLRenderingContext, texture: WebGLTexture, unit: GLint) => {
         gl.activeTexture(gl.TEXTURE0 + unit)
         gl.bindTexture(gl.TEXTURE_2D, texture)
-    }
-
-    public static updateTexture(gl: WebGLRenderingContext, texture: WebGLTexture, source: TexImageSource) {
-        gl.bindTexture(gl.TEXTURE_2D, texture)
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source)
     }
 
     public static bindAttribute = (gl: WebGLRenderingContext, buffer: WebGLBuffer, attribute: GLuint, numComponents: GLuint) => {
@@ -469,11 +464,10 @@ export default class ShaderFunctions {
         const quadBuffer = this.createBuffer(gl, new Float32Array([0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1]))
         const framebuffer = gl.createFramebuffer()
 
-        let emptyPixels = new Uint8Array(gl.canvas.width * gl.canvas.height * 4)
-        const scaleTexture = this.createTexture(gl, gl.LINEAR, emptyPixels, gl.canvas.width, gl.canvas.height)
-        const tempTexture = this.createTexture(gl, gl.LINEAR, emptyPixels, gl.canvas.width, gl.canvas.height)
-        const tempTexture2 = this.createTexture(gl, gl.LINEAR, emptyPixels, gl.canvas.width, gl.canvas.height)
-        const tempTexture3 = this.createTexture(gl, gl.LINEAR, emptyPixels, gl.canvas.width, gl.canvas.height)
+        const scaleTexture = this.createEmptyTexture(gl)
+        const tempTexture = this.createEmptyTexture(gl)
+        const tempTexture2 = this.createEmptyTexture(gl)
+        const tempTexture3 = this.createEmptyTexture(gl)
 
         const scaleProgram = this.createProgram(gl, quadVert, scaleFrag)
         const lumProgram = this.createProgram(gl, quadVert, lumFrag)

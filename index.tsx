@@ -12,4 +12,7 @@ if (process.env.SCAN === "yes") {
     scan({enabled: true})
 }
 
-hydrateRoot(document.getElementById("root")!, <Router><Provider store={store} stabilityCheck="never"><App/></Provider></Router>)
+document.addEventListener("DOMContentLoaded", () => {
+    const rootElement = document.getElementById("root")!
+    hydrateRoot(rootElement, <Router><Provider store={store}><App/></Provider></Router>)
+})
