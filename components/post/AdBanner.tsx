@@ -1,12 +1,17 @@
 import React from "react"
 import ad from "../../assets/images/ad.png"
+import functions from "../../functions/Functions"
+import {PostSearch, PostHistory} from "../../types/Types"
 import "./styles/adbanner.less"
 
 interface Props {
+    post: PostSearch | PostHistory
     negMargin?: boolean
 }
 
 const AdBanner: React.FunctionComponent<Props> = (props) => {
+    if (functions.post.isR18(props.post.rating)) return null
+
     return (
         <div className="ad-banner" style={{marginBottom: props.negMargin ? "-10px" : "0px"}}>
             <ins className="adsbygoogle" style={{display: "flex"}}
@@ -15,7 +20,6 @@ const AdBanner: React.FunctionComponent<Props> = (props) => {
                 data-ad-format="auto"
                 data-full-width-responsive="true">
             </ins>
-            {/* <img draggable={false} className="ad-banner-ad" src={ad} crossOrigin="anonymous"/> */}
         </div>
     )
 }

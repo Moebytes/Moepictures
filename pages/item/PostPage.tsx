@@ -718,7 +718,7 @@ const PostPage: React.FunctionComponent = () => {
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.englishCommentary}/> : null}
                     {post && artistPosts.length ? <ArtistWorks posts={artistPosts}/> : null}
                     {post ? <Comments post={post}/> : null}
-                    <AdBanner/>
+                    {post ? <AdBanner post={post}/> : null}
                     {post && tagCategories ? <Related post={post} tag={tagCategories.characters[0]?.tag} 
                     fallback={[tagCategories.series[0]?.tag, tagCategories.artists[0]?.tag]}/> : null}
                     <Footer/>
