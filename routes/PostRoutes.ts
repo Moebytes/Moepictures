@@ -1216,7 +1216,7 @@ const PostRoutes = (app: Express) => {
                     let newBuffer = fs.readFileSync(tempDest)
                     if (compressJPG) {
                         if (functions.file.isGIF(basename) || isAnimatedWebp || isAnimatedPng) {
-                            newBuffer = await sharp(newBuffer, {animated: true, limitInputPixels: false}).webp().toBuffer()
+                            newBuffer = await sharp(newBuffer, {animated: true, limitInputPixels: false}).webp({quality: 90}).toBuffer()
                         } else {
                             newBuffer = await sharp(newBuffer, {limitInputPixels: false}).jpeg({optimiseScans: true, trellisQuantisation: true, quality: 95}).toBuffer()
                         }

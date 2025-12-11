@@ -140,7 +140,7 @@ export default class ServerUtil {
         return phash(buffer).then((hash: string) => functions.byte.binaryToHex(hash))
     }
 
-    public static processThumbnail = async (buffer: Buffer, ext: string, size = 500) => {
+    public static processThumbnail = async (buffer: Buffer, ext: string, size = 750) => {
         if (ext === "jpg" || ext === "jpeg") {
             const thumbBuffer = await sharp(buffer, {animated: false, limitInputPixels: false})
             .resize(size, size, {fit: "inside"})
@@ -150,7 +150,7 @@ export default class ServerUtil {
         } else {
             const thumbBuffer = await sharp(buffer, {animated: false, limitInputPixels: false})
             .resize(size, size, {fit: "inside"})
-            .webp().toBuffer()
+            .webp({quality: 90}).toBuffer()
             return {thumbBuffer, thumbnailExt: "webp"}
         }
     }

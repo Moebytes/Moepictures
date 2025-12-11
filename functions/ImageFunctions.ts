@@ -215,7 +215,7 @@ export default class ImageFunctions {
         return null
     }
 
-    public static resize = async (image: string, ext = "png", size = 500) => {
+    public static resize = async (image: string, ext = "png", size = 750) => {
         if (!image) return ""
         const img = new window.Image()
         await new Promise<void>((resolve, reject) => {

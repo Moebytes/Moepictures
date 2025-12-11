@@ -456,10 +456,10 @@ export default class ShaderFunctions {
         if (texture) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0)
     }
 
-    public static anime4kUpscale = async (image: string, scale = 2.0, bold = 6.0, blur = 2.0) => {
+    public static anime4kUpscale = async (image: string, scale = 2.0, bold = 8.0, blur = 1.0) => {
         const img = await functions.image.createImage(image)
         if (Math.max(img.width, img.height) > 1000) return ""
-        
+
         const canvas = document.createElement("canvas")
         const gl = canvas.getContext("webgl")!
         gl.canvas.width = img.width * scale

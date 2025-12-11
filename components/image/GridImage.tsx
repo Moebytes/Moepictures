@@ -70,7 +70,7 @@ const GridImage = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
     useEffect(() => {
         const updateUpscaled = async () => {
             const upscaled = await functions.shader.anime4kUpscale(img)
-            if (upscaled) setUpscaled(upscaled)
+            setUpscaled(upscaled)
         }
         if (img) updateUpscaled()
     }, [img])
