@@ -17,6 +17,7 @@ import ModelFunctions from "./ModelFunctions"
 import NativeFunctions from "./NativeFunctions"
 import PostFunctions from "./PostFunctions"
 import RenderFunctions from "./RenderFunctions"
+import ShaderFunctions from "./ShaderFunctions"
 import TagFunctions from "./TagFunctions"
 import UtilFunctions from "./UtilFunctions"
 import ValidationFunctions from "./ValidationFunctions"
@@ -43,6 +44,7 @@ export default class Functions {
     public static native = NativeFunctions
     public static post = PostFunctions
     public static render = RenderFunctions
+    public static shader = ShaderFunctions
     public static tag = TagFunctions
     public static util = UtilFunctions
     public static validation = ValidationFunctions

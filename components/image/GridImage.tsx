@@ -9,6 +9,7 @@ const GridImage = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter} = useFilterSelector()
     const {sizeType, format} = useSearchSelector()
     const [img, setImg] = useState(props.cached ? props.img : "")
+    const [upscaled, setUpscaled] = useState("")
     const [imgIndex, setImgIndex] = useState(0)
     const {imageLoaded, setImageLoaded} = props
     const {imageRef, lightnessRef, overlayRef, effectRef, pixelateRef, onLoaded} = props
@@ -66,15 +67,27 @@ const GridImage = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
         if (img) loadImage()
     }, [img, sizeType])
 
+    useEffect(() => {
+        const updateUpscaled = async () => {
+            const upscaled = await functions.shader.anime4kUpscale(img)
+            if (upscaled) setUpscaled(upscaled)
+        }
+        if (img) updateUpscaled()
+    }, [img])
+
+    const getImg = () => {
+        return upscaled ? upscaled : img
+    }
+
     return (
         <>
-        <img draggable={false} className="lightness-overlay" ref={lightnessRef} src={img}/>
-        <img draggable={false} className="sharpen-overlay" ref={overlayRef} src={img}/>
+        <img draggable={false} className="lightness-overlay" ref={lightnessRef} src={getImg()}/>
+        <img draggable={false} className="sharpen-overlay" ref={overlayRef} src={getImg()}/>
 
         <canvas draggable={false} className="effect-canvas" ref={effectRef}></canvas>
         <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
 
-        <img draggable={false} className="image" ref={imageRef} src={img} fetchPriority="high"
+        <img draggable={false} className="image" ref={imageRef} src={getImg()} fetchPriority="high"
         onLoad={(event) => onLoaded(event)} style={{opacity: "1"}}/>
         </>
     )
