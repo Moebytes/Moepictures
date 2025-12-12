@@ -16,8 +16,6 @@ const AdBanner: React.FunctionComponent<Props> = (props) => {
         ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({})
     }, [])
 
-    return null
-
     return (
         <div className="ad-banner" style={{marginBottom: props.negMargin ? "-10px" : "0px"}}>
             <ins className="adsbygoogle" style={{display: "block", height: "100px"}}
