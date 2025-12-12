@@ -72,7 +72,7 @@ The site runs on http://localhost:8082 by default, but the port can be configure
 Some features like the auto tagger are done by a python script. The scripts try to install the dependencies if they aren't found, but if you have issues running them you can try installing the dependencies manually.
 
 ```py
-pip3 install pandas torch torchvision numpy Pillow timm opencv-python manga-ocr text-detector translate pyclipper shapely pytorch_lightning einops transformers safetensors onnxruntime --compile --force-reinstall
+pip3 install pandas torch torchvision numpy scipy Pillow timm opencv-python manga-ocr text-detector translate pyclipper shapely pytorch_lightning einops transformers safetensors onnxruntime --compile --force-reinstall
 ```
 
 #### Live2D Support

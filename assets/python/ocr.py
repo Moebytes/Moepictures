@@ -4,7 +4,7 @@ import os
 
 required_modules = [
     "torch", "opencv-python", "numpy", "Pillow", "manga-ocr", "text-detector",
-    "translate", "argparse", "pyclipper", "shapely", "torchvision"
+    "translate", "argparse", "pyclipper", "shapely", "torchvision", "scipy"
 ]
 
 for module in required_modules:
@@ -22,7 +22,7 @@ import torch
 import cv2
 import numpy as np
 from PIL import Image
-import logging
+from scipy.signal.windows import gaussian
 from manga_ocr import MangaOcr
 from text_detector import TextDetector
 from translate import Translator
@@ -110,6 +110,9 @@ def ocr_image(img_path):
             result_block["transcript"] += line_text
 
         result.append(result_block)
+    
+    if not result:
+        return json.dumps([])
     
     transcriptJoin = "\n".join(block["transcript"] for block in result)
     translatedJoin = translator.translate(transcriptJoin)

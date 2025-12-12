@@ -1,4 +1,4 @@
-import React from "react"
+import React, {useEffect} from "react"
 import ad from "../../assets/images/ad.png"
 import functions from "../../functions/Functions"
 import {PostSearch, PostHistory} from "../../types/Types"
@@ -11,6 +11,10 @@ interface Props {
 
 const AdBanner: React.FunctionComponent<Props> = (props) => {
     if (functions.post.isR18(props.post.rating)) return null
+
+    useEffect(() => {
+        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({})
+    }, [])
 
     return (
         <div className="ad-banner" style={{marginBottom: props.negMargin ? "-10px" : "0px"}}>
