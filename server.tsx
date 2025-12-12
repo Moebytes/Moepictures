@@ -530,8 +530,8 @@ app.get("/*", async (req: Request, res: Response) => {
     }
     const mimeType = mime.getType(req.path)
     if (mimeType) res.setHeader("Content-Type", mimeType)
-    res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
-    res.setHeader("Cross-Origin-Embedder-Policy", "require-corp")
+    //res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
+    //res.setHeader("Cross-Origin-Embedder-Policy", "require-corp")
     const document = fs.readFileSync(path.join(__dirname, "./dist/client/index.html"), {encoding: "utf-8"})
 
     let title = "Moepictures: Cute Anime Girl Art"
