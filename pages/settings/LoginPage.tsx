@@ -10,8 +10,8 @@ import hide from "../../assets/icons/hide.png"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useActiveSelector,
 useFlagSelector} from "../../store"
-import "./styles/sitepage.less"
 import functions from "../../functions/Functions"
+import "./styles/sitepage.less"
 
 const LoginPage: React.FunctionComponent = (props) => {
     const {theme, siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()

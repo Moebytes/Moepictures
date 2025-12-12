@@ -2,9 +2,9 @@ import React from "react"
 import {useNavigate} from "react-router-dom"
 import functions from "../../functions/Functions"
 import {useLayoutSelector, useSessionSelector, useThemeSelector, useFlagActions} from "../../store"
-import "./styles/parent.less"
 import Carousel from "../site/Carousel"
 import {ChildPost} from "../../types/Types"
+import "./styles/parent.less"
 
 interface Props {
     post: ChildPost

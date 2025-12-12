@@ -18,8 +18,8 @@ import GridModel from "../image/GridModel"
 import GridLive2D from "../image/GridLive2D"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
-import "./styles/related.less"
 import {PostHistory, PostSearch, MiniTag, Tag} from "../../types/Types"
+import "./styles/related.less"
 
 let relatedTimer = null as any
 let delay = 2000

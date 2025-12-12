@@ -32,8 +32,8 @@ import link from "../../assets/icons/link-purple.png"
 import codeblock from "../../assets/icons/codeblock.png"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
-import "./styles/threadpage.less"
 import {MessageUser, MessageUserReply} from "../../types/Types"
+import "./styles/threadpage.less"
 
 let pageAmount = 15
 
@@ -503,7 +503,7 @@ const MessagePage: React.FunctionComponent = () => {
                     {emojiGrid()}
                     {!scroll ? <PageControls page={page} maxPage={maxPage} setPage={setPage} scrollToTop={true}/> : null}
                 </div> : null}
-                <Footer/>
+                <Footer item={message}/>
             </div>
         </div>
         </>

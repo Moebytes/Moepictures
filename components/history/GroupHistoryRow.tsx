@@ -14,8 +14,8 @@ import contributorPencil from "../../assets/icons/contributor-pencil.png"
 import premiumStar from "../../assets/icons/premium-star.png"
 import permissions from "../../structures/Permissions"
 import TinyImage from "../image/TinyImage"
-import "./styles/historyrow.less"
 import {GroupHistory, PostFull, PrunedUser} from "../../types/Types"
+import "./styles/historyrow.less"
 
 interface Props {
     groupHistory: GroupHistory

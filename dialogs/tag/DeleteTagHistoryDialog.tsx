@@ -2,8 +2,8 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useTagDialogSelector, useTagDialogActions} from "../../store"
 import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
-import "../dialog.less"
 import permissions from "../../structures/Permissions"
+import "../dialog.less"
 
 const DeleteTagHistoryDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()

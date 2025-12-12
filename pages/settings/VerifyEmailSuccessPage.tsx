@@ -7,7 +7,6 @@ import SideBar from "../../components/site/SideBar"
 import functions from "../../functions/Functions"
 import {useThemeSelector, useInteractionActions, useLayoutActions, useActiveActions, useLayoutSelector} from "../../store"
 import "./styles/sitepage.less"
-import session from "express-session"
 
 const VerifyEmailSuccessPage: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()

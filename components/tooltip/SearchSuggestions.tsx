@@ -2,11 +2,10 @@ import React, {useEffect, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useInteractionActions, useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, 
 useSearchSelector, useSearchActions, useCacheSelector} from "../../store"
-import "./styles/searchsuggestions.less"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {TagType, TagCount} from "../../types/Types"
-import NewsBanner from "../site/NewsBanner"
+import "./styles/searchsuggestions.less"
 
 interface Props {
     active: boolean

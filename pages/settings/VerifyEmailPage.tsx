@@ -9,7 +9,6 @@ import functions from "../../functions/Functions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
 import "./styles/sitepage.less"
-import session from "express-session"
 
 const VerifyEmailPage: React.FunctionComponent = (props) => {
     const {theme, siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()

@@ -6,8 +6,8 @@ import permissions from "../../structures/Permissions"
 import favicon from "../../assets/icons/favicon.png"
 import noteHistory from "../../assets/icons/history.png"
 import TinyImage from "../image/TinyImage"
-import "./styles/commentrow.less"
 import {NoteSearch} from "../../types/Types"
+import "./styles/commentrow.less"
 
 interface Props {
     note: NoteSearch

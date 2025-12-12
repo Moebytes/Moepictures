@@ -2,7 +2,6 @@ import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useThemeSelector, useInteractionActions, useMessageDialogSelector, useMessageDialogActions, useSessionSelector,
 useLayoutSelector, useCacheSelector} from "../../store"
 import functions from "../../functions/Functions"
-import "../dialog.less"
 import Draggable from "react-draggable"
 import emojiSelect from "../../assets/icons/emoji-select.png"
 import highlight from "../../assets/icons/highlight.png"
@@ -19,6 +18,7 @@ import permissions from "../../structures/Permissions"
 import lewdIcon from "../../assets/icons/lewd.png"
 import radioButton from "../../assets/icons/radiobutton.png"
 import radioButtonChecked from "../../assets/icons/radiobutton-checked.png"
+import "../dialog.less"
 
 const EditMessageReplyDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)

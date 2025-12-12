@@ -6,8 +6,8 @@ import functions from "../../functions/Functions"
 import radioButton from "../../assets/icons/radiobutton.png"
 import radiobuttonChecked from "../../assets/icons/radiobutton-checked.png"
 import permissions from "../../structures/Permissions"
-import "../dialog.less"
 import Draggable from "react-draggable"
+import "../dialog.less"
 
 const BulkGroupDialog: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()

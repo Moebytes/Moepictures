@@ -6,8 +6,8 @@ import functions from "../../functions/Functions"
 import Carousel from "../site/Carousel"
 import fandom from "../../assets/icons/fandom.png"
 import permissions from "../../structures/Permissions"
-import "./styles/characterrow.less"
 import {TagCategorySearch} from "../../types/Types"
+import "./styles/characterrow.less"
 
 interface Props {
     character: TagCategorySearch

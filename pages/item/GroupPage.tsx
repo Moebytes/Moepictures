@@ -27,8 +27,8 @@ import pageIcon from "../../assets/icons/page.png"
 import GroupThumbnail from "../../components/search/GroupThumbnail"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
-import "./styles/grouppage.less"
 import {GroupPosts, GroupItem, PostOrdered} from "../../types/Types"
+import "./styles/grouppage.less"
 
 let pageAmount = 50
 
@@ -329,7 +329,7 @@ const GroupPage: React.FunctionComponent = () => {
                     </div>
                     {groupImagesJSX()}
                 </div> : null}
-                <Footer/>
+                <Footer item={group}/>
             </div>
         </div>
         </>

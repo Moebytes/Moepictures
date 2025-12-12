@@ -8,7 +8,6 @@ import functions from "../../functions/Functions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useLayoutActions, 
 useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
 import "./styles/sitepage.less"
-import session from "express-session"
 
 const ChangeEmailSuccessPage: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()

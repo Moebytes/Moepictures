@@ -4,13 +4,13 @@ usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
 import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
-import "../dialog.less"
 import permissions from "../../structures/Permissions"
 import radioButton from "../../assets/icons/radiobutton.png"
 import radioButtonChecked from "../../assets/icons/radiobutton-checked.png"
 import checkbox from "../../assets/icons/checkbox.png"
 import checkboxChecked from "../../assets/icons/checkbox-checked.png"
 import {ImageFormat} from "../../types/Types"
+import "../dialog.less"
 
 const CompressPostDialog: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()

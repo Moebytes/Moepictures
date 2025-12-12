@@ -9,8 +9,8 @@ import quoteOptIcon from "../../assets/icons/quote-opt.png"
 import reportOptIcon from "../../assets/icons/report-opt.png"
 import editOptIcon from "../../assets/icons/edit-opt.png"
 import deleteOptIcon from "../../assets/icons/delete-opt.png"
-import "./styles/commentrow.less"
 import {ForumPostSearch} from "../../types/Types"
+import "./styles/commentrow.less"
 
 interface Props {
     forumPost: ForumPostSearch

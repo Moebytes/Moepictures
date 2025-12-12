@@ -26,8 +26,8 @@ import model from "../../assets/icons/model.png"
 import live2d from "../../assets/icons/live2d.png"
 import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
-import "../dialog.less"
 import {PostType, PostRating, PostStyle, PostQuickEditParams, PostSearch} from "../../types/Types"
+import "../dialog.less"
 
 let caretPosition = 0
 

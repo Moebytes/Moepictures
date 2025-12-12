@@ -1,11 +1,12 @@
 import React, {useEffect} from "react"
-import ad from "../../assets/images/ad.png"
 import functions from "../../functions/Functions"
-import {PostSearch, PostHistory} from "../../types/Types"
+import {PostSearch, PostHistory, UnverifiedPost, Favgroup, GroupPosts, Tag, TagHistory, MessageUser, ThreadUser} from "../../types/Types"
 import "./styles/adbanner.less"
 
 interface Props {
-    post: PostSearch | PostHistory
+    item?: PostSearch | PostHistory | UnverifiedPost | Tag | 
+           TagHistory | Favgroup | GroupPosts | MessageUser | 
+           ThreadUser | null
     negMargin?: boolean
 }
 
@@ -13,8 +14,12 @@ const AdBanner: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({})
     }, [])
-
-    if (functions.post.isR18(props.post.rating)) return null
+    
+    if (props.item && "rating" in props.item) {
+        if (functions.post.isR18(props.item.rating)) return null
+    } else if (props.item && "r18" in props.item) {
+        if (props.item.r18) return null
+    }
 
     return (
         <div className="ad-banner" style={{marginBottom: props.negMargin ? "-10px" : "0px"}}>

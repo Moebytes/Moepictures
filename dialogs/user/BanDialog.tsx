@@ -4,10 +4,10 @@ useFlagActions} from "../../store"
 import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import "../dialog.less"
 import Draggable from "react-draggable"
 import checkbox from "../../assets/icons/checkbox.png"
 import checkboxChecked from "../../assets/icons/checkbox-checked.png"
+import "../dialog.less"
 
 const BanDialog: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()

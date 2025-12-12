@@ -3,8 +3,8 @@ import {useNavigate} from "react-router-dom"
 import {useLayoutSelector, useCacheActions, useThemeSelector, useSessionSelector, useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
 import Carousel from "../site/Carousel"
-import "./styles/related.less"
 import {PostFull} from "../../types/Types"
+import "./styles/related.less"
 
 interface Props {
     posts: PostFull[]

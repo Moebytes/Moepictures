@@ -1,8 +1,8 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useThreadDialogSelector, useThreadDialogActions} from "../../store"
 import functions from "../../functions/Functions"
-import "../dialog.less"
 import Draggable from "react-draggable"
+import "../dialog.less"
 
 const DeleteThreadDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()

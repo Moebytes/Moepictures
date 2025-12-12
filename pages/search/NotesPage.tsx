@@ -16,8 +16,8 @@ import scrollIcon from "../../assets/icons/scroll.png"
 import pageIcon from "../../assets/icons/page.png"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
-import "./styles/itemspage.less"
 import {NoteSearch, CommentSort} from "../../types/Types"
+import "./styles/itemspage.less"
 
 let limit = 100
 let pageAmount = 15

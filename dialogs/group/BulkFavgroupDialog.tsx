@@ -7,8 +7,8 @@ import radioButton from "../../assets/icons/radiobutton.png"
 import radiobuttonChecked from "../../assets/icons/radiobutton-checked.png"
 import deleteIcon from "../../assets/icons/delete.png"
 import lockIcon from "../../assets/icons/private-lock.png"
-import "../dialog.less"
 import Draggable from "react-draggable"
+import "../dialog.less"
 
 const BulkFavgroupDialog: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()

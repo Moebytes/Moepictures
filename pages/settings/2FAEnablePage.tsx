@@ -6,8 +6,8 @@ import Footer from "../../components/site/Footer"
 import SideBar from "../../components/site/SideBar"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useMiscDialogSelector, useMiscDialogActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
-import "./styles/sitepage.less"
 import functions from "../../functions/Functions"
+import "./styles/sitepage.less"
 
 const $2FAEnablePage: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()

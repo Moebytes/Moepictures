@@ -8,8 +8,8 @@ import quoteOptIcon from "../../assets/icons/quote-opt.png"
 import editOptIcon from "../../assets/icons/edit-opt.png"
 import deleteOptIcon from "../../assets/icons/delete-opt.png"
 import permissions from "../../structures/Permissions"
-import "./styles/reply.less"
 import {MessageUserReply} from "../../types/Types"
+import "./styles/reply.less"
 
 interface Props {
     reply: MessageUserReply

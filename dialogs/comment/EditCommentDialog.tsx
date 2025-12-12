@@ -2,7 +2,6 @@ import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useThemeSelector, useInteractionActions, useCommentDialogSelector, useCommentDialogActions, 
 useLayoutSelector, useCacheSelector} from "../../store"
 import functions from "../../functions/Functions"
-import "../dialog.less"
 import emojiSelect from "../../assets/icons/emoji-select.png"
 import highlight from "../../assets/icons/highlight.png"
 import bold from "../../assets/icons/bold.png"
@@ -15,6 +14,7 @@ import details from "../../assets/icons/details.png"
 import hexcolor from "../../assets/icons/hexcolor.png"
 import codeblock from "../../assets/icons/codeblock.png"
 import Draggable from "react-draggable"
+import "../dialog.less"
 
 const EditCommentDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)

@@ -7,9 +7,9 @@ import radioButton from "../../assets/icons/radiobutton.png"
 import radioButtonChecked from "../../assets/icons/radiobutton-checked.png"
 import deleteIcon from "../../assets/icons/delete.png"
 import lockIcon from "../../assets/icons/private-lock.png"
-import "../dialog.less"
 import Draggable from "react-draggable"
 import {GroupPosts} from "../../types/Types"
+import "../dialog.less"
 
 const GroupDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)

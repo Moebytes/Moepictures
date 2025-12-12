@@ -558,7 +558,7 @@ const TagPage: React.FunctionComponent = () => {
                     <Related tag={tag.tag} count={count}/>
                     {/* {postsJSX()} */}
                 </div> : null}
-                <Footer/>
+                <Footer item={tag}/>
             </div>
         </div>
         </>

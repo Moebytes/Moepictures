@@ -2,9 +2,9 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions,
 useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
-import "../dialog.less"
 import Draggable from "react-draggable"
 import permissions from "../../structures/Permissions"
+import "../dialog.less"
 
 const DeleteTagFavoritesDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()

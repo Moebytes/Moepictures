@@ -16,8 +16,8 @@ import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
-import "./styles/imagegrid.less"
 import {PostSearch} from "../../types/Types"
+import "./styles/imagegrid.less"
 
 interface Ref {
     shouldWait: () => Promise<boolean>

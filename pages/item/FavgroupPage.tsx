@@ -24,8 +24,8 @@ import Reorder from "react-reorder"
 import TinyImage from "../../components/image/TinyImage"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
-import "./styles/grouppage.less"
 import {GroupItem, Favgroup} from "../../types/Types"
+import "./styles/grouppage.less"
 
 let pageAmount = 50
 
@@ -270,7 +270,7 @@ const FavgroupPage: React.FunctionComponent = () => {
                     </div>
                     {favgroupImagesJSX()}
                 </div> : null}
-                <Footer/>
+                <Footer item={favgroup}/>
             </div>
         </div>
         </>

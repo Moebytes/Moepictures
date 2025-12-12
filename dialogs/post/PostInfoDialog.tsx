@@ -3,8 +3,8 @@ import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionA
 usePostDialogSelector, usePostDialogActions} from "../../store"
 import functions from "../../functions/Functions"
 import {PostMetadata} from "../../types/PostTypes"
-import "../dialog.less"
 import Draggable from "react-draggable"
+import "../dialog.less"
 
 const PostInfoDialog: React.FunctionComponent = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()

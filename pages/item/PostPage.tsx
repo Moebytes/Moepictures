@@ -31,8 +31,8 @@ useNoteDialogSelector, useNoteDialogActions, useActiveSelector, usePostDialogSel
 useCacheSelector, useInteractionActions, useThemeSelector,
 useSearchActions} from "../../store"
 import permissions from "../../structures/Permissions"
-import "./styles/postpage.less"
 import {PostSearch, ChildPost, PostHistory, GroupPosts, SourceData, Image} from "../../types/Types"
+import "./styles/postpage.less"
 
 let viewPromise = null as any
 
@@ -718,10 +718,9 @@ const PostPage: React.FunctionComponent = () => {
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.englishCommentary}/> : null}
                     {post && artistPosts.length ? <ArtistWorks posts={artistPosts}/> : null}
                     {post ? <Comments post={post}/> : null}
-                    {post ? <AdBanner post={post}/> : null}
                     {post && tagCategories ? <Related post={post} tag={tagCategories.characters[0]?.tag} 
                     fallback={[tagCategories.series[0]?.tag, tagCategories.artists[0]?.tag]}/> : null}
-                    <Footer/>
+                    <Footer item={post}/>
                 </div>
             </div>
         </div>

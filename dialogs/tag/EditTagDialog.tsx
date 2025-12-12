@@ -3,12 +3,12 @@ import {useThemeSelector, useInteractionActions, useTagDialogSelector, useTagDia
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import uploadIcon from "../../assets/icons/upload.png"
-import "../dialog.less"
 import Draggable from "react-draggable"
 import xButton from "../../assets/icons/x-button.png"
 import lewdIcon from "../../assets/icons/lewd.png"
 import radioButton from "../../assets/icons/radiobutton.png"
 import radioButtonChecked from "../../assets/icons/radiobutton-checked.png"
+import "../dialog.less"
 
 const EditTagDialog: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()

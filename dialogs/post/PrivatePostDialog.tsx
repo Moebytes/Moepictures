@@ -2,11 +2,11 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, usePostDialogSelector, usePostDialogActions, useFlagActions, useSessionSelector, useSessionActions} from "../../store"
 import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
-import "../dialog.less"
 import permissions from "../../structures/Permissions"
 import privateIcon from "../../assets/icons/private.png"
 import unprivateIcon from "../../assets/icons/unprivate.png"
 import {PostSearch, PostHistory} from "../../types/Types"
+import "../dialog.less"
 
 const PrivatePostDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()

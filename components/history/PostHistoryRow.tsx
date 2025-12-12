@@ -13,9 +13,9 @@ import premiumContributorPencil from "../../assets/icons/premium-contributor-pen
 import contributorPencil from "../../assets/icons/contributor-pencil.png"
 import premiumStar from "../../assets/icons/premium-star.png"
 import permissions from "../../structures/Permissions"
-import "./styles/historyrow.less"
 import TinyImage from "../image/TinyImage"
 import {PostHistory, PrunedUser, SourceData, TagCategories} from "../../types/Types"
+import "./styles/historyrow.less"
 
 interface Props {
     postHistory: PostHistory

@@ -9,8 +9,8 @@ import cuteness3 from "../../assets/images/cuteness3.png"
 import cuteness4 from "../../assets/images/cuteness4.png"
 import cuteness5 from "../../assets/images/cuteness5.png"
 import deleteStar from "../../assets/icons/deletestar.png"
-import "./styles/cutenessmeter.less"
 import {PostSearch, PostHistory} from "../../types/Types"
+import "./styles/cutenessmeter.less"
 
 interface Props {
     post: PostSearch | PostHistory

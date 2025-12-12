@@ -15,8 +15,8 @@ import details from "../../assets/icons/details.png"
 import hexcolor from "../../assets/icons/hexcolor.png"
 import codeblock from "../../assets/icons/codeblock.png"
 import Comment from "./Comment"
-import "./styles/comments.less"
 import {PostSearch, PostHistory, UserComment} from "../../types/Types"
+import "./styles/comments.less"
 
 interface Props {
     post: PostSearch | PostHistory

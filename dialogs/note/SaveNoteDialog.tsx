@@ -3,9 +3,9 @@ import {useThemeSelector, useInteractionActions, useNoteDialogSelector, useNoteD
 useSessionActions} from "../../store"
 import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
-import "../dialog.less"
 import permissions from "../../structures/Permissions"
 import {PostSearch, PostHistory, UnverifiedPost} from "../../types/Types"
+import "../dialog.less"
 
 const SaveNoteDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()

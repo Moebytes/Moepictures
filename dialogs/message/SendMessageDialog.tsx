@@ -19,8 +19,8 @@ import codeblock from "../../assets/icons/codeblock.png"
 import lewdIcon from "../../assets/icons/lewd.png"
 import radioButton from "../../assets/icons/radiobutton.png"
 import radioButtonChecked from "../../assets/icons/radiobutton-checked.png"
-import "../dialog.less"
 import Draggable from "react-draggable"
+import "../dialog.less"
 
 const SendMessageDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)

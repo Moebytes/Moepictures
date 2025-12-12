@@ -7,9 +7,8 @@ import Carousel from "../site/Carousel"
 import website from "../../assets/icons/website.png"
 import twitter from "../../assets/icons/twitter.png"
 import wikipedia from "../../assets/icons/wikipedia.png"
-import permissions from "../../structures/Permissions"
-import "./styles/seriesrow.less"
 import {TagCategorySearch} from "../../types/Types"
+import "./styles/seriesrow.less"
 
 interface Props {
     series: TagCategorySearch

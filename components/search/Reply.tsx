@@ -10,8 +10,8 @@ import reportOptIcon from "../../assets/icons/report-opt.png"
 import editOptIcon from "../../assets/icons/edit-opt.png"
 import deleteOptIcon from "../../assets/icons/delete-opt.png"
 import permissions from "../../structures/Permissions"
-import "./styles/reply.less"
 import {ThreadUser, ThreadReply} from "../../types/Types"
+import "./styles/reply.less"
 
 interface Props {
     thread: ThreadUser

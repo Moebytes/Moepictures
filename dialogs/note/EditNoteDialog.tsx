@@ -2,7 +2,6 @@ import React, {useEffect, useState} from "react"
 import {useThemeSelector, useInteractionActions, useNoteDialogSelector, useNoteDialogActions,
 useLayoutSelector} from "../../store"
 import functions from "../../functions/Functions"
-import "./styles/editnotedialog.less"
 import Draggable from "react-draggable"
 import bold from "../../assets/icons/edit-note-bold.png"
 import boldActive from "../../assets/icons/edit-note-bold-active.png"
@@ -12,6 +11,7 @@ import checkbox from "../../assets/icons/checkbox.png"
 import checkboxChecked from "../../assets/icons/checkbox-checked.png"
 import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import {defaultNoteData} from "../../reducers/noteDialogReducer"
+import "./styles/editnotedialog.less"
 
 const EditNoteDialog: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()

@@ -3,7 +3,6 @@ import {useInteractionActions, useMiscDialogSelector, useMiscDialogActions, useS
 import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import "../dialog.less"
 import Draggable from "react-draggable"
 import checkbox from "../../assets/icons/checkbox.png"
 import checkboxChecked from "../../assets/icons/checkbox-checked.png"
@@ -15,6 +14,7 @@ import premiumContributorPencil from "../../assets/icons/premium-contributor-pen
 import contributorPencil from "../../assets/icons/contributor-pencil.png"
 import premiumStar from "../../assets/icons/premium-star.png"
 import {UserRole} from "../../types/Types"
+import "../dialog.less"
 
 const PromoteDialog: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()

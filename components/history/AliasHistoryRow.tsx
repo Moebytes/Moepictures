@@ -7,7 +7,7 @@ import permissions from "../../structures/Permissions"
 import aliasHistoryUndo from "../../assets/icons/revert.png"
 import aliasHistoryRedo from "../../assets/icons/unrevert.png"
 import aliasHistoryDelete from "../../assets/icons/delete.png"
-import {AliasHistorySearch, PrunedUser} from "../../types/Types"
+import {AliasHistorySearch} from "../../types/Types"
 import "./styles/historyrow.less"
 
 interface Props {

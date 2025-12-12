@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from "react"
 import {useThemeSelector, useSessionSelector, useSessionActions} from "../../store"
 import functions from "../../functions/Functions"
-import "./styles/newtags.less"
 import {PostFull, Tag, UnverifiedPost} from "../../types/Types"
+import "./styles/newtags.less"
 
 interface Props {
     post: PostFull | UnverifiedPost

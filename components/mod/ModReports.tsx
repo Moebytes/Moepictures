@@ -8,8 +8,8 @@ import reject from "../../assets/icons/reject.png"
 import functions from "../../functions/Functions"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
-import "./styles/modposts.less"
 import {Report, ThreadReply, ThreadUser, UserComment} from "../../types/Types"
+import "./styles/modposts.less"
 
 let limit = 100
 let pageAmount = 15

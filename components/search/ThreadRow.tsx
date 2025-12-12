@@ -14,10 +14,10 @@ import unread from "../../assets/icons/unread.png"
 import read from "../../assets/icons/read.png"
 import readLight from "../../assets/icons/read-light.png"
 import favicon from "../../assets/icons/favicon.png"
-import "./styles/thread.less"
 import sticky from "../../assets/icons/sticky.png"
 import lock from "../../assets/icons/lock.png"
 import {ThreadSearch, PrunedUser} from "../../types/Types"
+import "./styles/thread.less"
 
 interface Props {
     thread?: ThreadSearch

@@ -10,8 +10,8 @@ import commentReport from "../../assets/icons/commentreport.png"
 import commentEdit from "../../assets/icons/commentedit.png"
 import commentDelete from "../../assets/icons/commentdelete.png"
 import permissions from "../../structures/Permissions"
-import "./styles/comment.less"
 import {UserComment} from "../../types/Types"
+import "./styles/comment.less"
 
 interface Props {
     comment: UserComment

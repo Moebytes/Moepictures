@@ -7,8 +7,8 @@ import unread from "../../assets/icons/unread.png"
 import read from "../../assets/icons/read.png"
 import readLight from "../../assets/icons/read-light.png"
 import favicon from "../../assets/icons/favicon.png"
-import "./styles/message.less"
 import {MessageSearch, PrunedUser} from "../../types/Types"
+import "./styles/message.less"
 
 interface Props {
     message?: MessageSearch

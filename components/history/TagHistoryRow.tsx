@@ -20,9 +20,8 @@ import pixiv from "../../assets/icons/pixiv.png"
 import soundcloud from "../../assets/icons/soundcloud.png"
 import sketchfab from "../../assets/icons/sketchfab.png"
 import twitter from "../../assets/icons/twitter.png"
-import crypto from "crypto"
-import "./styles/historyrow.less"
 import {PrunedUser, TagHistory} from "../../types/Types"
+import "./styles/historyrow.less"
 
 interface Props {
     tagHistory: TagHistory

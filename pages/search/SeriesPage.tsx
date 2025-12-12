@@ -15,8 +15,8 @@ useLayoutActions, useActiveActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchSelector, usePageSelector, useCacheSelector, useCacheActions} from "../../store"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
-import "./styles/itemspage.less"
 import {TagCategorySearch, CategorySort} from "../../types/Types"
+import "./styles/itemspage.less"
 
 let limit = 10
 let pageAmount = 5

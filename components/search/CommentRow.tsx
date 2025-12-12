@@ -10,8 +10,8 @@ import commentReport from "../../assets/icons/commentreport.png"
 import commentEdit from "../../assets/icons/commentedit.png"
 import commentDelete from "../../assets/icons/commentdelete.png"
 import TinyImage from "../image/TinyImage"
-import "./styles/commentrow.less"
 import {CommentSearch} from "../../types/Types"
+import "./styles/commentrow.less"
 
 interface Props {
     comment: CommentSearch

@@ -6,9 +6,9 @@ import permissions from "../../structures/Permissions"
 import historyIcon from "../../assets/icons/history-state.png"
 import uploadIcon from "../../assets/icons/upload.png"
 import Carousel from "../../components/site/Carousel"
-import "../dialog.less"
 import Draggable from "react-draggable"
 import {ThumbnailUpdate} from "../../types/PostTypes"
+import "../dialog.less"
 
 const EditThumbnailDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)

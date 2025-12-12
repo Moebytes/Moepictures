@@ -17,8 +17,8 @@ import pixiv from "../../assets/icons/pixiv.png"
 import soundcloud from "../../assets/icons/soundcloud.png"
 import sketchfab from "../../assets/icons/sketchfab.png"
 import twitter from "../../assets/icons/twitter.png"
-import "./styles/tagrow.less"
 import {TagSearch} from "../../types/Types"
+import "./styles/tagrow.less"
 
 interface Props {
     tag: TagSearch

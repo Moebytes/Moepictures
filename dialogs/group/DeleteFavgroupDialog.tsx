@@ -2,8 +2,8 @@ import React, {useEffect} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions} from "../../store"
 import functions from "../../functions/Functions"
-import "../dialog.less"
 import Draggable from "react-draggable"
+import "../dialog.less"
 
 const DeleteFavgroupDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()

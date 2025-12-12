@@ -2,8 +2,8 @@ import React, {useEffect, useState} from "react"
 import {useThemeSelector, useInteractionActions, useMiscDialogSelector, useMiscDialogActions,
 useFlagSelector, useFlagActions, useCacheSelector, useSearchSelector} from "../../store"
 import functions from "../../functions/Functions"
-import "../dialog.less"
 import Draggable from "react-draggable"
+import "../dialog.less"
 
 const DownloadDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()

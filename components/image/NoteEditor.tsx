@@ -20,8 +20,8 @@ import noteClear from "../../assets/icons/note-clear.png"
 import noteCopy from "../../assets/icons/note-copy.png"
 import notePaste from "../../assets/icons/note-paste.png"
 import noteOCR from "../../assets/icons/note-ocr.png"
-import "./styles/noteeditor.less"
 import {PostFull, PostHistory, UnverifiedPost, Note, BubbleData} from "../../types/Types"
+import "./styles/noteeditor.less"
 
 interface Props {
     post?: PostFull | PostHistory | UnverifiedPost

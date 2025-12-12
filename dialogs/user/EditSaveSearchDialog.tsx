@@ -2,11 +2,11 @@ import React, {useEffect, useContext, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSearchDialogSelector, useSearchDialogActions, useSessionSelector, useSessionActions} from "../../store"
 import functions from "../../functions/Functions"
 import uploadIcon from "../../assets/icons/upload.png"
-import "../dialog.less"
 import Draggable from "react-draggable"
 import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
 import xButton from "../../assets/icons/x-button.png"
+import "../dialog.less"
 
 const EditSaveSearchDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()

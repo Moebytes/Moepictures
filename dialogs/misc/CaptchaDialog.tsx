@@ -1,8 +1,8 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions} from "../../store"
 import functions from "../../functions/Functions"
-import "../dialog.less"
 import Draggable from "react-draggable"
+import "../dialog.less"
 
 const CaptchaDialog: React.FunctionComponent = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()

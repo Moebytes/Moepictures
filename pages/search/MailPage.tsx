@@ -18,8 +18,8 @@ import radioButton from "../../assets/icons/radiobutton.png"
 import radioButtonChecked from "../../assets/icons/radiobutton-checked.png"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
-import "./styles/itemspage.less"
 import {MessageSearch, CommentSort} from "../../types/Types"
+import "./styles/itemspage.less"
 
 let limit = 100
 let pageAmount = 50

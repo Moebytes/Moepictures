@@ -21,7 +21,6 @@ import playerStop from "../../assets/icons/player-stop.png"
 import expandMusicPlayer from "../../assets/icons/expand-music-player.png"
 import contractMusicPlayer from "../../assets/icons/contract-music-player.png"
 import "./styles/miniaudioplayer.less"
-import path from "path"
 
 const MiniAudioPlayer: React.FunctionComponent = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()

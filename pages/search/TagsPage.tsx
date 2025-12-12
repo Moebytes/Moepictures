@@ -17,8 +17,8 @@ useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageAc
 useActiveSelector, useSearchSelector, usePageSelector, useFlagSelector, useTagDialogActions} from "../../store"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
-import "./styles/itemspage.less"
 import {TagSearch, TagSort, TagType} from "../../types/Types"
+import "./styles/itemspage.less"
 
 let limit = 200
 let pageAmount = 50

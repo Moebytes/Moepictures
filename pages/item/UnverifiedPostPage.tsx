@@ -22,8 +22,8 @@ import MobileInfo from "../../components/site/MobileInfo"
 import {useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions,  useThemeSelector,
 useLayoutSelector, useFlagSelector, useCacheActions, useCacheSelector, useInteractionActions} from "../../store"
 import permissions from "../../structures/Permissions"
-import "./styles/postpage.less"
 import {TagCategories, UnverifiedPost, ChildPost, TagGroupCategory} from "../../types/Types"
+import "./styles/postpage.less"
 
 const UnverifiedPostPage: React.FunctionComponent = () => {
     const {language} = useThemeSelector()
@@ -312,7 +312,7 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
                     {childPosts.length ? <Children posts={childPosts}/>: null}
                     {post?.buyLink ? <BuyLink link={post.buyLink}/> : null}
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.englishCommentary}/> : null}
-                    <Footer/>
+                    <Footer item={post}/>
                 </div>
             </div>
         </div>

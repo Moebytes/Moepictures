@@ -3,11 +3,11 @@ import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionA
 useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
-import "../dialog.less"
 import permissions from "../../structures/Permissions"
 import takedownIcon from "../../assets/icons/takedown.png"
 import restoreIcon from "../../assets/icons/restore.png"
 import {PostSearch, PostHistory} from "../../types/Types"
+import "../dialog.less"
 
 const TakedownPostDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()

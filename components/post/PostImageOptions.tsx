@@ -12,9 +12,9 @@ import download from "../../assets/icons/download.png"
 import filters from "../../assets/icons/filters.png"
 import nextIcon from "../../assets/icons/next.png"
 import prevIcon from "../../assets/icons/prev.png"
-import "./styles/postimageoptions.less"
 import Filters from "./Filters"
 import {PostFull, PostHistory, UnverifiedPost} from "../../types/Types"
+import "./styles/postimageoptions.less"
 
 interface Props {
     img?: string

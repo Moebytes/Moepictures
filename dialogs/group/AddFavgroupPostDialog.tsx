@@ -3,8 +3,8 @@ import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGrou
 useSessionActions, useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import "../dialog.less"
 import Draggable from "react-draggable"
+import "../dialog.less"
 
 const AddFavgroupPostDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
