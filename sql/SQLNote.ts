@@ -254,7 +254,7 @@ export default class SQLNote {
                 ranked_notes AS (
                     SELECT "unverified notes"."noteID", "unverified notes"."originalID", "unverified notes"."postID", "unverified notes"."updater", 
                     "unverified notes"."updatedDate", "unverified notes"."order", "unverified notes"."reason", "unverified notes"."addedEntries", 
-                    "unverified notes"."removedEntries", note_json.data AS notes, jsonb_array_length(note_json.data) AS "noteCount",
+                    "unverified notes"."removedEntries", note_json.data AS notes,
                     to_jsonb((array_agg(post_json))[1]) AS post,
                     ROW_NUMBER() OVER (
                         PARTITION BY note_json.data
@@ -266,11 +266,16 @@ export default class SQLNote {
                     GROUP BY "unverified notes"."noteID", "unverified notes"."originalID", "unverified notes"."postID", "unverified notes"."updater", 
                     "unverified notes"."updatedDate", "unverified notes"."order", "unverified notes"."reason", "unverified notes"."addedEntries", 
                     "unverified notes"."removedEntries", note_json.data
+                ),
+                result_notes AS (
+                    SELECT *,
+                    COUNT(*) OVER () AS "noteCount"
+                    FROM ranked_notes
+                    WHERE "row" = 1
                 )
                 SELECT *
-                FROM ranked_notes
-                WHERE "row" = 1
-                ORDER BY ranked_notes."updatedDate" ASC
+                FROM result_notes
+                ORDER BY result_notes."updatedDate" ASC
                 LIMIT 100 ${offset ? `OFFSET $1` : ""}
             `)
         }
@@ -298,7 +303,7 @@ export default class SQLNote {
                 ranked_notes AS (
                     SELECT "unverified notes"."noteID", "unverified notes"."originalID", "unverified notes"."postID", "unverified notes"."updater", 
                     "unverified notes"."updatedDate", "unverified notes"."order", "unverified notes"."reason", "unverified notes"."addedEntries", 
-                    "unverified notes"."removedEntries", note_json.data AS notes, jsonb_array_length(note_json.data) AS "noteCount",
+                    "unverified notes"."removedEntries", note_json.data AS notes,
                     to_jsonb((array_agg(post_json))[1]) AS post,
                     ROW_NUMBER() OVER (
                         PARTITION BY note_json.data
@@ -311,10 +316,15 @@ export default class SQLNote {
                     GROUP BY "unverified notes"."noteID", "unverified notes"."originalID", "unverified notes"."postID", "unverified notes"."updater", 
                     "unverified notes"."updatedDate", "unverified notes"."order", "unverified notes"."reason", "unverified notes"."addedEntries", 
                     "unverified notes"."removedEntries", note_json.data
+                ),
+                result_notes AS (
+                    SELECT *,
+                    COUNT(*) OVER () AS "noteCount"
+                    FROM ranked_notes
+                    WHERE "row" = 1
                 )
                 SELECT *
-                FROM ranked_notes
-                WHERE "row" = 1
+                FROM result_notes
                 ORDER BY ranked_notes."updatedDate" ASC
             `),
             values: [username]
@@ -333,8 +343,8 @@ export default class SQLNote {
         }
         let sortQuery = ""
         if (sort === "random") sortQuery = `ORDER BY random()`
-        if (sort === "date") sortQuery = `ORDER BY ranked_notes."updatedDate" DESC`
-        if (sort === "reverse date") sortQuery = `ORDER BY ranked_notes."updatedDate" ASC`
+        if (sort === "date") sortQuery = `ORDER BY result_notes."updatedDate" DESC`
+        if (sort === "reverse date") sortQuery = `ORDER BY result_notes."updatedDate" ASC`
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
@@ -351,7 +361,7 @@ export default class SQLNote {
                 ),
                 ranked_notes AS (
                     SELECT notes."noteID", notes."postID", notes."updater", notes."updatedDate",
-                    notes."order", note_json.data AS notes, jsonb_array_length(note_json.data) AS "noteCount",
+                    notes."order", note_json.data AS notes,
                     users."image", users."imageHash", users."imagePost", 
                     users."role", users."banned", users."deleted",
                     to_jsonb((array_agg(post_json))[1]) AS post,
@@ -367,10 +377,15 @@ export default class SQLNote {
                     GROUP BY notes."noteID", notes."postID", notes."updater", notes."updatedDate", notes."order", note_json.data,
                     users."image", users."imageHash", users."imagePost", 
                     users."role", users."banned", users."deleted"
+                ),
+                result_notes AS (
+                    SELECT *,
+                    COUNT(*) OVER () AS "noteCount"
+                    FROM ranked_notes
+                    WHERE "row" = 1
                 )
                 SELECT *
-                FROM ranked_notes
-                WHERE "row" = 1
+                FROM result_notes
                 ${sortQuery}
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
             `),
@@ -392,8 +407,8 @@ export default class SQLNote {
         }
         let sortQuery = ""
         if (sort === "random") sortQuery = `ORDER BY random()`
-        if (sort === "date") sortQuery = `ORDER BY ranked_notes."updatedDate" DESC`
-        if (sort === "reverse date") sortQuery = `ORDER BY ranked_notes."updatedDate" ASC`
+        if (sort === "date") sortQuery = `ORDER BY result_notes."updatedDate" DESC`
+        if (sort === "reverse date") sortQuery = `ORDER BY result_notes."updatedDate" ASC`
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
@@ -410,7 +425,7 @@ export default class SQLNote {
                 ),
                 ranked_notes AS (
                     SELECT notes."noteID", notes."postID", notes."updater", notes."updatedDate",
-                    notes."order", note_json.data AS notes, jsonb_array_length(note_json.data) AS "noteCount",
+                    notes."order", note_json.data AS notes,
                     users."image", users."imageHash", users."imagePost", 
                     users."role", users."banned", users."deleted",
                     to_jsonb((array_agg(post_json))[1]) AS post,
@@ -426,10 +441,15 @@ export default class SQLNote {
                     GROUP BY notes."noteID", notes."postID", notes."updater", notes."updatedDate", notes."order", note_json.data,
                     users."image", users."imageHash", users."imagePost", 
                     users."role", users."banned", users."deleted"
+                ),
+                result_notes AS (
+                    SELECT *,
+                    COUNT(*) OVER () AS "noteCount"
+                    FROM ranked_notes
+                    WHERE "row" = 1
                 )
                 SELECT *
-                FROM ranked_notes
-                WHERE "row" = 1
+                FROM result_notes
                 ${sortQuery}
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
             `),
