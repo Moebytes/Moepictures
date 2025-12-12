@@ -20,6 +20,7 @@ const PostsPage: React.FunctionComponent = (props) => {
     const {setMobileScrolling} = useInteractionActions()
     const {session} = useSessionSelector()
     const {mobile} = useLayoutSelector()
+    const [imagesLoaded, setImagesLoaded] = useState(true)
 
     useEffect(() => {
         setRelative(false)
@@ -89,8 +90,8 @@ const PostsPage: React.FunctionComponent = (props) => {
             <div className="content">
                 <SortBar/>
                 {tagBannerJSX()}
-                <ImageGrid/>
-                <AdBanner/>
+                <ImageGrid imagesLoaded={imagesLoaded} setImagesLoaded={setImagesLoaded}/>
+                {imagesLoaded ? <AdBanner/> : null}
                 <Footer noPadding={true}/>
             </div>
         </div>

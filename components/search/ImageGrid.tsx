@@ -25,12 +25,17 @@ interface Ref {
     update: () => Promise<void>
 }
 
+interface Props {
+    imagesLoaded: boolean
+    setImagesLoaded: (value: boolean) => void
+}
+
 let interval = null as any
 let reloadedPost = false
 let init = true
 let limit = 100
 
-const ImageGrid: React.FunctionComponent = (props) => {
+const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {search, searchFlag, scroll, imageType, ratingType, styleType, sortType, sortReverse, sizeType, 
@@ -54,7 +59,6 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const [postsRef, setPostsRef] = useState([] as React.RefObject<Ref | null>[])
     const [reupdateFlag, setReupdateFlag] = useState(false)
     const [initData, setInitData] = useState({searchFlag, imageType, ratingType, styleType, sortType, sortReverse})
-    const [allImagesLoaded, setAllImagesLoaded] = useState(true)
     const [removeSaveSearchFlag, setRemoveSaveSearchFlag] = useState(false)
     const visiblePromisesRef = useRef<TrackablePromise<void>[]>([])
     const navigate = useNavigate()
@@ -333,7 +337,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (scroll) return
         if (!visiblePromisesRef.current.length) return
-        setAllImagesLoaded(false)
+        props.setImagesLoaded(false)
         const poll = async () => {
             const notFulfilled = () => {
                 return visiblePromisesRef.current.filter((p) => p.state === "pending").length > 0
@@ -345,7 +349,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
                 if (timer >= 1000) break
             }
             await functions.timeout(100)
-            setAllImagesLoaded(true)
+            props.setImagesLoaded(true)
         }
         poll()
     }, [scroll, visibleItems, page])
@@ -407,7 +411,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     return (
         <div className="imagegrid" style={{marginTop: mobile ? "10px" : "0px"}} onMouseEnter={() => setEnableDrag(true)}>
-            <div className="image-container" style={{visibility: allImagesLoaded ? "visible" : "hidden"}}>
+            <div className="image-container" style={{visibility: props.imagesLoaded ? "visible" : "hidden"}}>
                 {generateImagesJSX()}
             </div>
         </div>
