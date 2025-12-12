@@ -18,11 +18,9 @@ const AdBanner: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="ad-banner" style={{marginBottom: props.negMargin ? "-10px" : "0px"}}>
-            <ins className="adsbygoogle" style={{display: "block", width: "100%"}}
+            <ins className="adsbygoogle" style={{display: "block", height: "150px"}}
                 data-ad-client="ca-pub-9022780620749989"
-                data-ad-slot="7308241770"
-                data-ad-format="auto"
-                data-full-width-responsive="true">
+                data-ad-slot="7308241770">
             </ins>
         </div>
     )
