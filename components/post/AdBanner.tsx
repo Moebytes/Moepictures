@@ -16,11 +16,11 @@ const AdBanner: React.FunctionComponent<Props> = (props) => {
         ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({})
     }, [])
 
-    let adWidth = window.innerWidth - functions.dom.sidebarWidth() - 40
+    return null
 
     return (
         <div className="ad-banner" style={{marginBottom: props.negMargin ? "-10px" : "0px"}}>
-            <ins className="adsbygoogle" style={{display: "block", width: `${adWidth}px`, height: "100px"}}
+            <ins className="adsbygoogle" style={{display: "block", height: "100px"}}
                 data-ad-client="ca-pub-9022780620749989"
                 data-ad-slot="7308241770">
             </ins>
