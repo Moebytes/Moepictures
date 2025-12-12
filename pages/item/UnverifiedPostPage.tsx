@@ -312,7 +312,7 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
                     {childPosts.length ? <Children posts={childPosts}/>: null}
                     {post?.buyLink ? <BuyLink link={post.buyLink}/> : null}
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.englishCommentary}/> : null}
-                    <Footer item={post}/>
+                    <Footer/>
                 </div>
             </div>
         </div>

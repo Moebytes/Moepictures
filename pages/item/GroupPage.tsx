@@ -329,7 +329,7 @@ const GroupPage: React.FunctionComponent = () => {
                     </div>
                     {groupImagesJSX()}
                 </div> : null}
-                <Footer item={group}/>
+                <Footer/>
             </div>
         </div>
         </>

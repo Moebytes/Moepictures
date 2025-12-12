@@ -22,7 +22,6 @@ import Children from "../../components/post/Children"
 import ArtistWorks from "../../components/post/ArtistWorks"
 import Related from "../../components/post/Related"
 import MobileInfo from "../../components/site/MobileInfo"
-import AdBanner from "../../components/post/AdBanner"
 import historyIcon from "../../assets/icons/history-state.png"
 import currentIcon from "../../assets/icons/current.png"
 import {useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
@@ -31,6 +30,7 @@ useNoteDialogSelector, useNoteDialogActions, useActiveSelector, usePostDialogSel
 useCacheSelector, useInteractionActions, useThemeSelector,
 useSearchActions} from "../../store"
 import permissions from "../../structures/Permissions"
+import AdBanner from "../../components/post/AdBanner"
 import {PostSearch, ChildPost, PostHistory, GroupPosts, SourceData, Image} from "../../types/Types"
 import "./styles/postpage.less"
 
@@ -720,7 +720,8 @@ const PostPage: React.FunctionComponent = () => {
                     {post ? <Comments post={post}/> : null}
                     {post && tagCategories ? <Related post={post} tag={tagCategories.characters[0]?.tag} 
                     fallback={[tagCategories.series[0]?.tag, tagCategories.artists[0]?.tag]}/> : null}
-                    <Footer item={post}/>
+                    {post ? <AdBanner item={post}/> : null}
+                    <Footer/>
                 </div>
             </div>
         </div>

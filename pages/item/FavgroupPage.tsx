@@ -270,7 +270,7 @@ const FavgroupPage: React.FunctionComponent = () => {
                     </div>
                     {favgroupImagesJSX()}
                 </div> : null}
-                <Footer item={favgroup}/>
+                <Footer/>
             </div>
         </div>
         </>

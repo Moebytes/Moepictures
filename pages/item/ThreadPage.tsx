@@ -503,7 +503,7 @@ const ThreadPage: React.FunctionComponent = () => {
                     {emojiGrid()}
                     {!scroll ? <PageControls page={page} maxPage={maxPage} setPage={setPage} scrollToTop={true}/> : null}
                 </div> : null}
-                <Footer item={thread}/>
+                <Footer/>
             </div>
         </div>
         </>

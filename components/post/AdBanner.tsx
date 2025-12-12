@@ -1,12 +1,10 @@
 import React, {useEffect} from "react"
 import functions from "../../functions/Functions"
-import {PostSearch, PostHistory, UnverifiedPost, Favgroup, GroupPosts, Tag, TagHistory, MessageUser, ThreadUser} from "../../types/Types"
+import {PostSearch, PostHistory, Tag, TagHistory} from "../../types/Types"
 import "./styles/adbanner.less"
 
 interface Props {
-    item?: PostSearch | PostHistory | UnverifiedPost | Tag | 
-           TagHistory | Favgroup | GroupPosts | MessageUser | 
-           ThreadUser | null
+    item?: PostSearch | PostHistory | Tag | TagHistory |  null
     negMargin?: boolean
 }
 
@@ -22,7 +20,7 @@ const AdBanner: React.FunctionComponent<Props> = (props) => {
     }
 
     return (
-        <div className="ad-banner" style={{marginBottom: props.negMargin ? "-10px" : "0px"}}>
+        <div className="ad-banner">
             <ins className="adsbygoogle ad-long-banner" style={{display: "block"}}
                 data-ad-client="ca-pub-9022780620749989"
                 data-ad-slot="7308241770">

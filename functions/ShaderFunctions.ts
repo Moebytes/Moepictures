@@ -461,7 +461,7 @@ export default class ShaderFunctions {
         gl.canvas.height = img.height * scale
 
         const inputTex = this.createTexture(gl, gl.LINEAR, img)
-        const quadBuffer = this.createBuffer(gl, new Float32Array([0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1]))
+        const quadBuffer = this.createBuffer(gl, new Float32Array([0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1]))!
         const framebuffer = gl.createFramebuffer()
 
         const scaleTexture = this.createEmptyTexture(gl)

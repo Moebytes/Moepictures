@@ -7,14 +7,9 @@ import terms from "../../assets/icons/terms.png"
 import contact from "../../assets/icons/contact.png"
 import enIcon from "../../assets/icons/translation-en.png"
 import jaIcon from "../../assets/icons/translation-ja.png"
-import AdBanner from "../post/AdBanner"
-import {PostSearch, PostHistory, UnverifiedPost, Favgroup, GroupPosts, Tag, TagHistory, MessageUser, ThreadUser} from "../../types/Types"
 import "./styles/footer.less"
 
 interface Props {
-    item?: PostSearch | PostHistory | UnverifiedPost | Tag | 
-           TagHistory | Favgroup | GroupPosts | MessageUser | 
-           ThreadUser | null
     noPadding?: boolean
 }
 
@@ -64,7 +59,6 @@ const Footer: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <AdBanner item={props.item}/>
         {!props.noPadding ? <div style={{height: "100%", pointerEvents: "none"}}></div> : null}
         <div className="footer">
             <div className="footer-row">
