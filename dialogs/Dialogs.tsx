@@ -24,6 +24,7 @@ import EditMessageReplyDialog from "./message/EditMessageReplyDialog"
 import ForwardMessageDialog from "./message/ForwardMessageDialog"
 import SendMessageDialog from "./message/SendMessageDialog"
 import SoftDeleteMessageDialog from "./message/SoftDeleteMessageDialog"
+import AdDialog from "./misc/AdDialog"
 import CaptchaDialog from "./misc/CaptchaDialog"
 import DownloadDialog from "./misc/DownloadDialog"
 import LineartDialog from "./misc/LineartDialog"
@@ -120,6 +121,7 @@ const Dialogs: React.FunctionComponent = (props) => {
         <ForwardMessageDialog/>
         <SendMessageDialog/>
         <SoftDeleteMessageDialog/>
+        <AdDialog/>
         <CaptchaDialog/>
         <DownloadDialog/>
         <LineartDialog/>
