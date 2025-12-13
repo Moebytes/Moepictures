@@ -1,4 +1,4 @@
-import React from "react"
+import React, {useState, useEffect} from "react"
 import DeleteCommentDialog from "./comment/DeleteCommentDialog"
 import EditCommentDialog from "./comment/EditCommentDialog"
 import ReportCommentDialog from "./comment/ReportCommentDialog"
@@ -91,8 +91,15 @@ import EditSaveSearchDialog from "./user/EditSaveSearchDialog"
 import PromoteDialog from "./user/PromoteDialog"
 import SaveSearchDialog from "./user/SaveSearchDialog"
 import UnbanDialog from "./user/UnbanDialog"
+import {useMiscDialogSelector} from "../store"
 
-const Dialogs: React.FunctionComponent = (props) => {
+const Dialogs: React.FunctionComponent = () => {
+    const {showAdDialog} = useMiscDialogSelector()
+    const [adKey, setAdKey] = useState(null as string | null)
+
+    useEffect(() => {
+        if (showAdDialog) setAdKey(Math.random().toString())
+    }, [showAdDialog])
 
     return (
         <>
@@ -121,7 +128,7 @@ const Dialogs: React.FunctionComponent = (props) => {
         <ForwardMessageDialog/>
         <SendMessageDialog/>
         <SoftDeleteMessageDialog/>
-        <AdDialog/>
+        {showAdDialog && adKey ? <AdDialog key={adKey}/> : null}
         <CaptchaDialog/>
         <DownloadDialog/>
         <LineartDialog/>
