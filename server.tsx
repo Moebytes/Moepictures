@@ -81,7 +81,7 @@ app.use(session({
 
 app.use(express.static(path.join(__dirname, "./public")))
 app.use(express.static(path.join(__dirname, "./dist/client"), {index: false}))
-app.use("/static", express.static(path.join(__dirname, "./dist/client/static")))
+app.use("/static/image", express.static(path.join(__dirname, "./dist/client/static/image")))
 app.use("/emojis", express.static(path.join(__dirname, "./assets/emojis"), {maxAge: 2678400}))
 
 app.use(apiKeyLogin)
