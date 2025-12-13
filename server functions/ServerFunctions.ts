@@ -42,8 +42,7 @@ export const apiKeyLogin = async (req: Request, res: Response, next: NextFunctio
         if (apiToken) {
             const user = await sql.user.user(apiToken.username)
             if (!user) return next()
-            let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-            ip = ip?.toString().replace("::ffff:", "") || ""
+            let ip = ServerUtil.ip(req)
             await ServerUsers.login(req, user, ip)
             req.session.apiKey = true
             await sql.user.destroyOtherAPISessions(req.session.username!, req.sessionID)

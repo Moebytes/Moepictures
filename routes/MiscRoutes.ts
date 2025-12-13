@@ -156,8 +156,7 @@ const MiscRoutes = (app: Express) => {
     })
 
     app.post("/api/misc/wdtagger", csrfProtection, captchaLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-        ip = ip?.toString().replace("::ffff:", "") || ""
+        let ip = serverFunctions.util.ip(req)
         try {
             if (processingQueue.has(ip)) return void res.status(429).send("Processing in progress")
             if (!req.body) return void res.status(400).send("Image data must be provided")
@@ -445,8 +444,7 @@ const MiscRoutes = (app: Express) => {
     })
 
     app.post("/api/misc/sourcelookup", csrfProtection, captchaLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-        ip = ip?.toString().replace("::ffff:", "") || ""
+        let ip = serverFunctions.util.ip(req)
         try {
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const {current, rating} = req.body as SourceLookupParams
@@ -463,8 +461,7 @@ const MiscRoutes = (app: Express) => {
     })
 
     app.post("/api/misc/taglookup", csrfProtection, captchaLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-        ip = ip?.toString().replace("::ffff:", "") || ""
+        let ip = serverFunctions.util.ip(req)
         try {
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const {current, type, rating, style, hasUpscaled} = req.body as TagLookupParams

@@ -4,16 +4,12 @@ import {pluginNodePolyfill} from "@rsbuild/plugin-node-polyfill"
 import {pluginLess} from "@rsbuild/plugin-less"
 import {pluginTypeCheck} from "@rsbuild/plugin-type-check"
 import nodeExternals from "webpack-node-externals"
-import WebpackObfuscator from "webpack-obfuscator"
 import dotenv from "dotenv"
 
 const env = dotenv.config().parsed!
 
 let minimize = env.TESTING === "no"
-let obfuscator = env.OBFUSCATE === "yes"
 let typecheck = env.TYPECHECK === "yes"
-let hashes = env.TESTING === "no"
-let hmr = env.TESTING === "yes"
 
 export default defineConfig({
     tools: {
@@ -27,11 +23,6 @@ export default defineConfig({
             })
 
             config.externals = [nodeExternals()]
-
-            if (obfuscator) {
-                config.plugins = config.plugins || []
-                config.plugins.push(new WebpackObfuscator())
-            }
 
             return config
         }
@@ -48,7 +39,7 @@ export default defineConfig({
     output: {
         target: "node",
         minify: minimize,
-        filenameHash: hashes,
+        filenameHash: false,
         distPath: {root: "./dist/server"},
         copy: [
             {from: "index.html", to: "[name][ext]"}

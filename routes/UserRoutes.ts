@@ -112,8 +112,7 @@ const UserRoutes = (app: Express) => {
             const badEmail = functions.validation.validateEmail(email, enLocale)
             const badPassword = functions.validation.validatePassword(username, password, enLocale)
             if (badUsername || badEmail || badPassword) return void res.status(400).send("Bad username, password, or email.")
-            let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-            ip = ip?.toString().replace("::ffff:", "") || ""
+            let ip = serverFunctions.util.ip(req)
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return void res.status(400).send("Bad captchaResponse")
             let bannedIp = await sql.report.activeBannedIP(ip)
             if (bannedIp) return void res.status(400).send("IP banned")
@@ -197,8 +196,7 @@ const UserRoutes = (app: Express) => {
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return void res.status(400).send("Bad captchaResponse")
             const user = await sql.user.user(username)
             if (!user) return void res.status(400).send("Bad request")
-            let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-            ip = ip?.toString().replace("::ffff:", "") || ""
+            let ip = serverFunctions.util.ip(req)
             const device = functions.util.parseUserAgent(req.headers["user-agent"])
             const region = await serverFunctions.util.ipRegion(ip)
             const matches = await bcrypt.compare(password, user.password!)
@@ -218,9 +216,12 @@ const UserRoutes = (app: Express) => {
                         return void res.status(403).send("new IP login location")
                     }
                 }
-                req.session.$2fa = user.$2fa
-                req.session.email = user.email
-                if (user.$2fa) return void res.status(200).send("2fa")
+                if (user.$2fa) {
+                    req.session.$2fa = user.$2fa
+                    req.session.email = user.email
+                    req.session.$2faNeeded = true
+                    return void res.status(200).send("2fa")
+                }
                 await serverFunctions.users.login(req, user, ip)
                 await sql.user.updateUser(user.username, "lastLogin", new Date().toISOString())
                 await sql.user.insertLoginHistory(user.username, "login", ip, device, region)
@@ -251,8 +252,7 @@ const UserRoutes = (app: Express) => {
         try {
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             await sql.user.destroyOtherSessions(req.session.username, req.sessionID)
-            let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-            ip = ip?.toString().replace("::ffff:", "") || ""
+            let ip = serverFunctions.util.ip(req)
             await sql.user.updateUser(req.session.username, "ips", [ip])
             res.status(200).send("Success")
         } catch (e) {
@@ -700,8 +700,7 @@ const UserRoutes = (app: Express) => {
             await sql.user.updateUser(req.session.username, "username", newUsername)
             req.session.username = newUsername
             req.session.lastNameChange = lastNameChange
-            let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-            ip = ip?.toString().replace("::ffff:", "") || ""
+            let ip = serverFunctions.util.ip(req)
             const device = functions.util.parseUserAgent(req.headers["user-agent"])
             const region = await serverFunctions.util.ipRegion(ip)
             if (user.image) {
@@ -735,8 +734,7 @@ const UserRoutes = (app: Express) => {
             if (matches) {
                 const newHash = await bcrypt.hash(newPassword, 13)
                 await sql.user.updateUser(req.session.username, "password", newHash)
-                let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-                ip = ip?.toString().replace("::ffff:", "") || ""
+                let ip = serverFunctions.util.ip(req)
                 const device = functions.util.parseUserAgent(req.headers["user-agent"])
                 const region = await serverFunctions.util.ipRegion(ip)
                 await sql.user.insertLoginHistory(user.username, "password changed", ip, device, region)
@@ -791,8 +789,7 @@ const UserRoutes = (app: Express) => {
                 await sql.user.updateUser(req.session.username, "email", tokenData.email)
                 req.session.email = tokenData.email
                 await sql.token.deleteEmailToken(tokenData.email)
-                let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-                ip = ip?.toString().replace("::ffff:", "") || ""
+                let ip = serverFunctions.util.ip(req)
                 const device = functions.util.parseUserAgent(req.headers["user-agent"])
                 const region = await serverFunctions.util.ipRegion(ip)
                 await sql.user.insertLoginHistory(req.session.username, "email changed", ip, device, region)
@@ -850,8 +847,7 @@ const UserRoutes = (app: Express) => {
                 await sql.token.deleteEmailToken(tokenData.email)
                 let message = `Welcome to Moepictures ${user.username}!\n\nHope you enjoy your stay (ﾉ^_^)ﾉ*:･ﾟ✧`
                 await serverFunctions.systemMessage(user.username, "Welcome to Moepictures!", message)
-                let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-                ip = ip?.toString().replace("::ffff:", "") || ""
+                let ip = serverFunctions.util.ip(req)
                 const device = functions.util.parseUserAgent(req.headers["user-agent"])
                 const region = await serverFunctions.util.ipRegion(ip)
                 await sql.user.insertLoginHistory(user.username, "email verified", ip, device, region)
@@ -934,8 +930,7 @@ const UserRoutes = (app: Express) => {
             const username = functions.util.toProperCase(user.username)
             const link = `${functions.config.getDomain()}/reset-password?token=${token}&username=${user.username}`
             await serverFunctions.email(user.email!, "Moepictures Password Reset", functions.jsx.resetPasswordJSX(username, link))
-            let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-            ip = ip?.toString().replace("::ffff:", "") || ""
+            let ip = serverFunctions.util.ip(req)
             const device = functions.util.parseUserAgent(req.headers["user-agent"])
             const region = await serverFunctions.util.ipRegion(ip)
             await sql.user.insertLoginHistory(user.username, "password reset request", ip, device, region)
@@ -962,8 +957,7 @@ const UserRoutes = (app: Express) => {
                 await sql.token.deletePasswordToken(username)
                 const passwordHash = await bcrypt.hash(password, 13)
                 await sql.user.updateUser(username, "password", passwordHash)
-                let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-                ip = ip?.toString().replace("::ffff:", "") || ""
+                let ip = serverFunctions.util.ip(req)
                 const device = functions.util.parseUserAgent(req.headers["user-agent"])
                 const region = await serverFunctions.util.ipRegion(ip)
                 await sql.user.insertLoginHistory(username, "password reset", ip, device, region)

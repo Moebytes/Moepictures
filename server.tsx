@@ -96,9 +96,7 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
     }
     blacklist = blacklistSet
   }
-  let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-  ip = ip?.toString().replace("::ffff:", "") || ""
-
+  let ip = serverFunctions.util.ip(req)
   if (["127.0.0.1", "::1", "0.0.0.0"].includes(ip)) return next()
 
   if (!req.session.username) {
@@ -418,8 +416,7 @@ app.post("/storage", imageUpdateLimiter, csrfProtection, async (req: Request, re
   try {
     const upscaleParam = new URL(`${functions.config.getDomain()}${req.originalUrl}`).searchParams.get("upscaled") ?? ""
     const {link, songCover} = req.body as {link: string, songCover?: boolean}
-    let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-    ip = ip?.toString().replace("::ffff:", "") || ""
+    let ip = serverFunctions.util.ip(req)
     let userKey = req.session.username ? req.session.username : ip
     const pixelHash = new URL(link).searchParams.get("hash") ?? ""
     const key = decodeURIComponent(link.replace(/\?.*$/, "").split("/").slice(3).join("/"))

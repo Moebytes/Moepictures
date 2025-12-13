@@ -70,6 +70,7 @@ export interface Session extends Require<Omit<User, "password" | "ip">> {
         secure: boolean
     }
     captchaNeeded: boolean
+    $2faNeeded: boolean
     csrfToken: string
     publicKey: string
 }
@@ -77,6 +78,7 @@ export interface Session extends Require<Omit<User, "password" | "ip">> {
 export interface ServerSession extends Partial<Omit<User, "password">> {
     captchaNeeded?: boolean
     captchaAnswer?: string
+    $2faNeeded?: boolean
     csrfToken?: string
     csrfSecret?: string
     publicKey?: string

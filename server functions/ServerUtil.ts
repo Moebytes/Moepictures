@@ -5,6 +5,7 @@ import crypto from "crypto"
 import path from "path"
 import fs from "fs"
 import * as mm from "music-metadata"
+import {Request} from "express"
 import {Translator} from "@vitalets/google-translate-api"
 import {createCanvas, loadImage} from "@napi-rs/canvas"
 import wanakana from "wanakana"
@@ -18,6 +19,12 @@ import functions from "../functions/Functions"
 const exec = util.promisify(child_process.exec)
 
 export default class ServerUtil {
+    public static ip = (req: Request) => {
+        let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+        ip = ip?.toString().replace("::ffff:", "") || ""
+        return ip
+    }
+
     public static ipRegion = async (ip: string) => {
         const ipInfo = await axios.get(`http://ip-api.com/json/${ip}`).then((r) => r.data).catch(() => null)
         let region = ipInfo?.regionName || "unknown"

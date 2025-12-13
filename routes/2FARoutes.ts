@@ -30,8 +30,7 @@ const $2FARoutes = (app: Express) => {
                 await sql.user.updateUser(req.session.username, "$2fa", false)
                 req.session.$2fa = false
                 await sql.token.delete2faToken(req.session.username)
-                let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-                ip = ip?.toString().replace("::ffff:", "") || ""
+                let ip = serverFunctions.util.ip(req)
                 const device = functions.util.parseUserAgent(req.headers["user-agent"])
                 const region = await serverFunctions.util.ipRegion(ip)
                 await sql.user.insertLoginHistory(user.username, "2fa disabled", ip, device, region)
@@ -69,8 +68,7 @@ const $2FARoutes = (app: Express) => {
             if (validToken) {
                 await sql.user.updateUser(req.session.username, "$2fa", true)
                 req.session.$2fa = true
-                let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-                ip = ip?.toString().replace("::ffff:", "") || ""
+                let ip = serverFunctions.util.ip(req)
                 const device = functions.util.parseUserAgent(req.headers["user-agent"])
                 const region = await serverFunctions.util.ipRegion(ip)
                 await sql.user.insertLoginHistory(user.username, "2fa enabled", ip, device, region)
@@ -89,16 +87,17 @@ const $2FARoutes = (app: Express) => {
             let {token} = req.body as {token: string}
             if (!req.session.$2fa || !req.session.email || !token) return void res.status(400).send("2FA isn't enabled")
             if (req.session.username) return void res.status(400).send("Already authenticated")
+            if (!req.session.$2faNeeded) return void res.status(400).send("2fa not requested")
             token = token.trim()
             const user = await sql.user.userByEmail(req.session.email)
             if (!user) return void res.status(400).send("Bad email")
-            let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-            ip = ip?.toString().replace("::ffff:", "") || ""
+            let ip = serverFunctions.util.ip(req)
             const device = functions.util.parseUserAgent(req.headers["user-agent"])
             const region = await serverFunctions.util.ipRegion(ip)
             const $2FAToken = await sql.token.$2faToken(user.username)
             const validToken = verifyToken($2FAToken?.token || "", token, 60)
             if (validToken) {
+                req.session.$2faNeeded = false
                 await serverFunctions.users.login(req, user, ip)
                 await sql.user.updateUser(user.username, "lastLogin", new Date().toISOString())
                 await sql.user.insertLoginHistory(user.username, "login", ip, device, region)
