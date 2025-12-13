@@ -11,8 +11,6 @@ const env = dotenv.config().parsed!
 let minimize = env.TESTING === "no"
 let obfuscator = env.OBFUSCATE === "yes"
 let typecheck = env.TYPECHECK === "yes"
-let hashes = env.TESTING === "no"
-let hmr = env.TESTING === "yes"
 
 export default defineConfig({
     tools: {
@@ -41,7 +39,7 @@ export default defineConfig({
     output: {
         target: "web",
         minify: minimize,
-        filenameHash: hashes,
+        filenameHash: false,
         sourceMap: false,
         legalComments: "none",
         distPath: {root: "./dist/client"},
