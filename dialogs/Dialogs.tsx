@@ -111,8 +111,8 @@ const Dialogs: React.FunctionComponent = () => {
         if (!showAdDialog || !adKey) return
 
         const observer = new MutationObserver(() => {
-            const exists = document.getElementById("ad-dialog")
-            if (!exists) {
+            const adRoot = document.getElementById("ad-dialog")
+            if (!adRoot?.childElementCount) {
                 adCounterRef.current += 1
                 setAdKey(`ad-dialog-${adCounterRef.current}`)
             }
