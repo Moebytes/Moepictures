@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react"
+import React, {useState, useEffect, useRef} from "react"
 import DeleteCommentDialog from "./comment/DeleteCommentDialog"
 import EditCommentDialog from "./comment/EditCommentDialog"
 import ReportCommentDialog from "./comment/ReportCommentDialog"
@@ -96,10 +96,32 @@ import {useMiscDialogSelector} from "../store"
 const Dialogs: React.FunctionComponent = () => {
     const {showAdDialog} = useMiscDialogSelector()
     const [adKey, setAdKey] = useState(null as string | null)
+    const adCounterRef = useRef(0)
 
     useEffect(() => {
-        if (showAdDialog) setAdKey(Math.random().toString())
+        if (showAdDialog) {
+            adCounterRef.current += 1
+            setAdKey(`ad-dialog-${adCounterRef.current}`)
+        } else {
+            setAdKey(null)
+        }
     }, [showAdDialog])
+
+    useEffect(() => {
+        if (!showAdDialog || !adKey) return
+
+        const observer = new MutationObserver(() => {
+            const exists = document.getElementById("ad-dialog")
+            if (!exists) {
+                adCounterRef.current += 1
+                setAdKey(`ad-dialog-${adCounterRef.current}`)
+            }
+        })
+
+        observer.observe(document.body, {childList: true, subtree: true})
+
+        return () => observer.disconnect()
+    }, [showAdDialog, adKey])
 
     return (
         <>
@@ -128,7 +150,7 @@ const Dialogs: React.FunctionComponent = () => {
         <ForwardMessageDialog/>
         <SendMessageDialog/>
         <SoftDeleteMessageDialog/>
-        {showAdDialog && adKey ? <AdDialog key={adKey}/> : null}
+        {adKey ? <div id="ad-dialog"><AdDialog key={adKey}/></div> : null}
         <CaptchaDialog/>
         <DownloadDialog/>
         <LineartDialog/>
