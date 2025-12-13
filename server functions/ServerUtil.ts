@@ -339,8 +339,7 @@ export default class ServerUtil {
 
             return false
         } catch {
-            // Sometimes the referer is badly formed? (don't block the images)
-            return true
+            return false
         }
     }
 }
