@@ -109,7 +109,7 @@
     "pg": "^8.13.3",
     "pg-dump-restore": "^1.0.12",
     "pinyin": "^4.0.0",
-    "pixiv.ts": "^0.8.7",
+    "pixiv.ts": "^0.8.8",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.9",
