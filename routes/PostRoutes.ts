@@ -11,7 +11,8 @@ import fs from "fs"
 import path from "path"
 import {PostSearch, PostFull, PostDeleteRequestFulfillParams, PostHistoryParams, PostCompressParams, PostUpscaleParams,
 PostQuickEditParams, PostQuickEditUnverifiedParams, PostHistory, UnverifiedPost, ThumbnailUpdate, PostUpdateColumns,
-ImageUpdateColumns, BulkTag} from "../types/Types"
+ImageUpdateColumns, BulkTag,
+MiniTagGroup} from "../types/Types"
 
 const postLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -1523,13 +1524,21 @@ const PostRoutes = (app: Express) => {
 
     app.put("/api/post/addtags", csrfProtection, modLimiter, async (req: Request, res: Response) => {
         try {
-            let {postID, tags} = req.body as {postID: string, tags: string[]}
+            let {postID, tags, tagGroups} = req.body as {postID: string, tags?: string[], tagGroups?: MiniTagGroup[]}
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             const post = await sql.post.post(postID)
             if (!post) return void res.status(400).send("Invalid postID")
                 
-            await sql.tag.insertTagMap(postID, tags)
+            if (tags !== undefined) {
+                tags = await serverFunctions.tags.applyAliases(tags)
+                await sql.tag.insertTagMap(postID, tags)
+            }
+            if (tagGroups !== undefined) {
+                await serverFunctions.upload.updateTagGroups(postID, 
+                {oldTagGroups: post.tagGroups, newTagGroups: tagGroups})
+            }
+
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -1539,13 +1548,20 @@ const PostRoutes = (app: Express) => {
 
     app.put("/api/post/removetags", csrfProtection, modLimiter, async (req: Request, res: Response) => {
         try {
-            let {postID, tags} = req.body as {postID: string, tags: string[]}
+            let {postID, tags, tagGroups} = req.body as {postID: string, tags?: string[], tagGroups?: MiniTagGroup[]}
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             const post = await sql.post.post(postID)
             if (!post) return void res.status(400).send("Invalid postID")
     
-            await sql.tag.deleteTagMap(postID, tags)
+            if (tags !== undefined) {
+                tags = await serverFunctions.tags.applyAliases(tags)
+                await sql.tag.deleteTagMap(postID, tags)
+            }
+            if (tagGroups !== undefined) {
+                await serverFunctions.upload.updateTagGroups(postID, 
+                {oldTagGroups: post.tagGroups, newTagGroups: tagGroups})
+            }
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

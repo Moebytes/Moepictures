@@ -1,6 +1,5 @@
 import subprocess
 import sys
-import os
 
 required_modules = [
     "torch", "opencv-python", "numpy", "Pillow", "manga-ocr", "text-detector",
@@ -28,7 +27,7 @@ from text_detector import TextDetector
 from translate import Translator
 import argparse
 import json
-import sys
+import os
 
 device = "mps" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() else "cpu"
 dirname = os.path.dirname(os.path.abspath(__file__))
@@ -129,4 +128,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     result = ocr_image(args.input)
+    sys.stdout.write(">>>JSON<<<\n")
     sys.stdout.write(result)
+    sys.stdout.write("\n>>>ENDJSON<<<")

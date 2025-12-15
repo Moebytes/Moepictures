@@ -200,7 +200,7 @@ export interface PostQuickEditParams {
     characters?: string[]
     series?: string[]
     tags?: string[]
-    tagGroups?: {name: string, tags: string[]}[]
+    tagGroups?: MiniTagGroup[]
     imageSources?: {[key: string]: string | null} | null
     imageLinks?: {[key: string]: string | null} | null
     reason?: string | null
@@ -282,8 +282,8 @@ export type PostPutEndpoint<T extends string> =
     T extends "/api/image/source" ? {params: {imageID: string, directLink: string, altSource: string, unverified?: boolean, reason?: string}, response: string} :
     T extends "/api/post/update" ? {params: {postID: string, column: PostUpdateColumns, value: any}, response: string} :
     T extends "/api/image/update" ? {params: {imageID: string, column: ImageUpdateColumns, value: any}, response: string} :
-    T extends "/api/post/addtags" ? {params: {postID: string, tags: string[]}, response: string} :
-    T extends "/api/post/removetags" ? {params: {postID: string, tags: string[]}, response: string} :
+    T extends "/api/post/addtags" ? {params: {postID: string, tags?: string[], tagGroups?: MiniTagGroup[]}, response: string} :
+    T extends "/api/post/removetags" ? {params: {postID: string, tags?: string[], tagGroups?: MiniTagGroup[]}, response: string} :
     never
 
 export type PostDeleteEndpoint<T extends string> = 

@@ -183,7 +183,7 @@ const MiscRoutes = (app: Express) => {
             const scriptPath = path.join(__dirname, "../../assets/python/ocr.py")
             let command = `python3 "${scriptPath}" -i "${imagePath}"`
             const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
-            const json = JSON.parse(str.match(/\[.*?\]/gm)?.[0]) as OCRResponse[]
+            const json = JSON.parse(str.match(/(?<=>>>JSON<<<)([\s\S]*?)(?=>>>ENDJSON<<<)/gm)?.[0]) as OCRResponse[]
             
             fs.unlinkSync(imagePath)
             processingQueue.delete(req.session.username)

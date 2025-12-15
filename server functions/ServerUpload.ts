@@ -464,10 +464,10 @@ export default class ServerUpload {
 
         let {addedTagGroups, removedTagGroups} = functions.compare.tagGroupChanges(oldTagGroups, newTagGroups)
         
-        let oldTagsSet = new Set<string>(oldTagGroups.filter(Boolean).map((o) => o.name))
-        let newTagsSet = new Set<string>(newTagGroups.filter(Boolean).map((n) => n.name))
-        let addedGroups = [...newTagsSet].filter(tag => !oldTagsSet.has(tag)).filter(Boolean)
-        let removedGroups = [...oldTagsSet].filter(tag => !newTagsSet.has(tag)).filter(Boolean)
+        let oldNameSet = new Set<string>(oldTagGroups.filter(Boolean).map((o) => o.name))
+        let newNameSet = new Set<string>(newTagGroups.filter(Boolean).map((n) => n.name))
+        let addedGroups = [...newNameSet].filter(tag => !oldNameSet.has(tag)).filter(Boolean)
+        let removedGroups = [...oldNameSet].filter(tag => !newNameSet.has(tag)).filter(Boolean)
 
         for (const tagGroup of addedTagGroups) {
             if (!tagGroup) continue

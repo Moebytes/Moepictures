@@ -410,6 +410,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 }
             }
 
+            if (!sourceData.source.source && /^\d{5,}(?=$|_)/.test(currentArr[0].name)) {
+                // Bad source generation... assume the post is from pixiv
+                sourceData.source.source = `https://www.pixiv.net/artworks/${sourceArr[0]}`
+            }
+
             let {imageChunks, upscaledChunks} = functions.byte.chunkImages(currentArr, upscaledCurrentArr)
             await functions.byte.uploadChunks(imageChunks, upscaledChunks, session, setSessionFlag)
 
