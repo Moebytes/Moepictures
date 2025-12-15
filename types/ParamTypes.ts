@@ -18,11 +18,11 @@ export type PostType =
 
 export type PostRating =
     | "all"
-    | "all+h"
+    | "all+l"
     | "cute" 
     | "sexy" 
     | "erotic" 
-    | "hentai"
+    | "lewd"
 
 export type PostStyle =
     | "all"

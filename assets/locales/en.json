@@ -70,11 +70,11 @@
             "model": "Model"
         },
         "rating": {
-            "allH": "All+H",
+            "allL": "All+L",
             "cute": "Cute",
             "sexy": "Sexy",
             "erotic": "Erotic",
-            "hentai": "Hentai"
+            "lewd": "Lewd"
         },
         "style": {
             "allS": "All+S",
@@ -1431,7 +1431,7 @@
                 "guide12": "⇾ Resolution: Keep original images under 2000x2000px and upscaled images under 8000x8000px.",
                 "guide13": "⇾ (Music only) The audio file must have a song cover in its metadata.",
                 "guide14": "⇾ Compress / re-encode files (maintaining high quality) to be storage efficient.*",
-                "guide15": "⇾ No hentai. We only allow light nudity and suggestiveness.",
+                "guide15": "⇾ No sexual content. We only allow light nudity and suggestiveness.",
                 "guide16": "⇾ No AI-generated works. We only want art created by passionate humans.",
                 "guide17": "⇾ No paid content. This includes anime clips, manga and doujinshi scans, and paid artist rewards. Support artists for their work!"
             },

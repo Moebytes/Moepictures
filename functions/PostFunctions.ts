@@ -122,7 +122,7 @@ export default class PostFunctions {
     }
 
     public static isR18 = (ratingType: PostRating) => {
-        return ratingType === "hentai" || ratingType === "all+h"
+        return ratingType === "lewd" || ratingType === "all+l"
     }
 
     public static isSketch = (styleType: PostStyle) => {

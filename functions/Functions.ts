@@ -59,7 +59,7 @@ export default class Functions {
     }
 
     public static r18 = () => {
-        return "hentai" as PostRating
+        return "lewd" as PostRating
     }
 
     public static r17 = () => {

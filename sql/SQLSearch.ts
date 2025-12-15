@@ -22,9 +22,9 @@ export default class SQLSearch {
         if (rating === "cute") ratingQuery = `posts.rating = 'cute'`
         if (rating === "sexy") ratingQuery = `posts.rating = 'sexy'`
         if (rating === "erotic") ratingQuery = `posts.rating = 'erotic'`
-        if (rating === "hentai") ratingQuery = `posts.rating = 'hentai'`
+        if (rating === "lewd") ratingQuery = `posts.rating = 'lewd'`
         if (rating === "all") ratingQuery = `(posts.rating = 'cute' OR posts.rating = 'sexy' OR posts.rating = 'erotic')`
-        if (rating === "all+h") ratingQuery = ``
+        if (rating === "all+l") ratingQuery = ``
         if (rating === "all" && !username) ratingQuery = `posts.rating = 'cute'`
         let styleQuery = ""
         if (style === "2d") styleQuery = `lower(posts.style) = '2d'`
@@ -720,7 +720,7 @@ export default class SQLSearch {
         if (rating === "cute") ratingQuery = `groups.rating = 'cute'`
         if (rating === "sexy") ratingQuery = `groups.rating = 'sexy'`
         if (rating === "erotic") ratingQuery = `groups.rating = 'erotic'`
-        if (rating === "hentai") ratingQuery = `groups.rating = 'hentai'`
+        if (rating === "lewd") ratingQuery = `groups.rating = 'lewd'`
         if (rating === "all") ratingQuery = `(groups.rating = 'cute' OR groups.rating = 'sexy' OR groups.rating = 'erotic')`
         if (rating === "all" && !username) ratingQuery = `groups.rating = 'cute'`
         let searchQuery = ""

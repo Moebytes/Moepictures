@@ -22,7 +22,7 @@ import live2d from "../../assets/icons/live2d.png"
 import cute from "../../assets/icons/cute.png"
 import sexy from "../../assets/icons/sexy.png"
 import erotic from "../../assets/icons/erotic.png"
-import hentai from "../../assets/icons/hentai.png"
+import lewd from "../../assets/icons/lewd.png"
 import $2d from "../../assets/icons/2d.png"
 import $3d from "../../assets/icons/3d.png"
 import pixel from "../../assets/icons/pixel.png"
@@ -682,9 +682,9 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 </div>
                 <div className="upload-row">
                     {session.showR18 ?
-                    <button className={`upload-button ${rating === "hentai" ? "button-selected" : ""}`} onClick={() => setRating("hentai")}>
-                        <img className="upload-button-img" src={hentai}/>
-                        <span className="upload-button-text">{i18n.sortbar.rating.hentai}</span>
+                    <button className={`upload-button ${rating === "lewd" ? "button-selected" : ""}`} onClick={() => setRating("lewd")}>
+                        <img className="upload-button-img" src={lewd}/>
+                        <span className="upload-button-text">{i18n.sortbar.rating.lewd}</span>
                     </button> : null}
                 </div> 
                 </>
@@ -705,9 +705,9 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                         <span className="upload-button-text">{i18n.sortbar.rating.erotic}</span>
                     </button>
                     {session.showR18 ?
-                    <button className={`upload-button ${rating === "hentai" ? "button-selected" : ""}`} onClick={() => setRating("hentai")}>
-                        <img className="upload-button-img" src={hentai}/>
-                        <span className="upload-button-text">{i18n.sortbar.rating.hentai}</span>
+                    <button className={`upload-button ${rating === "lewd" ? "button-selected" : ""}`} onClick={() => setRating("lewd")}>
+                        <img className="upload-button-img" src={lewd}/>
+                        <span className="upload-button-text">{i18n.sortbar.rating.lewd}</span>
                     </button> : null}
                 </div>
             )

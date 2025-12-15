@@ -30,7 +30,7 @@ import audio from "../../assets/icons/audio.png"
 import cute from "../../assets/icons/cute.png"
 import sexy from "../../assets/icons/sexy.png"
 import erotic from "../../assets/icons/erotic.png"
-import hentai from "../../assets/icons/hentai.png"
+import lewd from "../../assets/icons/lewd.png"
 import $2d from "../../assets/icons/2d.png"
 import $3d from "../../assets/icons/3d.png"
 import pixel from "../../assets/icons/pixel.png"
@@ -254,7 +254,7 @@ const ToolTip: React.FunctionComponent = (props) => {
         if (tooltipPost.rating === "cute") return cute
         if (tooltipPost.rating === "sexy") return sexy
         if (tooltipPost.rating === "erotic") return erotic
-        if (tooltipPost.rating === "hentai") return hentai
+        if (tooltipPost.rating === "lewd") return lewd
         return cute
     }
 
@@ -271,7 +271,7 @@ const ToolTip: React.FunctionComponent = (props) => {
     }
 
     const getIconStyle = (icon: string) => {
-        if (icon === "hentai") return {filter: `hue-rotate(-10deg)`}
+        if (icon === "lewd") return {filter: `hue-rotate(-10deg)`}
         if (icon === "promo") return {filter: `hue-rotate(125deg)`}
         if (icon === "sketch") return {filter: `hue-rotate(125deg)`}
         if (icon === "lineart") return {filter: `hue-rotate(125deg)`}

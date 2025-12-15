@@ -15,7 +15,7 @@ import download from "../../assets/icons/download.png"
 import reset from "../../assets/icons/reset.png"
 import all from "../../assets/icons/all.png"
 import allS from "../../assets/icons/all+s.png"
-import allH from "../../assets/icons/all+h.png"
+import allL from "../../assets/icons/all+l.png"
 import image from "../../assets/icons/image.png"
 import animation from "../../assets/icons/animation.png"
 import video from "../../assets/icons/video.png"
@@ -26,7 +26,7 @@ import audio from "../../assets/icons/audio.png"
 import cute from "../../assets/icons/cute.png"
 import sexy from "../../assets/icons/sexy.png"
 import erotic from "../../assets/icons/erotic.png"
-import hentai from "../../assets/icons/hentai.png"
+import lewd from "../../assets/icons/lewd.png"
 import $2d from "../../assets/icons/2d.png"
 import $3d from "../../assets/icons/3d.png"
 import pixel from "../../assets/icons/pixel.png"
@@ -281,18 +281,18 @@ const SortBar: React.FunctionComponent = (props) => {
                     <span className="sortbar-text">{i18n.sortbar.rating.erotic}</span>
                 </div>
             )
-        } else if (ratingType === "hentai") {
+        } else if (ratingType === "lewd") {
             return (
                 <div className="sortbar-item" ref={ratingRef} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}>
-                    <img className="sortbar-img" src={hentai}/>
-                    <span style={{color: "var(--r18Color)"}} className="sortbar-text">{i18n.sortbar.rating.hentai}</span>
+                    <img className="sortbar-img" src={lewd}/>
+                    <span style={{color: "var(--r18Color)"}} className="sortbar-text">{i18n.sortbar.rating.lewd}</span>
                 </div>
             )
-        } else if (ratingType === "all+h") {
+        } else if (ratingType === "all+l") {
             return (
                 <div className="sortbar-item" ref={ratingRef} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}>
-                    <img className="sortbar-img rotate" src={allH}/>
-                    <span style={{color: "var(--r18Color)"}} className="sortbar-text">{i18n.sortbar.rating.allH}</span>
+                    <img className="sortbar-img rotate" src={allL}/>
+                    <span style={{color: "var(--r18Color)"}} className="sortbar-text">{i18n.sortbar.rating.allL}</span>
                 </div>
             )
         } else {
@@ -312,10 +312,10 @@ const SortBar: React.FunctionComponent = (props) => {
             return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={sexy} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}/>
         } else if (ratingType === "erotic") {
             return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={erotic} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}/>
-        } else if (ratingType === "hentai") {
-            return <img style={{height: "30px"}} className="sortbar-img" src={hentai} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}/>
-        } else if (ratingType === "all+h") {
-            return <img style={{height: "30px"}} className="sortbar-img rotate" src={allH} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}/>
+        } else if (ratingType === "lewd") {
+            return <img style={{height: "30px"}} className="sortbar-img" src={lewd} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}/>
+        } else if (ratingType === "all+l") {
+            return <img style={{height: "30px"}} className="sortbar-img rotate" src={allL} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}/>
         } else {
             return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img rotate" src={all} onClick={() => {setActiveDropdown(activeDropdown === "rating" ? "none" : "rating"); setFilterDropActive(false)}}/>
         }
@@ -328,11 +328,11 @@ const SortBar: React.FunctionComponent = (props) => {
         const raw = rect.x
         let offset = 0
         if (ratingType === "all") offset = -15
-        if (ratingType === "all+h") offset = -15
+        if (ratingType === "all+l") offset = -15
         if (ratingType === "cute") offset = -10
         if (ratingType === "sexy") offset = -10
         if (ratingType === "erotic") offset = -5
-        if (ratingType === "hentai") offset = -5
+        if (ratingType === "lewd") offset = -5
         if (!session.username) offset += 0
         return `${raw + offset}px`
     }
@@ -945,9 +945,9 @@ const SortBar: React.FunctionComponent = (props) => {
                     <span className="sortbar-dropdown-text">{i18n.tag.all}</span>
                 </div>
                 {session.showR18 ?
-                <div className="sortbar-dropdown-row" onClick={() => setRatingType("all+h")}>
-                    <img className="sortbar-dropdown-img rotate" src={allH}/>
-                    <span style={{color: "var(--r18Color)"}} className="sortbar-dropdown-text">{i18n.sortbar.rating.allH}</span>
+                <div className="sortbar-dropdown-row" onClick={() => setRatingType("all+l")}>
+                    <img className="sortbar-dropdown-img rotate" src={allL}/>
+                    <span style={{color: "var(--r18Color)"}} className="sortbar-dropdown-text">{i18n.sortbar.rating.allL}</span>
                 </div> : null}
                 <div className="sortbar-dropdown-row" onClick={() => setRatingType("cute")}>
                     <img className="sortbar-dropdown-img" src={cute} style={{filter: getFilter()}}/>
@@ -962,9 +962,9 @@ const SortBar: React.FunctionComponent = (props) => {
                     <span className="sortbar-dropdown-text">{i18n.sortbar.rating.erotic}</span>
                 </div> : null}
                 {session.showR18 ?
-                <div className="sortbar-dropdown-row" onClick={() => setRatingType("hentai")}>
-                    <img className="sortbar-dropdown-img" src={hentai}/>
-                    <span style={{color: "var(--r18Color)"}} className="sortbar-dropdown-text">{i18n.sortbar.rating.hentai}</span>
+                <div className="sortbar-dropdown-row" onClick={() => setRatingType("lewd")}>
+                    <img className="sortbar-dropdown-img" src={lewd}/>
+                    <span style={{color: "var(--r18Color)"}} className="sortbar-dropdown-text">{i18n.sortbar.rating.lewd}</span>
                 </div> : null}
             </div>
             <div className={`dropdown ${activeDropdown === "style" ? "" : "hide-dropdown"}`} 

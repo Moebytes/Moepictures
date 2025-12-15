@@ -70,11 +70,11 @@
             "model": "モデル"
         },
         "rating": {
-            "allH": "オール+H",
+            "allL": "オール+L",
             "cute": "かわいい",
             "sexy": "セクシー",
             "erotic": "エロチック",
-            "hentai": "変態"
+            "lewd": "下品な"
         },
         "style": {
             "allS": "オール＋S",
