@@ -408,7 +408,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
 
     const editText = (index: number) => {
         setItems((prev) => {
-            const item = prev[index]
+            const item = {...prev[index]}
             item.imageWidth = item?.imageWidth || targetWidth
             item.imageHeight = item?.imageHeight || targetHeight
             item.imageHash = targetHash
@@ -428,7 +428,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
             item.borderRadius = editNoteData.borderRadius
             item.character = editNoteData.character
             item.characterTag = editNoteData.characterTag
-            return prev
+            return functions.util.insertAtIndex(prev, index, item)
         })
     }
 
@@ -597,10 +597,10 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         })
                     }} DrawPreviewComponent={RectShape}/>
                     {items.map((item: Note, index: number) => {
-                        let {id, height, width, x, y, imageWidth, imageHeight, fontSize, strokeWidth, borderRadius} = item
+                        let {id, height, width, x, y, fontSize, strokeWidth, borderRadius} = item
 
-                        if (!imageWidth) imageWidth = targetWidth
-                        if (!imageHeight) imageHeight = targetHeight
+                        const imageWidth = item.imageWidth || targetWidth
+                        const imageHeight = item.imageHeight || targetHeight
 
                         const newWidth = (width / imageWidth) * targetWidth
                         const newHeight = (height / imageHeight) * targetHeight
