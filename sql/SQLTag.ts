@@ -828,6 +828,40 @@ export default class SQLTag {
         await SQLQuery.run(query)
     }
 
+    public static deleteEmptyTagGroups = async (postID: string) => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                DELETE FROM "tag groups"
+                WHERE "tag groups"."postID" = $1
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM "tag group map"
+                    JOIN "tag map" ON "tag map"."mapID" = "tag group map"."tagMapID"
+                    WHERE "tag group map"."groupID" = "tag groups"."groupID"
+                )
+            `),
+            values: [postID]
+        }
+        await SQLQuery.run(query)
+    }
+
+    public static deleteUnverifiedEmptyTagGroups = async (postID: string) => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                DELETE FROM "unverified tag groups"
+                WHERE "unverified tag groups"."postID" = $1
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM "unverified tag group map"
+                    JOIN "unverified tag map" ON "unverified tag map"."mapID" = "unverified tag group map"."tagMapID"
+                    WHERE "unverified tag group map"."groupID" = "unverified tag groups"."groupID"
+                )
+            `),
+            values: [postID]
+        }
+        await SQLQuery.run(query)
+    }
+
     public static tagReplaceMap = async () => {
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`

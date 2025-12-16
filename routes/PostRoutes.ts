@@ -1543,7 +1543,9 @@ const PostRoutes = (app: Express) => {
             if (!post) return void res.status(400).send("Invalid postID")
                 
             if (tags !== undefined) {
+                let tagObjectMapping = await serverFunctions.tags.tagMap(true)
                 tags = await serverFunctions.tags.applyAliases(tags)
+                tags = await serverFunctions.tags.applyImplications(tags, tagObjectMapping)
                 await sql.tag.insertTagMap(postID, tags)
             }
             if (tagGroups !== undefined) {

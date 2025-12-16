@@ -494,21 +494,12 @@ export default class ServerUpload {
             }
         }
 
-        // Delete empty tag groups
-        for (const tagGroup of [...newTagGroups, ...removedTagGroups]) {
-            if (!tagGroup) continue
-            if (unverified) {
-                const group = await sql.tag.unverifiedTagGroup(postID, tagGroup.name)
-                if (!group?.tags.length) {
-                    await sql.tag.deleteUnverifiedTagGroup(postID, tagGroup.name)
-                }
-            } else {
-                const group = await sql.tag.tagGroup(postID, tagGroup.name)
-                if (!group?.tags.length) {
-                    await sql.tag.deleteTagGroup(postID, tagGroup.name)
-                }
-            }
+        if (unverified) {
+            await sql.tag.deleteUnverifiedEmptyTagGroups(postID)
+        } else {
+            await sql.tag.deleteEmptyTagGroups(postID)
         }
+
         return {
             addedTagGroups: addedGroups, 
             removedTagGroups: removedGroups
