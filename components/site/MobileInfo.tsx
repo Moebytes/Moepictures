@@ -293,7 +293,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         if (!props.tagGroups) return null
         let jsx = [] as React.ReactElement[]
         let tagGroups = functions.tag.appendOrphanTags(props.tagGroups, props.tags)
-        tagGroups.sort((a, b) => {
+        tagGroups = [...tagGroups].sort((a, b) => {
             return a.name.toLowerCase() === "tags" ? 1 :
                 b.name.toLowerCase() === "tags" ? -1 : 0
         })
