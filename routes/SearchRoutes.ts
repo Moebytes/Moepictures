@@ -3,7 +3,7 @@ import crypto from "crypto"
 import functions from "../functions/Functions"
 import sql from "../sql/SQLQuery"
 import phash from "sharp-phash"
-import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server/ServerFunctions"
 import permissions from "../structures/Permissions"
 import rateLimit from "express-rate-limit"
 import {PostSearch, TagSearch, PostSearchParams, CategorySearchParams, CommentSearch, TagSearchParams, 

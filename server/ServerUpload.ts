@@ -1,7 +1,7 @@
 import sql from "../sql/SQLQuery"
 import path from "path"
 import functions from "../functions/Functions"
-import serverFunctions from "../server functions/ServerFunctions"
+import serverFunctions from "./ServerFunctions"
 import sharp from "sharp"
 import phash from "sharp-phash"
 import dist from "sharp-phash/distance"

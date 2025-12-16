@@ -2,7 +2,7 @@ import {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import sql from "../sql/SQLQuery"
 import functions from "../functions/Functions"
-import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server/ServerFunctions"
 import {generateSecret, verifyToken} from "node-2fa"
 
 const $2faLimiter = rateLimit({

@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import sql from "../sql/SQLQuery"
 import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
-import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server/ServerFunctions"
 import {NoteSaveParams, NoteEditParams, NoteApproveParams, NoteHistory, NoteHistoryParams, NoteHistoryDeleteParams, Note, BulkTag, NoteUpdateColumns} from "../types/Types"
 
 const noteLimiter = rateLimit({

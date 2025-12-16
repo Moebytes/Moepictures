@@ -2,7 +2,7 @@ import {Express, NextFunction, Request, Response} from "express"
 import sql from "../sql/SQLQuery"
 import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
-import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server/ServerFunctions"
 import rateLimit from "express-rate-limit"
 import multer from "multer"
 import {UploadParams, EditParams, UnverifiedUploadParams, UnverifiedEditParams, 

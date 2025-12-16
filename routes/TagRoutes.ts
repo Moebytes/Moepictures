@@ -3,11 +3,11 @@ import rateLimit from "express-rate-limit"
 import sql from "../sql/SQLQuery"
 import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
-import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server/ServerFunctions"
 import path from "path"
 import {TagHistory, Tag, Post, AliasToParams, TagDeleteRequestFulfillParams, AliasToRequestParams, AliasToRequestFulfillParams, TagCount,
 TagEditRequestFulfillParams, TagHistoryParams, TagEditParams, TagEditRequestParams, AliasHistoryType, TagUpdateColumns, TagType} from "../types/Types"
-import ServerFunctions from "../server functions/ServerFunctions"
+import ServerFunctions from "../server/ServerFunctions"
 
 const tagLimiter = rateLimit({
 	windowMs: 60 * 1000,

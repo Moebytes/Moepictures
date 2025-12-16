@@ -7,7 +7,7 @@ import crypto from "crypto"
 import functions from "../functions/Functions"
 import enLocale from "../assets/locales/en.json"
 import moepictures from "../assets/images/moepictures.jpg"
-import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server/ServerFunctions"
 import permissions from "../structures/Permissions"
 import path from "path"
 import {SignupParams, LoginParams, UserPfpParams, SaveSearchParams, SaveSearchEditParams, ChangeUsernameParams,

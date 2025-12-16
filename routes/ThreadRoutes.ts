@@ -4,7 +4,7 @@ import sql from "../sql/SQLQuery"
 import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
 import enLocale from "../assets/locales/en.json"
-import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server functions/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server/ServerFunctions"
 import {ThreadCreateParams, ThreadEditParams, ThreadReplyParams, ReplyEditParams, ThreadReportFulfillParams} from "../types/Types"
 
 const threadLimiter = rateLimit({

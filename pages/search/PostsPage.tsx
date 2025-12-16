@@ -5,10 +5,10 @@ import SideBar from "../../components/site/SideBar"
 import SortBar from "../../components/site/SortBar"
 import ImageGrid from "../../components/search/ImageGrid"
 import Footer from "../../components/site/Footer"
-import TagBanner from "../../components/site/TagBanner"
+import TagBanner from "../../components/banner/TagBanner"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useLayoutActions, 
 useActiveActions, useLayoutSelector} from "../../store"
-import AdBanner from "../../components/post/AdBanner"
+import AdBanner from "../../components/banner/AdBanner"
 
 let scrollTimer = null as any
 let lastPos = 0

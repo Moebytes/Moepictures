@@ -29,7 +29,7 @@ import historyIcon from "../../assets/icons/history-state.png"
 import currentIcon from "../../assets/icons/current.png"
 import Related from "../../components/post/Related"
 import {Tag, TagHistory, PostSearch, Alias, Implication} from "../../types/Types"
-import AdBanner from "../../components/post/AdBanner"
+import AdBanner from "../../components/banner/AdBanner"
 import "./styles/tagpage.less"
 
 let limit = 25

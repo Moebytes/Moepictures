@@ -30,7 +30,7 @@ useNoteDialogSelector, useNoteDialogActions, useActiveSelector, usePostDialogSel
 useCacheSelector, useInteractionActions, useThemeSelector,
 useSearchActions} from "../../store"
 import permissions from "../../structures/Permissions"
-import AdBanner from "../../components/post/AdBanner"
+import AdBanner from "../../components/banner/AdBanner"
 import {PostSearch, ChildPost, PostHistory, GroupPosts, SourceData, Image} from "../../types/Types"
 import "./styles/postpage.less"
 
