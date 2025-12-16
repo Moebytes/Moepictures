@@ -80,9 +80,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const [activeParticleDropdown, setActiveParticleDropdown] = useState(false)
     const navigate = useNavigate()
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
         setShowMiniTitle(false)
@@ -471,7 +469,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                 <div className="mobile-nav-text-container">
                     {session.username ? 
                     <div className="mobile-nav-user-container">
-                        <img className="mobile-nav-user-img" src={userImg} style={{filter: session.image ? "" : getFilter()}}/>
+                        <img className="mobile-nav-user-img" src={userImg} style={{filter: session.image ? "" : filter}}/>
                         {generateMobileUsernameJSX()}
                     </div> :
                     <span className="mobile-nav-text mobile-nav-login-text" onClick={() => {navigate("/login"); setHideMobileNavbar(true)}}>{i18n.navbar.login}</span>}
@@ -493,15 +491,15 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     </div> : null}
                 </div>
                 <div className="mobile-nav-color-container">
-                    {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => navigate("/history")} style={{filter: getFilter()}}/> : null}
-                    <img className="mobile-nav-color" src={getMusicIcon()} onClick={miniPlayer} style={{filter: getFilter()}}/>
-                    <img className="mobile-nav-color" src={getSnowflakeIcon()} onClick={particleChange} style={{filter: getFilter()}}/>
-                    <img className="mobile-nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
-                    {/* <img className="mobile-nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/> */}
-                    {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => navigate("/mail")} style={{filter: getFilter()}}/> : null}
-                    {permissions.isMod(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => navigate("/mod-queue")} style={{filter: getFilter()}}/> : null}
-                    <img className="mobile-nav-color" src={getScrollIcon()} onClick={toggleScroll} style={{filter: getFilter(), marginRight: "7px"}}/>
-                    <img className="mobile-nav-color" src={getPageMultiplierIcon()} onClick={togglePageMultiplier} style={{filter: getFilter()}}/>
+                    {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => navigate("/history")} style={{filter}}/> : null}
+                    <img className="mobile-nav-color" src={getMusicIcon()} onClick={miniPlayer} style={{filter}}/>
+                    <img className="mobile-nav-color" src={getSnowflakeIcon()} onClick={particleChange} style={{filter}}/>
+                    <img className="mobile-nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter}}/>
+                    {/* <img className="mobile-nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter}}/> */}
+                    {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => navigate("/mail")} style={{filter}}/> : null}
+                    {permissions.isMod(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => navigate("/mod-queue")} style={{filter}}/> : null}
+                    <img className="mobile-nav-color" src={getScrollIcon()} onClick={toggleScroll} style={{filter, marginRight: "7px"}}/>
+                    <img className="mobile-nav-color" src={getPageMultiplierIcon()} onClick={togglePageMultiplier} style={{filter}}/>
                 </div>
                 <MiniAudioPlayer/>
                 {getColorDropdownJSX()}
@@ -548,7 +546,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                 <div className="nav-text-container">
                     {session.username ? 
                     <div className="nav-user-container" style={{marginRight: marginR}}>
-                        <img className="nav-user-img" src={userImg} style={{filter: session.image ? "" : getFilter()}}/>
+                        <img className="nav-user-img" src={userImg} style={{filter: session.image ? "" : filter}}/>
                         {generateUsernameJSX()}
                     </div> :
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text nav-login-text" onClick={() => navigate("/login")}>{i18n.navbar.login}</span>}
@@ -569,13 +567,13 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                         <img className="nav-search-icon" src={searchIcon} onClick={() => setSearchFlag(true)}/>
                         <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
                     </div>
-                    {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => navigate("/history")} style={{filter: getFilter()}}/> : null}
-                    <img className="nav-color" src={getMusicIcon()} onClick={miniPlayer} style={{filter: getFilter()}}/>
-                    <img className="nav-color" src={getSnowflakeIcon()} onClick={particleChange} style={{filter: getFilter()}}/>
-                    <img className="nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
-                    {/* <img className="nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/> */}
-                    {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => navigate("/mail")} style={{filter: getFilter()}}/> : null}
-                    {permissions.isMod(session) && !hideSidebar ? <img className="nav-color" src={getCrownIcon()} onClick={() => navigate("/mod-queue")} style={{filter: getFilter()}}/> : null}
+                    {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => navigate("/history")} style={{filter}}/> : null}
+                    <img className="nav-color" src={getMusicIcon()} onClick={miniPlayer} style={{filter}}/>
+                    <img className="nav-color" src={getSnowflakeIcon()} onClick={particleChange} style={{filter}}/>
+                    <img className="nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter}}/>
+                    {/* <img className="nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter}}/> */}
+                    {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => navigate("/mail")} style={{filter}}/> : null}
+                    {permissions.isMod(session) && !hideSidebar ? <img className="nav-color" src={getCrownIcon()} onClick={() => navigate("/mod-queue")} style={{filter}}/> : null}
                 </div>
                 <MiniAudioPlayer/>
                 {getColorDropdownJSX()}

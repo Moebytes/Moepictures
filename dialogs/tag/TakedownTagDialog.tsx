@@ -16,15 +16,9 @@ const TakedownTagDialog: React.FunctionComponent = (props) => {
     const [submitted, setSubmitted] = useState(false)
 
     useEffect(() => {
-        document.title = i18n.dialogs.takedownTag.title
-    }, [i18n])
-
-    useEffect(() => {
         if (takedownTag) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }

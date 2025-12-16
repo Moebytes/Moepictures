@@ -23,14 +23,6 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    useEffect(() => {
-        document.title = i18n.dialogs.categorizeTag.title
-    }, [i18n])
-
     useEffect(() => {
         if (categorizeTag) {
             document.body.style.pointerEvents = "none"

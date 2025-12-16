@@ -17,10 +17,6 @@ const ReportThreadDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
 
     useEffect(() => {
-        document.title = i18n.dialogs.reportThread.title
-    }, [i18n])
-
-    useEffect(() => {
         if (reportThreadID) {
             document.body.style.pointerEvents = "none"
         } else {

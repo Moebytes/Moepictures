@@ -6,6 +6,7 @@ import Footer from "../../components/site/Footer"
 import tos from "../../assets/icons/tos.png"
 import privacy from "../../assets/icons/privacy.png"
 import permissions from "../../structures/Permissions"
+import functions from "../../functions/Functions"
 import {useThemeSelector, useInteractionActions, useLayoutActions, 
 useActiveActions, useLayoutSelector} from "../../store"
 import "./styles/tospage.less"
@@ -18,9 +19,7 @@ const TermsPage: React.FunctionComponent = (props) => {
     const {mobile} = useLayoutSelector()
     const [onPrivacy, setOnPrivacy] = useState(false)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
         setHideNavbar(true)
@@ -58,7 +57,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                 <div className="terms-container">
                     <div className="terms">
                         <div className="terms-title-container">
-                            <img className="terms-img" src={tos} style={{filter: getFilter()}}/>
+                            <img className="terms-img" src={tos} style={{filter}}/>
                             <span className="terms-title">{i18n.terms.tos.title}</span>
                         </div>
                         <div className="terms-text">
@@ -129,7 +128,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="privacy" id="privacy" onMouseOver={() => setOnPrivacy(true)} onMouseLeave={() => setOnPrivacy(false)}>
                         <div className="privacy-title-container">
-                            <img className="privacy-img" src={privacy} style={{filter: getFilter()}}/>
+                            <img className="privacy-img" src={privacy} style={{filter}}/>
                             <span className="privacy-title">{i18n.terms.privacy.title}</span>
                         </div>
                         <div className="privacy-text">

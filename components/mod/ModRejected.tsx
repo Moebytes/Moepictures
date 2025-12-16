@@ -30,9 +30,7 @@ const ModRejected: React.FunctionComponent = (props) => {
     const [imagesRef, setImagesRef] = useState([] as React.RefObject<HTMLCanvasElement | null>[])
     const navigate = useNavigate()
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const loadInitial = async () => {
         const posts = await functions.http.get("/api/post/deleted/unverified", null, session, setSessionFlag, true)
@@ -171,11 +169,11 @@ const ModRejected: React.FunctionComponent = (props) => {
                     </div>
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => restorePost(post.postID)}>
-                            <img className="mod-post-options-img" src={restore} style={{filter: getFilter()}}/>
+                            <img className="mod-post-options-img" src={restore} style={{filter}}/>
                             <span className="mod-post-options-text">{i18n.sidebar.restore}</span>
                         </div>
                         <div className="mod-post-options-container" onClick={() => rejectPost(post.postID)}>
-                            <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
+                            <img className="mod-post-options-img" src={reject} style={{filter}}/>
                             <span className="mod-post-options-text">{i18n.buttons.delete}</span>
                         </div>
                     </div>

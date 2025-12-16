@@ -44,14 +44,8 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         limit = mobile ? 5 : 25
     }, [mobile])
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    const getFilterSearch = () => {
-        if (theme.includes("light")) return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation - 60}%) brightness(${siteLightness + 220}%)`
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+    const getFilterSearch = functions.color.filter({theme, siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
         setHideNavbar(true)
@@ -115,7 +109,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     const getSortJSX = () => {
         return (
             <div className="itemsort-item" ref={sortRef}>
-                <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse(!sortReverse)}/>
+                <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter}} onClick={() => setSortReverse(!sortReverse)}/>
                 <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{i18n.sort[sortType]}</span>
             </div>
         )
@@ -147,13 +141,13 @@ const ArtistsPage: React.FunctionComponent = (props) => {
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
-                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => initItems()}>
+                            <button className="item-search-button" style={{filter: getFilterSearch}} onClick={() => initItems()}>
                                 <img src={search}/>
                             </button>
                         </div>
                         {getSortJSX()}
                         {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>
-                            <img className="itemsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
+                            <img className="itemsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter}}/>
                             <span className="itemsort-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                         </div> : null}
                         <div className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 

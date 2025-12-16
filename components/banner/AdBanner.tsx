@@ -22,12 +22,9 @@ const AdBanner: React.FunctionComponent<Props> = (props) => {
             if (!adRef.current) return
             if (noAds()) return
             const ins = adRef.current.querySelector(".adsbygoogle") as HTMLElement | null
-            const computedStyle = ins ? getComputedStyle(ins) : {} as CSSStyleDeclaration
-            if (!ins || !ins.childElementCount || ins.offsetHeight === 0 || computedStyle.display === "none" 
-                || computedStyle.visibility === "hidden" || computedStyle.opacity === "0") {
+            if (!ins || !ins.childElementCount || ins.offsetHeight === 0 || getComputedStyle(ins).display === "none") {
                 const status = ins?.getAttribute("data-ad-status")
-                if (status === "unfilled" && ins?.childElementCount) return
-                setShowAdDialog(true)
+                if (!status) setShowAdDialog(true)
             }
         }
 

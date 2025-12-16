@@ -13,9 +13,7 @@ const CookieBanner: React.FunctionComponent = (props) => {
     const {setEnableDrag} = useInteractionActions()
     const [showCookieBanner, setShowCookieBanner] = useState(false)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
         if (!session.cookie) return
@@ -38,7 +36,7 @@ const CookieBanner: React.FunctionComponent = (props) => {
     return (
         <div className={`cookie-banner ${showCookieBanner ? "show-cookie-banner" : ""}`}>
             <div className="cookie-icon-container">
-                <img className="cookie-icon" src={cookieIcon} style={{filter: getFilter()}}/>
+                <img className="cookie-icon" src={cookieIcon} style={{filter}}/>
                 <div className="cookie-text-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <span className="cookie-text">{i18n.dialogs.cookieBanner.text}</span>
                 </div>

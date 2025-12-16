@@ -21,15 +21,9 @@ const TakedownPostDialog: React.FunctionComponent = (props) => {
     const [submitted, setSubmitted] = useState(false)
 
     useEffect(() => {
-        document.title = getTitle()
-    }, [i18n])
-
-    useEffect(() => {
         if (takedownPostID) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }

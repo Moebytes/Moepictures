@@ -16,15 +16,9 @@ const PremiumRequiredDialog: React.FunctionComponent = (props) => {
     const navigate = useNavigate()
 
     useEffect(() => {
-        document.title = i18n.dialogs.premium.title
-    }, [i18n])
-
-    useEffect(() => {
         if (premiumRequired) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }

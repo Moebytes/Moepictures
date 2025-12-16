@@ -14,10 +14,6 @@ const OCRDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
 
     useEffect(() => {
-        document.title = i18n.dialogs.ocr.title
-    }, [i18n])
-
-    useEffect(() => {
         if (noteOCRDialog) {
             document.body.style.pointerEvents = "none"
             setRunning(false)

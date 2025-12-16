@@ -56,9 +56,7 @@ const GroupPage: React.FunctionComponent = () => {
     const location = useLocation()
     const {group: slug} = useParams() as {group: string}
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
         setHideNavbar(true)
@@ -230,18 +228,18 @@ const GroupPage: React.FunctionComponent = () => {
         let jsx = [] as React.ReactElement[]
         if (!group) return jsx
         if (session.username) {
-            jsx.push(<img className="group-opt" src={groupHistory} onClick={() => navigate(`/group/history/${group.slug}`)} style={{filter: getFilter()}}/>)
+            jsx.push(<img className="group-opt" src={groupHistory} onClick={() => navigate(`/group/history/${group.slug}`)} style={{filter}}/>)
             if (!session.banned) {
-                jsx.push(<img className="group-opt" src={reorderState ? groupReorderActive : groupReorder} onClick={() => changeReorderState()} style={{filter: reorderState ? "" : getFilter()}}/>)
+                jsx.push(<img className="group-opt" src={reorderState ? groupReorderActive : groupReorder} onClick={() => changeReorderState()} style={{filter: reorderState ? "" : filter}}/>)
                 if (reorderState) {
-                    jsx.push(<img className="group-opt" src={groupAccept} onClick={() => commitReorder()} style={{filter: getFilter()}}/>)
+                    jsx.push(<img className="group-opt" src={groupAccept} onClick={() => commitReorder()} style={{filter}}/>)
                 }
             }
-            jsx.push(<img className="group-opt" src={deleteMode ? groupCancelActive : groupCancel} onClick={() => setDeleteMode((prev: boolean) => !prev)} style={{filter: getFilter()}}/>)
-            jsx.push(<img className="group-opt" src={groupAdd} onClick={() => showGroupAddDialog()} style={{filter: getFilter()}}/>)
-            jsx.push(<img className="group-opt" src={groupEdit} onClick={() => showGroupEditDialog()} style={{filter: getFilter()}}/>)
-            jsx.push(<img className="group-opt" src={groupRemap} onClick={() => showGroupRemapDialog()} style={{filter: getFilter()}}/>)
-            jsx.push(<img className="group-opt" src={groupDelete} onClick={() => showGroupDeleteDialog()} style={{filter: getFilter()}}/>)
+            jsx.push(<img className="group-opt" src={deleteMode ? groupCancelActive : groupCancel} onClick={() => setDeleteMode((prev: boolean) => !prev)} style={{filter}}/>)
+            jsx.push(<img className="group-opt" src={groupAdd} onClick={() => showGroupAddDialog()} style={{filter}}/>)
+            jsx.push(<img className="group-opt" src={groupEdit} onClick={() => showGroupEditDialog()} style={{filter}}/>)
+            jsx.push(<img className="group-opt" src={groupRemap} onClick={() => showGroupRemapDialog()} style={{filter}}/>)
+            jsx.push(<img className="group-opt" src={groupDelete} onClick={() => showGroupDeleteDialog()} style={{filter}}/>)
         }
         return jsx
     }
@@ -323,7 +321,7 @@ const GroupPage: React.FunctionComponent = () => {
                     <div className="group-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <span><span className="group-label" onClick={searchGroup}>{i18n.sort.posts}</span> <span className="group-label-alt">{group.postCount}</span></span>
                         <div className="group-page-container" onClick={() => toggleScroll()}>
-                            <img className="group-mini-icon" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
+                            <img className="group-mini-icon" src={scroll ? scrollIcon : pageIcon} style={{filter}}/>
                             <span className="group-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                         </div>
                     </div>

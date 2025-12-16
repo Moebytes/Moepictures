@@ -25,20 +25,12 @@ const UpscalePostDialog: React.FunctionComponent = (props) => {
     const [compressJPG, setCompressJPG] = useState(true)
     const errorRef = useRef<HTMLSpanElement>(null)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    useEffect(() => {
-        document.title = i18n.dialogs.upscale.title
-    }, [i18n])
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
         if (upscalePostID) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
@@ -72,11 +64,11 @@ const UpscalePostDialog: React.FunctionComponent = (props) => {
                                 <span className="dialog-title">{i18n.dialogs.upscale.title}</span>
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center", paddingRight: "20px"}}>
-                                <img className="dialog-checkbox" src={upscaler === "waifu2x" ? radioButtonChecked : radioButton} onClick={() => setUpscaler("waifu2x")} style={{marginRight: "10px", filter: getFilter()}}/>
+                                <img className="dialog-checkbox" src={upscaler === "waifu2x" ? radioButtonChecked : radioButton} onClick={() => setUpscaler("waifu2x")} style={{marginRight: "10px", filter}}/>
                                 <span className="dialog-text">waifu2x</span>
-                                <img className="dialog-checkbox" src={upscaler === "real-esrgan" ? radioButtonChecked : radioButton} onClick={() => setUpscaler("real-esrgan")} style={{marginRight: "10px", filter: getFilter()}}/>
+                                <img className="dialog-checkbox" src={upscaler === "real-esrgan" ? radioButtonChecked : radioButton} onClick={() => setUpscaler("real-esrgan")} style={{marginRight: "10px", filter}}/>
                                 <span className="dialog-text">esrgan</span>
-                                <img className="dialog-checkbox" src={upscaler === "real-cugan" ? radioButtonChecked : radioButton} onClick={() => setUpscaler("real-cugan")} style={{marginRight: "10px", filter: getFilter()}}/>
+                                <img className="dialog-checkbox" src={upscaler === "real-cugan" ? radioButtonChecked : radioButton} onClick={() => setUpscaler("real-cugan")} style={{marginRight: "10px", filter}}/>
                                 <span className="dialog-text">cugan</span>
                             </div>
                             <div className="dialog-row">
@@ -85,7 +77,7 @@ const UpscalePostDialog: React.FunctionComponent = (props) => {
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center"}}>
                                 <span className="dialog-text">{i18n.labels.compressTo} {upscalePostID.post.type === "animation" ? "WebP" : "JPG"}</span>
-                                <img className="dialog-checkbox" src={compressJPG ? checkboxChecked : checkbox} onClick={() => setCompressJPG((prev: boolean) => !prev)} style={{marginRight: "10px", filter: getFilter()}}/>
+                                <img className="dialog-checkbox" src={compressJPG ? checkboxChecked : checkbox} onClick={() => setCompressJPG((prev: boolean) => !prev)} style={{marginRight: "10px", filter}}/>
                             </div>
                             <div className="dialog-row">
                                 <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>

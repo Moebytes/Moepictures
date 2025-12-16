@@ -25,10 +25,6 @@ const APIKeyPage: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
     const updateStatus = async () => {
         const status = await functions.http.get("/api/misc/api-key/status", null, session, setSessionFlag)
         setStatus(status)

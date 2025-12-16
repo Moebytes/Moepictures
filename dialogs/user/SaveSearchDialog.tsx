@@ -42,10 +42,6 @@ const SaveSearchDialog: React.FunctionComponent = (props) => {
         }
     }, [])
 
-    useEffect(() => {
-        document.title = i18n.sidebar.saveSearch
-    }, [i18n])
-
     const initItems = () => {
         if (saveSearchDialog) {
             const nameString = search.split(/ +/g).map((s: string) => s.split("-")[0]).join(" ")
@@ -59,10 +55,8 @@ const SaveSearchDialog: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (saveSearchDialog) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }

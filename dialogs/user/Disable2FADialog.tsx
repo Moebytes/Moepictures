@@ -13,10 +13,6 @@ const Disable2FADialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
 
     useEffect(() => {
-        document.title = i18n.dialogs.disable2FA.title
-    }, [i18n])
-
-    useEffect(() => {
         if (disable2FADialog) {
             document.body.style.pointerEvents = "none"
         } else {

@@ -135,9 +135,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const navigate = useNavigate()
     const location = useLocation()
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const getFilterSearch = () => {
         if (theme.includes("light")) return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation - 80}%) brightness(${siteLightness + 350}%)`
@@ -1212,9 +1210,9 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         <span>{i18n.sort.random}</span>
                         <img src={random}/>
                     </button>
-                    {session.username ? <img className="autosearch" style={{filter: getFilter()}} src={getAutoSearch()} onClick={toggleAutoSearch}/> : null}
-                    {!props.post && session.username ? <img className="autosearch" style={{filter: getFilter()}} src={getSaveSearch()} onClick={() => changeSearchType("savesearch")}/> : null}
-                    {!props.post && session.username ? <img className="autosearch" style={{height: "20px", filter: getFilter()}} src={getFavSearch()} onClick={() => changeSearchType("favsearch")}/> : null}
+                    {session.username ? <img className="autosearch" style={{filter}} src={getAutoSearch()} onClick={toggleAutoSearch}/> : null}
+                    {!props.post && session.username ? <img className="autosearch" style={{filter}} src={getSaveSearch()} onClick={() => changeSearchType("savesearch")}/> : null}
+                    {!props.post && session.username ? <img className="autosearch" style={{height: "20px", filter}} src={getFavSearch()} onClick={() => changeSearchType("favsearch")}/> : null}
                 </div>
                 {!props.post && session.username && favSearch ? 
                 <div className="random-container">
@@ -1229,7 +1227,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         <img src={bookmark}/>
                         <span>{i18n.sidebar.saveSearch}</span>
                     </button>
-                    <img className="autosearch" style={{filter: getFilter()}} src={deleteOptIcon} onClick={() => setDeleteAllSaveSearchDialog(!deleteAllSaveSearchDialog)}/>
+                    <img className="autosearch" style={{filter}} src={deleteOptIcon} onClick={() => setDeleteAllSaveSearchDialog(!deleteAllSaveSearchDialog)}/>
                 </div> : null}
 
                 {copyTagsJSX()}
@@ -1357,13 +1355,13 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         </div>
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={() => copyHash()} onAuxClick={() => copyHash()} onContextMenu={(event) => {event.preventDefault(); setTimeout(() => copyHash(true), 100)}}>
-                                <img className="sidebar-icon" src={hashIcon} style={{filter: getFilter()}}/>
+                                <img className="sidebar-icon" src={hashIcon} style={{filter}}/>
                                 <span className="tag">{i18n.sidebar.copyHash}</span>
                             </span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={getPostInfo}>
-                                <img className="sidebar-icon" src={infoIcon} style={{filter: getFilter()}}/>
+                                <img className="sidebar-icon" src={infoIcon} style={{filter}}/>
                                 <span className="tag">{i18n.sidebar.getInfo}</span>
                             </span>
                         </div>
@@ -1374,74 +1372,74 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     <div className="sidebar-subcontainer">
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerTagEdit}>
-                                <img className="sidebar-icon" src={tagEdit} style={{filter: getFilter()}}/>
+                                <img className="sidebar-icon" src={tagEdit} style={{filter}}/>
                                 <span className="tag">{i18n.sidebar.tagEdit}</span>
                             </span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerSourceEdit}>
-                                <img className="sidebar-icon" src={sourceEdit} style={{filter: getFilter()}}/>
+                                <img className="sidebar-icon" src={sourceEdit} style={{filter}}/>
                                 <span className="tag">{i18n.sidebar.sourceEdit}</span>
                             </span>
                         </div>
                         {!props.unverified && !functions.post.isR18(props.post.rating) ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerSetAvatar}>
-                                <img className="sidebar-icon" src={setAvatar} style={{filter: getFilter()}}/>
+                                <img className="sidebar-icon" src={setAvatar} style={{filter}}/>
                                 <span className="tag">{i18n.sidebar.setAvatar}</span>
                             </span>
                         </div> : null}
                         {!props.unverified ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerParent}>
-                                <img className="sidebar-icon" src={parent} style={{filter: getFilter()}}/>
+                                <img className="sidebar-icon" src={parent} style={{filter}}/>
                                 <span className="tag">{i18n.sidebar.addParent}</span>
                             </span>
                         </div> : null}
                         {!props.unverified ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerGroup}>
-                                <img className="sidebar-icon" src={group} style={{filter: getFilter()}}/>
+                                <img className="sidebar-icon" src={group} style={{filter}}/>
                                 <span className="tag">{i18n.sidebar.addGroup}</span>
                             </span>
                         </div> : null}
                         {!props.unverified ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerAddNote}>
-                                <img className="sidebar-icon" src={addNote} style={{filter: getFilter()}}/>
+                                <img className="sidebar-icon" src={addNote} style={{filter}}/>
                                 <span className="tag">{i18n.sidebar.addNote}</span>
                             </span>
                         </div> : null}
                         {permissions.isMod(session) ? 
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={editThumbnail}>
-                                <img className="sidebar-icon" src={snapshotIcon} style={{filter: getFilter()}}/>
+                                <img className="sidebar-icon" src={snapshotIcon} style={{filter}}/>
                                 <span className="tag">{i18n.sidebar.editThumbnail}</span>
                             </span>
                         </div> : null}
                         {!props.unverified && permissions.isAdmin(session) ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerSplit}>
-                                <img className="sidebar-icon" src={splitIcon} style={{filter: getFilter()}}/>
+                                <img className="sidebar-icon" src={splitIcon} style={{filter}}/>
                                 <span className="tag">{i18n.sidebar.splitVariations}</span>
                             </span>
                         </div> : null}
                         {!props.unverified && permissions.isAdmin(session) ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerJoin}>
-                                <img className="sidebar-icon" src={joinIcon} style={{filter: getFilter()}}/>
+                                <img className="sidebar-icon" src={joinIcon} style={{filter}}/>
                                 <span className="tag">{i18n.sidebar.joinChildPosts}</span>
                             </span>
                         </div> : null}
                         {!props.unverified && props.post.parentID && permissions.isAdmin(session) ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerFlip}>
-                                <img className="sidebar-icon" src={flipIcon} style={{filter: getFilter()}}/>
+                                <img className="sidebar-icon" src={flipIcon} style={{filter}}/>
                                 <span className="tag">{i18n.sidebar.flipParent}</span>
                             </span>
                         </div> : null}
                         {!props.unverified && permissions.canPrivate(session, props.artists) ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={privatePost}>
-                                <img className="sidebar-icon" src={props.post.private ? unprivateIcon : privateIcon} style={{filter: getFilter()}}/>
+                                <img className="sidebar-icon" src={props.post.private ? unprivateIcon : privateIcon} style={{filter}}/>
                                 <span className="tag">{props.post.private ? i18n.sidebar.unprivate : i18n.sort.private}</span>
                             </span>
                         </div> : null}
                         {!props.unverified && permissions.isMod(session) ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerTakedown}>
-                                <img className="sidebar-icon" src={props.post.hidden ? restore : takedown} style={{filter: getFilter()}}/>
+                                <img className="sidebar-icon" src={props.post.hidden ? restore : takedown} style={{filter}}/>
                                 <span className="tag">{props.post.hidden ? i18n.sidebar.restore : i18n.sidebar.takedown}</span>
                             </span>
                         </div> : null}
@@ -1518,10 +1516,10 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             <div className="sidebar-footer">
                     <span className="sidebar-footer-text">©{new Date().getFullYear()} Moepictures</span>
                     <Link to="/terms">
-                        <img className="sidebar-footer-icon" src={terms} style={{filter: getFilter()}}/>
+                        <img className="sidebar-footer-icon" src={terms} style={{filter}}/>
                     </Link>
                     <Link to="/contact">
-                        <img className="sidebar-footer-icon" src={contact} style={{filter: getFilter()}}/>
+                        <img className="sidebar-footer-icon" src={contact} style={{filter}}/>
                     </Link>
                 </div>
             </div>

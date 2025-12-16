@@ -22,18 +22,10 @@ const BulkGroupDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
     useEffect(() => {
         const savedGroupName = localStorage.getItem("groupName")
         if (savedGroupName) setName(savedGroupName)
     }, [])
-
-    useEffect(() => {
-        document.title = i18n.dialogs.bulkGroup.title
-    }, [i18n])
 
     useEffect(() => {
         localStorage.setItem("groupName", name)
@@ -41,10 +33,8 @@ const BulkGroupDialog: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (bulkGroupDialog) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }

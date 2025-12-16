@@ -21,15 +21,7 @@ const RemapGroupDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
-
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    useEffect(() => {
-        document.title = i18n.dialogs.remapGroup.title
-    }, [i18n])
-
+    
     useEffect(() => {
         if (remapGroupObj) {
             document.body.style.pointerEvents = "none"

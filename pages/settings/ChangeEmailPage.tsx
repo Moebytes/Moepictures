@@ -27,9 +27,7 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const getCaptchaColor = () => {
         if (theme.includes("light")) return "#ffffff"
@@ -130,7 +128,7 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
                         <input className="sitepage-input" type="text" spellCheck={false} value={newEmail} onChange={(event) => setNewEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     <div className="sitepage-row" style={{justifyContent: "center"}}>
-                        <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
+                        <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter}}/>
                         <input className="sitepage-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}

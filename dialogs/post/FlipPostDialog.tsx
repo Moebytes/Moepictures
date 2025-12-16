@@ -15,20 +15,10 @@ const FlipPostDialog: React.FunctionComponent = (props) => {
     const {setFlipPostID} = usePostDialogActions()
     const {setPostFlag} = useFlagActions()
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    useEffect(() => {
-        document.title = i18n.dialogs.joinPost.title
-    }, [i18n])
-
     useEffect(() => {
         if (flipPostID) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "all"
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }

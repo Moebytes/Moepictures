@@ -18,10 +18,6 @@ const DownloadDialog: React.FunctionComponent = (props) => {
     const [amountField, setAmountField] = useState("")
 
     useEffect(() => {
-        document.title = i18n.buttons.download
-    }, [i18n])
-
-    useEffect(() => {
         setTimeout(() => {
             let offset = Math.floor(functions.util.round(postAmount * functions.dom.getScrollPercentAdjusted(sizeType), functions.render.getImagesPerRow(sizeType)))
             if (offset < 0) offset = 0
@@ -46,10 +42,8 @@ const DownloadDialog: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (showDownloadDialog) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }

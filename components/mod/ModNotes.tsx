@@ -25,9 +25,7 @@ const ModNotes: React.FunctionComponent = (props) => {
     const [hover, setHover] = useState(false)
     const navigate = useNavigate()
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const loadInitial = async () => {
         const notes = await functions.http.get("/api/note/list/unverified", null, session, setSessionFlag, true)
@@ -112,11 +110,11 @@ const ModNotes: React.FunctionComponent = (props) => {
                     </div>
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => rejectNote(noteGroup.postID, noteGroup.originalID, noteGroup.order, noteGroup.notes, noteGroup.updater)}>
-                            <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
+                            <img className="mod-post-options-img" src={reject} style={{filter}}/>
                             <span className="mod-post-options-text">{i18n.buttons.reject}</span>
                         </div>
                         <div className="mod-post-options-container" onClick={() => approveNote(noteGroup.postID, noteGroup.originalID, noteGroup.order, noteGroup.notes, noteGroup.updater)}>
-                            <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
+                            <img className="mod-post-options-img" src={approve} style={{filter}}/>
                             <span className="mod-post-options-text">{i18n.buttons.approve}</span>
                         </div>
                     </div>

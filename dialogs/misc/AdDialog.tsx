@@ -11,10 +11,6 @@ const AdDialog: React.FunctionComponent = (props) => {
     const {setShowAdDialog} = useMiscDialogActions()
 
     useEffect(() => {
-        document.title = i18n.dialogs.ad.pageTitle
-    }, [i18n])
-
-    useEffect(() => {
         if (showAdDialog) {
             document.body.style.pointerEvents = "none"
         } else {

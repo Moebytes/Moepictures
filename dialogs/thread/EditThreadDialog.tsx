@@ -37,13 +37,7 @@ const EditThreadDialog: React.FunctionComponent = (props) => {
     const dialogRef = useRef<HTMLDivElement>(null)
     const textRef = useRef<HTMLTextAreaElement>(null)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    useEffect(() => {
-        document.title = i18n.dialogs.editThread.title
-    }, [i18n])
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
         if (editThreadID) {
@@ -144,16 +138,16 @@ const EditThreadDialog: React.FunctionComponent = (props) => {
                             <span className="dialog-text">{i18n.labels.content}: </span>
                         </div>
                         <div className="dialog-textarea-buttons">
-                            <button className="dialog-textarea-button"><img src={highlight} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditThreadContent, "highlight")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={bold} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditThreadContent, "bold")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={italic} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditThreadContent, "italic")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={underline} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditThreadContent, "underline")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={strikethrough} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditThreadContent, "strikethrough")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={spoiler} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditThreadContent, "spoiler")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={link} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditThreadContent, "link")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={details} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditThreadContent, "details")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={hexcolor} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditThreadContent, "color")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={codeblock} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditThreadContent, "code")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={highlight} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditThreadContent, "highlight")} style={{filter}}/></button>
+                            <button className="dialog-textarea-button"><img src={bold} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditThreadContent, "bold")} style={{filter}}/></button>
+                            <button className="dialog-textarea-button"><img src={italic} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditThreadContent, "italic")} style={{filter}}/></button>
+                            <button className="dialog-textarea-button"><img src={underline} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditThreadContent, "underline")} style={{filter}}/></button>
+                            <button className="dialog-textarea-button"><img src={strikethrough} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditThreadContent, "strikethrough")} style={{filter}}/></button>
+                            <button className="dialog-textarea-button"><img src={spoiler} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditThreadContent, "spoiler")} style={{filter}}/></button>
+                            <button className="dialog-textarea-button"><img src={link} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditThreadContent, "link")} style={{filter}}/></button>
+                            <button className="dialog-textarea-button"><img src={details} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditThreadContent, "details")} style={{filter}}/></button>
+                            <button className="dialog-textarea-button"><img src={hexcolor} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditThreadContent, "color")} style={{filter}}/></button>
+                            <button className="dialog-textarea-button"><img src={codeblock} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditThreadContent, "code")} style={{filter}}/></button>
                         </div>
                         {previewMode ? <div className="dialog-textarea-preview">{functions.jsx.renderText(editThreadContent, emojis, "reply")}</div> : 
                         <div style={{marginTop: "0px"}} className="dialog-row">
@@ -161,9 +155,9 @@ const EditThreadDialog: React.FunctionComponent = (props) => {
                         </div>}
                         {session.showR18 ?
                         <div className="dialog-row">
-                            <img className="dialog-checkbox" src={editThreadR18 ? radioButtonChecked : radioButton} onClick={() => setEditThreadR18(!editThreadR18)} style={{marginLeft: "0px", filter: getFilter()}}/>
+                            <img className="dialog-checkbox" src={editThreadR18 ? radioButtonChecked : radioButton} onClick={() => setEditThreadR18(!editThreadR18)} style={{marginLeft: "0px", filter}}/>
                             <span className="dialog-text" style={{marginLeft: "10px"}}>R18</span>
-                            <img className="dialog-title-img" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter: getFilter()}}/>
+                            <img className="dialog-title-img" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter}}/>
                         </div> : null}
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">

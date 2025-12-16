@@ -18,15 +18,9 @@ const PermaDeleteAllPostDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
 
     useEffect(() => {
-        document.title = i18n.dialogs.permaDeleteAllPost.title
-    }, [i18n])
-
-    useEffect(() => {
         if (permaDeleteAllDialog) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }

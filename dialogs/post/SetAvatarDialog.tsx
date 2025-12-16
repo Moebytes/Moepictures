@@ -31,14 +31,6 @@ const SetAvatarDialog: React.FunctionComponent = (props) => {
     const ref = useRef<HTMLImageElement>(null)
     const previewRef = useRef<HTMLCanvasElement>(null)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    useEffect(() => {
-        document.title = i18n.sidebar.setAvatar
-    }, [i18n])
-
     const loadImages = async () => {
         if (!avatarID) return
         let images = [] as string[]

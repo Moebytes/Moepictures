@@ -17,10 +17,6 @@ const BlockedTagsDialog: React.FunctionComponent = (props) => {
     const [blockedTags, setBlockedTags] = useState([] as string[])
 
     useEffect(() => {
-        document.title = i18n.dialogs.blockedTags.title
-    }, [i18n])
-
-    useEffect(() => {
         if (blockedTagsDialog) {
             document.body.style.pointerEvents = "none"
             updateBlockedTags()

@@ -34,9 +34,7 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
         setHideNavbar(true)
@@ -207,11 +205,11 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
                         <textarea className="contact-textarea" style={{marginLeft: "0px", height: "100px"}} spellCheck={false} value={socialMediaLinks} onChange={(event) => setSocialMediaLinks(event.target.value)}></textarea>
                     </div>
                     <div className="contact-row-start">
-                        <img className="contact-checkbox" src={removeAllRequest ? checkbox : checkboxChecked} onClick={() => setRemoveAllRequest(false)} style={{filter: getFilter()}}/>
+                        <img className="contact-checkbox" src={removeAllRequest ? checkbox : checkboxChecked} onClick={() => setRemoveAllRequest(false)} style={{filter}}/>
                         <span className="contact-link">{i18n.pages.copyrightRemoval.removeSpecified}</span>
                     </div>
                     <div className="contact-row-start">
-                        <img className="contact-checkbox" src={removeAllRequest ? checkboxChecked : checkbox} onClick={() => setRemoveAllRequest(true)} style={{filter: getFilter()}}/>
+                        <img className="contact-checkbox" src={removeAllRequest ? checkboxChecked : checkbox} onClick={() => setRemoveAllRequest(true)} style={{filter}}/>
                         <span className="contact-link">{i18n.pages.copyrightRemoval.removeAll}</span>
                     </div>
                     {getRemovalTypeJSX()}
@@ -236,7 +234,7 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
                         <textarea className="contact-textarea" style={{marginLeft: "0px", height: "100px"}} spellCheck={false} value={proofLinks} onChange={(event) => setProofLinks(event.target.value)}></textarea>
                     </div>
                     <div className="contact-row-start">
-                        <img className="contact-checkbox" src={attestOwnership ? checkboxChecked : checkbox} onClick={() => setAttestOwnership((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
+                        <img className="contact-checkbox" src={attestOwnership ? checkboxChecked : checkbox} onClick={() => setAttestOwnership((prev: boolean) => !prev)} style={{filter}}/>
                         <span className="contact-link">
                         <span className="contact-link" style={{marginRight: "5px"}}>*</span>{i18n.pages.copyrightRemoval.verifyCopyright}</span>
                     </div>

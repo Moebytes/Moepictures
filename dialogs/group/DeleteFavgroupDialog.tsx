@@ -15,15 +15,9 @@ const DeleteFavgroupDialog: React.FunctionComponent = (props) => {
     const navigate = useNavigate()
 
     useEffect(() => {
-        document.title = i18n.dialogs.deleteFavgroup.title
-    }, [i18n])
-
-    useEffect(() => {
         if (deleteFavGroupObj) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }

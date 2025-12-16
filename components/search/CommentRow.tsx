@@ -33,10 +33,8 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     const {setCommentID, setCommentJumpFlag} = useFlagActions()
     const navigate = useNavigate()
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+    
     const defaultIcon = props.comment?.image ? false : true
 
     const getCommentPFP = () => {
@@ -189,7 +187,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
             <div className="commentrow-container-row">
                 <div className="commentrow-container">
                     <div className="commentrow-user-container" onClick={userClick} onAuxClick={userClick}>
-                        <img className="commentrow-user-img" src={getCommentPFP()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
+                        <img className="commentrow-user-img" src={getCommentPFP()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? filter : ""}}/>
                         {generateUsernameJSX()}
                     </div>
                 </div>

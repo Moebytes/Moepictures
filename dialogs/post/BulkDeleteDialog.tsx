@@ -19,10 +19,6 @@ const BulkDeleteDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
 
     useEffect(() => {
-        document.title = i18n.dialogs.bulkDelete.title
-    }, [i18n])
-
-    useEffect(() => {
         if (showBulkDeleteDialog) {
             document.body.style.pointerEvents = "none"
         } else {

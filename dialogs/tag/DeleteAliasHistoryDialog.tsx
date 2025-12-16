@@ -17,11 +17,9 @@ const DeleteAliasHistoryDialog: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (deleteAliasHistoryID) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
             document.title = getTitle() || ""
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }

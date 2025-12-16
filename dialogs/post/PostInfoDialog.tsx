@@ -15,20 +15,10 @@ const PostInfoDialog: React.FunctionComponent = (props) => {
     const {setPostInfoID} = usePostDialogActions()
     const [info, setInfo] = useState(null as PostMetadata | null)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    useEffect(() => {
-        document.title = i18n.dialogs.postInfo.title
-    }, [i18n])
-
     useEffect(() => {
         if (postInfoID) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "all"
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }

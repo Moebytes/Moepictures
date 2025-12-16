@@ -23,14 +23,6 @@ const EditThumbnailDialog: React.FunctionComponent = (props) => {
     const [thumbnail, setThumbnail] = useState("")
     const [order, setOrder] = useState(1)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    useEffect(() => {
-        document.title = i18n.sidebar.editThumbnail
-    }, [i18n])
-
     const loadImages = async () => {
         if (!editThumbnailID) return
         let images = [] as string[]

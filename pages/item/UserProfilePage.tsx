@@ -106,9 +106,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         }
     }
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const updateUploads = async () => {
         let rating = functions.post.isR18(ratingType) ? functions.r18() : "all"
@@ -617,7 +615,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
             jsx.push(
                 <div className="user-column">
                     <div className="user-title-container">
-                        {favgroup.private ? <img className="user-icon" src={lockIcon} style={{height: "20px", marginTop: "3px", filter: getFilter()}}/> : null}
+                        {favgroup.private ? <img className="user-icon" src={lockIcon} style={{height: "20px", marginTop: "3px", filter}}/> : null}
                         <span className="user-title" onClick={viewFavgroup}>{favgroup.name} <span className="user-text-alt">{favgroup.postCount}</span></span>
                     </div>
                     <Carousel images={images} noKey={true} set={setFavgroup} index={0} unlimited={true}/>
@@ -682,16 +680,16 @@ const UserProfilePage: React.FunctionComponent = (props) => {
             <>
             <div className="user-column">
                 <div className="dialog-textarea-buttons" style={{width: "50%"}}>
-                    <button className="dialog-textarea-button"><img src={highlight} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "highlight")} style={{filter: getFilter()}}/></button>
-                    <button className="dialog-textarea-button"><img src={bold} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "bold")} style={{filter: getFilter()}}/></button>
-                    <button className="dialog-textarea-button"><img src={italic} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "italic")} style={{filter: getFilter()}}/></button>
-                    <button className="dialog-textarea-button"><img src={underline} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "underline")} style={{filter: getFilter()}}/></button>
-                    <button className="dialog-textarea-button"><img src={strikethrough} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "strikethrough")} style={{filter: getFilter()}}/></button>
-                    <button className="dialog-textarea-button"><img src={spoiler} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "spoiler")} style={{filter: getFilter()}}/></button>
-                    <button className="dialog-textarea-button"><img src={link} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "link")} style={{filter: getFilter()}}/></button>
-                    <button className="dialog-textarea-button"><img src={details} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "details")} style={{filter: getFilter()}}/></button>
-                    <button className="dialog-textarea-button"><img src={hexcolor} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "color")} style={{filter: getFilter()}}/></button>
-                    <button className="dialog-textarea-button"><img src={codeblock} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "code")} style={{filter: getFilter()}}/></button>
+                    <button className="dialog-textarea-button"><img src={highlight} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "highlight")} style={{filter}}/></button>
+                    <button className="dialog-textarea-button"><img src={bold} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "bold")} style={{filter}}/></button>
+                    <button className="dialog-textarea-button"><img src={italic} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "italic")} style={{filter}}/></button>
+                    <button className="dialog-textarea-button"><img src={underline} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "underline")} style={{filter}}/></button>
+                    <button className="dialog-textarea-button"><img src={strikethrough} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "strikethrough")} style={{filter}}/></button>
+                    <button className="dialog-textarea-button"><img src={spoiler} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "spoiler")} style={{filter}}/></button>
+                    <button className="dialog-textarea-button"><img src={link} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "link")} style={{filter}}/></button>
+                    <button className="dialog-textarea-button"><img src={details} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "details")} style={{filter}}/></button>
+                    <button className="dialog-textarea-button"><img src={hexcolor} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "color")} style={{filter}}/></button>
+                    <button className="dialog-textarea-button"><img src={codeblock} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "code")} style={{filter}}/></button>
                 </div>
                 {previewMode ? <div className="comments-preview" style={{width: "50%", minHeight: "100px"}}>{functions.jsx.renderText(bio, emojis, "reply")}</div> : 
                 <div style={{marginTop: "0px"}} className="user-column">
@@ -720,11 +718,11 @@ const UserProfilePage: React.FunctionComponent = (props) => {
             <div className="content">
                 <div className="user">
                     <div className="user-top-container">
-                        <img className="user-img" src={userImg} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: session.image ? "" : getFilter()}}/>
+                        <img className="user-img" src={userImg} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: session.image ? "" : filter}}/>
                         {generateUsernameJSX()}
                         {!mobile && permissions.isAdmin(session) && <>
                         <label htmlFor="upload-pfp" className="uploadpfp-label">
-                            <img className="user-uploadimg" src={uploadPfpIcon} style={{filter: getFilter()}}/>
+                            <img className="user-uploadimg" src={uploadPfpIcon} style={{filter}}/>
                         </label>
                         <input id="upload-pfp" type="file" onChange={(event) => uploadPfp(event)}/>
                         </>}

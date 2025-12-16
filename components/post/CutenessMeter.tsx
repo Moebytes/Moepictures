@@ -29,9 +29,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     // const sliderRef = useRef<Slider>(null)
     // useEffect(() => sliderRef.current ? sliderRef.current.resize() : null)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const getFilter2 = () => {
         let hue = siteHue - 180
@@ -103,7 +101,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
         <div className="cuteness-meter">
             <div className="cuteness-title-container">
                 <div className="cuteness-title">{i18n.sort.cuteness}</div>
-                <img className="cuteness-img" src={deleteStar} style={{filter: getFilter()}} onClick={deleteRating}/>
+                <img className="cuteness-img" src={deleteStar} style={{filter}} onClick={deleteRating}/>
             </div>
             <div className="cuteness-slider-container" style={{filter: getFilter2()}}>
                 <Rating style={{paddingRight: "10px"}} onClick={setCutenessValue} initialValue={Number(getCutenessValue())} allowFraction={true} fullFraction={true} 

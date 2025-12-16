@@ -17,10 +17,6 @@ const ReportReplyDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
 
     useEffect(() => {
-        document.title = i18n.dialogs.reportReply.title
-    }, [i18n])
-
-    useEffect(() => {
         if (reportReplyID) {
             document.body.style.pointerEvents = "none"
         } else {

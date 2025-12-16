@@ -18,15 +18,9 @@ const DeleteAllSearchHistoryDialog: React.FunctionComponent = (props) => {
     const navigate = useNavigate()
 
     useEffect(() => {
-        document.title = i18n.dialogs.deleteAllSearchHistory.title
-    }, [i18n])
-
-    useEffect(() => {
         if (showDeleteAllHistoryDialog) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }

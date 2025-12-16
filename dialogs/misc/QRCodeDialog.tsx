@@ -13,20 +13,10 @@ const QRCodeDialog: React.FunctionComponent = (props) => {
     const {qrcodeImage} = useMiscDialogSelector()
     const {setQRCodeImage} = useMiscDialogActions()
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    useEffect(() => {
-        document.title = i18n.dialogs.qrcode.title
-    }, [i18n])
-
     useEffect(() => {
         if (qrcodeImage) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "all"
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }

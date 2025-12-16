@@ -176,9 +176,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
                 props.audio || props.model || props.live2d
         }
 
-        const getFilter = () => {
-            return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-        }
+        const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
         const resizeOverlays = () => {
             const currentRef = getRef()
@@ -665,52 +663,52 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
                         <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={buttonMouseEnter} onMouseLeave={() => setButtonHover(false)}>
                             <div className={`post-image-special-buttons ${showSpecialIcons ? "show-post-image-special-buttons" : ""}`}>
                                 {showSpecialIcons ? <>
-                                <img draggable={false} className="post-image-top-button" src={segmentateIcon} style={{filter: getFilter()}} onClick={toggleSegmentate}/>
-                                <img draggable={false} className="post-image-top-button" src={lineartIcon} style={{filter: getFilter()}} onClick={toggleLineart}/>
+                                <img draggable={false} className="post-image-top-button" src={segmentateIcon} style={{filter}} onClick={toggleSegmentate}/>
+                                <img draggable={false} className="post-image-top-button" src={lineartIcon} style={{filter}} onClick={toggleLineart}/>
                                 </> : null}
                             </div>
 
                             <div className={`post-image-share-buttons ${showShareIcons ? "show-post-image-share-buttons" : ""}`}>
                                 {showShareIcons ? <>
-                                <img draggable={false} className="post-image-top-button" src={qrcode} style={{filter: getFilter()}} onClick={() => generateQRCode()}/>
-                                <img draggable={false} className="post-image-top-button" src={pinterest} style={{filter: getFilter()}} onClick={() => sharePost("pinterest")}/>
-                                <img draggable={false} className="post-image-top-button" src={twitter} style={{filter: getFilter()}} onClick={() => sharePost("twitter")}/>
-                                <img draggable={false} className="post-image-top-button" src={reddit} style={{filter: getFilter()}} onClick={() => sharePost("reddit")}/>
+                                <img draggable={false} className="post-image-top-button" src={qrcode} style={{filter}} onClick={() => generateQRCode()}/>
+                                <img draggable={false} className="post-image-top-button" src={pinterest} style={{filter}} onClick={() => sharePost("pinterest")}/>
+                                <img draggable={false} className="post-image-top-button" src={twitter} style={{filter}} onClick={() => sharePost("twitter")}/>
+                                <img draggable={false} className="post-image-top-button" src={reddit} style={{filter}} onClick={() => sharePost("reddit")}/>
                                 </> : null}
                             </div>
 
                             <div className={`post-image-reverse-buttons ${showReverseIcons ? "show-post-image-reverse-buttons" : ""}`}>
                                 {showReverseIcons ? <>
-                                <img draggable={false} className="post-image-top-button"src={google} style={{filter: getFilter()}} onClick={() => reverseSearch("google")}/>
-                                <img draggable={false} className="post-image-top-button" src={bing} style={{filter: getFilter()}} onClick={() => reverseSearch("bing")}/>
-                                <img draggable={false} className="post-image-top-button" src={yandex} style={{filter: getFilter()}} onClick={() => reverseSearch("yandex")}/>
-                                <img draggable={false} className="post-image-top-button" src={saucenao} style={{filter: getFilter()}} onClick={() => reverseSearch("saucenao")}/>
-                                <img draggable={false} className="post-image-top-button" src={ascii2d} style={{filter: getFilter()}} onClick={() => reverseSearch("ascii2d")}/>
+                                <img draggable={false} className="post-image-top-button"src={google} style={{filter}} onClick={() => reverseSearch("google")}/>
+                                <img draggable={false} className="post-image-top-button" src={bing} style={{filter}} onClick={() => reverseSearch("bing")}/>
+                                <img draggable={false} className="post-image-top-button" src={yandex} style={{filter}} onClick={() => reverseSearch("yandex")}/>
+                                <img draggable={false} className="post-image-top-button" src={saucenao} style={{filter}} onClick={() => reverseSearch("saucenao")}/>
+                                <img draggable={false} className="post-image-top-button" src={ascii2d} style={{filter}} onClick={() => reverseSearch("ascii2d")}/>
                                 </> : null}
                             </div>
 
-                            <img draggable={false} className="post-image-top-button" src={getSourceIcon()} style={{filter: getFilter(), marginRight: "6px"}} 
+                            <img draggable={false} className="post-image-top-button" src={getSourceIcon()} style={{filter, marginRight: "6px"}} 
                                 onClick={editImgSource} onContextMenu={openDirectLink}/>
-                            {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={shareIcon} style={{filter: getFilter()}} 
+                            {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={shareIcon} style={{filter}} 
                                 onClick={() => showAdditionalIcons("share")}/> : null}
-                            {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={reverseSearchIcon} style={{filter: getFilter()}} 
+                            {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={reverseSearchIcon} style={{filter}} 
                                 onClick={() => showAdditionalIcons("reverse")}/> : null}
                             {!props.noNotes && (props.post?.type === "image" || props.post?.type === "comic") ? <img draggable={false} className="post-image-top-button" 
-                                src={wandIcon} style={{filter: getFilter()}} onClick={() => showAdditionalIcons("special")}/> : null}
-                            {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={waifu2xIcon} style={{filter: getFilter()}} 
+                                src={wandIcon} style={{filter}} onClick={() => showAdditionalIcons("special")}/> : null}
+                            {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={waifu2xIcon} style={{filter}} 
                                 onClick={() => toggleUpscale()}/> : null}
-                            {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={noteToggleOn} style={{filter: getFilter()}} 
+                            {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={noteToggleOn} style={{filter}} 
                                 onClick={() => {setNoteMode(true); setNoteDrawingEnabled(true)}}/> : null}
                             {!mobile ? <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} 
-                                style={{filter: getFilter()}} onClick={() => setImageExpand(!imageExpand)}/> : null}
+                                style={{filter}} onClick={() => setImageExpand(!imageExpand)}/> : null}
                         </div>
                         <div className={`post-image-previous-button ${previousButtonHover ? "show-post-image-mid-buttons" : ""}`} 
                             onMouseEnter={() => setPreviousButtonHover(true)} onMouseLeave={() => setPreviousButtonHover(false)}>
-                            <img draggable={false} className="post-image-mid-button" src={prevIcon} style={{filter: getFilter()}} onClick={() => props.previous?.()}/>
+                            <img draggable={false} className="post-image-mid-button" src={prevIcon} style={{filter}} onClick={() => props.previous?.()}/>
                         </div>
                         <div className={`post-image-next-button ${nextButtonHover ? "show-post-image-mid-buttons" : ""}`} 
                             onMouseEnter={() => setNextButtonHover(true)} onMouseLeave={() => setNextButtonHover(false)}>
-                            <img draggable={false} className="post-image-mid-button" src={nextIcon} style={{filter: getFilter()}} onClick={() => props.next?.()}/>
+                            <img draggable={false} className="post-image-mid-button" src={nextIcon} style={{filter}} onClick={() => props.next?.()}/>
                         </div>
                         <div className="relative-ref" onMouseMove={dragImgDown} onMouseLeave={dragImgUp}>
                             <WrappedComponent 

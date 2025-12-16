@@ -33,9 +33,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const getCaptchaColor = () => {
         if (theme.includes("light")) return "#ffffff"
@@ -184,19 +182,19 @@ const SignUpPage: React.FunctionComponent = (props) => {
                     <div className="sitepage-row">
                         <span className="sitepage-text-wide">{i18n.labels.password}:</span>
                         <div className="sitepage-pass">
-                            <img className="sitepage-pass-show" src={getEye()} style={{filter: getFilter()}} onClick={() => setShowPassword((prev) => !prev)}/>
+                            <img className="sitepage-pass-show" src={getEye()} style={{filter}} onClick={() => setShowPassword((prev) => !prev)}/>
                             <input className="sitepage-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={password} onChange={(event) => setPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                         </div>
                     </div>
                     <div className="sitepage-row">
                         <span className="sitepage-text-wide">{i18n.labels.confirmPassword}:</span>
                         <div className="sitepage-pass">
-                            <img className="sitepage-pass-show" src={getEye2()} style={{filter: getFilter()}} onClick={() => setShowPassword2((prev) => !prev)}/>
+                            <img className="sitepage-pass-show" src={getEye2()} style={{filter}} onClick={() => setShowPassword2((prev) => !prev)}/>
                             <input className="sitepage-pass-input" type={showPassword2 ? "text" : "password"} spellCheck={false} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                         </div>
                     </div>
                     <div className="sitepage-row" style={{justifyContent: "center"}}>
-                        <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
+                        <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter}}/>
                         <input className="sitepage-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     <span className="sitepage-validation">

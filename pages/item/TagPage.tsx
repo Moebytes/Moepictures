@@ -65,9 +65,7 @@ const TagPage: React.FunctionComponent = () => {
 
     tagName = decodeURIComponent(tagName)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
         setHideNavbar(true)
@@ -342,14 +340,14 @@ const TagPage: React.FunctionComponent = () => {
         let jsx = [] as React.ReactElement[]
         if (!tag) return jsx
         if (session.username) {
-            jsx.push(<img className="tag-social" src={favorited ? tagHearted : tagHeart} onClick={() => favoriteTag()} style={{filter: getFilter()}}/>)
-            jsx.push(<img className="tag-social" src={tagHistory} onClick={() => showTagHistory()} style={{filter: getFilter()}}/>)
-            jsx.push(<img className="tag-social" src={tagCategorize} onClick={() => showTagCategorizeDialog()} style={{filter: getFilter()}}/>)
-            jsx.push(<img className="tag-social" src={tagEdit} onClick={() => showTagEditDialog()} style={{filter: getFilter()}}/>)
-            jsx.push(<img className="tag-social" src={tagDelete} onClick={() => showTagDeleteDialog()} style={{filter: getFilter()}}/>)
+            jsx.push(<img className="tag-social" src={favorited ? tagHearted : tagHeart} onClick={() => favoriteTag()} style={{filter}}/>)
+            jsx.push(<img className="tag-social" src={tagHistory} onClick={() => showTagHistory()} style={{filter}}/>)
+            jsx.push(<img className="tag-social" src={tagCategorize} onClick={() => showTagCategorizeDialog()} style={{filter}}/>)
+            jsx.push(<img className="tag-social" src={tagEdit} onClick={() => showTagEditDialog()} style={{filter}}/>)
+            jsx.push(<img className="tag-social" src={tagDelete} onClick={() => showTagDeleteDialog()} style={{filter}}/>)
         }
         if (permissions.isMod(session)) {
-            jsx.push(<img className="tag-social" src={tag.banned ? restore : takedown} onClick={() => setTakedownTag(tag)} style={{filter: getFilter()}}/>)
+            jsx.push(<img className="tag-social" src={tag.banned ? restore : takedown} onClick={() => setTakedownTag(tag)} style={{filter}}/>)
         }
         return jsx
     }

@@ -133,9 +133,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
                 props.audio || props.model || props.live2d
         }
 
-        const getFilter = () => {
-            return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-        }
+        let filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
     
         const handleIntersection = (entries: IntersectionObserverEntry[]) => {
             const entry = entries[0]
@@ -548,7 +546,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
             <div style={{opacity: visible && refWidth ? "1" : "0", transition: "opacity 0.1s", borderRadius: `${props.borderRadius || 0}px`}} className="image-box" id={String(props.id)} ref={containerRef} 
             onClick={onClick} onAuxClick={onClick} onContextMenu={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
                 <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
-                    {cornerIcon() ? <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s", filter: getFilter()}} className="song-icon" src={cornerIcon()} 
+                    {cornerIcon() ? <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s", filter}} className="song-icon" src={cornerIcon()} 
                     onClick={childRef.current?.songClick} onMouseDown={(event) => {event.stopPropagation()}} onMouseUp={(event) => {event.stopPropagation()}}/> : null}
     
                     <WrappedComponent 

@@ -16,10 +16,6 @@ const SegmentateDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
 
     useEffect(() => {
-        document.title = i18n.dialogs.segmentate.title
-    }, [i18n])
-
-    useEffect(() => {
         if (segmentateLink) {
             document.body.style.pointerEvents = "none"
             setRunning(false)

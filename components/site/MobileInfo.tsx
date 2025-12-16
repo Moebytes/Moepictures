@@ -96,9 +96,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const navigate = useNavigate()
     const location = useLocation()
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const updateTags = async () => {
         const tags = await functions.tag.parseTags(posts, session, setSessionFlag)
@@ -927,13 +925,13 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={() => copyHash()} onAuxClick={() => copyHash()} onContextMenu={(event) => {event.preventDefault(); setTimeout(() => copyHash(true), 100)}}>
-                                    <img className="mobileinfo-icon" src={hashIcon} style={{filter: getFilter()}}/>
+                                    <img className="mobileinfo-icon" src={hashIcon} style={{filter}}/>
                                     <span className="tag">{i18n.sidebar.copyHash}</span>
                                 </span>
                             </div>
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={getPostInfo}>
-                                    <img className="mobileinfo-icon" src={infoIcon} style={{filter: getFilter()}}/>
+                                    <img className="mobileinfo-icon" src={infoIcon} style={{filter}}/>
                                     <span className="tag">{i18n.sidebar.getInfo}</span>
                                 </span>
                             </div>
@@ -946,13 +944,13 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerTagEdit}>
-                                    <img className="mobileinfo-icon" src={tagEdit} style={{filter: getFilter()}}/>
+                                    <img className="mobileinfo-icon" src={tagEdit} style={{filter}}/>
                                     <span className="tag">{i18n.sidebar.tagEdit}</span>
                                 </span>
                             </div>
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerSourceEdit}>
-                                    <img className="mobileinfo-icon" src={sourceEdit} style={{filter: getFilter()}}/>
+                                    <img className="mobileinfo-icon" src={sourceEdit} style={{filter}}/>
                                     <span className="tag">{i18n.sidebar.sourceEdit}</span>
                                 </span>
                             </div>
@@ -960,13 +958,13 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <div className="mobileinfo-sub-row">
                             {!props.unverified && !functions.post.isR18(props.post.rating) ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerSetAvatar}>
-                                    <img className="mobileinfo-icon" src={setAvatar} style={{filter: getFilter()}}/>
+                                    <img className="mobileinfo-icon" src={setAvatar} style={{filter}}/>
                                     <span className="tag">{i18n.sidebar.setAvatar}</span>
                                 </span>
                             </div> : null}
                             {!props.unverified ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerAddNote}>
-                                    <img className="mobileinfo-icon" src={addNote} style={{filter: getFilter()}}/>
+                                    <img className="mobileinfo-icon" src={addNote} style={{filter}}/>
                                     <span className="tag">{i18n.sidebar.addNote}</span>
                                 </span>
                             </div> : null}
@@ -974,13 +972,13 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <div className="mobileinfo-sub-row">
                             {!props.unverified ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerParent}>
-                                    <img className="sidebar-icon" src={parent} style={{filter: getFilter()}}/>
+                                    <img className="sidebar-icon" src={parent} style={{filter}}/>
                                     <span className="tag">{i18n.sidebar.addParent}</span>
                                 </span>
                             </div> : null}
                             {!props.unverified ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerGroup}>
-                                    <img className="sidebar-icon" src={group} style={{filter: getFilter()}}/>
+                                    <img className="sidebar-icon" src={group} style={{filter}}/>
                                     <span className="tag">{i18n.sidebar.addGroup}</span>
                                 </span>
                             </div> : null}
@@ -988,13 +986,13 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <div className="mobileinfo-sub-row">
                             {!props.unverified && permissions.isAdmin(session) ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerSplit}>
-                                    <img className="mobileinfo-icon" src={splitIcon} style={{filter: getFilter()}}/>
+                                    <img className="mobileinfo-icon" src={splitIcon} style={{filter}}/>
                                     <span className="tag">{i18n.sidebar.splitVariations}</span>
                                 </span>
                             </div> : null}
                             {!props.unverified && permissions.isAdmin(session) ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerJoin}>
-                                    <img className="mobileinfo-icon" src={joinIcon} style={{filter: getFilter()}}/>
+                                    <img className="mobileinfo-icon" src={joinIcon} style={{filter}}/>
                                     <span className="tag">{i18n.sidebar.joinChildPosts}</span>
                                 </span>
                             </div> : null}
@@ -1002,26 +1000,26 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <div className="mobileinfo-sub-row">
                             {!props.unverified && props.post.parentID && permissions.isAdmin(session) ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerFlip}>
-                                    <img className="mobileinfo-icon" src={flipIcon} style={{filter: getFilter()}}/>
+                                    <img className="mobileinfo-icon" src={flipIcon} style={{filter}}/>
                                     <span className="tag">{i18n.sidebar.flipParent}</span>
                                 </span>
                             </div> : null}
                             {permissions.isMod(session) ? 
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={editThumbnail}>
-                                    <img className="mobileinfo-icon" src={snapshotIcon} style={{filter: getFilter()}}/>
+                                    <img className="mobileinfo-icon" src={snapshotIcon} style={{filter}}/>
                                     <span className="tag">{i18n.sidebar.editThumbnail}</span>
                                 </span>
                             </div> : null}
                             {!props.unverified && permissions.canPrivate(session, props.artists) ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={privatePost}>
-                                    <img className="mobileinfo-icon" src={props.post.private ? unprivateIcon : privateIcon} style={{filter: getFilter()}}/>
+                                    <img className="mobileinfo-icon" src={props.post.private ? unprivateIcon : privateIcon} style={{filter}}/>
                                     <span className="tag">{props.post.private ? i18n.sidebar.unprivate : i18n.sort.private}</span>
                                 </span>
                             </div> : null}
                             {!props.unverified && permissions.isMod(session) ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerTakedown}>
-                                    <img className="mobileinfo-icon" src={props.post.hidden ? restore : takedown} style={{filter: getFilter()}}/>
+                                    <img className="mobileinfo-icon" src={props.post.hidden ? restore : takedown} style={{filter}}/>
                                     <span className="tag">{props.post.hidden ? i18n.sidebar.restore : i18n.sidebar.takedown}</span>
                                 </span>
                             </div> : null}

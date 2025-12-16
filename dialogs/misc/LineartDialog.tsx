@@ -16,10 +16,6 @@ const LineartDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
 
     useEffect(() => {
-        document.title = i18n.dialogs.lineart.title
-    }, [i18n])
-
-    useEffect(() => {
         if (lineartLink) {
             document.body.style.pointerEvents = "none"
             setRunning(false)

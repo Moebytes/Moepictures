@@ -13,10 +13,6 @@ const DeleteThreadDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
 
     useEffect(() => {
-        document.title = i18n.dialogs.deleteThread.title
-    }, [i18n])
-
-    useEffect(() => {
         if (deleteThreadID) {
             document.body.style.pointerEvents = "none"
         } else {

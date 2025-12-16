@@ -54,9 +54,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         }
     }, [headerFlag])
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const toggleMobileNavbar = () => {
         setHideMobileNavbar(!hideMobileNavbar)
@@ -114,7 +112,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         <div className={`titlebar ${hideTitlebar ? "hide-titlebar" : ""} ${relative ? "titlebar-relative" : ""} ${mobileScrolling ? "hide-mobile-titlebar" : ""}`} onMouseEnter={() => setEnableDrag(false)}>
             {mobile ?
             <div className="titlebar-hamburger-container">
-                <img className="titlebar-hamburger" src={hamburger} onClick={toggleMobileNavbar} style={{filter: getFilter()}}/>
+                <img className="titlebar-hamburger" src={hamburger} onClick={toggleMobileNavbar} style={{filter}}/>
             </div>
             : null}
             <div onClick={titleClick} className="titlebar-logo-container">

@@ -29,21 +29,13 @@ const CompressPostDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    useEffect(() => {
-        document.title = i18n.dialogs.compress.title
-    }, [i18n])
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
         if (compressPostID) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
             setFormat(compressPostID.post.type === "animation" ? "webp" : "jpg" as ImageFormat)
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
@@ -82,16 +74,16 @@ const CompressPostDialog: React.FunctionComponent = (props) => {
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center", paddingRight: "20px"}}>
                                 {compressPostID.post.type === "image" || compressPostID.post.type === "comic" ? <>
-                                <img className="dialog-checkbox" src={format === "jpg" ? radioButtonChecked : radioButton} onClick={() => setFormat("jpg")} style={{marginRight: "10px", filter: getFilter()}}/>
+                                <img className="dialog-checkbox" src={format === "jpg" ? radioButtonChecked : radioButton} onClick={() => setFormat("jpg")} style={{marginRight: "10px", filter}}/>
                                 <span className="dialog-text">jpg</span>
-                                <img className="dialog-checkbox" src={format === "png" ? radioButtonChecked : radioButton} onClick={() => setFormat("png")} style={{marginRight: "10px", filter: getFilter()}}/>
+                                <img className="dialog-checkbox" src={format === "png" ? radioButtonChecked : radioButton} onClick={() => setFormat("png")} style={{marginRight: "10px", filter}}/>
                                 <span className="dialog-text">png</span></> : null}
                                 {compressPostID.post.type === "animation" ? <>
-                                <img className="dialog-checkbox" src={format === "gif" ? radioButtonChecked : radioButton} onClick={() => setFormat("gif")} style={{marginRight: "10px", filter: getFilter()}}/>
+                                <img className="dialog-checkbox" src={format === "gif" ? radioButtonChecked : radioButton} onClick={() => setFormat("gif")} style={{marginRight: "10px", filter}}/>
                                 <span className="dialog-text">gif</span></> : null}
-                                <img className="dialog-checkbox" src={format === "webp" ? radioButtonChecked : radioButton} onClick={() => setFormat("webp")} style={{marginRight: "10px", filter: getFilter()}}/>
+                                <img className="dialog-checkbox" src={format === "webp" ? radioButtonChecked : radioButton} onClick={() => setFormat("webp")} style={{marginRight: "10px", filter}}/>
                                 <span className="dialog-text">webp</span>
-                                <img className="dialog-checkbox" src={format === "avif" ? radioButtonChecked : radioButton} onClick={() => setFormat("avif")} style={{marginRight: "10px", filter: getFilter()}}/>
+                                <img className="dialog-checkbox" src={format === "avif" ? radioButtonChecked : radioButton} onClick={() => setFormat("avif")} style={{marginRight: "10px", filter}}/>
                                 <span className="dialog-text">avif</span>
                             </div>
                             <div className="dialog-row">
@@ -104,9 +96,9 @@ const CompressPostDialog: React.FunctionComponent = (props) => {
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center"}}>
                                 <span className="dialog-text">{i18n.labels.original}</span>
-                                <img className="dialog-checkbox" src={original ? checkboxChecked : checkbox} onClick={() => setOriginal((prev: boolean) => !prev)} style={{marginRight: "10px", filter: getFilter()}}/>
+                                <img className="dialog-checkbox" src={original ? checkboxChecked : checkbox} onClick={() => setOriginal((prev: boolean) => !prev)} style={{marginRight: "10px", filter}}/>
                                 <span className="dialog-text">{i18n.labels.upscaled}</span>
-                                <img className="dialog-checkbox" src={upscaled ? checkboxChecked : checkbox} onClick={() => setUpscaled((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
+                                <img className="dialog-checkbox" src={upscaled ? checkboxChecked : checkbox} onClick={() => setUpscaled((prev: boolean) => !prev)} style={{filter}}/>
                             </div>
                             <div className="dialog-row">
                                 <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>

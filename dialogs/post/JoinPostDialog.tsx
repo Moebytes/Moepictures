@@ -18,20 +18,12 @@ const JoinPostDialog: React.FunctionComponent = (props) => {
     const {setJoinPostID} = usePostDialogActions()
     const [nestedChildren, setNestedChildren] = useState(false)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    useEffect(() => {
-        document.title = i18n.dialogs.joinPost.title
-    }, [i18n])
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
         if (joinPostID) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "all"
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
@@ -70,7 +62,7 @@ const JoinPostDialog: React.FunctionComponent = (props) => {
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center"}}>
                                 <span className="dialog-text">{i18n.dialogs.joinPost.nestedChildren}?</span>
-                                <img className="dialog-checkbox" src={nestedChildren ? checkboxChecked : checkbox} onClick={() => setNestedChildren((prev: boolean) => !prev)} style={{marginRight: "10px", filter: getFilter()}}/>
+                                <img className="dialog-checkbox" src={nestedChildren ? checkboxChecked : checkbox} onClick={() => setNestedChildren((prev: boolean) => !prev)} style={{marginRight: "10px", filter}}/>
                             </div>
                             <div className="dialog-row">
                                 <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>

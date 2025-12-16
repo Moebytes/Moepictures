@@ -27,9 +27,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
     const [imagesRef, setImagesRef] = useState([] as React.RefObject<HTMLCanvasElement | null>[])
     const navigate = useNavigate()
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const loadInitial = async () => {
         const requests = await functions.http.get("/api/post/delete/request/list", null, session, setSessionFlag, true)
@@ -138,11 +136,11 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
                     </div>
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => rejectRequest(request.username, request.postID)}>
-                            <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
+                            <img className="mod-post-options-img" src={reject} style={{filter}}/>
                             <span className="mod-post-options-text">{i18n.buttons.reject}</span>
                         </div>
                         <div className="mod-post-options-container" onClick={() => deletePost(request.username, request.postID)}>
-                            <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
+                            <img className="mod-post-options-img" src={approve} style={{filter}}/>
                             <span className="mod-post-options-text">{i18n.buttons.approve}</span>
                         </div>
                     </div>

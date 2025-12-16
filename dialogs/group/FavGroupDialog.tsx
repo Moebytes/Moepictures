@@ -25,9 +25,7 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const updateFavGroups = async () => {
         if (!favGroupID) return
@@ -44,21 +42,15 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.dialogs.favgroup.title
-    }, [i18n])
-
-    useEffect(() => {
         localStorage.setItem("favgroupName", name)
         localStorage.setItem("favgroupPrivacy", String(isPrivate))
     }, [name, isPrivate])
 
     useEffect(() => {
         if (favGroupID) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
             updateFavGroups()
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
@@ -90,7 +82,7 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
             }
             jsx.push(
                 <div className="dialog-row">
-                    {favgroup.private ? <img className="dialog-icon" src={lockIcon} style={{marginRight: "5px", height: "18px", filter: getFilter()}}/> : null}
+                    {favgroup.private ? <img className="dialog-icon" src={lockIcon} style={{marginRight: "5px", height: "18px", filter}}/> : null}
                     <span className="dialog-text">{favgroup.name}</span>
                     <img className="dialog-clickable-icon" src={deleteIcon} onClick={deleteFromFavGroup}/>
                 </div>
@@ -114,9 +106,9 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
                         </div>
                         <div className="dialog-row" style={{justifyContent: "center", paddingRight: "20px"}}>
                             <span className="dialog-text" style={{marginTop: "-4px"}}>{i18n.labels.privacy}: </span>
-                            <img className="dialog-checkbox" src={isPrivate ? radioButton : radioButtonChecked} onClick={() => setIsPrivate(false)} style={{marginRight: "10px", filter: getFilter()}}/>
+                            <img className="dialog-checkbox" src={isPrivate ? radioButton : radioButtonChecked} onClick={() => setIsPrivate(false)} style={{marginRight: "10px", filter}}/>
                             <span className="dialog-text">{i18n.labels.public}</span>
-                            <img className="dialog-checkbox" src={isPrivate ? radioButtonChecked : radioButton} onClick={() => setIsPrivate(true)} style={{marginRight: "10px", filter: getFilter()}}/>
+                            <img className="dialog-checkbox" src={isPrivate ? radioButtonChecked : radioButton} onClick={() => setIsPrivate(true)} style={{marginRight: "10px", filter}}/>
                             <span className="dialog-text">{i18n.sort.private}</span>
                         </div>
                         {favgroupJSX()}

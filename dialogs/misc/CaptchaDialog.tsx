@@ -16,9 +16,7 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
     const [captchaResponse, setCaptchaResponse] = useState("")
     const [captcha, setCaptcha] = useState("")
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const getCaptchaColor = () => {
         if (theme.includes("light")) return "#ffffff"
@@ -36,10 +34,6 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
     }, [session, theme])
 
     useEffect(() => {
-        document.title = i18n.dialogs.captcha.title
-    }, [i18n])
-
-    useEffect(() => {
         if (!session.cookie) return
         let ignoreCaptcha = sessionStorage.getItem("ignoreCaptcha")
         if (ignoreCaptcha === "true") return setNeedsVerification(false)
@@ -52,10 +46,8 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (needsVerification) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "all"
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
@@ -111,7 +103,7 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
                                 <span className="dialog-text">{i18n.dialogs.captcha.header}</span>
                             </div>
                             <div className="dialog-row" style={{pointerEvents: "all"}}>
-                                <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
+                                <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter}}/>
                                 <input className="dialog-input-taller" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)}/>
                             </div>
                             {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}

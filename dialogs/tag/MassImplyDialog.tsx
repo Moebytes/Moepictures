@@ -18,17 +18,11 @@ const MassImplyDialog: React.FunctionComponent = (props) => {
     const [implyTo, setImplyTo] = useState("")
 
     useEffect(() => {
-        document.title = i18n.dialogs.massImply.title
-    }, [i18n])
-
-    useEffect(() => {
         if (massImplyDialog) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
             setWildcard("")
             setImplyTo("")
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }

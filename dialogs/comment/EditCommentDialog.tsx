@@ -30,20 +30,12 @@ const EditCommentDialog: React.FunctionComponent = (props) => {
     const dialogRef = useRef<HTMLDivElement>(null)
     const textRef = useRef<HTMLTextAreaElement>(null)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    useEffect(() => {
-        document.title = i18n.dialogs.editComment.title
-    }, [i18n])
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
         if (editCommentID) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
@@ -128,16 +120,16 @@ const EditCommentDialog: React.FunctionComponent = (props) => {
                             <span className="dialog-title">{i18n.dialogs.editComment.title}</span>
                         </div>
                         <div className="dialog-textarea-buttons">
-                            <button className="dialog-textarea-button"><img src={highlight} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditCommentText, "highlight")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={bold} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditCommentText, "bold")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={italic} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditCommentText, "italic")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={underline} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditCommentText, "underline")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={strikethrough} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditCommentText, "strikethrough")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={spoiler} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditCommentText, "spoiler")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={link} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditCommentText, "link")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={details} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditCommentText, "details")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={hexcolor} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditCommentText, "color")} style={{filter: getFilter()}}/></button>
-                            <button className="dialog-textarea-button"><img src={codeblock} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditCommentText, "code")} style={{filter: getFilter()}}/></button>
+                            <button className="dialog-textarea-button"><img src={highlight} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditCommentText, "highlight")} style={{filter}}/></button>
+                            <button className="dialog-textarea-button"><img src={bold} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditCommentText, "bold")} style={{filter}}/></button>
+                            <button className="dialog-textarea-button"><img src={italic} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditCommentText, "italic")} style={{filter}}/></button>
+                            <button className="dialog-textarea-button"><img src={underline} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditCommentText, "underline")} style={{filter}}/></button>
+                            <button className="dialog-textarea-button"><img src={strikethrough} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditCommentText, "strikethrough")} style={{filter}}/></button>
+                            <button className="dialog-textarea-button"><img src={spoiler} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditCommentText, "spoiler")} style={{filter}}/></button>
+                            <button className="dialog-textarea-button"><img src={link} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditCommentText, "link")} style={{filter}}/></button>
+                            <button className="dialog-textarea-button"><img src={details} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditCommentText, "details")} style={{filter}}/></button>
+                            <button className="dialog-textarea-button"><img src={hexcolor} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditCommentText, "color")} style={{filter}}/></button>
+                            <button className="dialog-textarea-button"><img src={codeblock} onClick={() => functions.render.triggerTextboxButton(textRef.current, setEditCommentText, "code")} style={{filter}}/></button>
                         </div>
                         {previewMode ? <div className="dialog-textarea-preview">{functions.jsx.renderText(editCommentText, emojis, "comment")}</div> : 
                         <div style={{marginTop: "0px"}} className="dialog-row">

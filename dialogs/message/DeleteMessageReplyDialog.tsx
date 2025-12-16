@@ -14,10 +14,6 @@ const DeleteMessageReplyDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
 
     useEffect(() => {
-        document.title = i18n.dialogs.deleteMessageReply.title
-    }, [i18n])
-
-    useEffect(() => {
         if (deleteMsgReplyID) {
             document.body.style.pointerEvents = "none"
         } else {

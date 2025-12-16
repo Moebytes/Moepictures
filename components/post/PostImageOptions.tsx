@@ -50,9 +50,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const filterRef = useRef<HTMLDivElement>(null)
     const formatRef = useRef<HTMLButtonElement>(null)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
         getFavorite()
@@ -233,30 +231,30 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
             {mobile ? <>
             <div className="post-image-options">
                 <div className="post-image-options-box" onClick={() => props.previous?.()} style={{marginRight: "25px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <img className="post-image-icon-small" src={prevIcon} style={{filter: getFilter()}}/>
+                    <img className="post-image-icon-small" src={prevIcon} style={{filter}}/>
                     {!session.username ? <div className="post-image-text-small">{i18n.post.prev}</div> : null}
                 </div>
                 {session.username ?
                 <div className="post-image-options-box" onClick={() => updateFavorite(!favorited)} style={{marginLeft: "-10px"}}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <img className="post-image-icon" src={getStar()} style={{filter: favorited ? "" : getFilter()}}/>
+                    <img className="post-image-icon" src={getStar()} style={{filter: favorited ? "" : filter}}/>
                     <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? i18n.post.favorited : i18n.post.favorite}</div>
                 </div> : null}
                 {session.username ?
                 <div className="post-image-options-box" onClick={() => setFavGroupID(props.post?.postID!)}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <img className="post-image-icon" src={getStarGroup()} style={{filter: favGrouped ? "" : getFilter()}}/>
+                    <img className="post-image-icon" src={getStarGroup()} style={{filter: favGrouped ? "" : filter}}/>
                     <div className={`post-image-text ${favGrouped ? "favgrouped" : ""}`}>{i18n.post.favgroup}</div>
                 </div> : null}
                 <div className="post-image-options-box" onClick={() => props.next?.()} style={{marginLeft: "25px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <img className="post-image-icon-small" src={nextIcon} style={{filter: getFilter()}}/> 
+                    <img className="post-image-icon-small" src={nextIcon} style={{filter}}/> 
                     {!session.username ? <div className="post-image-text-small">{i18n.post.next}</div> : null}
                 </div>
             </div>
             <div className="post-image-options">
                 <div className="post-image-options-box" onClick={() => props.download?.()} style={{marginRight: "25px"}}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <img className="post-image-icon" src={download} style={{filter: getFilter()}}/>
+                    <img className="post-image-icon" src={download} style={{filter}}/>
                     <div className="post-image-text">{i18n.buttons.download}</div>
                 </div>
                 {props.post?.type === "image" || props.post?.type === "comic" ? 
@@ -264,7 +262,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                 {String(format).toUpperCase()}</button> : null}
                 <div className="post-image-options-box" ref={filterRef} onClick={() => toggleDropdown("filter")} style={{marginLeft: "25px"}}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <img className="post-image-icon" src={filters} style={{filter: getFilter()}}/>
+                    <img className="post-image-icon" src={filters} style={{filter}}/>
                     <div className="post-image-text">{i18n.filters.filters}</div>
                 </div>
             </div> </>
@@ -272,17 +270,17 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
             <div className="post-image-options">
                 <div className="post-image-options-left">
                     <div className="post-image-options-box" onClick={() => props.previous?.()} style={{marginRight: "15px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <img className="post-image-icon-small" src={prevIcon} style={{filter: getFilter()}}/>
+                        <img className="post-image-icon-small" src={prevIcon} style={{filter}}/>
                         <div className="post-image-text-small">{i18n.post.prev}</div>
                     </div>
                     {session.username && !props.noFavorite ?
                     <div className="post-image-options-box" onClick={() => updateFavorite(!favorited)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <img className="post-image-icon" src={getStar()} style={{filter: favorited ? "" : getFilter()}}/>
+                        <img className="post-image-icon" src={getStar()} style={{filter: favorited ? "" : filter}}/>
                         <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? i18n.post.favorited : i18n.post.favorite}</div>
                     </div> : null}
                     {session.username && !props.noFavorite ?
                     <div className="post-image-options-box" onClick={() => setFavGroupID(props.post?.postID!)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <img className="post-image-icon" src={getStarGroup()} style={{filter: favGrouped ? "" : getFilter()}}/>
+                        <img className="post-image-icon" src={getStarGroup()} style={{filter: favGrouped ? "" : filter}}/>
                         <div className={`post-image-text ${favGrouped ? "favgrouped" : ""}`}>{i18n.post.favgroup}</div>
                     </div> : null}
                 </div>
@@ -291,19 +289,19 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                         <div className="post-image-text-alt">{downloadText}</div>
                     </div>
                     <div className="post-image-options-box" onClick={() => props.download?.()} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <img className="post-image-icon" src={download} style={{filter: getFilter()}}/>
+                        <img className="post-image-icon" src={download} style={{filter}}/>
                         <div className="post-image-text">{i18n.buttons.download}</div>
                     </div>
                     {props.post?.type === "image" || props.post?.type === "comic" ? 
                     <button className="post-image-button" ref={formatRef} onClick={() => toggleDropdown("format")}>
                     {String(format).toUpperCase()}</button> : null}
                     <div className="post-image-options-box" ref={filterRef} onClick={() => toggleDropdown("filter")} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <img className="post-image-icon" src={filters} style={{filter: getFilter()}}/>
+                        <img className="post-image-icon" src={filters} style={{filter}}/>
                         <div className="post-image-text">{i18n.filters.filters}</div>
                     </div>
                     <div className="post-image-options-box" onClick={() => props.next?.()} style={{marginLeft: "25px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="post-image-text-small">{i18n.post.next}</div>
-                        <img className="post-image-icon-small" src={nextIcon} style={{filter: getFilter()}}/>
+                        <img className="post-image-icon-small" src={nextIcon} style={{filter}}/>
                     </div>
                 </div>
             </div>}

@@ -28,10 +28,6 @@ const GroupDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
     const updateGroups = async () => {
         if (!groupPostID) return
         const groups = await functions.http.get("/api/groups", {postID: groupPostID}, session, setSessionFlag)
@@ -44,21 +40,15 @@ const GroupDialog: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = removalItems.length ? i18n.dialogs.group.titleRemove : i18n.sidebar.addGroup
-    }, [removalItems, i18n])
-
-    useEffect(() => {
         localStorage.setItem("groupName", name)
     }, [name])
 
     useEffect(() => {
         if (groupPostID) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
             updateGroups()
             setRemovalItems([])
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }

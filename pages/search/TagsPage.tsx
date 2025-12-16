@@ -45,14 +45,8 @@ const TagsPage: React.FunctionComponent = (props) => {
     const sortRef = useRef<HTMLDivElement>(null)
     const typeRef = useRef<HTMLDivElement>(null)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    const getFilterSearch = () => {
-        if (theme.includes("light")) return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation - 60}%) brightness(${siteLightness + 220}%)`
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+    const getFilterSearch = functions.color.filter({theme, siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
         setHideNavbar(true)
@@ -138,7 +132,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     const getSortJSX = () => {
         return (
             <div className="itemsort-item" ref={sortRef}>
-                <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse(!sortReverse)}/>
+                <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter}} onClick={() => setSortReverse(!sortReverse)}/>
                 <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{i18n.sort[sortType]}</span>
             </div>
         )
@@ -147,7 +141,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     const getTypeJSX = () => {
         return (
             <div className="itemsort-item" ref={typeRef} onClick={() => {setActiveDropdown(activeDropdown === "type" ? "none" : "type")}}>
-                <img className="itemsort-img rotate" src={type} style={{filter: getFilter()}}/>
+                <img className="itemsort-img rotate" src={type} style={{filter}}/>
                 {!mobile ? <span className="itemsort-text">{i18n.tag[typeType]}</span> : null}
             </div>
         )
@@ -211,7 +205,7 @@ const TagsPage: React.FunctionComponent = (props) => {
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="item-search" type="search" spellCheck="false" value={searchQuery} style={{width: mobile ? "170px" : "230px"}}
                             onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
-                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => initItems()}>
+                            <button className="item-search-button" style={{filter: getFilterSearch}} onClick={() => initItems()}>
                                 <img src={search}/>
                             </button>
                         </div>
@@ -219,7 +213,7 @@ const TagsPage: React.FunctionComponent = (props) => {
                         {!mobile && permissions.isAdmin(session) ? getBlockedTagsButton() : null}
                         {getSortJSX()}
                         {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>
-                            <img className="itemsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
+                            <img className="itemsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter}}/>
                             <span className="itemsort-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                         </div> : null}
                         <div className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 

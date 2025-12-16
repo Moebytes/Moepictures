@@ -37,9 +37,9 @@ interface Props {
 const CircleHandle = ({active, cursor, onMouseDown, onDoubleClick, scale, x, y}) => {
     const {noteDrawingEnabled} = useSearchSelector()
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
     const getBGColor = () => {
         return "rgba(89, 43, 255, 0.9)"
     }
@@ -50,7 +50,7 @@ const CircleHandle = ({active, cursor, onMouseDown, onDoubleClick, scale, x, y})
     return (
         <circle fill={active ? getBGColor() : getBGColorInactive()}
         stroke={active ? "rgba(53, 33, 140, 1)" : "rgba(53, 33, 140, 0.3)"} strokeWidth={1 / scale}
-        style={{cursor, opacity: active && noteDrawingEnabled ? "1" : "0", filter: getFilter()}} 
+        style={{cursor, opacity: active && noteDrawingEnabled ? "1" : "0", filter}} 
         cx={x} cy={-size*5} r={size} onMouseDown={onMouseDown} onDoubleClick={onDoubleClick}/>
     )
 }
@@ -58,9 +58,9 @@ const CircleHandle = ({active, cursor, onMouseDown, onDoubleClick, scale, x, y})
 const RectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
     const {noteDrawingEnabled} = useSearchSelector()
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
     const getBGColor = () => {
         return "rgba(89, 43, 255, 0.9)"
     }
@@ -72,7 +72,7 @@ const RectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
         <rect fill={active ? getBGColor() : getBGColorInactive()}
         width={size} height={size} x={x - size / 2} y={y - size / 2}
         stroke={active ? "rgba(53, 33, 140, 1)" : "rgba(53, 33, 140, 0.3)"} strokeWidth={1 / scale}
-        style={{cursor, opacity: active && noteDrawingEnabled ? "1" : "0", filter: getFilter()}} onMouseDown={onMouseDown}/>
+        style={{cursor, opacity: active && noteDrawingEnabled ? "1" : "0", filter}} onMouseDown={onMouseDown}/>
     )
 }
 
@@ -109,10 +109,10 @@ const RectShape = wrapShape(({width, height, scale, onMouseEnter, onMouseMove, o
     fontFamily, bold, italic, strokeColor, strokeWidth, borderRadius}) => {
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {session} = useSessionSelector()
-    const getFilter = () => {
-        if (overlay && !session.forceNoteBubbles) return ""
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+
+    let filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+    if (overlay && !session.forceNoteBubbles) filter = ""
+
     const getBGColor = () => {
         if (overlay && !session.forceNoteBubbles) return backgroundColor || "#ffffff"
         return "rgba(89, 43, 255, 0.1)"
@@ -142,7 +142,7 @@ const RectShape = wrapShape(({width, height, scale, onMouseEnter, onMouseMove, o
         <svg width={width} height={height} onMouseEnter={onMouseEnter} onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} 
         onContextMenu={onContextMenu} onDoubleClick={onDoubleClick} onMouseDown={onMouseDown} style={{pointerEvents: "all"}}>
             <rect width={width} height={height} fill={getBGColor()} opacity={(backgroundAlpha ?? 100) / 100} stroke={getStrokeColor()} 
-            strokeWidth={rectStrokeWidth} strokeDasharray={rectStrokeArray} style={{filter: getFilter()}} rx={borderRadius} ry={borderRadius}/>
+            strokeWidth={rectStrokeWidth} strokeDasharray={rectStrokeArray} style={{filter}} rx={borderRadius} ry={borderRadius}/>
             {lines.map((line, index) => (
                 <text key={index} x="50%" y={textStartY + index * lineHeight} textAnchor="middle" fill={getTextColor()} fontSize={fontSize || 100}
                 fontFamily={fontFamily || "Tahoma"} fontWeight={bold ? "bold" : "normal"} fontStyle={italic ? "italic" : "normal"}
@@ -174,9 +174,7 @@ const CharacterRectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
         }, 500)
     }, [active, noteDrawingEnabled])
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    let filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
     const getBGColor = () => {
         return "rgba(0, 0, 0, 0)"
     }
@@ -188,7 +186,7 @@ const CharacterRectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
         <rect fill={active ? getBGColor() : getBGColorInactive()}
         width={size} height={size} x={x - size / 2} y={y - size / 2}
         stroke={active ? "rgba(245, 20, 132, 1)" : "rgba(245, 20, 132, 0.3)"} strokeWidth={1 / scale}
-        style={{cursor, opacity:visible ? "1" : "0", filter: getFilter()}} onMouseDown={onMouseDown}/>
+        style={{cursor, opacity:visible ? "1" : "0", filter}} onMouseDown={onMouseDown}/>
     )
 }
 const CharacterRectShape = wrapShape(({width, height, scale, onMouseEnter, onMouseMove, onMouseLeave, 
@@ -197,9 +195,7 @@ const CharacterRectShape = wrapShape(({width, height, scale, onMouseEnter, onMou
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const [focus, setFocus] = useState(false)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    let filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
     const getBGColor = () => {
         return "rgba(0, 0, 0, 0)"
     }
@@ -216,7 +212,7 @@ const CharacterRectShape = wrapShape(({width, height, scale, onMouseEnter, onMou
         onContextMenu={onContextMenu} onDoubleClick={onDoubleClick} onMouseDown={onMouseDown} onFocus={() => setFocus(true)}
         onBlur={() => setFocus(false)} tabIndex={0} style={{pointerEvents: "all"}}>
             <rect width={width} height={height} fill={getBGColor()} stroke={getStrokeColor()} 
-            strokeWidth={rectStrokeWidth} strokeDasharray={rectStrokeArray} style={{filter: getFilter()}}/>
+            strokeWidth={rectStrokeWidth} strokeDasharray={rectStrokeArray} style={{filter}}/>
         </svg>
     )
 })
@@ -255,9 +251,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const bubbleRef = useRef<HTMLDivElement>(null)
     const navigate = useNavigate()
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    let filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const updateNotes = async () => {
         if (!props.post) return
@@ -574,17 +568,17 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         <div className="note-editor" style={{display: noteMode ? "flex" : "none", marginTop: props.reader ? "0px" : "20px", marginBottom: props.reader ? "0px" : "20px"}}>
             <div className="note-editor-filters" ref={filtersRef} onMouseDown={() => {if (enableDrag) setEnableDrag(false)}}>
                 <div className={`note-editor-buttons ${buttonHover ? "show-note-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
-                    {!props.unverified ? <img draggable={false} className="note-editor-button" src={noteHistory} style={{filter: getFilter()}} onClick={() => showHistory()}/> : null}
-                    <img draggable={false} className="note-editor-button" src={noteOCR} style={{filter: getFilter()}} onClick={() => ocrDialog()}/>
-                    <img draggable={false} className="note-editor-button" src={noteSave} style={{filter: getFilter()}} onClick={() => saveTextDialog()}/>
-                    <img draggable={false} className="note-editor-button" src={noteClear} style={{filter: getFilter()}} onClick={() => clearNotes()}/>
-                    <img draggable={false} className="note-editor-button" src={noteCopy} style={{filter: getFilter()}} onClick={() => copyNotes()}/>
-                    <img draggable={false} className="note-editor-button" src={notePaste} style={{filter: getFilter()}} onClick={() => pasteNotes()}/>
-                    <img draggable={false} className="note-editor-button" src={showTranscript ? translationJA : translationEN} style={{filter: getFilter()}} onClick={() => setShowTranscript(!showTranscript)}/>
-                    {/* <img draggable={false} className="note-editor-button" src={noteText} style={{filter: getFilter()}} onClick={() => editTextDialog()}/> */}
-                    {/* <img draggable={false} className="note-editor-button" src={noteDelete} style={{filter: getFilter()}} onClick={() => deleteFocused()}/> */}
-                    <img draggable={false} className="note-editor-button" src={noteDrawingEnabled ? noteEdit : noteView} style={{filter: getFilter()}} onClick={() => setNoteDrawingEnabled(!noteDrawingEnabled)}/>
-                    <img draggable={false} className="note-editor-button" src={noteToggleOff} style={{filter: getFilter()}} onClick={() => setNoteMode(false)}/>
+                    {!props.unverified ? <img draggable={false} className="note-editor-button" src={noteHistory} style={{filter}} onClick={() => showHistory()}/> : null}
+                    <img draggable={false} className="note-editor-button" src={noteOCR} style={{filter}} onClick={() => ocrDialog()}/>
+                    <img draggable={false} className="note-editor-button" src={noteSave} style={{filter}} onClick={() => saveTextDialog()}/>
+                    <img draggable={false} className="note-editor-button" src={noteClear} style={{filter}} onClick={() => clearNotes()}/>
+                    <img draggable={false} className="note-editor-button" src={noteCopy} style={{filter}} onClick={() => copyNotes()}/>
+                    <img draggable={false} className="note-editor-button" src={notePaste} style={{filter}} onClick={() => pasteNotes()}/>
+                    <img draggable={false} className="note-editor-button" src={showTranscript ? translationJA : translationEN} style={{filter}} onClick={() => setShowTranscript(!showTranscript)}/>
+                    {/* <img draggable={false} className="note-editor-button" src={noteText} style={{filter}} onClick={() => editTextDialog()}/> */}
+                    {/* <img draggable={false} className="note-editor-button" src={noteDelete} style={{filter}} onClick={() => deleteFocused()}/> */}
+                    <img draggable={false} className="note-editor-button" src={noteDrawingEnabled ? noteEdit : noteView} style={{filter}} onClick={() => setNoteDrawingEnabled(!noteDrawingEnabled)}/>
+                    <img draggable={false} className="note-editor-button" src={noteToggleOff} style={{filter}} onClick={() => setNoteMode(false)}/>
                 </div>
                 {bubbleJSX()}
                 <ShapeEditor vectorWidth={targetWidth} vectorHeight={targetHeight} scale={scale} style={{pointerEvents: noteDrawingEnabled ? "all" : "none"}}>

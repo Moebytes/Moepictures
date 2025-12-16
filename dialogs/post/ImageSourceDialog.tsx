@@ -21,10 +21,6 @@ const ImageSourceDialog: React.FunctionComponent = () => {
     const [reason, setReason] = useState("")
 
     useEffect(() => {
-        document.title = i18n.sidebar.editThumbnail
-    }, [i18n])
-
-    useEffect(() => {
         if (imgSourceID) {
             document.body.style.pointerEvents = "all"
             if (imgSourceID.uploadImage) {

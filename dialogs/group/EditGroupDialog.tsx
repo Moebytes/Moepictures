@@ -23,14 +23,6 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    useEffect(() => {
-        document.title = i18n.dialogs.editGroup.title
-    }, [i18n])
-
     useEffect(() => {
         if (editGroupObj) {
             document.body.style.pointerEvents = "none"

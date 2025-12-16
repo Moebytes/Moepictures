@@ -27,9 +27,7 @@ const ModGroupDeletions: React.FunctionComponent = (props) => {
     const [updateVisibleRequestFlag, setUpdateVisibleRequestFlag] = useState(false)
     const navigate = useNavigate()
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const loadInitial = async () => {
         const requests = await functions.http.get("/api/group/delete/request/list", null, session, setSessionFlag, true)
@@ -160,11 +158,11 @@ const ModGroupDeletions: React.FunctionComponent = (props) => {
                     </div>
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => rejectRequest(request.username, request.group, request.post)}>
-                            <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
+                            <img className="mod-post-options-img" src={reject} style={{filter}}/>
                             <span className="mod-post-options-text">{i18n.buttons.reject}</span>
                         </div>
                         <div className="mod-post-options-container" onClick={() => deleteGroup(request.username, request.group, request.post)}>
-                            <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
+                            <img className="mod-post-options-img" src={approve} style={{filter}}/>
                             <span className="mod-post-options-text">{i18n.buttons.approve}</span>
                         </div>
                     </div>

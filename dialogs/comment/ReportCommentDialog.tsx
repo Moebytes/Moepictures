@@ -17,10 +17,6 @@ const ReportCommentDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
 
     useEffect(() => {
-        document.title = i18n.dialogs.reportComment.title
-    }, [i18n])
-
-    useEffect(() => {
         if (reportCommentID) {
             document.body.style.pointerEvents = "none"
         } else {

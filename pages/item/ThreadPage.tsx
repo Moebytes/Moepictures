@@ -84,9 +84,7 @@ const ThreadPage: React.FunctionComponent = () => {
     const navigate = useNavigate()
     const {id: threadID} = useParams() as {id: string}
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
         const replyParam = new URLSearchParams(window.location.search).get("reply")
@@ -313,24 +311,24 @@ const ThreadPage: React.FunctionComponent = () => {
         if (permissions.isMod(session)) {
             jsx.push(
                 <>
-                <img draggable={false} className="thread-page-opt-icon" src={thread.sticky ? unstickyOptIcon : stickyOptIcon} onClick={updateSticky} style={{marginTop: "3px", filter: getFilter()}}/>
-                <img draggable={false} className="thread-page-opt-icon" src={thread.locked ? unlockOptIcon : lockOptIcon} onClick={updateLocked} style={{filter: getFilter()}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={thread.sticky ? unstickyOptIcon : stickyOptIcon} onClick={updateSticky} style={{marginTop: "3px", filter}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={thread.locked ? unlockOptIcon : lockOptIcon} onClick={updateLocked} style={{filter}}/>
                 </>
             )
         }
         if (session.username && !session.banned) {
             jsx.push(
                 <>
-                <img draggable={false} className="thread-page-opt-icon" src={quoteOptIcon} onClick={triggerQuote} style={{filter: getFilter()}}/>
-                <img draggable={false} className="thread-page-opt-icon" src={reportOptIcon} onClick={reportThreadDialog} style={{filter: getFilter()}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={quoteOptIcon} onClick={triggerQuote} style={{filter}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={reportOptIcon} onClick={reportThreadDialog} style={{filter}}/>
                 </>
             )
         }
         if (session.username === thread.creator || permissions.isMod(session)) {
             jsx.push(
                 <>
-                <img draggable={false} className="thread-page-opt-icon" src={editOptIcon} onClick={editThreadDialog} style={{filter: getFilter()}}/>
-                <img draggable={false} className="thread-page-opt-icon" src={deleteOptIcon} onClick={deleteThreadDialog} style={{filter: getFilter()}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={editOptIcon} onClick={editThreadDialog} style={{filter}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={deleteOptIcon} onClick={deleteThreadDialog} style={{filter}}/>
                 </>
             )
         }
@@ -431,16 +429,16 @@ const ThreadPage: React.FunctionComponent = () => {
                 <div className="thread-page-reply-box">
                     <div className="thread-page-input-container">
                         <div className="thread-page-textarea-buttons">
-                            <button className="thread-page-textarea-button"><img src={highlight} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "highlight")} style={{filter: getFilter()}}/></button>
-                            <button className="thread-page-textarea-button"><img src={bold} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "bold")} style={{filter: getFilter()}}/></button>
-                            <button className="thread-page-textarea-button"><img src={italic} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "italic")} style={{filter: getFilter()}}/></button>
-                            <button className="thread-page-textarea-button"><img src={underline} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "underline")} style={{filter: getFilter()}}/></button>
-                            <button className="thread-page-textarea-button"><img src={strikethrough} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "strikethrough")} style={{filter: getFilter()}}/></button>
-                            <button className="thread-page-textarea-button"><img src={spoiler} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "spoiler")} style={{filter: getFilter()}}/></button>
-                            <button className="comments-textarea-button"><img src={link} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "link")} style={{filter: getFilter()}}/></button>
-                            <button className="comments-textarea-button"><img src={details} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "details")} style={{filter: getFilter()}}/></button>
-                            <button className="comments-textarea-button"><img src={hexcolor} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "color")} style={{filter: getFilter()}}/></button>
-                            <button className="comments-textarea-button"><img src={codeblock} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "code")} style={{filter: getFilter()}}/></button>
+                            <button className="thread-page-textarea-button"><img src={highlight} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "highlight")} style={{filter}}/></button>
+                            <button className="thread-page-textarea-button"><img src={bold} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "bold")} style={{filter}}/></button>
+                            <button className="thread-page-textarea-button"><img src={italic} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "italic")} style={{filter}}/></button>
+                            <button className="thread-page-textarea-button"><img src={underline} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "underline")} style={{filter}}/></button>
+                            <button className="thread-page-textarea-button"><img src={strikethrough} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "strikethrough")} style={{filter}}/></button>
+                            <button className="thread-page-textarea-button"><img src={spoiler} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "spoiler")} style={{filter}}/></button>
+                            <button className="comments-textarea-button"><img src={link} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "link")} style={{filter}}/></button>
+                            <button className="comments-textarea-button"><img src={details} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "details")} style={{filter}}/></button>
+                            <button className="comments-textarea-button"><img src={hexcolor} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "color")} style={{filter}}/></button>
+                            <button className="comments-textarea-button"><img src={codeblock} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "code")} style={{filter}}/></button>
                         </div>
                         {previewMode ? <div className="thread-page-preview">{functions.jsx.renderText(text, emojis, "reply", undefined, r18)}</div> : 
                         <div style={{marginTop: "0px"}} className="thread-page-row-start" onMouseEnter={() => setEnableDrag(false)}>
@@ -455,9 +453,9 @@ const ThreadPage: React.FunctionComponent = () => {
                             <button className={previewMode ? "thread-page-edit-button" : "thread-page-preview-button"} onClick={() => setPreviewMode((prev: boolean) => !prev)}>{previewMode ? i18n.buttons.unpreview : i18n.buttons.preview}</button>
                             {session.showR18 ?
                             <div className="thread-page-replybox-row">
-                                <img className="thread-page-checkbox" src={r18 ? radioButtonChecked : radioButton} onClick={() => setR18((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
+                                <img className="thread-page-checkbox" src={r18 ? radioButtonChecked : radioButton} onClick={() => setR18((prev: boolean) => !prev)} style={{filter}}/>
                                 <span className="thread-page-replybox-text" style={{marginLeft: "10px"}}>R18</span>
-                                <img className="thread-page-icon" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter: getFilter()}}/>
+                                <img className="thread-page-icon" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter}}/>
                             </div> : null}
                         </div>
                     </div>
@@ -488,7 +486,7 @@ const ThreadPage: React.FunctionComponent = () => {
                         <div className="thread-page-user-container">
                             {getCreatorJSX()}
                             <span className="thread-page-date-text">{functions.date.timeAgo(thread.createDate, i18n)}</span>
-                            <img draggable={false} className="thread-page-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
+                            <img draggable={false} className="thread-page-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: defaultIcon ? filter : ""}}/>
                             <span className="thread-page-mini-link" onClick={viewThreads}>{thread.postCount} {Number(thread.postCount) === 1 ? i18n.buttons.post : i18n.sort.posts}</span>
                             <span className="thread-page-mini-text">{i18n.labels.joined} {functions.date.prettyDate(thread.joinDate, i18n, true)}</span>
                         </div>

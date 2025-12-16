@@ -36,10 +36,6 @@ const ForumPostsPage: React.FunctionComponent = () => {
     const {ratingType} = useSearchSelector()
     const {username} = useParams() as {username: string}
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
     useEffect(() => {
         setHideNavbar(true)
         setHideTitlebar(true)

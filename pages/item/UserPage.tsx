@@ -61,9 +61,7 @@ const UserPage: React.FunctionComponent = () => {
         limit = mobile ? 5 : 25
     }, [mobile])
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const fetchUser = async () => {
         const user = await functions.http.get("/api/user", {username}, session, setSessionFlag)
@@ -388,7 +386,7 @@ const UserPage: React.FunctionComponent = () => {
                 {user ?
                 <div className="user">
                     <div className="user-top-container">
-                        <img className="user-img" src={getUserImg()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
+                        <img className="user-img" src={getUserImg()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? filter : ""}}/>
                         {generateUsernameJSX()}
                         {session.username && (session.username !== username) && user.role !== "system" && !session.banned ? <img className="user-opt-icon" src={dmIcon} onClick={dmDialog}/> : null}
                         {permissions.isMod(session) && !permissions.isMod(user) ? <img className="user-opt-icon" src={user.banned ? unbanIcon : banIcon} onClick={banDialog}/> : null}

@@ -35,9 +35,7 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
     setEditThreadR18, setReportReplyID, setReportThreadID} = useThreadDialogActions()
     const navigate = useNavigate()
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const defaultIcon = props.forumPost?.image ? false : true
 
@@ -241,7 +239,7 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
             <div className="commentrow-container-row">
                 <div className="commentrow-container">
                     <div className="commentrow-user-container" onClick={userClick} onAuxClick={userClick} style={{justifyContent: "flex-start", paddingTop: "10px"}}>
-                        <img className="commentrow-user-img" src={getUserPFP()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
+                        <img className="commentrow-user-img" src={getUserPFP()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? filter : ""}}/>
                         {generateUsernameJSX()}
                     </div>
                 </div>

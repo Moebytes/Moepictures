@@ -16,11 +16,9 @@ const RevertAliasHistoryDialog: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (revertAliasHistoryID) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
             document.title = getTitle() || ""
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }

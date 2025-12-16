@@ -15,15 +15,9 @@ const PermaDeletePostDialog: React.FunctionComponent = (props) => {
     const {setSessionFlag} = useSessionActions()
 
     useEffect(() => {
-        document.title = i18n.dialogs.permaDeletePost.title
-    }, [i18n])
-
-    useEffect(() => {
         if (permaDeletePostID) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }

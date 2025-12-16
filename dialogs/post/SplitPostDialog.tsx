@@ -19,20 +19,12 @@ const SplitPostDialog: React.FunctionComponent = (props) => {
     const [currentOnly, setCurrentOnly] = useState(false)
     const [mergeSubsequent, setMergeSubsequent] = useState(false)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    useEffect(() => {
-        document.title = i18n.dialogs.splitPost.title
-    }, [i18n])
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
         if (splitPostID) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "all"
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
@@ -86,11 +78,11 @@ const SplitPostDialog: React.FunctionComponent = (props) => {
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center"}}>
                                 <span className="dialog-text">{i18n.dialogs.splitPost.currentOnly}?</span>
-                                <img className="dialog-checkbox" src={currentOnly ? checkboxChecked : checkbox} onClick={() => toggleCheckbox("currentOnly")} style={{marginRight: "10px", filter: getFilter()}}/>
+                                <img className="dialog-checkbox" src={currentOnly ? checkboxChecked : checkbox} onClick={() => toggleCheckbox("currentOnly")} style={{marginRight: "10px", filter}}/>
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center"}}>
                                 <span className="dialog-text">{i18n.dialogs.splitPost.mergeSubsequent}?</span>
-                                <img className="dialog-checkbox" src={mergeSubsequent ? checkboxChecked : checkbox} onClick={() => toggleCheckbox("mergeSubsequent")} style={{marginRight: "10px", filter: getFilter()}}/>
+                                <img className="dialog-checkbox" src={mergeSubsequent ? checkboxChecked : checkbox} onClick={() => toggleCheckbox("mergeSubsequent")} style={{marginRight: "10px", filter}}/>
                             </div>
                             <div className="dialog-row">
                                 <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>

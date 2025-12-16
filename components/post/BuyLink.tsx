@@ -12,15 +12,13 @@ const BuyLink: React.FunctionComponent<Props> = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     return (
         <div className="commentary">
             <div className="commentary-title-container">
                 <div className="commentary-title">{i18n.labels.buyLink}</div>
-                <img className="commentary-img-static" src={buyLinkIcon} style={{filter: getFilter()}}/>
+                <img className="commentary-img-static" src={buyLinkIcon} style={{filter}}/>
             </div>
             <div className="commentary-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="commentary-text">

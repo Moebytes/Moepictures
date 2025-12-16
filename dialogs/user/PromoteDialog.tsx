@@ -30,19 +30,11 @@ const PromoteDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
     const updateRole = async () => {
         if (!promoteName) return
         const user = await functions.http.get("/api/user", {username: promoteName}, session, setSessionFlag)
         if (user) setRole(user.role)
     }
-
-    useEffect(() => {
-        document.title = i18n.dialogs.promote.title
-    }, [i18n])
 
     useEffect(() => {
         if (promoteName) {

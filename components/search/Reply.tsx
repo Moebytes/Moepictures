@@ -36,9 +36,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
 
     const defaultIcon = props.reply.image ? false : true
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const getReplyPFP = () => {
         if (props.reply.image) {
@@ -115,11 +113,11 @@ const Reply: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="reply-options">
                     <div className="reply-options-container" onClick={editReplyDialog}>
-                        <img className="reply-options-img" src={editOptIcon} style={{filter: getFilter()}}/>
+                        <img className="reply-options-img" src={editOptIcon} style={{filter}}/>
                         <span className="reply-options-text">{i18n.buttons.edit}</span>
                     </div>
                     <div className="reply-options-container" onClick={deleteReplyDialog}>
-                        <img className="reply-options-img" src={deleteOptIcon} style={{filter: getFilter()}}/>
+                        <img className="reply-options-img" src={deleteOptIcon} style={{filter}}/>
                         <span className="reply-options-text">{i18n.buttons.delete}</span>
                     </div>
                 </div>
@@ -129,20 +127,20 @@ const Reply: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="reply-options">
                     <div className="reply-options-container" onClick={triggerQuote}>
-                        <img className="reply-options-img" src={quoteOptIcon} style={{filter: getFilter()}}/>
+                        <img className="reply-options-img" src={quoteOptIcon} style={{filter}}/>
                         <span className="reply-options-text">{i18n.buttons.quote}</span>
                     </div>
                     {permissions.isMod(session) ? <>
                     <div className="reply-options-container" onClick={editReplyDialog}>
-                        <img className="reply-options-img" src={editOptIcon} style={{filter: getFilter()}}/>
+                        <img className="reply-options-img" src={editOptIcon} style={{filter}}/>
                         <span className="reply-options-text">{i18n.buttons.edit}</span>
                     </div>
                     <div className="reply-options-container" onClick={deleteReplyDialog}>
-                        <img className="reply-options-img" src={deleteOptIcon} style={{filter: getFilter()}}/>
+                        <img className="reply-options-img" src={deleteOptIcon} style={{filter}}/>
                         <span className="reply-options-text">{i18n.buttons.delete}</span>
                     </div></> : 
                     <div className="reply-options-container" onClick={reportReplyDialog}>
-                        <img className="reply-options-img" src={reportOptIcon} style={{filter: getFilter()}}/>
+                        <img className="reply-options-img" src={reportOptIcon} style={{filter}}/>
                         <span className="reply-options-text">{i18n.buttons.report}</span>
                     </div>}
                 </div>
@@ -187,7 +185,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
                 <div className="reply-user-container">
                     {generateUsernameJSX()}
                     <span className="reply-date-text">{functions.date.timeAgo(props.reply.createDate, i18n)}</span>
-                    <img className="reply-user-img" src={getReplyPFP()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
+                    <img className="reply-user-img" src={getReplyPFP()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? filter : ""}}/>
                     <span className="reply-mini-link" onClick={viewThreads}>{props.reply.postCount} {Number(props.reply.postCount) === 1 ? i18n.buttons.post : i18n.sort.posts}</span>
                     <span className="reply-mini-text">{i18n.labels.joined} {functions.date.prettyDate(props.reply.joinDate, i18n, true)}</span>
                 </div>

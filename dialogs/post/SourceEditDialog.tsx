@@ -71,10 +71,6 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        document.title = i18n.sidebar.sourceEdit
-    }, [i18n])
-
-    useEffect(() => {
         if (sourceEditID) {
             document.body.style.pointerEvents = "none"
             updateFields()

@@ -104,10 +104,6 @@ const TagEditDialog: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.sidebar.tagEdit
-    }, [i18n])
-
-    useEffect(() => {
         if (tagEditID) {
             document.body.style.pointerEvents = "none"
             updateFields()

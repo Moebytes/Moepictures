@@ -26,13 +26,7 @@ const BanDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    useEffect(() => {
-        document.title = i18n.dialogs.ban.title
-    }, [i18n])
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
         if (banName) {
@@ -152,19 +146,19 @@ const BanDialog: React.FunctionComponent = (props) => {
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.dialogs.ban.unverifiedChanges}</span>
-                            <img className="dialog-checkbox" src={deleteUnverifiedChanges ? checkboxChecked : checkbox} onClick={() => setDeleteUnverifiedChanges((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
+                            <img className="dialog-checkbox" src={deleteUnverifiedChanges ? checkboxChecked : checkbox} onClick={() => setDeleteUnverifiedChanges((prev: boolean) => !prev)} style={{filter}}/>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.dialogs.ban.historyChanges}</span>
-                            <img className="dialog-checkbox" src={deleteHistoryChanges ? checkboxChecked : checkbox} onClick={() => setDeleteHistoryChanges((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
+                            <img className="dialog-checkbox" src={deleteHistoryChanges ? checkboxChecked : checkbox} onClick={() => setDeleteHistoryChanges((prev: boolean) => !prev)} style={{filter}}/>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.dialogs.ban.comments}</span>
-                            <img className="dialog-checkbox" src={deleteComments ? checkboxChecked : checkbox} onClick={() => setDeleteComments((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
+                            <img className="dialog-checkbox" src={deleteComments ? checkboxChecked : checkbox} onClick={() => setDeleteComments((prev: boolean) => !prev)} style={{filter}}/>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.dialogs.ban.messages}</span>
-                            <img className="dialog-checkbox" src={deleteMessages ? checkboxChecked : checkbox} onClick={() => setDeleteMessages((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
+                            <img className="dialog-checkbox" src={deleteMessages ? checkboxChecked : checkbox} onClick={() => setDeleteMessages((prev: boolean) => !prev)} style={{filter}}/>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.labels.days}: </span>

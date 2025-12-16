@@ -21,20 +21,12 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    useEffect(() => {
-        document.title = i18n.dialogs.editTag.title
-    }, [i18n])
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
         if (editTagObj) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
@@ -249,7 +241,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 </label>
                 <input id="tag-img" type="file" onChange={(event) => uploadTagImg(event)}/>
                 {editTagObj.image && editTagObj.image !== "delete" ? 
-                <img className="dialog-x-button" src={xButton} style={{filter: getFilter()}} onClick={() => setEditTagObj({...editTagObj, image: "delete"})}/>
+                <img className="dialog-x-button" src={xButton} style={{filter}} onClick={() => setEditTagObj({...editTagObj, image: "delete"})}/>
                 : null}
                 <span style={{marginLeft: "20px"}} className="dialog-text">{i18n.labels.featured}: </span>
                 <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.featuredPost!} onChange={(event) => setEditTagObj({...editTagObj, featuredPost: event.target.value})} style={{width: "20%"}}/>
@@ -294,9 +286,9 @@ const EditTagDialog: React.FunctionComponent = (props) => {
             </div>
             {!functions.util.arrayIncludes(editTagObj.type, ["artist", "character", "series"]) && session.showR18 ?
             <div className="dialog-row">
-                <img className="dialog-checkbox" src={editTagObj.r18 ? radioButtonChecked : radioButton} onClick={() => setEditTagObj({...editTagObj, r18: !editTagObj.r18})} style={{marginLeft: "0px", filter: getFilter()}}/>
+                <img className="dialog-checkbox" src={editTagObj.r18 ? radioButtonChecked : radioButton} onClick={() => setEditTagObj({...editTagObj, r18: !editTagObj.r18})} style={{marginLeft: "0px", filter}}/>
                 <span className="dialog-text" style={{marginLeft: "10px"}}>R18</span>
-                <img className="dialog-title-img" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter: getFilter()}}/>
+                <img className="dialog-title-img" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter}}/>
             </div> : null}
             </>
         )

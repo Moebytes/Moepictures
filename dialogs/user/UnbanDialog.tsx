@@ -19,10 +19,6 @@ const UnbanDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
 
     useEffect(() => {
-        document.title = i18n.dialogs.unban.title
-    }, [i18n])
-
-    useEffect(() => {
         if (unbanName) {
             document.body.style.pointerEvents = "none"
         } else {

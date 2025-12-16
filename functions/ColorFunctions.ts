@@ -1,6 +1,12 @@
 import {hexToRgb} from "../structures/Color"
 
 export default class ColorFunctions {
+    public static filter = (opt: {siteHue: number, siteSaturation: number, siteLightness: number, theme?: string}) => {
+        let {siteHue, siteSaturation, siteLightness, theme} = opt
+        if (theme?.includes("light")) return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation - 60}%) brightness(${siteLightness + 220}%)`
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+
     public static parseTransparentColor = (color: string) => {
         return Number(`0x${color.replace(/^#/, "")}`)
     }

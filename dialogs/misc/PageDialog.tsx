@@ -13,16 +13,10 @@ const PageDialog: React.FunctionComponent = (props) => {
     const [pageField, setPageField] = useState("")
 
     useEffect(() => {
-        document.title = i18n.dialogs.page.title
-    }, [i18n])
-
-    useEffect(() => {
         if (showPageDialog) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
             setPageField("")
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }

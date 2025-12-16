@@ -89,10 +89,6 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.dialogs.bulkTagEdit.title
-    }, [i18n])
-
-    useEffect(() => {
         if (showBulkTagEditDialog) {
             document.body.style.pointerEvents = "none"
         } else {

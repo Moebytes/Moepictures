@@ -51,10 +51,7 @@ const MiniAudioPlayer: React.FunctionComponent = (props) => {
     const location = useLocation()
     const navigate = useNavigate()
 
-    const getFilter = () => {
-        if (theme.includes("light")) return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation - 60}%) brightness(${siteLightness + 220}%)`
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({theme, siteHue, siteSaturation, siteLightness})
 
     const updateSongCover = async () => {
         if (!audio) return
@@ -227,15 +224,15 @@ const MiniAudioPlayer: React.FunctionComponent = (props) => {
                 </div>
             </div>
             <div className="mini-audio-player-row">
-                    <img draggable={false} style={{filter: getFilter()}} className="mini-audio-player-icon-small" src={playerStop} onClick={() => quit()}/>
-                    <img draggable={false} style={{filter: getFilter()}} className="mini-audio-player-icon" src={getAudioReverseIcon()} onClick={() => changeReverse()}/>
-                    <img draggable={false} style={{filter: getFilter()}} className="mini-audio-player-icon" ref={audioSpeedRef} src={getAudioSpeedIcon()} onClick={() => toggleDropdown("speed")}/>
-                    <img draggable={false} style={{filter: getFilter()}} className="mini-audio-player-icon-small" src={playerRewind} onClick={() => setAudioRewindFlag(true)}/>
-                    <img draggable={false} style={{filter: getFilter(), width: "27px"}} className="mini-audio-player-play-icon" src={getAudioPlayIcon()} onClick={() => updatePlay()}/>
-                    <img draggable={false} style={{filter: getFilter()}} className="mini-audio-player-icon-small" src={playerFastforward} onClick={() => setAudioFastForwardFlag(true)}/>
-                    <img draggable={false} style={{filter: getFilter()}} className="mini-audio-player-icon" ref={audioPitchRef} src={getAudioPitchIcon()} onClick={() => toggleDropdown("pitch")}/>
-                    <img draggable={false} style={{filter: getFilter()}} className="mini-audio-player-icon" src={playerClear} onClick={() => setResetFlag(true)}/>
-                    <img draggable={false} style={{filter: getFilter(), width: "25px"}} className="mini-audio-player-icon" ref={audioVolumeRef} src={getAudioVolumeIcon()} onMouseEnter={() => setShowVolumeSlider(true)} onMouseLeave={() => setShowVolumeSlider(false)} onClick={updateMute}/>
+                    <img draggable={false} style={{filter}} className="mini-audio-player-icon-small" src={playerStop} onClick={() => quit()}/>
+                    <img draggable={false} style={{filter}} className="mini-audio-player-icon" src={getAudioReverseIcon()} onClick={() => changeReverse()}/>
+                    <img draggable={false} style={{filter}} className="mini-audio-player-icon" ref={audioSpeedRef} src={getAudioSpeedIcon()} onClick={() => toggleDropdown("speed")}/>
+                    <img draggable={false} style={{filter}} className="mini-audio-player-icon-small" src={playerRewind} onClick={() => setAudioRewindFlag(true)}/>
+                    <img draggable={false} style={{filter, width: "27px"}} className="mini-audio-player-play-icon" src={getAudioPlayIcon()} onClick={() => updatePlay()}/>
+                    <img draggable={false} style={{filter}} className="mini-audio-player-icon-small" src={playerFastforward} onClick={() => setAudioFastForwardFlag(true)}/>
+                    <img draggable={false} style={{filter}} className="mini-audio-player-icon" ref={audioPitchRef} src={getAudioPitchIcon()} onClick={() => toggleDropdown("pitch")}/>
+                    <img draggable={false} style={{filter}} className="mini-audio-player-icon" src={playerClear} onClick={() => setResetFlag(true)}/>
+                    <img draggable={false} style={{filter, width: "25px"}} className="mini-audio-player-icon" ref={audioVolumeRef} src={getAudioVolumeIcon()} onMouseEnter={() => setShowVolumeSlider(true)} onMouseLeave={() => setShowVolumeSlider(false)} onClick={updateMute}/>
             </div>
             </>
         )

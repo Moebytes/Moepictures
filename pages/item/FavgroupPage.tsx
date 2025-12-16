@@ -50,9 +50,7 @@ const FavgroupPage: React.FunctionComponent = () => {
     const location = useLocation()
     const {username, favgroup: favgroupName} = useParams() as {username: string, favgroup: string}
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
         setHideNavbar(true)
@@ -223,15 +221,15 @@ const FavgroupPage: React.FunctionComponent = () => {
     const favgroupOptionsJSX = () => {
         let jsx = [] as React.ReactElement[]
         if (session.username === username) {
-            jsx.push(<img className="group-opt" src={reorderState ? groupReorderActive : groupReorder} onClick={() => changeReorderState()} style={{filter: reorderState ? "" : getFilter()}}/>)
+            jsx.push(<img className="group-opt" src={reorderState ? groupReorderActive : groupReorder} onClick={() => changeReorderState()} style={{filter: reorderState ? "" : filter}}/>)
             if (reorderState) {
-                jsx.push(<img className="group-opt" src={groupAccept} onClick={() => commitReorder()} style={{filter: getFilter()}}/>)
+                jsx.push(<img className="group-opt" src={groupAccept} onClick={() => commitReorder()} style={{filter}}/>)
             }
-            jsx.push(<img className="group-opt" src={deleteMode ? groupCancelActive : groupCancel} onClick={() => setDeleteMode((prev: boolean) => !prev)} style={{filter: getFilter()}}/>)
-            jsx.push(<img className="group-opt" src={groupAdd} onClick={() => showFavgroupAddDialog()} style={{filter: getFilter()}}/>)
-            jsx.push(<img className="group-opt" src={groupEdit} onClick={() => showFavgroupEditDialog()} style={{filter: getFilter()}}/>)
-            jsx.push(<img className="group-opt" src={groupRemap} onClick={() => showFavgroupRemapDialog()} style={{filter: getFilter()}}/>)
-            jsx.push(<img className="group-opt" src={groupDelete} onClick={() => showFavgroupDeleteDialog()} style={{filter: getFilter()}}/>)
+            jsx.push(<img className="group-opt" src={deleteMode ? groupCancelActive : groupCancel} onClick={() => setDeleteMode((prev: boolean) => !prev)} style={{filter}}/>)
+            jsx.push(<img className="group-opt" src={groupAdd} onClick={() => showFavgroupAddDialog()} style={{filter}}/>)
+            jsx.push(<img className="group-opt" src={groupEdit} onClick={() => showFavgroupEditDialog()} style={{filter}}/>)
+            jsx.push(<img className="group-opt" src={groupRemap} onClick={() => showFavgroupRemapDialog()} style={{filter}}/>)
+            jsx.push(<img className="group-opt" src={groupDelete} onClick={() => showFavgroupDeleteDialog()} style={{filter}}/>)
         }
         return jsx
     }
@@ -257,14 +255,14 @@ const FavgroupPage: React.FunctionComponent = () => {
                 {favgroup ? 
                 <div className="group-page">
                     <div className="group-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        {favgroup.private ? <img className="group-icon" src={lockIcon} style={{filter: getFilter()}}/> : null}
+                        {favgroup.private ? <img className="group-icon" src={lockIcon} style={{filter}}/> : null}
                         <span className="group-heading">{favgroup.name}</span>
                         {favgroupOptionsJSX()}
                     </div>
                     <div className="group-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <span><span className="group-label" onClick={searchGroup}>{i18n.sort.posts}</span> <span className="group-label-alt">{favgroup.postCount}</span></span>
                         <div className="group-page-container" onClick={() => toggleScroll()}>
-                            <img className="group-mini-icon" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
+                            <img className="group-mini-icon" src={scroll ? scrollIcon : pageIcon} style={{filter}}/>
                             <span className="group-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                         </div>
                     </div>

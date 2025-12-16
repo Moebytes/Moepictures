@@ -18,9 +18,7 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
     const [text, setText] = useState(props.text)
     const [translatedText, setTranslatedText] = useState("")
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
         if (language === "ja") {
@@ -53,7 +51,7 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
         <div className="commentary">
             <div className="commentary-title-container">
                 <div className="commentary-title">{i18n.post.commentary}</div>
-                <img className="commentary-img" src={commentaryTranslate} style={{filter: getFilter()}} onClick={() => setShowTranslated((prev: boolean) => !prev)}/>
+                <img className="commentary-img" src={commentaryTranslate} style={{filter}} onClick={() => setShowTranslated((prev: boolean) => !prev)}/>
             </div>
             <div className="commentary-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="commentary-text">

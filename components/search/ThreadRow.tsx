@@ -37,9 +37,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     const [updaterDefaultIcon, setUpdaterDefaultIcon] = useState(false)
     const navigate = useNavigate()
 
-    const getFilter = () => {
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const updateUpdater = async () => {
         if (!props.thread) return
@@ -101,7 +99,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             imageClass: "thread-user-label",
             profilePictureClass: "thread-user-img",
             profilePicture: getCreatorPFP(),
-            filter: creatorDefaultIcon ? getFilter() : "",
+            filter: creatorDefaultIcon ? filter : "",
             session, setSessionFlag
         }, i18n, navigate)
     }
@@ -114,7 +112,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             imageClass: "thread-user-label",
             profilePictureClass: "thread-user-img",
             profilePicture: getUpdaterPFP(),
-            filter: updaterDefaultIcon ? getFilter() : ""
+            filter: updaterDefaultIcon ? filter : ""
         }, i18n, navigate)
     }
 
@@ -169,7 +167,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             <div className="thread-content-container">
                 <div className="thread-container">
                     <div className="thread-row" style={{width: "100%"}}>
-                        {session.username ? <img draggable={false} className="thread-opt-icon" src={getReadIcon()} onClick={toggleRead} style={{filter: getFilter()}}/> : null}
+                        {session.username ? <img draggable={false} className="thread-opt-icon" src={getReadIcon()} onClick={toggleRead} style={{filter}}/> : null}
                         {props.thread?.sticky ? <img draggable={false} className="thread-icon" src={sticky} style={{marginTop: "4px"}}/> : null}
                         {props.thread?.locked ? <img draggable={false} className="thread-icon" src={lock}/> : null}
                         <span className={`thread-title ${readStatus() ? "thread-read" : ""}`} onClick={threadPage} onAuxClick={threadPage}>

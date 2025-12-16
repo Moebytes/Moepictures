@@ -17,10 +17,6 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
     const navigate = useNavigate()
 
     useEffect(() => {
-        document.title = i18n.buttons.deleteAccount
-    }, [i18n])
-
-    useEffect(() => {
         if (showDeleteAccountDialog) {
             document.body.style.pointerEvents = "none"
         } else {
