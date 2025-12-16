@@ -1487,6 +1487,17 @@ const PostRoutes = (app: Express) => {
             }
             
             await sql.post.updatePost(postID, columns[column], value)
+
+            if (column === "title" || column === "englishTitle") {
+                let title = column === "title" ? value : post.title
+                let englishTitle = column === "englishTitle" ? value : post.englishTitle
+                let newSlug = functions.post.postSlug(title, englishTitle)
+                if (post.slug && post.slug !== newSlug) {
+                    try {
+                        await sql.report.insertRedirect(postID, post.slug)
+                    } catch {}
+                }
+            }
             
             res.status(200).send("Success")
         } catch (e) {
