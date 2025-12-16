@@ -1483,7 +1483,7 @@ const PostRoutes = (app: Express) => {
                 pixivTags: "pixivTags", hidden: "hidden", locked: "locked",
                 private: "private", deleted: "deleted", deletionDate: "deletionDate",
                 userProfile: "userProfile", drawingTools: "drawingTools", 
-                sourceImageCount: "sourceImageCount"
+                sourceImageCount: "sourceImageCount", slug: "slug"
             }
             
             await sql.post.updatePost(postID, columns[column], value)
@@ -1494,6 +1494,7 @@ const PostRoutes = (app: Express) => {
                 let newSlug = functions.post.postSlug(title, englishTitle)
                 if (post.slug && post.slug !== newSlug) {
                     try {
+                        await sql.post.updatePost(postID, "slug", newSlug)
                         await sql.report.insertRedirect(postID, post.slug)
                     } catch {}
                 }
