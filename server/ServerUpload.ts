@@ -495,7 +495,7 @@ export default class ServerUpload {
         }
 
         // Delete empty tag groups
-        for (const tagGroup of newTagGroups) {
+        for (const tagGroup of [...newTagGroups, ...removedTagGroups]) {
             if (!tagGroup) continue
             if (unverified) {
                 const group = await sql.tag.unverifiedTagGroup(postID, tagGroup.name)

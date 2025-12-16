@@ -68,7 +68,6 @@
     "@tsparticles/all": "^3.8.1",
     "@tsparticles/preset-snow": "^3.2.0",
     "@tsparticles/react": "^3.0.0",
-    "@vitalets/google-translate-api": "^9.2.1",
     "apng-js": "^1.1.5",
     "audio-encoder": "^1.0.4",
     "axios": "^1.8.2",
