@@ -51,4 +51,9 @@ export default class Source {
         let buffer = await functions.http.getBuffer(url)
         return [buffer]
     }
+
+    public static pixivIllust = async (url: string) => {
+        const pixivSource = new PixivSource(url)
+        return pixivSource.illust(url)
+    }
 }

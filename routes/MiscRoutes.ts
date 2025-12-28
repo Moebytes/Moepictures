@@ -98,7 +98,7 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/misc/boorulinks", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const {bytes, pixivID} = req.body as {bytes: number[], pixivID: string}
+            const {bytes} = req.body as {bytes: number[]}
             const mirrors = await serverFunctions.links.booruLinks(bytes)
             res.status(200).send(mirrors)
         } catch {
@@ -125,6 +125,17 @@ const MiscRoutes = (app: Express) => {
             if (!link) return void res.status(400).send("No url")
             let images = await source.extractImages(link)
             res.status(200).send(images)
+        } catch {
+            res.status(400).end()
+        }
+    })
+
+    app.post("/api/misc/pixiv", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const link = decodeURIComponent(req.body.url as string)
+            if (!link) return void res.status(400).send("No url")
+            let result = await source.pixivIllust(link)
+            res.status(200).json(result)
         } catch {
             res.status(400).end()
         }

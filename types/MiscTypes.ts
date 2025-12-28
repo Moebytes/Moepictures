@@ -1,5 +1,4 @@
 import {PixivIllust} from "pixiv.ts"
-import {DeviationRSSExtended} from "deviantart.ts"
 import {Banner, PostRating, PostStyle, PostType, UploadImage, UploadTag} from "./Types"
 
 export interface GIFFrame {
@@ -51,6 +50,7 @@ export interface SaucenaoResponse {
 }
 
 export type PixivResponse = PixivIllust & {user: {twitter: string}}
+export type UgoiraData = {zip_urls: {medium: string}, frames: {file: string, delay: number}[]}
 
 export interface Attachment {
     filename: string
@@ -176,6 +176,7 @@ export type MiscPostEndpoint<T extends string> =
     T extends "/api/misc/saucenao" ? {params: number[], response: SaucenaoResponse[]} :
     T extends "/api/misc/boorulinks" ? {params: {bytes: number[], pixivID: string}, response: string[]} :
     T extends "/api/misc/revdanbooru" ? {params: number[], response: string} :
+    T extends "/api/misc/pixiv" ? {params: {url: string}, response: {illust: PixivIllust, ugoiraMetadata: UgoiraData}} :
     T extends "/api/misc/proxy-images" ? {params: {url: string}, response: {data: number[]}[]} :
     T extends "/api/misc/translate" ? {params: string[], response: string[]} :
     T extends "/api/misc/romajinize" ? {params: string[], response: string[]} :

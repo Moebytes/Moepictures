@@ -2,6 +2,7 @@ import path from "path"
 import Pixiv from "pixiv.ts"
 import JSZip from "jszip"
 import {AbstractSource} from "./AbstractSource"
+import {UgoiraData} from "../types/Types"
 
 let pixiv: Pixiv
 
@@ -55,5 +56,20 @@ export class PixivSource extends AbstractSource {
             const image = await this.fetchBuffer(link)
             return [image]
         }
+    }
+
+    public illust = async (url: string) => {
+        if (!pixiv) await this.init()
+        let resolvable = url as string | number
+        if (url.includes("pximg.net")) {
+            const id = path.basename(url).match(/(\d+)(?=_)/)?.[0]
+            resolvable = Number(id)
+        }
+        let illust = await pixiv.illust.get(resolvable)
+        let ugoiraMetadata = null as UgoiraData | null
+        if (illust.type === "ugoira") {
+            ugoiraMetadata = await pixiv.ugoira.get(illust.id).then((r) => r.ugoira_metadata)
+        }
+        return {illust, ugoiraMetadata}
     }
 }
