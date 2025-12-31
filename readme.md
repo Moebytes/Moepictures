@@ -2,7 +2,7 @@
 
 Moepictures is a website for cataloging cute anime art and has its own tagging system.
 
-<img src="assets/images/mainimg.png">
+<img src="assets/images/readme.png">
 
 ### Searching With Spaces
 
