@@ -1,9 +1,6 @@
 import React, {useEffect} from "react"
 import {useNavigate, useLocation} from "react-router-dom"
 import favicon from "../../assets/icons/favicon.png"
-import favicon2 from "../../assets/icons/favicon2.png"
-import favicon3 from "../../assets/icons/favicon3.png"
-import favicon4 from "../../assets/icons/favicon4.png"
 import {useThemeSelector, useThemeActions, useLayoutSelector, useSearchActions, useSearchSelector, 
 useInteractionActions, useLayoutActions, useActiveSelector, useInteractionSelector, useCacheSelector, 
 useCacheActions, useFlagSelector, useActiveActions, useFlagActions, useFilterActions} from "../../store"
@@ -91,23 +88,6 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         }
     }, [mobile])
 
-    const getFavicon = () => {
-        if (typeof window === "undefined") return favicon
-        if (siteHue >= 240) {
-            functions.dom.changeFavicon(favicon2)
-            return favicon2
-        } else if (siteHue >= 160) {
-            functions.dom.changeFavicon(favicon)
-            return favicon
-        } else if (siteHue >= 100) {
-            functions.dom.changeFavicon(favicon3)
-            return favicon3
-        } else {
-            functions.dom.changeFavicon(favicon4)
-            return favicon4
-        }
-    }
-
     return (
         <div className={`titlebar ${hideTitlebar ? "hide-titlebar" : ""} ${relative ? "titlebar-relative" : ""} ${mobileScrolling ? "hide-mobile-titlebar" : ""}`} onMouseEnter={() => setEnableDrag(false)}>
             {mobile ?
@@ -131,7 +111,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                             <span className="titlebar-text-a">s</span>
                     </div>
                     <div className="titlebar-image-container">
-                        <img className="titlebar-img" src={getFavicon()}/>
+                        <img className="titlebar-img" src={favicon}/>
                     </div>
                 </span>
             </div>

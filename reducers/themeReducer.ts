@@ -11,7 +11,7 @@ const themeSlice = createSlice({
     name: "theme",
     initialState: {
         language: "en" as Languages,
-        theme: "dark" as Themes,
+        theme: "light" as Themes,
         siteHue: 180,
         siteSaturation: 100,
         siteLightness: 50,

@@ -5,6 +5,7 @@
   "main": "dist/server/server.js",
   "scripts": {
     "start": "npm run build && node --max-old-space-size=8192 dist/server/server.js",
+    "dev": "rsbuild dev --config rsbuild.client.ts",
     "build": "npm run clean && rsbuild build --config rsbuild.client.ts && rsbuild build --config rsbuild.server.ts",
     "pm2": "pm2 start ecosystem.config.js --env production",
     "ssh": "dotenv -e .env -- sh -c 'ssh -i \"$SSH_KEY_PATH\" \"$SSH_USER\"@\"$SSH_HOST\"'",

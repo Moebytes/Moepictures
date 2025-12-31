@@ -1,9 +1,5 @@
-import React, {useContext, useState, useEffect, useReducer} from "react"
-import {HashLink as Link} from "react-router-hash-link"
+import React, {useState, useEffect, useReducer} from "react"
 import {useNavigate} from "react-router-dom"
-import favicon from "../../assets/icons/favicon.png"
-import eyedropper from "../../assets/icons/eyedropper.png"
-import light from "../../assets/icons/light.png"
 import logoutIcon from "../../assets/icons/logout.png"
 import logoutModIcon from "../../assets/icons/logout-mod.png"
 import logoutAdminIcon from "../../assets/icons/logout-admin.png"
@@ -12,18 +8,27 @@ import logoutPremiumIcon from "../../assets/icons/logout-premium.png"
 import logoutCuratorIcon from "../../assets/icons/logout-curator.png"
 import logoutContributorIcon from "../../assets/icons/logout-contributor.png"
 import searchIcon from "../../assets/icons/search.png"
-import crown from "../../assets/icons/crown.png"
-import mail from "../../assets/icons/mail.png"
+
+import history from "../../assets/svg/history.svg"
+import music from "../../assets/svg/music.svg"
+import snowflake from "../../assets/svg/snowflake.svg"
+import hueshift from "../../assets/svg/hueshift.svg"
+import mail from "../../assets/svg/mail.svg"
+import crown from "../../assets/svg/crown.svg"
+
+import eyedropperLight from "../../assets/icons/eyedropper-light.png"
+import light from "../../assets/icons/light.png"
 import mailNotif from "../../assets/icons/mail-notif.png"
 import crownLight from "../../assets/icons/crown-light.png"
 import mailLight from "../../assets/icons/mail-light.png"
 import mailNotifLight from "../../assets/icons/mail-notif-light.png"
-import eyedropperLight from "../../assets/icons/eyedropper-light.png"
-import lightLight from "../../assets/icons/light-light.png"
-import dark from "../../assets/icons/dark.png"
-import userHistory from "../../assets/icons/user-history.png"
 import userHistoryLight from "../../assets/icons/user-history-light.png"
 import darkLight from "../../assets/icons/dark-light.png"
+import snowflakeLight from "../../assets/icons/snowflake-light.png"
+import snowflakeOn from "../../assets/icons/snowflake-on.png"
+import musicLight from "../../assets/icons/music-light.png"
+import musicActive from "../../assets/icons/music-active.png"
+
 import permissions from "../../structures/Permissions"
 import functions from "../../functions/Functions"
 import SearchSuggestions from "../tooltip/SearchSuggestions"
@@ -32,12 +37,6 @@ import pageIconLight from "../../assets/icons/page-mobile-light.png"
 import scrollIconLight from "../../assets/icons/scroll-mobile-light.png"
 import pageIcon from "../../assets/icons/page-mobile.png"
 import premiumStar from "../../assets/icons/premium-star.png"
-import snowflake from "../../assets/icons/snowflake.png"
-import snowflakeLight from "../../assets/icons/snowflake-light.png"
-import snowflakeOn from "../../assets/icons/snowflake-on.png"
-import music from "../../assets/icons/music.png"
-import musicLight from "../../assets/icons/music-light.png"
-import musicActive from "../../assets/icons/music-active.png"
 import multiplier1xIcon from "../../assets/icons/1x-mobile.png"
 import multiplier2xIcon from "../../assets/icons/2x-mobile.png"
 import multiplier3xIcon from "../../assets/icons/3x-mobile.png"
@@ -145,8 +144,6 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
         setActiveParticleDropdown(!activeParticleDropdown)
     }
 
-
-
     const miniPlayer = () => {
         if (!audio) return
         setActiveParticleDropdown(false)
@@ -164,41 +161,31 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
         setTheme(newTheme as Themes)
     }
 
-    const getEyedropperIcon = () => {
-        if (theme.includes("light")) return eyedropperLight
-        return eyedropper
-    }
-
-    const getThemeIcon = () => {
-        if (theme.includes("light")) return darkLight
-        return light
-    }
-
-    const getMailIcon = () => {
-        if (theme.includes("light")) return hasNotification ? mailNotifLight : mailLight
-        return hasNotification ? mailNotif : mail
-    }
-
     const getHistoryIcon = () => {
-        if (theme.includes("light")) return userHistoryLight
-        return userHistory
-    }
-
-    const getCrownIcon = () => {
-        if (theme.includes("light")) return crownLight
-        return crown
-    }
-
-    const getSnowflakeIcon = () => {
-        if (particles) return snowflakeOn
-        if (theme.includes("light")) return snowflakeLight
-        return snowflake
+        return functions.color.colorizeSVG(history, "--titleButtons")
     }
 
     const getMusicIcon = () => {
         if (audio) return musicActive
-        if (theme.includes("light")) return musicLight
-        return music
+        return functions.color.colorizeSVG(music, "--titleButtons")
+    }
+    
+    const getSnowflakeIcon = () => {
+        if (particles) return snowflakeOn
+        return functions.color.colorizeSVG(snowflake, "--titleButtons")
+    }
+
+    const getHueShiftIcon = () => {
+        return functions.color.colorizeSVG(hueshift, "--titleButtons")
+    }
+
+    const getMailIcon = () => {
+        return hasNotification ? mailNotif : 
+        functions.color.colorizeSVG(mail, "--titleButtons")
+    }
+
+    const getCrownIcon = () => {
+        return functions.color.colorizeSVG(crown, "--titleButtons")
     }
 
     const getScrollIcon = () => {
@@ -217,7 +204,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const logout = async () => {
         await functions.http.post("/api/user/logout", null, session, setSessionFlag)
         setSessionFlag(true)
-        history.go(0)
+        navigate(0)
     }
 
     const postsClick = () => {
@@ -483,8 +470,6 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span className="mobile-nav-text" onClick={() => {navigate("/groups"); setHideMobileNavbar(true)}}>{i18n.sort.groups}</span>
                     <span className="mobile-nav-text" onClick={() => {navigate("/forum"); setHideMobileNavbar(true)}}>{i18n.navbar.forum}</span>
                     <span className="mobile-nav-text" onClick={() => {navigate("/help"); setHideMobileNavbar(true)}}>{i18n.navbar.help}</span>
-                    {/* <span className="mobile-nav-text" onClick={() => {navigate("/terms"); setHideMobileNavbar(true)}}>{i18n.navbar.terms}</span> */}
-                    {/* <span className="mobile-nav-text" onClick={() => {navigate("/contact"); setHideMobileNavbar(true)}}>{i18n.navbar.contact}</span> */}
                     {permissions.isPremiumEnabled() && session.username ? <div className="mobile-nav-img-container" onClick={() => {navigate("/premium"); setHideMobileNavbar(true)}}>
                         <img className="mobile-nav-img" src={premiumStar} style={{marginRight: "10px"}}/>
                         <span className="mobile-nav-text" style={{margin: "0px", color: "var(--premiumColor)"}}>{i18n.roles.premium}</span>
@@ -494,8 +479,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => navigate("/history")} style={{filter}}/> : null}
                     <img className="mobile-nav-color" src={getMusicIcon()} onClick={miniPlayer} style={{filter}}/>
                     <img className="mobile-nav-color" src={getSnowflakeIcon()} onClick={particleChange} style={{filter}}/>
-                    <img className="mobile-nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter}}/>
-                    {/* <img className="mobile-nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter}}/> */}
+                    <img className="mobile-nav-color" src={getHueShiftIcon()} onClick={colorChange} style={{filter}}/>
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => navigate("/mail")} style={{filter}}/> : null}
                     {permissions.isMod(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => navigate("/mod-queue")} style={{filter}}/> : null}
                     <img className="mobile-nav-color" src={getScrollIcon()} onClick={toggleScroll} style={{filter, marginRight: "7px"}}/>
@@ -528,28 +512,13 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
             <SearchSuggestions active={suggestionsActive && hideSidebar} width={180} x={getX()} y={getY()}/>
             <div className={`navbar ${hideTitlebar ? "translate-navbar" : ""} ${hideSortbar && hideTitlebar && hideSidebar ? "hide-navbar" : ""} ${hideSortbar && hideNavbar && showMiniTitle ? "hide-navbar" : ""}
             ${relative ? "navbar-relative" : ""}`} onMouseEnter={() => setEnableDrag(false)}>
-                {/*showMiniTitle && !relative ? 
-                    <Link to="/" className="nav-mini-title-container">
-                        <span className="nav-mini-title-a">M</span>
-                        <span className="nav-mini-title-b">o</span>
-                        <span className="nav-mini-title-a">e</span>
-                        <span className="nav-mini-title-b">p</span>
-                        <span className="nav-mini-title-a">i</span>
-                        <span className="nav-mini-title-b">c</span>
-                        <span className="nav-mini-title-a">t</span>
-                        <span className="nav-mini-title-b">u</span>
-                        <span className="nav-mini-title-a">r</span>
-                        <span className="nav-mini-title-b">e</span>
-                        <span className="nav-mini-title-a">s</span>
-                    </Link>
-                : null*/}
                 <div className="nav-text-container">
-                    {session.username ? 
+                    {/*session.username ? 
                     <div className="nav-user-container" style={{marginRight: marginR}}>
                         <img className="nav-user-img" src={userImg} style={{filter: session.image ? "" : filter}}/>
                         {generateUsernameJSX()}
                     </div> :
-                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text nav-login-text" onClick={() => navigate("/login")}>{i18n.navbar.login}</span>}
+                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text nav-login-text" onClick={() => navigate("/login")}>{i18n.navbar.login}</span>*/}
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => postsClick()}>{i18n.sort.posts}</span>
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/comments")}>{i18n.navbar.comments}</span>
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/notes")}>{i18n.navbar.notes}</span>
@@ -570,8 +539,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => navigate("/history")} style={{filter}}/> : null}
                     <img className="nav-color" src={getMusicIcon()} onClick={miniPlayer} style={{filter}}/>
                     <img className="nav-color" src={getSnowflakeIcon()} onClick={particleChange} style={{filter}}/>
-                    <img className="nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter}}/>
-                    {/* <img className="nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter}}/> */}
+                    <img className="nav-color" src={getHueShiftIcon()} onClick={colorChange} style={{filter}}/>
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => navigate("/mail")} style={{filter}}/> : null}
                     {permissions.isMod(session) && !hideSidebar ? <img className="nav-color" src={getCrownIcon()} onClick={() => navigate("/mod-queue")} style={{filter}}/> : null}
                 </div>

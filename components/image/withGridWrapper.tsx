@@ -460,18 +460,10 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         }
     
         const getBorder = () => {
-            if (sizeType === "tiny" || sizeType === "small" || session.captchaNeeded) {
-                if (selected) {
-                    return "0px 0px 0px 2px var(--selectBorder)"
-                } else {
-                    return `0px 0px 0px 1px ${functions.post.borderColor(props.post)}`
-                }
+            if (selected) {
+                return "0px 0px 0px 2px var(--selectBorder)"
             } else {
-                if (selected) {
-                    return "0px 0px 0px 4px var(--selectBorder)"
-                } else {
-                    return `0px 0px 0px 2px ${functions.post.borderColor(props.post)}`
-                }
+                return `0px 0px 0px 1px ${functions.post.borderColor(props.post)}`
             }
         }
     
@@ -543,7 +535,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         const refWidth = getRef()?.clientWidth
     
         return (
-            <div style={{opacity: visible && refWidth ? "1" : "0", transition: "opacity 0.1s", borderRadius: `${props.borderRadius || 0}px`}} className="image-box" id={String(props.id)} ref={containerRef} 
+            <div style={{opacity: visible && refWidth ? "1" : "0", transition: "opacity 0.1s", borderRadius: `${props.borderRadius || 5}px`}} className="image-box" id={String(props.id)} ref={containerRef} 
             onClick={onClick} onAuxClick={onClick} onContextMenu={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
                 <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
                     {cornerIcon() ? <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s", filter}} className="song-icon" src={cornerIcon()} 

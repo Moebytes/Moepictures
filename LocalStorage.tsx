@@ -6,30 +6,89 @@ import {Themes, ImageFormat, PostType, PostRating, PostStyle, PostSize, PostSort
 import functions from "./functions/Functions"
 import localforage from "localforage"
 
+const lightColorList = {
+    "--selection": "#ffe0f4",
+    "--background": "#FFFFFF",
+
+    "--titlebarBG": "#FFD6EB",
+    "--moeTextA": "#FF5099",
+    "--moeTextB": "#FF307F",
+    "--titleText": "#FF579D",
+
+    "--navbarBG": "#FFD6EB",
+    "--navbarText": "#FF579D",
+
+    "--sidebarBG": "#FFEFF7",
+    "--sidebarText": "#000000",
+    "--sidebarSearchBG": "#FFFFFF",
+
+    "--sortbarBG": "rgba(255, 255, 255, 0.75)",
+    "--sortbarText": "#000000",
+
+    "--footerBG": "#FFD6EB",
+
+    "--imageBorder": "#FF77CB",
+    "--pageButton": "#FF93CB",
+
+    //////////////////////// UNPROCESSED
+
+    "--sidebarSearchFocus": "#8581ff",
+    "--tagReadColor": "rgba(154, 87, 255, 0.5)",
+    "--tagColor": "#9957ff",
+    "--tooltipBG": "rgba(240, 240, 255, 0.5)",
+    "--inputBorder": "#7fa0ff",
+    "--text": "#7b6dff",
+    "--text-alt": "#cb7cff",
+    "--inputBG": "#f4f2ff",
+    "--drop-color1": "rgba(153, 112, 250, 0.7)",
+    "--drop-color2": "rgba(158, 124, 252, 0.9)",
+    "--bubbleBG": "rgba(202, 171, 255, 0.8)",
+    "--binary": "#ffffff",
+    "--selectBorder": "#8373ff",
+    "--progressText": "#000000",
+    "--progressBG": "#ffffff",
+    "--audioPlayerColor": "#e0e4ff",
+    "--buttonBG": "#ff92ff",
+    "--previewBG": "#b2d0ff",
+    "--editBG": "#afe6ff",
+    "--r18BGColor": "#e206444a",
+    "--audioFilterColor": "#ff4d97"
+}
+
 const darkColorList = {
-    "--selection": "#6c69fc",
-    "--background": "#09071c",
-    "--background2": "#080622",
-    "--titlebarBG": "#090420",
-    "--titleTextA": "#6814ff",
-    "--titleTextB": "#4214ff",
-    "--titlebarText": "#431dff",
-    "--navbarBG": "#0b0322",
-    "--navbarText": "#4f35ff",
-    "--sidebarBG": "#0a041e",
+    "--selection": "#fc69bc",
+    "--background": "#10030C",
+
+    "--titlebarBG": "#1C0713",
+    "--moeTextA": "#FF5099",
+    "--moeTextB": "#FF307F",
+    "--titleText": "#FF5099",
+
+    "--navbarBG": "#1C0713",
+    "--navbarText": "#FF3CA4",
+
+    "--sidebarBG": "#16050F",
+    "--sidebarText": "#FF349A",
+    "--sidebarSearchBG": "#2D0D1A",
+
+    "--sortbarBG": "rgba(14, 1, 10, 0.95)",
+    "--sortbarText": "#FFFFFF",
+
+    "--footerBG": "#1C0713",
+
+    "--imageBorder": "#FF77CB",
+    "--pageButton": "#FF4E92",
+
+    //////////////////////// UNPROCESSED
+
     "--sidebarSearchFocus": "#2908e0",
-    "--sidebarSearchBG": "#0e0631",
     "--tagReadColor": "rgba(98, 31, 255, 0.5)",
     "--tagColor": "#641fff",
-    "--sortbarBG": "rgba(11, 3, 34, 0.95)",
     "--tooltipBG": "rgba(11, 3, 34, 0.85)",
-    "--sortbarText": "#5053ff",
-    "--imageBorder": "#0a0f7f",
     "--inputBorder": "#0d0325",
     "--text": "#716fff",
     "--text-alt": "#8b4dff",
     "--inputBG": "#050020",
-    "--footerBG": "#0b0322",
     "--drop-color1": "rgba(59, 13, 165, 0.7)",
     "--drop-color2": "rgba(86, 26, 226, 0.9)",
     "--bubbleBG": "rgba(89, 43, 255, 0.8)",
@@ -45,44 +104,6 @@ const darkColorList = {
     "--audioFilterColor": "#ff4d97"
 }
 
-const lightColorList = {
-    "--selection": "#e0e0ff",
-    "--background": "#ffffff",
-    "--background2": "#f9f9ff",
-    "--titlebarBG": "#e0e4ff",
-    "--titleTextA": "#745dff",
-    "--titleTextB": "#5d60ff",
-    "--titlebarText": "#7e66ff",
-    "--navbarBG": "#e0e4ff",
-    "--navbarText": "#6c47ff",
-    "--sidebarBG": "#e0e4ff",
-    "--sidebarSearchFocus": "#8581ff",
-    "--sidebarSearchBG": "#dbdaff",
-    "--tagReadColor": "rgba(154, 87, 255, 0.5)",
-    "--tagColor": "#9957ff",
-    "--sortbarBG": "rgba(240, 240, 255, 0.3)",
-    "--tooltipBG": "rgba(240, 240, 255, 0.5)",
-    "--sortbarText": "#6d77ff",
-    "--imageBorder": "#7fa0ff",
-    "--inputBorder": "#7fa0ff",
-    "--text": "#7b6dff",
-    "--text-alt": "#cb7cff",
-    "--inputBG": "#f4f2ff",
-    "--footerBG": "#ffffff",
-    "--drop-color1": "rgba(153, 112, 250, 0.7)",
-    "--drop-color2": "rgba(158, 124, 252, 0.9)",
-    "--bubbleBG": "rgba(202, 171, 255, 0.8)",
-    "--binary": "#ffffff",
-    "--selectBorder": "#8373ff",
-    "--progressText": "#000000",
-    "--progressBG": "#ffffff",
-    "--audioPlayerColor": "#e0e4ff",
-    "--buttonBG": "#ff92ff",
-    "--previewBG": "#b2d0ff",
-    "--editBG": "#afe6ff",
-    "--r18BGColor": "#e206444a",
-    "--audioFilterColor": "#ff4d97"
-}
 const LocalStorage: React.FunctionComponent = (props) => {
     const {theme, language, siteHue, siteSaturation, siteLightness, particles, 
     particleAmount, particleSize, particleSpeed} = useThemeSelector()

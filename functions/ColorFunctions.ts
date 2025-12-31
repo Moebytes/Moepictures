@@ -3,8 +3,7 @@ import {hexToRgb} from "../structures/Color"
 export default class ColorFunctions {
     public static filter = (opt: {siteHue: number, siteSaturation: number, siteLightness: number, theme?: string}) => {
         let {siteHue, siteSaturation, siteLightness, theme} = opt
-        if (theme?.includes("light")) return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation - 60}%) brightness(${siteLightness + 220}%)`
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 50}%)`
     }
 
     public static parseTransparentColor = (color: string) => {
@@ -119,5 +118,33 @@ export default class ColorFunctions {
         } else {
             return this.rgbToHex(newRGB[0], newRGB[1], newRGB[2])
         }
+    }
+
+    public static computedVar = (variable: string) => {
+        if (typeof window === "undefined") return "#FF579D"
+        return window.getComputedStyle(document.documentElement).getPropertyValue(variable)
+    }
+
+    public static colorizeSVG = (svg: string, varColor: string) => {
+        let code = svg
+        let isBase64 = svg.startsWith("data:image/svg+xml;base64,")
+        let hexColor = this.computedVar(varColor)
+
+        if (isBase64) {
+            const base64 = svg.replace("data:image/svg+xml;base64,", "")
+            code = new TextDecoder("utf-8").decode(Uint8Array.from(atob(base64), c => c.charCodeAt(0)))
+        }
+
+        const updated = code.replace(
+            /fill\s*=\s*"(black|#000000|#000|rgb\(\s*0\s*,\s*0\s*,\s*0\s*\))"/gi,
+            `fill="${hexColor}"`
+        )
+
+        if (isBase64) {
+            const encoded = btoa(String.fromCharCode(...new TextEncoder().encode(updated)))
+            return `data:image/svg+xml;base64,${encoded}`
+        }
+
+        return updated
     }
 }

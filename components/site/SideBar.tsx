@@ -8,13 +8,23 @@ useTagDialogSelector} from "../../store"
 import {HashLink as Link} from "react-router-hash-link"
 import permissions from "../../structures/Permissions"
 import favicon from "../../assets/icons/favicon.png"
-import searchIcon from "../../assets/icons/search.png"
-import searchImage from "../../assets/icons/search-image.png"
-import random from "../../assets/icons/random.png"
+
+import searchIcon from "../../assets/svg/search.svg"
+import searchImage from "../../assets/svg/search-image.svg"
+import random from "../../assets/svg/random.svg"
+
+import autoSearchIcon from "../../assets/svg/autosearch.svg"
+import saveSearchIcon from "../../assets/svg/savesearch.svg"
+import favSearchIcon from "../../assets/svg/heart.svg"
+import autoSearchActiveIcon from "../../assets/icons/autosearch-active.gif"
+import saveSearchActiveIcon from "../../assets/icons/savesearch-active.png"
+import favSearchActiveIcon from "../../assets/icons/tag-hearted.png"
+
+import terms from "../../assets/svg/terms.svg"
+import privacy from "../../assets/svg/privacy.svg"
+import contact from "../../assets/svg/contact.svg"
+
 import bookmark from "../../assets/icons/bookmark.png"
-import terms from "../../assets/icons/terms.png"
-import contact from "../../assets/icons/contact.png"
-import code from "../../assets/icons/code.png"
 import setAvatar from "../../assets/icons/setavatar.png"
 import addNote from "../../assets/icons/note-toggle-on.png"
 import report from "../../assets/icons/report.png"
@@ -44,16 +54,8 @@ import youtube from "../../assets/icons/youtube.png"
 import bandcamp from "../../assets/icons/bandcamp.png"
 import sketchfab from "../../assets/icons/sketchfab.png"
 import SearchSuggestions from "../tooltip/SearchSuggestions"
-import adminCrown from "../../assets/icons/admin-crown.png"
-import modCrown from "../../assets/icons/mod-crown.png"
 import question from "../../assets/icons/question.png"
 import unheart from "../../assets/icons/unheart.png"
-import autoSearchIcon from "../../assets/icons/autosearch.png"
-import autoSearchActiveIcon from "../../assets/icons/autosearch-active.gif"
-import saveSearchIcon from "../../assets/icons/savesearch.png"
-import saveSearchActiveIcon from "../../assets/icons/savesearch-active.png"
-import favSearchIcon from "../../assets/icons/tag-heart.png"
-import favSearchActiveIcon from "../../assets/icons/tag-hearted.png"
 import danbooru from "../../assets/icons/danbooru.png"
 import gelbooru from "../../assets/icons/gelbooru.png"
 import safebooru from "../../assets/icons/safebooru.png"
@@ -96,9 +98,9 @@ interface Props {
 
 let interval = null as any
 let tagTooltipTimer = null as any
-let maxHeight1 = 547 // 582
-let maxHeight2 = 625 // 655
-let maxHeight3 = 672 // 698
+let maxHeight1 = 547
+let maxHeight2 = 625
+let maxHeight3 = 672
 
 const SideBar: React.FunctionComponent<Props> = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
@@ -136,16 +138,6 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const location = useLocation()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getFilterSearch = () => {
-        if (theme.includes("light")) return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation - 80}%) brightness(${siteLightness + 350}%)`
-        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
-
-    const getFilterRandom = () => {
-        if (theme.includes("light")) return `hue-rotate(${siteHue - 230}deg) saturate(${siteSaturation - 30}%) brightness(${siteLightness + 200}%)`
-        return `hue-rotate(${siteHue - 200}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
-    }
 
     const updateTags = async () => {
         let tags = await functions.tag.parseTags(posts, session, setSessionFlag)
@@ -331,27 +323,33 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }, [hideSortbar, hideNavbar, hideTitlebar, mobile])
 
     const getAutoSearch = () => {
-        if (autoSearch) {
-            return autoSearchActiveIcon
-        } else {
-            return autoSearchIcon
-        }
+        return autoSearch ?
+        autoSearchActiveIcon :
+        functions.color.colorizeSVG(autoSearchIcon, "--sidebarButtons")
     }
 
     const getSaveSearch = () => {
-        if (saveSearch) {
-            return saveSearchActiveIcon
-        } else {
-            return saveSearchIcon
-        }
+        return saveSearch ?
+        saveSearchActiveIcon :
+        functions.color.colorizeSVG(saveSearchIcon, "--sidebarButtons")
     }
 
     const getFavSearch = () => {
-        if (favSearch) {
-            return favSearchActiveIcon
-        } else {
-            return favSearchIcon
-        }
+        return favSearch ?
+        favSearchActiveIcon :
+        functions.color.colorizeSVG(favSearchIcon, "--sidebarButtons")
+    }
+
+    const termsIcon = () => {
+        return functions.color.colorizeSVG(terms, "--navbarText")
+    }
+
+    const privacyIcon = () => {
+        return functions.color.colorizeSVG(privacy, "--navbarText")
+    }
+
+    const contactIcon = () => {
+        return functions.color.colorizeSVG(contact, "--navbarText")
     }
 
     const tagInfo = (event: React.MouseEvent, tag?: string) => {
@@ -1168,16 +1166,16 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         <div className={`mobile-sidebar ${relative ? "mobile-sidebar-relative" : ""} ${mobileScrolling ? "hide-mobile-sidebar" : ""}`}>
             <div className="mobile-search-container">
                 <input className="mobile-search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null} onFocus={(event) => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
-                <button className="search-mobile-button" style={{filter: getFilterSearch()}} onClick={triggerSearch}>
+                <button className="search-mobile-button" style={{filter}} onClick={triggerSearch}>
                     <img src={searchIcon}/>
                 </button>
                 <label style={{display: "flex", width: "max-content", height: "max-content"}} htmlFor="image-search">
-                    <div className="search-mobile-button" style={{filter: getFilterSearch()}}>
+                    <div className="search-mobile-button" style={{filter}}>
                         <img src={searchImage}/>
                     </div>
                 </label>
                 <input id="image-search" type="file" onChange={(event) => imageSearch(event)}/>
-                <button className="search-mobile-button" style={{filter: getFilterSearch()}} onClick={randomSearch}>
+                <button className="search-mobile-button" style={{filter}} onClick={randomSearch}>
                     <img src={random}/>
                 </button>
             </div>
@@ -1199,18 +1197,18 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 </div> : null}
                 <div className="search-container" onMouseEnter={() => setEnableDrag(false)}>
                     <input className="search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
-                    <button className="search-button" style={{filter: getFilterSearch()}} onClick={triggerSearch}>
+                    <button className="search-button" style={{filter}} onClick={triggerSearch}>
                         <img src={searchIcon}/>
                     </button>
                     <label style={{display: "flex", width: "max-content", height: "max-content"}} htmlFor="image-search">
-                        <div className="search-button" style={{filter: getFilterSearch()}}>
+                        <div className="search-button" style={{filter}}>
                             <img src={searchImage}/>
                         </div>
                     </label>
                     <input id="image-search" type="file" onChange={(event) => imageSearch(event)}/>
                 </div>
                 <div className="random-container">
-                    <button className="random-button" style={{filter: getFilterRandom()}} onClick={randomSearch}>
+                    <button className="random-button" style={{filter}} onClick={randomSearch}>
                         <span>{i18n.sort.random}</span>
                         <img src={random}/>
                     </button>
@@ -1220,14 +1218,14 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 </div>
                 {!props.post && session.username && favSearch ? 
                 <div className="random-container">
-                    <button className="fav-search-button" style={{filter: getFilterSearch()}} onClick={() => setDeleteTagFavoritesDialog(!deleteTagFavoritesDialog)}>
+                    <button className="fav-search-button" style={{filter}} onClick={() => setDeleteTagFavoritesDialog(!deleteTagFavoritesDialog)}>
                         <img src={unheart}/>
                         <span>{i18n.sidebar.deleteFavorites}</span>
                     </button>
                 </div> : null}
                 {!props.post && session.username && saveSearch ? 
                 <div className="random-container">
-                    <button className="save-search-button" style={{filter: getFilterSearch()}} onClick={() => setSaveSearchDialog(!saveSearchDialog)}>
+                    <button className="save-search-button" style={{filter}} onClick={() => setSaveSearchDialog(!saveSearchDialog)}>
                         <img src={bookmark}/>
                         <span>{i18n.sidebar.saveSearch}</span>
                     </button>
@@ -1520,10 +1518,13 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             <div className="sidebar-footer">
                     <span className="sidebar-footer-text">©{new Date().getFullYear()} Moepictures</span>
                     <Link to="/terms">
-                        <img className="sidebar-footer-icon" src={terms} style={{filter}}/>
+                        <img className="sidebar-footer-icon" src={termsIcon()} style={{filter}}/>
+                    </Link>
+                    <Link to="/terms#privacy">
+                        <img className="sidebar-footer-icon" src={privacyIcon()} style={{filter}}/>
                     </Link>
                     <Link to="/contact">
-                        <img className="sidebar-footer-icon" src={contact} style={{filter}}/>
+                        <img className="sidebar-footer-icon" src={contactIcon()} style={{filter}}/>
                     </Link>
                 </div>
             </div>
