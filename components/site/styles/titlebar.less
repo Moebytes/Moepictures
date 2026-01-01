@@ -116,6 +116,57 @@
     transform: translateY(-@title-bar-height);
 }
 
+.titlebar-login-container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: 2px 18px;
+    gap: 7px;
+}
+
+.titlebar-login-icon {
+    width: auto;
+    height: 20px;  
+    margin-bottom: 3px;
+}
+
+.titlebar-login-text {
+    font-family: "Honoka Shin Antique-Kaku", sans-serif;
+    font-size: 20px; 
+    color: var(--loginText);
+    &:hover {
+        cursor: pointer;
+        filter: brightness(130%);
+    }
+}
+
+.titlebar-user-img {
+    width: auto;
+    height: 28px;
+    border-radius: 5px;
+}
+
+.titlebar-user-text {
+    font-family: "Honoka Shin Antique-Kaku", sans-serif;
+    font-size: 18px;
+    color: var(--userColor);
+    cursor: pointer;
+    &:hover {
+        filter: brightness(150%);
+    }
+}
+
+.titlebar-logout-img {
+    width: auto;  
+    height: 18px;
+    margin-bottom: 3px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
 @media screen and (max-width: 500px) {
     .titlebar {
         justify-content: center;    

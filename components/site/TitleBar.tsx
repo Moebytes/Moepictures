@@ -1,11 +1,13 @@
 import React, {useEffect} from "react"
 import {useNavigate, useLocation} from "react-router-dom"
 import favicon from "../../assets/icons/favicon.png"
-import {useThemeSelector, useThemeActions, useLayoutSelector, useSearchActions, useSearchSelector, 
+import {useThemeSelector, useSessionSelector, useLayoutSelector, useSearchActions, useSearchSelector, 
 useInteractionActions, useLayoutActions, useActiveSelector, useInteractionSelector, useCacheSelector, 
-useCacheActions, useFlagSelector, useActiveActions, useFlagActions, useFilterActions} from "../../store"
+useCacheActions, useFlagSelector, useActiveActions, useFlagActions, useFilterActions, useSessionActions} from "../../store"
 import functions from "../../functions/Functions"
-import hamburger from "../../assets/icons/hamburger.png"
+import hamburger from "../../assets/svg/hamburger.svg"
+import key from "../../assets/svg/key.svg"
+import logoutSVG from "../../assets/svg/logout.svg"
 import lockIcon from "../../assets/icons/lock-red.png"
 import privateIcon from "../../assets/icons/private.png"
 import {PostFull, PostHistory, UnverifiedPost, Themes} from "../../types/Types"
@@ -28,6 +30,8 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     const {search, ratingType, autoSearch} = useSearchSelector()
     const {setSearch, setSearchFlag, setImageType, setRatingType, setStyleType, setSortType} = useSearchActions()
     const {scrollY, mobileScrolling} = useInteractionSelector()
+    const {session, userImg} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const {setEnableDrag, setScrollY, setMobileScrolling} = useInteractionActions()
     const {headerFlag} = useFlagSelector()
     const {setHeaderFlag} = useFlagActions()
@@ -52,6 +56,14 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     }, [headerFlag])
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--moeTextB")
+    }
+
+    const getLoginIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--loginText")
+    }
 
     const toggleMobileNavbar = () => {
         setHideMobileNavbar(!hideMobileNavbar)
@@ -88,11 +100,54 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         }
     }, [mobile])
 
+    const logout = async () => {
+        await functions.http.post("/api/user/logout", null, session, setSessionFlag)
+        setSessionFlag(true)
+        navigate(0)
+    }
+
+    const generateUsernameJSX = () => {
+        const colorMap = {
+            "admin": "admin-color",
+            "mod": "mod-color",
+            "system": "system-color",
+            "premium-curator": "curator-color",
+            "curator": "curator-color",
+            "premium-contributor": "premium-color",
+            "contributor": "contributor-color",
+            "premium": "premium-color"
+        }
+        const svgMap = {
+            "admin": "--adminColor",
+            "mod": "--modColor",
+            "system": "--systemColor",
+            "premium-curator": "--curatorColor",
+            "curator": "--curatorColor",
+            "premium-contributor": "--premiumColor",
+            "contributor": "--contributorColor",
+            "premium": "--premiumColor",
+            "user": "--userColor"
+        }
+        const colorClass = session.banned ? "banned" : colorMap[session.role] ?? ""
+        const svgColor = session.banned ? "--banText" : svgMap[session.role] ?? "--userColor"
+        const logoutIcon = functions.color.colorizeSVG(logoutSVG, svgColor)
+
+        return (
+            <>
+            <span className={`titlebar-user-text ${colorClass}`} 
+                onClick={() => navigate("/profile")}>
+                {functions.util.toProperCase(session.username)}
+            </span>
+            <img className="titlebar-logout-img" src={logoutIcon} onClick={logout}/>
+            </>
+        )
+    }
+
     return (
         <div className={`titlebar ${hideTitlebar ? "hide-titlebar" : ""} ${relative ? "titlebar-relative" : ""} ${mobileScrolling ? "hide-mobile-titlebar" : ""}`} onMouseEnter={() => setEnableDrag(false)}>
             {mobile ?
             <div className="titlebar-hamburger-container">
-                <img className="titlebar-hamburger" src={hamburger} onClick={toggleMobileNavbar} style={{filter}}/>
+                <img className="titlebar-hamburger" src={getIcon(hamburger)} onClick={toggleMobileNavbar} style={{filter}}/>
             </div>
             : null}
             <div onClick={titleClick} className="titlebar-logo-container">
@@ -130,6 +185,16 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                     {autoSearch ? <span style={{color: "var(--premiumColor)", marginRight: "10px"}}>[{i18n.labels.autoSearch}]</span> : null}
                     {headerText}
                 </span>
+            </div> : null}
+            {!mobile ? 
+            <div className="titlebar-login-container">
+                {session.username ? <>
+                <img className="titlebar-user-img" src={userImg} style={{filter: session.image ? "" : filter}}/>
+                {generateUsernameJSX()}
+                </> : <>
+                <img draggable={false} className="titlebar-login-icon" src={getLoginIcon(key)}/>
+                <span className="titlebar-login-text" onClick={() => navigate("/login")}>{i18n.navbar.login}</span>
+                </>}
             </div> : null}
         </div>
     )

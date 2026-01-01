@@ -82,7 +82,7 @@ export default class DOMFunctions {
         const navbar = document.querySelector(".navbar")
         if (!navbar) {
             const mobileNavbar = document.querySelector(".mobile-navbar") as HTMLElement
-            return mobileNavbar ? mobileNavbar.clientHeight : 32
+            return mobileNavbar ? mobileNavbar.clientHeight : 30
         }
         return navbar.clientHeight
     }

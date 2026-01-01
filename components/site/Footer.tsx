@@ -91,7 +91,7 @@ const Footer: React.FunctionComponent<Props> = (props) => {
                 </div> : null}
                 <div className="footer-container">
                     <div className="footer-click-container" onClick={() => changeLanguage()}>
-                        <img className="footer-img" src={getLanguageIcon()} style={{height: "20px", marginRight: "5px", filter}}/>
+                        <img className="footer-img" src={getLanguageIcon()} style={{height: "16px", marginRight: "5px", filter}}/>
                         <span className="footer-text">{getLanguageText()}</span>
                     </div>
                     <div className="footer-click-container" onClick={() => goToTop()}>
@@ -110,7 +110,7 @@ const Footer: React.FunctionComponent<Props> = (props) => {
                     <span className="footer-text" >{i18n.navbar.contact}</span>
                 </div>
                 <div className="footer-click-container" style={{cursor: "default"}}>
-                    <span style={{fontSize: "16px"}} className="footer-text">- {i18n.footer.bottomMobile} -</span>
+                    <span className="footer-text">- {i18n.footer.bottomMobile} -</span>
                 </div>
             </div> : null}
         </div>

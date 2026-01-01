@@ -9,7 +9,7 @@
 
 @font-face {
     font-family: "Honoka Shin Antique-Kaku";
-    src: url("assets/fonts/Honoka-Shin-Antique-Kaku_M.otf") format("opentype");
+    src: url("assets/fonts/Honoka-Shin-Antique-Kaku_M.ttf") format("truetype");
 }
 
 @font-face {
@@ -27,16 +27,18 @@
     src: url("assets/fonts/TsunagiGothic.ttf") format("truetype");
 }
 
-@title-bar-height: 64px;
-@nav-bar-height: 29px;
-@sort-bar-height: 38px;
-@tag-banner-height: 38px;
+@title-bar-height: 60px;
+@nav-bar-height: 30px;
+@sort-bar-height: 35px;
+@tag-banner-height: 35px;
 @footer-height: 25px;
 @sidebar-width: 220px;
 
 :root {
     --selection: #ffe0f4;
     --background: #FFFFFF;
+    --black: #000000;
+    --white: #FFFFFF;
 
     --titlebarBG: #FFD6EB;
     --moeTextA: #FF5099;
@@ -46,52 +48,51 @@
     --navbarBG: #FFD6EB;
     --navbarText: #FF579D;
     --titleButtons: #FF44A1;
+    --loginText: #ff3ca4;
 
     --sidebarBG: #FFEFF7;
     --sidebarText: #000000;
     --sidebarButtons: #FF529A;
     --sidebarSearchBG: #FFFFFF;
+    --sidebarSearchFocus: #ff81c4;
+
+    --tagReadColor: rgba(255, 87, 205, 0.5);
+    --text: #ff6dd3;
+    --text-alt: #ff7cb7;
+    --inputBG: #fff2ff;
+    --inputBorder: #f97fff;
 
     --sortbarBG: rgba(255, 255, 255, 0.75);
     --sortbarIcons: #FF579D;
     --sortbarText: #000000;
 
+    --tooltipBG: rgba(255, 240, 255, 0.7);
+
     --footerBG: #FFD6EB;
 
     --imageBorder: #FF77CB;
     --pageButton: #FF93CB;
+    --drop-color1: rgba(250, 112, 213, 0.7);
+    --drop-color2: rgba(252, 124, 194, 0.9);
+    --selectBorder: #ff73ce;
+    --r18BGColor: #e2067f4a;
 
-    //////////////////////// UNPROCESSED
-
-    --navbarUserText: #ad3cff;
-    --sidebarSearchFocus: #8581ff;
-    --tagReadColor: rgba(154, 87, 255, 0.5);
-    --tagColor: #9957ff;
-    --tagCountColor: #6b59ff;
-    --tooltipBG: rgba(240, 240, 255, 0.7);
-    --inputBorder: #7fa0ff;
-    --text: #7b6dff;
-    --text-alt: #cb7cff;
-    --text-strong: #b264df;
-    --inputBG: #f4f2ff;
-    --buttonBG: #ff92ff;
-    --previewBG: #b2d0ff;
-    --editBG: #afe6ff;
-    --drop-color1: rgba(153, 112, 250, 0.7);
-    --drop-color2: rgba(158, 124, 252, 0.9);
-    --bubbleBG: rgba(202, 171, 255, 0.8);
-    --selectBorder: #8373ff;
     --progressText: #000000;
     --progressBG: #ffffff;
-    --r18BGColor: #e206444a;
-    --audioPlayerColor: #c2c2ff;
+    --previewBG: #f5b2ff;
+    --editBG: #f7afff;
+    --bubbleBG: rgba(255, 171, 226, 0.8);
+    --buttonBG: #ff92de;
 
-    /////////////////// STATIC
+    --audioPlayerColor: #ffc2ec;
+    --audioFilterColor: #ff4d97;
 
     --sidebarSearchButtonBG: #FF579D;
     --sidebarRandomButtonBG: #FF549B;
     --sidebarSaveSearchButtonBG: #5f51fe;
     --sidebarFavSearchButtonBG: #ff2897;
+    --tagCountColor: #ff59ba;
+    --text-strong: #df6485;
 
     --artistTagColor: #ff1994;
     --characterTagColor: #ff1ce6;
@@ -115,21 +116,23 @@
     --takendownBorder: #7f0a0a;
     --lockedBorder: #b40e1d;
 
-    --banText: #fc1657;
-    --userColor: #4b48ff;
-    --premiumColor: #ff2cd0;
-    --r18Color: #e20644;
-    --sketchColor: #189af7;
-    
     --historyColor: #ed1287;
     --noteColor: #5612ed;
-    --audioPlayerColor: #130737;
     --actionBannerColor: #ce1a4d;
     --pendingColor: #286be7;
     --deletedColor: #b21740;
-    --audioFilterColor: #ff4d97;
-    --black: #000000;
-    --white: #FFFFFF;
+
+    --banText: #fc1657;
+    --r18Color: #e20644;
+    --sketchColor: #189af7;
+
+    --userColor: #4b48ff;
+    --contributorColor: #b948ff;
+    --curatorColor: #fc279f;
+    --premiumColor: #ff22e5;
+    --systemColor: #ffa923;
+    --modColor: #1365f6;
+    --adminColor: #d70c67;
 }
 
 .dark {
@@ -144,41 +147,43 @@
     --navbarBG: #1C0713;
     --navbarText: #FF3CA4;
     --titleButtons: #FF42A1;
+    --loginText: #fe2391;
 
     --sidebarBG: #16050F;
     --sidebarText: #FF349A;
     --sidebarSearchBG: #2D0D1A;
+    --sidebarSearchFocus: #e00882;
+
+    --tagReadColor: rgba(255, 31, 158, 0.5);
+    --text: #ff6fa4;
+    --text-alt: #ff4dea;
+    --text-strong: #ff2680;
+    --inputBorder: #250319;
+    --inputBG: #200014;
 
     --sortbarBG: rgba(14, 1, 10, 0.95);
     --sortbarIcons: #FF4391;
     --sortbarText: #FFFFFF;
 
+    --tooltipBG: rgba(34, 3, 22, 0.85);
+
     --footerBG: #1C0713;
 
     --imageBorder: #FF77CB;
     --pageButton: #FF4E92;
+    --drop-color1: rgba(165, 13, 152, 0.7);
+    --drop-color2: rgba(226, 26, 173, 0.9);
+    --selectBorder: #e610a6;
+    --r18BGColor: #5603383d;
 
-    //////////////////////// UNPROCESSED
-
-    --navbarUserText: #fe23ae;
-    --sidebarSearchFocus: #2908e0;
-    --tagReadColor: rgba(98, 31, 255, 0.5);
-    --tooltipBG: rgba(11, 3, 34, 0.85);
-    --inputBorder: #0d0325;
-    --text: #716fff;
-    --text-alt: #8b4dff;
-    --text-strong: #ff26ba;
-    --inputBG: #050020;
-    --buttonBG: #ff11af;
-    --previewBG: #4a44ff;
-    --editBG: #347bff;
-    --drop-color1: rgba(59, 13, 165, 0.7);
-    --drop-color2: rgba(86, 26, 226, 0.9);
-    --bubbleBG: rgba(89, 43, 255, 0.8);
-    --selectBorder: #6710e6;
     --progressText: #ffffff;
     --progressBG: #000000;
-    --r18BGColor: #5603033d;
+    --buttonBG: #ff119c;
+    --previewBG: #ff44f6;
+    --editBG: #ff34e1;
+    --bubbleBG: rgba(255, 43, 188, 0.8);
+
+    --audioPlayerColor: #37071b;
 }
 
 * {
@@ -373,31 +378,31 @@ img {
 }
 
 .user-color {
-    color: #4b48ff !important;
+    color: var(--userColor) !important;
 }
 
 .contributor-color {
-    color: #b948ff !important;
+    color: var(--contributorColor) !important;
 }
 
 .curator-color {
-    color: #fc279f !important;
+    color: var(--curatorColor) !important;
 }
 
 .premium-color {
-    color: #ff22e5 !important;
+    color: var(--premiumColor) !important;
 }
 
 .system-color {
-    color: #ffa923 !important;
+    color: var(--systemColor) !important;
 }
 
 .mod-color {
-    color: #1365f6 !important;
+    color: var(--modColor) !important;
 }
 
 .admin-color {
-    color: #d70c67 !important;
+    color: var(--adminColor) !important;
 }
 
 .tag-reg-color {

@@ -461,7 +461,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
     
         const getBorder = () => {
             if (selected) {
-                return "0px 0px 0px 2px var(--selectBorder)"
+                return "0px 0px 0px 3px var(--selectBorder)"
             } else {
                 return `0px 0px 0px 1px ${functions.post.borderColor(props.post)}`
             }

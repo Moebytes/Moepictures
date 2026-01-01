@@ -21,37 +21,38 @@ const lightColorList = {
     "--sidebarBG": "#FFEFF7",
     "--sidebarText": "#000000",
     "--sidebarSearchBG": "#FFFFFF",
+    "--sidebarSearchFocus": "#ff81c4",
+
+    "--tagReadColor": "rgba(255, 87, 205, 0.5)",
+    "--tagColor": "#ff57b9",
+    "--text": "#ff6dd3",
+    "--text-alt": "#ff7cb7",
+    "--inputBG": "#fff2ff",
+    "--inputBorder": "#f97fff",
 
     "--sortbarBG": "rgba(255, 255, 255, 0.75)",
     "--sortbarText": "#000000",
+
+    "--tooltipBG": "rgba(255, 240, 255, 0.7)",
 
     "--footerBG": "#FFD6EB",
 
     "--imageBorder": "#FF77CB",
     "--pageButton": "#FF93CB",
-
-    //////////////////////// UNPROCESSED
-
-    "--sidebarSearchFocus": "#8581ff",
-    "--tagReadColor": "rgba(154, 87, 255, 0.5)",
-    "--tagColor": "#9957ff",
-    "--tooltipBG": "rgba(240, 240, 255, 0.5)",
-    "--inputBorder": "#7fa0ff",
-    "--text": "#7b6dff",
-    "--text-alt": "#cb7cff",
-    "--inputBG": "#f4f2ff",
-    "--drop-color1": "rgba(153, 112, 250, 0.7)",
-    "--drop-color2": "rgba(158, 124, 252, 0.9)",
-    "--bubbleBG": "rgba(202, 171, 255, 0.8)",
+    "--drop-color1": "rgba(250, 112, 213, 0.7)",
+    "--drop-color2": "rgba(252, 124, 194, 0.9)",
     "--binary": "#ffffff",
-    "--selectBorder": "#8373ff",
+    "--selectBorder": "#ff73ce",
+    "--r18BGColor": "#e2067f4a",
+
     "--progressText": "#000000",
     "--progressBG": "#ffffff",
-    "--audioPlayerColor": "#e0e4ff",
-    "--buttonBG": "#ff92ff",
-    "--previewBG": "#b2d0ff",
-    "--editBG": "#afe6ff",
-    "--r18BGColor": "#e206444a",
+    "--bubbleBG": "rgba(255, 171, 226, 0.8)",
+    "--buttonBG": "#ff92de",
+    "--previewBG": "#f5b2ff",
+    "--editBG": "#f7afff",
+
+    "--audioPlayerColor": "#37071b",
     "--audioFilterColor": "#ff4d97"
 }
 
@@ -70,37 +71,36 @@ const darkColorList = {
     "--sidebarBG": "#16050F",
     "--sidebarText": "#FF349A",
     "--sidebarSearchBG": "#2D0D1A",
+    "--sidebarSearchFocus": "#e00882",
+
+    "--tagReadColor": "rgba(255, 31, 158, 0.5)",
+    "--text": "#ff6fa4",
+    "--text-alt": "#ff4dea",
+    "--inputBorder": "#250319",
+    "--inputBG": "#200014",
 
     "--sortbarBG": "rgba(14, 1, 10, 0.95)",
     "--sortbarText": "#FFFFFF",
+
+    "--tooltipBG": "rgba(34, 3, 22, 0.85)",
 
     "--footerBG": "#1C0713",
 
     "--imageBorder": "#FF77CB",
     "--pageButton": "#FF4E92",
-
-    //////////////////////// UNPROCESSED
-
-    "--sidebarSearchFocus": "#2908e0",
-    "--tagReadColor": "rgba(98, 31, 255, 0.5)",
-    "--tagColor": "#641fff",
-    "--tooltipBG": "rgba(11, 3, 34, 0.85)",
-    "--inputBorder": "#0d0325",
-    "--text": "#716fff",
-    "--text-alt": "#8b4dff",
-    "--inputBG": "#050020",
-    "--drop-color1": "rgba(59, 13, 165, 0.7)",
-    "--drop-color2": "rgba(86, 26, 226, 0.9)",
-    "--bubbleBG": "rgba(89, 43, 255, 0.8)",
+    "--drop-color1": "rgba(165, 13, 152, 0.7)",
+    "--drop-color2": "rgba(226, 26, 173, 0.9)",
     "--binary": "#000000",
-    "--selectBorder": "#6710e6",
+    "--selectBorder": "#e610a6",
+    "--r18BGColor": "#5603383d",
+
     "--progressText": "#ffffff",
     "--progressBG": "#000000",
-    "--audioPlayerColor": "#130737",
-    "--buttonBG": "#ff11af",
-    "--previewBG": "#4a44ff",
-    "--editBG": "#347bff",
-    "--r18BGColor": "#5603033d",
+    "--bubbleBG": "rgba(255, 43, 188, 0.8)",
+    "--buttonBG": "#ff119c",
+    "--previewBG": "#ff44f6",
+    "--editBG": "#ff34e1",
+    "--audioPlayerColor": "#37071b",
     "--audioFilterColor": "#ff4d97"
 }
 
