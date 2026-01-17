@@ -4,7 +4,7 @@ import {useFilterSelector, useInteractionActions, useLayoutSelector, useCacheAct
 useSearchSelector, useSessionSelector, useFlagSelector, useFlagActions, useSearchActions} from "../../store"
 import functions from "../../functions/Functions"
 import privateIcon from "../../assets/icons/lock-opt.png"
-import musicNote from "../../assets/icons/music-note.png"
+import musicNote from "../../assets/svg/music-note.svg"
 import {PostSearch, GIFFrame} from "../../types/Types"
 import "./styles/gridimage.less"
 
@@ -528,7 +528,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
 
         const cornerIcon = () => {
             if (props.post.private) return privateIcon
-            if (audioRef.current) return musicNote
+            if (audioRef.current) return functions.color.colorizeSVG(musicNote, "--audioPlayerIcons")
             return null
         }
         
@@ -538,7 +538,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
             <div style={{opacity: visible && refWidth ? "1" : "0", transition: "opacity 0.1s", borderRadius: `${props.borderRadius || 5}px`}} className="image-box" id={String(props.id)} ref={containerRef} 
             onClick={onClick} onAuxClick={onClick} onContextMenu={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
                 <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
-                    {cornerIcon() ? <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s", filter}} className="song-icon" src={cornerIcon()} 
+                    {cornerIcon() ? <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s"}} className="song-icon" src={cornerIcon()} 
                     onClick={childRef.current?.songClick} onMouseDown={(event) => {event.stopPropagation()}} onMouseUp={(event) => {event.stopPropagation()}}/> : null}
     
                     <WrappedComponent 

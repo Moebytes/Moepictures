@@ -6,7 +6,6 @@
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
-    //height: 100%;
     padding-left: 200px;
     padding-right: 200px;
     margin-top: 20px;
@@ -14,18 +13,16 @@
 }
 
 .comments-title {
-    font-family: Tahoma, sans-serif;
+    font-family: "JK Gothic M", sans-serif;
     font-size: 29px;
     color: var(--text-strong);
     margin-bottom: 15px;
-    //.stroke-black-thin();
 }
 
 .comments-text {
-    font-family: Tahoma, sans-serif;
+    font-family: "JK Gothic M", sans-serif;
     font-size: 20px;
     color: var(--text-strong);
-    margin-bottom: 15px;
 }
 
 .comments-input-container {
@@ -33,6 +30,7 @@
     flex-direction: column;
     width: 100%;
     height: 100%;
+    margin-top: 15px;
 }
 
 .comments-row-start {
@@ -41,6 +39,8 @@
 
 .comments-textarea {
     .form-textarea();
+    border: 2px solid var(--inputBorder);
+    border-radius: 0px 0px 9px 9px;
     font-size: 25px;
 }
 
@@ -123,7 +123,8 @@
     display: flex;
     justify-content: flex-start;
     background-color: var(--inputBG);
-    border: 1px solid var(--inputBorder);
+    border: 2px solid var(--inputBorder);
+    border-radius: 9px 9px 0px 0px;
     border-bottom: none;
     margin-left: 10px;
 }
@@ -134,7 +135,6 @@
     align-items: center;
     border: none;
     background: transparent;
-    // border: 1px solid var(--sidebarBG);
     padding: 8px 10px;
     cursor: pointer;
     & > img {
@@ -151,7 +151,8 @@
     flex-direction: column;
     margin-left: 10px;
     background-color: var(--inputBG);
-    border: 1px solid var(--inputBorder);
+    border: 2px solid var(--inputBorder);
+    border-radius: 0px 0px 9px 9px;
     min-height: 200px;
     & > div > span {
         font-size: 21px;

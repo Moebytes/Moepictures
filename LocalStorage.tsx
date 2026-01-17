@@ -22,13 +22,17 @@ const lightColorList = {
     "--sidebarText": "#000000",
     "--sidebarSearchBG": "#FFFFFF",
     "--sidebarSearchFocus": "#ff81c4",
+    "--sidebarTitleText": "#FF2194",
+    "--sidebarTextA": "#FF328B",
+    "--sidebarTextB": "#FF65BC",
 
     "--tagReadColor": "rgba(255, 87, 205, 0.5)",
     "--tagColor": "#ff57b9",
-    "--text": "#ff6dd3",
+    "--text": "#000000",
     "--text-alt": "#ff7cb7",
-    "--inputBG": "#fff2ff",
-    "--inputBorder": "#f97fff",
+    "--text-strong": "#FF16A6",
+    "--inputBG": "#ffffff",
+    "--inputBorder": "#FF42B3",
 
     "--sortbarBG": "rgba(255, 255, 255, 0.75)",
     "--sortbarText": "#000000",
@@ -48,11 +52,11 @@ const lightColorList = {
     "--progressText": "#000000",
     "--progressBG": "#ffffff",
     "--bubbleBG": "rgba(255, 171, 226, 0.8)",
-    "--buttonBG": "#ff92de",
-    "--previewBG": "#f5b2ff",
+    "--buttonBG": "#FF17A6",
+    "--previewBG": "#FFB1E9",
     "--editBG": "#f7afff",
 
-    "--audioPlayerColor": "#37071b",
+    "--audioPlayerColor": "#FFEFF7",
     "--audioFilterColor": "#ff4d97"
 }
 
@@ -72,11 +76,15 @@ const darkColorList = {
     "--sidebarText": "#FF349A",
     "--sidebarSearchBG": "#2D0D1A",
     "--sidebarSearchFocus": "#e00882",
+    "--sidebarTitleText": "#FF0CB2",
+    "--sidebarTextA": "#FF3281",
+    "--sidebarTextB": "#FF32EE",
 
     "--tagReadColor": "rgba(255, 31, 158, 0.5)",
-    "--text": "#ff6fa4",
+    "--text": "#FF399F",
     "--text-alt": "#ff4dea",
-    "--inputBorder": "#250319",
+    "--text-strong": "#FF16A6",
+    "--inputBorder": "#FF42B3",
     "--inputBG": "#200014",
 
     "--sortbarBG": "rgba(14, 1, 10, 0.95)",
@@ -97,10 +105,10 @@ const darkColorList = {
     "--progressText": "#ffffff",
     "--progressBG": "#000000",
     "--bubbleBG": "rgba(255, 43, 188, 0.8)",
-    "--buttonBG": "#ff119c",
-    "--previewBG": "#ff44f6",
+    "--buttonBG": "#FF17A6",
+    "--previewBG": "#FFB1E9",
     "--editBG": "#ff34e1",
-    "--audioPlayerColor": "#37071b",
+    "--audioPlayerColor": "#1D0915",
     "--audioFilterColor": "#ff4d97"
 }
 

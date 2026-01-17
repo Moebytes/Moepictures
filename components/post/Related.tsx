@@ -6,10 +6,10 @@ useFlagSelector, useFlagActions, useCacheSelector} from "../../store"
 import {TrackablePromise} from "../../structures/TrackablePromise"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import pageIcon from "../../assets/icons/page.png"
-import scrollIcon from "../../assets/icons/scroll.png"
-import squareIcon from "../../assets/icons/square.png"
-import sizeIcon from "../../assets/icons/size.png"
+import scrollSVG from "../../assets/svg/scroll.svg"
+import pagesSVG from "../../assets/svg/pages.svg"
+import squareSVG from "../../assets/svg/square.svg"
+import sizeSVG from "../../assets/svg/size.svg"
 import GridImage from "../image/GridImage"
 import GridAnimation from "../image/GridAnimation"
 import GridVideo from "../image/GridVideo"
@@ -34,8 +34,7 @@ interface Props {
 }
 
 const Related: React.FunctionComponent<Props> = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {i18n} = useThemeSelector()
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {related} = useCacheSelector()
     const {setNavigationPosts, setRelated} = useCacheActions()
@@ -52,6 +51,12 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const sizeRef = useRef<HTMLImageElement>(null)
     const visiblePromisesRef = useRef<TrackablePromise<void>[]>([])
     const navigate = useNavigate()
+
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--titleButtons")
+    }
 
     let rating = props.post?.rating || (ratingType === functions.r18() ? ratingType : "all")
 
@@ -138,7 +143,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
         const rect = sizeRef.current?.getBoundingClientRect()
         if (!rect || mobile) return "150px"
         const raw = window.innerWidth - rect.x
-        let offset = -60
+        let offset = -50
         if (sizeType === "tiny") offset += -15
         if (sizeType === "small") offset += -10
         if (sizeType === "medium") offset += -5
@@ -281,15 +286,15 @@ const Related: React.FunctionComponent<Props> = (props) => {
             <div style={{display: "flex", alignItems: "center", marginBottom: "20px"}}>
                 <span className="tag-label" onClick={searchTag} onAuxClick={searchTag}>{i18n.sort.posts}
                 </span><span className="tag-label-alt">{props.count}</span>
-                <img className="related-icon" src={scroll ? scrollIcon : pageIcon} onClick={toggleScroll}/>
-                <img className="related-icon" src={squareIcon} onClick={() => setSquare(!square)} style={{filter: "brightness(110%) hue-rotate(60deg)"}}/>
-                <img className="related-icon" ref={sizeRef} src={sizeIcon} onClick={() => setSizeDropdown((prev) => !prev)}/>
+                <img className="related-icon" src={getIcon(scroll ? scrollSVG : pagesSVG)} onClick={toggleScroll} style={{filter}}/>
+                <img className="related-icon" src={getIcon(squareSVG)} onClick={() => setSquare(!square)} style={{filter}}/>
+                <img className="related-icon" ref={sizeRef} src={getIcon(sizeSVG)} onClick={() => setSizeDropdown((prev) => !prev)} style={{filter}}/>
             </div> :
             <div style={{display: "flex", alignItems: "center", marginBottom: "20px"}}>
                 <span className="related-title">{i18n.post.related}</span>
-                <img className="related-icon" src={scroll ? scrollIcon : pageIcon} onClick={toggleScroll}/>
-                <img className="related-icon" src={squareIcon} onClick={() => setSquare(!square)} style={{filter: "brightness(110%) hue-rotate(60deg)"}}/>
-                <img className="related-icon" ref={sizeRef} src={sizeIcon} onClick={() => setSizeDropdown((prev) => !prev)}/>
+                <img className="related-icon" src={getIcon(scroll ? scrollSVG : pagesSVG)} onClick={toggleScroll} style={{filter}}/>
+                <img className="related-icon" src={getIcon(squareSVG)} onClick={() => setSquare(!square)} style={{filter}}/>
+                <img className="related-icon" ref={sizeRef} src={getIcon(sizeSVG)} onClick={() => setSizeDropdown((prev) => !prev)} style={{filter}}/>
             </div>}
             <div className="related-container" style={{visibility: allImagesLoaded ? "visible" : "hidden", width: "98%", justifyContent: related.length < 5 ? "flex-start" : "space-evenly"}}>
                 {generateImagesJSX()}

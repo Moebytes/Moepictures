@@ -7,7 +7,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: var(--sortbarBG);
+    background-color: var(--navbarBG);
+    padding: 0px 5px;
     transform-origin: top;
     transition: transform 0.3s;
 }
@@ -26,14 +27,11 @@
     height: 100%;
     padding: 5px;
     cursor: pointer;
-    &:hover {
-        filter: brightness(140%);
-    }
 }
 
 .filter-dropdown-text {
-    font-family: Tahoma, sans-serif;
-    font-size: 16px;
+    font-family: "Tsunagi Gothic Black", sans-serif;
+    font-size: 19px;
     margin-left: 5px;
     color: var(--sortbarText);
 }
@@ -55,21 +53,21 @@
 .filter-slider-track {
     display: flex;
     height: 9px;
-    background-color: var(--text);
+    background-color: var(--navbarText);
 }
 
 .filter-slider-track.filter-slider-track-1 {
-    background-color: var(--footerBG);
+    background-color: var(--progressBG);
 }
 
 .filter-slider-thumb {
     opacity: 0;
     display: flex;
     margin-top: -1px;
-    border-radius: 10;
+    border-radius: 10px;
     height: 8px;
     width: 8px;
-    background-color: var(--text);
+    background-color: var(--navbarText);
     &:active {
         outline: none;
     }
@@ -87,15 +85,16 @@
 }
 
 .filter-button {
-    background-color: var(--text);
+    background-color: var(--navbarText);
     color: black;
     border: 1px solid black;
-    font-family: Tahoma, sans-serif;
+    font-family: "Tsunagi Gothic Black", sans-serif;
     font-weight: bold;
-    font-size: 15px;
-    padding: 3px;
+    font-size: 18px;
+    padding: 5px 7px;
     cursor: pointer;
     transition: all 0.1s;
+    border-radius: 10px;
     margin-top: -5px;
     margin-bottom: 3px;
     & > img {
@@ -113,10 +112,10 @@
 }
 
 .audio-filter-dropdown-text {
-    font-family: Tahoma, sans-serif;
-    font-size: 16px;
+    font-family: "Tsunagi Gothic Black", sans-serif;
+    font-size: 19px;
     margin-left: 5px;
-    color: var(--audioFilterColor);
+    color: var(--sortbarText);
 }
 
 .audio-filter-slider {
@@ -131,21 +130,21 @@
 .audio-filter-slider-track {
     display: flex;
     height: 9px;
-    background-color: var(--audioFilterColor);
+    background-color: var(--navbarText);
 }
 
 .audio-filter-slider-track.audio-filter-slider-track-1 {
-    background-color: var(--footerBG);
+    background-color: var(--progressBG);
 }
 
 .audio-filter-slider-thumb {
     opacity: 0;
     display: flex;
     margin-top: -1px;
-    border-radius: 10;
+    border-radius: 10px;
     height: 8px;
     width: 8px;
-    background-color: var(--audioFilterColor);
+    background-color: var(--navbarText);
     &:active {
         outline: none;
     }
@@ -155,14 +154,15 @@
 }
 
 .audio-filter-button {
-    background-color: var(--audioFilterColor);
+    background-color: var(--navbarText);
     color: black;
     border: 1px solid black;
-    font-family: Tahoma, sans-serif;
+    font-family: "Tsunagi Gothic Black", sans-serif;
     font-weight: bold;
-    font-size: 15px;
-    padding: 3px;
+    font-size: 18px;
+    padding: 5px 7px;
     cursor: pointer;
+    border-radius: 10px;
     transition: all 0.1s;
     margin-top: -5px;
     margin-bottom: 3px;

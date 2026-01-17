@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from "react"
 import {useThemeSelector, useSessionSelector, useSessionActions, useLayoutSelector} from "../../store"
-import Slider from "react-slider"
 import {Rating} from "react-simple-star-rating"
 import functions from "../../functions/Functions"
 import cuteness1 from "../../assets/images/cuteness1.png"
@@ -8,7 +7,7 @@ import cuteness2 from "../../assets/images/cuteness2.png"
 import cuteness3 from "../../assets/images/cuteness3.png"
 import cuteness4 from "../../assets/images/cuteness4.png"
 import cuteness5 from "../../assets/images/cuteness5.png"
-import deleteStar from "../../assets/icons/deletestar.png"
+import deleteStar from "../../assets/svg/deletestar.svg"
 import {PostSearch, PostHistory} from "../../types/Types"
 import "./styles/cutenessmeter.less"
 
@@ -19,7 +18,7 @@ interface Props {
 let cutenessTimer = null as any
 
 const CutenessMeter: React.FunctionComponent<Props> = (props) => {
-    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
+    const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
@@ -30,6 +29,10 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     // useEffect(() => sliderRef.current ? sliderRef.current.resize() : null)
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
 
     const getFilter2 = () => {
         let hue = siteHue - 180
@@ -97,16 +100,20 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
         return cuteness
     }
 
+    const fillColor = () => {
+        return theme.includes("light") ? "#ffc8ec" : "black"
+    }
+
     return (
         <div className="cuteness-meter">
             <div className="cuteness-title-container">
                 <div className="cuteness-title">{i18n.sort.cuteness}</div>
-                <img className="cuteness-img" src={deleteStar} style={{filter}} onClick={deleteRating}/>
+                <img className="cuteness-img" src={getIcon(deleteStar)} style={{filter}} onClick={deleteRating}/>
             </div>
             <div className="cuteness-slider-container" style={{filter: getFilter2()}}>
                 <Rating style={{paddingRight: "10px"}} onClick={setCutenessValue} initialValue={Number(getCutenessValue())} allowFraction={true} fullFraction={true} 
                 allowTitleTag={false} multiplier={200} showTooltip={true} tooltipClassName="cuteness-tooltip" tooltipDefaultText={`${averageCuteness}`}
-                iconsCount={5} size={mobile ? 70 : 80} snap={2} SVGstrokeColor="black" SVGstorkeWidth={1} fillColor="#4b22f0" emptyColor="black"/>
+                iconsCount={5} size={mobile ? 70 : 80} snap={2} SVGstrokeColor={fillColor()} SVGstorkeWidth={1} fillColor="#FF6DAC" emptyColor={fillColor()}/>
                 {/* <Slider ref={sliderRef} renderTrack={(props, state) => <div {...props} className={`cuteness-track-${state.index}`}><span className="cuteness-text">{state.value}</span></div>} className="cuteness-slider" thumbClassName="cuteness-thumb" onChange={(value) => setCuteness(value)} min={0} max={1000} step={1} value={cuteness}/> */}
             </div>
         </div>

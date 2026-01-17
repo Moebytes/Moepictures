@@ -4,14 +4,12 @@ useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions,
 useSessionActions, useCacheSelector, useGroupDialogActions,
 useCacheActions} from "../../store"
 import functions from "../../functions/Functions"
-import star from "../../assets/icons/star.png"
-import starFavorited from "../../assets/icons/starFavorited.png"
-import starGroup from "../../assets/icons/stargroup.png"
-import starGroupFavorited from "../../assets/icons/stargroup-favorited.png"
-import download from "../../assets/icons/download.png"
-import filters from "../../assets/icons/filters.png"
-import nextIcon from "../../assets/icons/next.png"
-import prevIcon from "../../assets/icons/prev.png"
+import star from "../../assets/svg/star.svg"
+import starGroup from "../../assets/svg/stargroup.svg"
+import download from "../../assets/svg/download.svg"
+import filters from "../../assets/svg/filters.svg"
+import nextIcon from "../../assets/svg/next.svg"
+import prevIcon from "../../assets/svg/prev.svg"
 import Filters from "./Filters"
 import {PostFull, PostHistory, UnverifiedPost} from "../../types/Types"
 import "./styles/postimageoptions.less"
@@ -51,6 +49,14 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const formatRef = useRef<HTMLButtonElement>(null)
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
+
+    const getPinkIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "#ff47d4")
+    }
 
     useEffect(() => {
         getFavorite()
@@ -120,19 +126,11 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     }, [props.post, session])
 
     const getStar = () => {
-        if (favorited) {
-            return starFavorited
-        } else {
-            return star
-        }
+        return favorited ? getPinkIcon(star) : getIcon(star)
     }
 
     const getStarGroup = () => {
-        if (favGrouped) {
-            return starGroupFavorited
-        } else {
-            return starGroup
-        }
+        return favGrouped ? getPinkIcon(starGroup) : getIcon(starGroup)
     }
 
     const getFilterMarginRight = () => {
@@ -154,7 +152,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         const rect = filterRef.current?.getBoundingClientRect()
         if (!rect || !bodyRect) return 0
         const raw = bodyRect.bottom - rect.bottom
-        let offset = -250
+        let offset = -310
         if (mobile) offset += 20
         if (session.showR18) offset -= 35
         return raw + offset
@@ -231,7 +229,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
             {mobile ? <>
             <div className="post-image-options">
                 <div className="post-image-options-box" onClick={() => props.previous?.()} style={{marginRight: "25px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <img className="post-image-icon-small" src={prevIcon} style={{filter}}/>
+                    <img className="post-image-icon-small" src={getIcon(prevIcon)} style={{filter}}/>
                     {!session.username ? <div className="post-image-text-small">{i18n.post.prev}</div> : null}
                 </div>
                 {session.username ?
@@ -247,14 +245,14 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                     <div className={`post-image-text ${favGrouped ? "favgrouped" : ""}`}>{i18n.post.favgroup}</div>
                 </div> : null}
                 <div className="post-image-options-box" onClick={() => props.next?.()} style={{marginLeft: "25px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <img className="post-image-icon-small" src={nextIcon} style={{filter}}/> 
+                    <img className="post-image-icon-small" src={getIcon(nextIcon)} style={{filter}}/> 
                     {!session.username ? <div className="post-image-text-small">{i18n.post.next}</div> : null}
                 </div>
             </div>
             <div className="post-image-options">
                 <div className="post-image-options-box" onClick={() => props.download?.()} style={{marginRight: "25px"}}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <img className="post-image-icon" src={download} style={{filter}}/>
+                    <img className="post-image-icon" src={getIcon(download)} style={{filter}}/>
                     <div className="post-image-text">{i18n.buttons.download}</div>
                 </div>
                 {props.post?.type === "image" || props.post?.type === "comic" ? 
@@ -262,7 +260,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                 {String(format).toUpperCase()}</button> : null}
                 <div className="post-image-options-box" ref={filterRef} onClick={() => toggleDropdown("filter")} style={{marginLeft: "25px"}}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <img className="post-image-icon" src={filters} style={{filter}}/>
+                    <img className="post-image-icon" src={getIcon(filters)} style={{filter}}/>
                     <div className="post-image-text">{i18n.filters.filters}</div>
                 </div>
             </div> </>
@@ -270,7 +268,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
             <div className="post-image-options">
                 <div className="post-image-options-left">
                     <div className="post-image-options-box" onClick={() => props.previous?.()} style={{marginRight: "15px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <img className="post-image-icon-small" src={prevIcon} style={{filter}}/>
+                        <img className="post-image-icon-small" src={getIcon(prevIcon)} style={{filter}}/>
                         <div className="post-image-text-small">{i18n.post.prev}</div>
                     </div>
                     {session.username && !props.noFavorite ?
@@ -289,19 +287,19 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                         <div className="post-image-text-alt">{downloadText}</div>
                     </div>
                     <div className="post-image-options-box" onClick={() => props.download?.()} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <img className="post-image-icon" src={download} style={{filter}}/>
+                        <img className="post-image-icon" src={getIcon(download)} style={{filter}}/>
                         <div className="post-image-text">{i18n.buttons.download}</div>
                     </div>
                     {props.post?.type === "image" || props.post?.type === "comic" ? 
                     <button className="post-image-button" ref={formatRef} onClick={() => toggleDropdown("format")}>
                     {String(format).toUpperCase()}</button> : null}
                     <div className="post-image-options-box" ref={filterRef} onClick={() => toggleDropdown("filter")} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <img className="post-image-icon" src={filters} style={{filter}}/>
+                        <img className="post-image-icon" src={getIcon(filters)} style={{filter}}/>
                         <div className="post-image-text">{i18n.filters.filters}</div>
                     </div>
                     <div className="post-image-options-box" onClick={() => props.next?.()} style={{marginLeft: "25px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="post-image-text-small">{i18n.post.next}</div>
-                        <img className="post-image-icon-small" src={nextIcon} style={{filter}}/>
+                        <img className="post-image-icon-small" src={getIcon(nextIcon)} style={{filter}}/>
                     </div>
                 </div>
             </div>}

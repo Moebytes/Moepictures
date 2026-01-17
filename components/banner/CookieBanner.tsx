@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react"
 import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionActions} from "../../store"
 import functions from "../../functions/Functions"
-import cookieIcon from "../../assets/icons/cookie.png"
+import cookie from "../../assets/svg/cookie.svg"
 import "./styles/cookiebanner.less"
 
 let cookieTimer = null as any
@@ -14,6 +14,10 @@ const CookieBanner: React.FunctionComponent = (props) => {
     const [showCookieBanner, setShowCookieBanner] = useState(false)
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--cookieColor")
+    }
 
     useEffect(() => {
         if (!session.cookie) return
@@ -36,13 +40,12 @@ const CookieBanner: React.FunctionComponent = (props) => {
     return (
         <div className={`cookie-banner ${showCookieBanner ? "show-cookie-banner" : ""}`}>
             <div className="cookie-icon-container">
-                <img className="cookie-icon" src={cookieIcon} style={{filter}}/>
+                <img className="cookie-icon" src={getIcon(cookie)} style={{filter}}/>
                 <div className="cookie-text-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <span className="cookie-text">{i18n.dialogs.cookieBanner.text}</span>
                 </div>
             </div>
             <button className="cookie-button" onClick={() => click("accept")}>{i18n.labels.agree}</button>
-            {/* <button className="cookie-button-deny" onClick={() => click("reject")}>{i18n.labels.deny}</button> */}
         </div>
     )
 }

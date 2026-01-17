@@ -4,16 +4,16 @@ import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionA
 useActiveActions, useLayoutSelector, useFlagSelector, useFlagActions, useCacheSelector} from "../../store"
 import functions from "../../functions/Functions"
 import emojiSelect from "../../assets/icons/emoji-select.png"
-import highlight from "../../assets/icons/highlight.png"
-import bold from "../../assets/icons/bold.png"
-import italic from "../../assets/icons/italic.png"
-import underline from "../../assets/icons/underline.png"
-import strikethrough from "../../assets/icons/strikethrough.png"
-import spoiler from "../../assets/icons/spoiler.png"
-import link from "../../assets/icons/link-purple.png"
-import details from "../../assets/icons/details.png"
-import hexcolor from "../../assets/icons/hexcolor.png"
-import codeblock from "../../assets/icons/codeblock.png"
+import highlight from "../../assets/svg/highlight.svg"
+import bold from "../../assets/svg/bold.svg"
+import italic from "../../assets/svg/italic.svg"
+import underline from "../../assets/svg/underline.svg"
+import strikethrough from "../../assets/svg/strikethrough.svg"
+import spoiler from "../../assets/svg/spoiler.svg"
+import link from "../../assets/svg/link.svg"
+import details from "../../assets/svg/details.svg"
+import hexcolor from "../../assets/svg/hash.svg"
+import codeblock from "../../assets/svg/codeblock.svg"
 import Comment from "./Comment"
 import {PostSearch, PostHistory, UserComment} from "../../types/Types"
 import "./styles/comments.less"
@@ -45,6 +45,10 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     const navigate = useNavigate()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--titleButtons")
+    }
 
     useEffect(() => {
         const commentParam = new URLSearchParams(window.location.search).get("comment")
@@ -170,7 +174,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
         const rect = emojiRef.current?.getBoundingClientRect()
         if (!rect || !bodyRect) return "0px"
         const raw = bodyRect.bottom - rect.bottom
-        let offset = 100
+        let offset = 110
         if (mobile) offset += 0
         return `${raw + offset}px`
     }
@@ -212,16 +216,16 @@ const Comments: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="comments-input-container">
                     <div className="comments-textarea-buttons">
-                        <button className="comments-textarea-button"><img src={highlight} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "highlight")} style={{filter}}/></button>
-                        <button className="comments-textarea-button"><img src={bold} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "bold")} style={{filter}}/></button>
-                        <button className="comments-textarea-button"><img src={italic} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "italic")} style={{filter}}/></button>
-                        <button className="comments-textarea-button"><img src={underline} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "underline")} style={{filter}}/></button>
-                        <button className="comments-textarea-button"><img src={strikethrough} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "strikethrough")} style={{filter}}/></button>
-                        <button className="comments-textarea-button"><img src={spoiler} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "spoiler")} style={{filter}}/></button>
-                        <button className="comments-textarea-button"><img src={link} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "link")} style={{filter}}/></button>
-                        <button className="comments-textarea-button"><img src={details} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "details")} style={{filter}}/></button>
-                        <button className="comments-textarea-button"><img src={hexcolor} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "color")} style={{filter}}/></button>
-                        <button className="comments-textarea-button"><img src={codeblock} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "code")} style={{filter}}/></button>
+                        <button className="comments-textarea-button"><img src={getIcon(highlight)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "highlight")} style={{filter}}/></button>
+                        <button className="comments-textarea-button"><img src={getIcon(bold)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "bold")} style={{filter}}/></button>
+                        <button className="comments-textarea-button"><img src={getIcon(italic)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "italic")} style={{filter}}/></button>
+                        <button className="comments-textarea-button"><img src={getIcon(underline)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "underline")} style={{filter}}/></button>
+                        <button className="comments-textarea-button"><img src={getIcon(strikethrough)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "strikethrough")} style={{filter}}/></button>
+                        <button className="comments-textarea-button"><img src={getIcon(spoiler)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "spoiler")} style={{filter}}/></button>
+                        <button className="comments-textarea-button"><img src={getIcon(link)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "link")} style={{filter}}/></button>
+                        <button className="comments-textarea-button"><img src={getIcon(details)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "details")} style={{filter}}/></button>
+                        <button className="comments-textarea-button"><img src={getIcon(hexcolor)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "color")} style={{filter}}/></button>
+                        <button className="comments-textarea-button"><img src={getIcon(codeblock)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "code")} style={{filter}}/></button>
                     </div>
                     {previewMode ? <div className="comments-preview">{functions.jsx.renderText(text, emojis, "comment")}</div> : 
                     <div style={{marginTop: "0px"}} className="comments-row-start" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>

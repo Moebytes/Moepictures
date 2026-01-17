@@ -9,7 +9,7 @@ const ParticleEffect: React.FunctionComponent = (props) => {
 
     const computedColor = () => {
         if (theme === "dark") return "#ffffff"
-        return getComputedStyle(document.documentElement).getPropertyValue("--text")
+        return getComputedStyle(document.documentElement).getPropertyValue("--navbarText")
     }
 
     const loadParticles = async () => {

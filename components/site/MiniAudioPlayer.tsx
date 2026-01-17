@@ -3,23 +3,20 @@ import {useLocation, useNavigate} from "react-router-dom"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, useThemeSelector, useSessionSelector, useSessionActions} from "../../store"
 import functions from "../../functions/Functions"
 import Slider from "react-slider"
-import playerRewind from "../../assets/icons/player-rewind.png"
-import playerFastforward from "../../assets/icons/player-fastforward.png"
-import playerPlay from "../../assets/icons/player-play.png"
-import playerPause from "../../assets/icons/player-pause.png"
-import playerReverse from "../../assets/icons/player-reverse.png"
-import playerReverseActive from "../../assets/icons/player-reverse-active.png"
-import playerSpeed from "../../assets/icons/player-speed.png"
-import playerSpeedActive from "../../assets/icons/player-speed-active.png"
-import playerPitch from "../../assets/icons/player-pitch.png"
-import playerPitchActive from "../../assets/icons/player-pitch-active.png"
-import playerVolume from "../../assets/icons/player-volume.png"
-import playerVolumeLow from "../../assets/icons/player-volume-low.png"
-import playerVolumeMute from "../../assets/icons/player-volume-mute.png"
-import playerClear from "../../assets/icons/player-clear.png"
-import playerStop from "../../assets/icons/player-stop.png"
-import expandMusicPlayer from "../../assets/icons/expand-music-player.png"
-import contractMusicPlayer from "../../assets/icons/contract-music-player.png"
+import playerRewind from "../../assets/svg/rewind.svg"
+import playerFastforward from "../../assets/svg/fastforward.svg"
+import playerPlay from "../../assets/svg/play.svg"
+import playerPause from "../../assets/svg/pause.svg"
+import playerReverse from "../../assets/svg/reverse.svg"
+import playerSpeed from "../../assets/svg/speed.svg"
+import playerPitch from "../../assets/svg/pitch.svg"
+import playerVolume from "../../assets/svg/volume.svg"
+import playerVolumeLow from "../../assets/svg/volume-low.svg"
+import playerVolumeMute from "../../assets/svg/volume-mute.svg"
+import playerClear from "../../assets/svg/clear.svg"
+import playerStop from "../../assets/svg/stop.svg"
+import expandMusicPlayer from "../../assets/svg/expand.svg"
+import contractMusicPlayer from "../../assets/svg/contract.svg"
 import "./styles/miniaudioplayer.less"
 
 const MiniAudioPlayer: React.FunctionComponent = (props) => {
@@ -52,6 +49,14 @@ const MiniAudioPlayer: React.FunctionComponent = (props) => {
     const navigate = useNavigate()
 
     const filter = functions.color.filter({theme, siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--audioPlayerIcons")
+    }
+
+    const getBlueIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "#579AFF")
+    }
 
     const updateSongCover = async () => {
         if (!audio) return
@@ -130,33 +135,33 @@ const MiniAudioPlayer: React.FunctionComponent = (props) => {
     }
 
     const getAudioPlayIcon = () => {
-        if (audioPaused) return playerPlay
-        return playerPause
+        if (audioPaused) return getIcon(playerPlay)
+        return getIcon(playerPause)
     }
 
     const getAudioVolumeIcon = () => {
         if (audioVolume > 0.5) {
-            return playerVolume
+            return getIcon(playerVolume)
         } else if (audioVolume > 0) {
-            return playerVolumeLow
+            return getIcon(playerVolumeLow)
         } else {
-            return playerVolumeMute
+            return getIcon(playerVolumeMute)
         }
     }
 
     const getAudioReverseIcon = () => {
-        if (audioReverse) return playerReverseActive
-        return playerReverse
+        if (audioReverse) return getBlueIcon(playerReverse)
+        return getIcon(playerReverse)
     }
 
     const getAudioSpeedIcon = () => {
-        if (audioSpeed === 1) return playerSpeed
-        return playerSpeedActive
+        if (audioSpeed === 1) return getIcon(playerSpeed)
+        return getBlueIcon(playerSpeed)
     }
 
     const getAudioPitchIcon = () => {
-        if (pitch === 0) return playerPitch
-        return playerPitchActive
+        if (pitch === 0) return getIcon(playerPitch)
+        return getBlueIcon(playerPitch)
     }
 
     useEffect(() => {
@@ -224,14 +229,14 @@ const MiniAudioPlayer: React.FunctionComponent = (props) => {
                 </div>
             </div>
             <div className="mini-audio-player-row">
-                    <img draggable={false} style={{filter}} className="mini-audio-player-icon-small" src={playerStop} onClick={() => quit()}/>
+                    <img draggable={false} style={{filter}} className="mini-audio-player-icon-small" src={getIcon(playerStop)} onClick={() => quit()}/>
                     <img draggable={false} style={{filter}} className="mini-audio-player-icon" src={getAudioReverseIcon()} onClick={() => changeReverse()}/>
                     <img draggable={false} style={{filter}} className="mini-audio-player-icon" ref={audioSpeedRef} src={getAudioSpeedIcon()} onClick={() => toggleDropdown("speed")}/>
-                    <img draggable={false} style={{filter}} className="mini-audio-player-icon-small" src={playerRewind} onClick={() => setAudioRewindFlag(true)}/>
+                    <img draggable={false} style={{filter}} className="mini-audio-player-icon-small" src={getIcon(playerRewind)} onClick={() => setAudioRewindFlag(true)}/>
                     <img draggable={false} style={{filter, width: "27px"}} className="mini-audio-player-play-icon" src={getAudioPlayIcon()} onClick={() => updatePlay()}/>
-                    <img draggable={false} style={{filter}} className="mini-audio-player-icon-small" src={playerFastforward} onClick={() => setAudioFastForwardFlag(true)}/>
+                    <img draggable={false} style={{filter}} className="mini-audio-player-icon-small" src={getIcon(playerFastforward)} onClick={() => setAudioFastForwardFlag(true)}/>
                     <img draggable={false} style={{filter}} className="mini-audio-player-icon" ref={audioPitchRef} src={getAudioPitchIcon()} onClick={() => toggleDropdown("pitch")}/>
-                    <img draggable={false} style={{filter}} className="mini-audio-player-icon" src={playerClear} onClick={() => setResetFlag(true)}/>
+                    <img draggable={false} style={{filter}} className="mini-audio-player-icon" src={getIcon(playerClear)} onClick={() => setResetFlag(true)}/>
                     <img draggable={false} style={{filter, width: "25px"}} className="mini-audio-player-icon" ref={audioVolumeRef} src={getAudioVolumeIcon()} onMouseEnter={() => setShowVolumeSlider(true)} onMouseLeave={() => setShowVolumeSlider(false)} onClick={updateMute}/>
             </div>
             </>
@@ -261,7 +266,7 @@ const MiniAudioPlayer: React.FunctionComponent = (props) => {
     if (audio) {
         return (
             <div className={`mini-audio-player ${showMiniPlayer ? "" : "hide-mini-audio-player"}`} style={style} ref={audioControls} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onMouseUp={() => setAudioDragging(false)}>
-                <img className="mini-audio-player-expand-icon" src={showBigPlayer ? contractMusicPlayer : expandMusicPlayer} onClick={() => setShowBigPlayer(!showBigPlayer)}/>
+                <img className="mini-audio-player-expand-icon" src={showBigPlayer ? getIcon(contractMusicPlayer) : getIcon(expandMusicPlayer)} onClick={() => setShowBigPlayer(!showBigPlayer)}/>
                 <div className="mini-audio-player-row">
                     <img className="mini-audio-player-img" src={coverImg} onClick={() => audioPost ? navigate(`/post/${audioPost.postID}/${audioPost.slug}`) : null} style={{height: !mobile && coverImg ? "150px" : "50px"}}/>
                 </div>

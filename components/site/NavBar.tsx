@@ -9,6 +9,9 @@ import mail from "../../assets/svg/mail.svg"
 import mailNotif from "../../assets/svg/mail-notif.svg"
 import crown from "../../assets/svg/crown.svg"
 import logoutSVG from "../../assets/svg/logout.svg"
+import lightSVG from "../../assets/svg/light.svg"
+import darkSVG from "../../assets/svg/dark.svg"
+import snowflakeSVG from "../../assets/svg/snowflake2.svg"
 
 import premiumStar from "../../assets/icons/premium-star.png"
 
@@ -243,7 +246,9 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                 </div>
                 <div className="title-dropdown-row" style={{justifyContent: "space-evenly"}}>
                     <button className="title-dropdown-button" onClick={() => resetFilters()}>{i18n.filters.reset}</button>
-                    <button className="title-dropdown-button" onClick={() => lightChange()} style={{backgroundColor: theme.includes("light") ? "#f536ac" : "#36eaf7"}}>{theme.includes("light") ? i18n.buttons.dark : i18n.buttons.light}</button>
+                    <button className="title-dropdown-button" onClick={() => lightChange()}>
+                        <img src={theme.includes("light") ? darkSVG : lightSVG}/>
+                    </button>
                 </div>
             </div>
         )
@@ -274,7 +279,10 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                 </div>
                 <div className="title-dropdown-row" style={{justifyContent: "space-evenly"}}>
                     <button className="title-dropdown-button" onClick={() => resetParticles()}>{i18n.filters.reset}</button>
-                    <button style={{backgroundColor: particles ? "#f536ac" : "#36eaf7"}} className="title-dropdown-button" onClick={() => setParticles(!particles)}>{particles ? i18n.buttons.disable : i18n.buttons.enable}</button>
+                    <button style={{backgroundColor: particles ? "#f536ac" : "#36eaf7"}} className="title-dropdown-button" onClick={() => setParticles(!particles)}>
+                        {/*particles ? i18n.buttons.disable : i18n.buttons.enable*/}
+                        <img src={snowflakeSVG}/>
+                    </button>
                 </div>
             </div>
         )
