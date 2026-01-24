@@ -15,8 +15,8 @@ import playerVolumeLow from "../../assets/svg/volume-low.svg"
 import playerVolumeMute from "../../assets/svg/volume-mute.svg"
 import playerClear from "../../assets/svg/clear.svg"
 import playerStop from "../../assets/svg/stop.svg"
-import expandMusicPlayer from "../../assets/svg/expand.svg"
-import contractMusicPlayer from "../../assets/svg/contract.svg"
+import expandMusicPlayer from "../../assets/svg/expand-music.svg"
+import contractMusicPlayer from "../../assets/svg/contract-music.svg"
 import "./styles/miniaudioplayer.less"
 
 const MiniAudioPlayer: React.FunctionComponent = (props) => {

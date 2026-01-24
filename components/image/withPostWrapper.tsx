@@ -5,29 +5,32 @@ useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, useFl
 useMiscDialogActions, useInteractionSelector, useSessionActions, useActiveActions, usePostDialogActions} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import noteToggleOn from "../../assets/icons/note-toggle-on.png"
-import waifu2xIcon from "../../assets/icons/waifu2x.png"
-import reverseSearchIcon from "../../assets/icons/reverse-search.png"
-import shareIcon from "../../assets/icons/share.png"
-import google from "../../assets/icons/google-purple.png"
-import bing from "../../assets/icons/bing-purple.png"
-import yandex from "../../assets/icons/yandex-purple.png"
-import saucenao from "../../assets/icons/saucenao-purple.png"
-import ascii2d from "../../assets/icons/ascii2d-purple.png"
-import twitter from "../../assets/icons/twitter-purple.png"
-import reddit from "../../assets/icons/reddit-purple.png"
-import pinterest from "../../assets/icons/pinterest-purple.png"
-import qrcode from "../../assets/icons/qrcode.png"
-import expand from "../../assets/icons/expand.png"
-import contract from "../../assets/icons/contract.png"
+
+import sourceIcon from "../../assets/svg/source.svg"
+import shareIcon from "../../assets/svg/share.svg"
+import reverseSearchIcon from "../../assets/svg/reverse-search.svg"
+import wandIcon from "../../assets/svg/wand.svg"
+import waifu2xIcon from "../../assets/svg/waifu2x.svg"
+import noteToggleOn from "../../assets/svg/note-toggle-on.svg"
+import expand from "../../assets/svg/expand.svg"
+import contract from "../../assets/svg/contract.svg"
+
+import lineartIcon from "../../assets/svg/lineart-process.svg"
+import segmentateIcon from "../../assets/svg/segmentate.svg"
+
+import google from "../../assets/svg/google.svg"
+import bing from "../../assets/svg/bing.svg"
+import yandex from "../../assets/svg/yandex.svg"
+import saucenao from "../../assets/svg/saucenao.svg"
+import ascii2d from "../../assets/svg/ascii2d.svg"
+import twitter from "../../assets/svg/twitter.svg"
+import reddit from "../../assets/svg/reddit.svg"
+import pinterest from "../../assets/svg/pinterest.svg"
+import qrcode from "../../assets/svg/qrcode.svg"
+
+import nextIcon from "../../assets/svg/right.svg"
+import prevIcon from "../../assets/svg/left.svg"
 import NoteEditor from "./NoteEditor"
-import nextIcon from "../../assets/icons/go-right.png"
-import prevIcon from "../../assets/icons/go-left.png"
-import sourceIcon from "../../assets/icons/source.png"
-import sourceSetIcon from "../../assets/icons/source-set.png"
-import wandIcon from "../../assets/icons/wand.png"
-import lineartIcon from "../../assets/icons/lineart-big.png"
-import segmentateIcon from "../../assets/icons/segmentate.png"
 import QRCode from "qrcode"
 import {GIFFrame, TagCount, PostFull, PostHistory, UnverifiedPost, UploadImage} from "../../types/Types"
 import "./styles/postimage.less"
@@ -177,6 +180,14 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
         }
 
         const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+        const getIcon = (icon: string) => {
+            return functions.color.colorizeSVG(icon, "--titleButtons")
+        }
+
+        const getPinkIcon = (icon: string) => {
+            return functions.color.colorizeSVG(icon, "#ff69ff")
+        }
 
         const resizeOverlays = () => {
             const currentRef = getRef()
@@ -602,16 +613,16 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
 
         const getSourceIcon = () => {
             if (props.uploadImage) {
-                return props.uploadImage.altSource ? sourceSetIcon : sourceIcon
+                return props.uploadImage.altSource ? getPinkIcon(sourceIcon) : getIcon(sourceIcon)
             } else {
                 if (!props.post) return sourceIcon
                 let order = (props.order || 1) - 1
                 if ("historyID" in props.post) {
-                    if (props.post.imageSources?.[order]) return sourceSetIcon
+                    if (props.post.imageSources?.[order]) return getPinkIcon(sourceIcon)
                 } else {
-                    if (props.post.images[order]?.altSource) return sourceSetIcon
+                    if (props.post.images[order]?.altSource) return getPinkIcon(sourceIcon)
                 }
-                return sourceIcon
+                return getIcon(sourceIcon)
             }
         }
 
@@ -620,7 +631,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
             if (props.uploadImage?.directLink) {
                 window.open(props.uploadImage.directLink, "_blank")
             } else {
-                if (!props.post) return sourceIcon
+                if (!props.post) return
                 let order = (props.order || 1) - 1
                 if ("historyID" in props.post) {
                     if (props.post.imageLinks?.[order]) window.open(props.post.imageLinks[order], "_blank")
@@ -663,52 +674,52 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
                         <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={buttonMouseEnter} onMouseLeave={() => setButtonHover(false)}>
                             <div className={`post-image-special-buttons ${showSpecialIcons ? "show-post-image-special-buttons" : ""}`}>
                                 {showSpecialIcons ? <>
-                                <img draggable={false} className="post-image-top-button" src={segmentateIcon} style={{filter}} onClick={toggleSegmentate}/>
-                                <img draggable={false} className="post-image-top-button" src={lineartIcon} style={{filter}} onClick={toggleLineart}/>
+                                <img draggable={false} className="post-image-top-button" src={getIcon(segmentateIcon)} style={{filter}} onClick={toggleSegmentate}/>
+                                <img draggable={false} className="post-image-top-button" src={getIcon(lineartIcon)} style={{filter}} onClick={toggleLineart}/>
                                 </> : null}
                             </div>
 
                             <div className={`post-image-share-buttons ${showShareIcons ? "show-post-image-share-buttons" : ""}`}>
                                 {showShareIcons ? <>
-                                <img draggable={false} className="post-image-top-button" src={qrcode} style={{filter}} onClick={() => generateQRCode()}/>
-                                <img draggable={false} className="post-image-top-button" src={pinterest} style={{filter}} onClick={() => sharePost("pinterest")}/>
-                                <img draggable={false} className="post-image-top-button" src={twitter} style={{filter}} onClick={() => sharePost("twitter")}/>
-                                <img draggable={false} className="post-image-top-button" src={reddit} style={{filter}} onClick={() => sharePost("reddit")}/>
+                                <img draggable={false} className="post-image-top-button" src={getIcon(qrcode)} style={{filter}} onClick={() => generateQRCode()}/>
+                                <img draggable={false} className="post-image-top-button" src={getIcon(pinterest)} style={{filter}} onClick={() => sharePost("pinterest")}/>
+                                <img draggable={false} className="post-image-top-button" src={getIcon(twitter)} style={{filter}} onClick={() => sharePost("twitter")}/>
+                                <img draggable={false} className="post-image-top-button" src={getIcon(reddit)} style={{filter}} onClick={() => sharePost("reddit")}/>
                                 </> : null}
                             </div>
 
                             <div className={`post-image-reverse-buttons ${showReverseIcons ? "show-post-image-reverse-buttons" : ""}`}>
                                 {showReverseIcons ? <>
-                                <img draggable={false} className="post-image-top-button"src={google} style={{filter}} onClick={() => reverseSearch("google")}/>
-                                <img draggable={false} className="post-image-top-button" src={bing} style={{filter}} onClick={() => reverseSearch("bing")}/>
-                                <img draggable={false} className="post-image-top-button" src={yandex} style={{filter}} onClick={() => reverseSearch("yandex")}/>
-                                <img draggable={false} className="post-image-top-button" src={saucenao} style={{filter}} onClick={() => reverseSearch("saucenao")}/>
-                                <img draggable={false} className="post-image-top-button" src={ascii2d} style={{filter}} onClick={() => reverseSearch("ascii2d")}/>
+                                <img draggable={false} className="post-image-top-button"src={getIcon(google)} style={{filter}} onClick={() => reverseSearch("google")}/>
+                                <img draggable={false} className="post-image-top-button" src={getIcon(bing)} style={{filter}} onClick={() => reverseSearch("bing")}/>
+                                <img draggable={false} className="post-image-top-button" src={getIcon(yandex)} style={{filter}} onClick={() => reverseSearch("yandex")}/>
+                                <img draggable={false} className="post-image-top-button" src={getIcon(saucenao)} style={{filter}} onClick={() => reverseSearch("saucenao")}/>
+                                <img draggable={false} className="post-image-top-button" src={getIcon(ascii2d)} style={{filter}} onClick={() => reverseSearch("ascii2d")}/>
                                 </> : null}
                             </div>
 
                             <img draggable={false} className="post-image-top-button" src={getSourceIcon()} style={{filter, marginRight: "6px"}} 
                                 onClick={editImgSource} onContextMenu={openDirectLink}/>
-                            {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={shareIcon} style={{filter}} 
+                            {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={getIcon(shareIcon)} style={{filter}} 
                                 onClick={() => showAdditionalIcons("share")}/> : null}
-                            {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={reverseSearchIcon} style={{filter}} 
+                            {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={getIcon(reverseSearchIcon)} style={{filter}} 
                                 onClick={() => showAdditionalIcons("reverse")}/> : null}
                             {!props.noNotes && (props.post?.type === "image" || props.post?.type === "comic") ? <img draggable={false} className="post-image-top-button" 
-                                src={wandIcon} style={{filter}} onClick={() => showAdditionalIcons("special")}/> : null}
-                            {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={waifu2xIcon} style={{filter}} 
+                                src={getIcon(wandIcon)} style={{filter}} onClick={() => showAdditionalIcons("special")}/> : null}
+                            {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={getIcon(waifu2xIcon)} style={{filter}} 
                                 onClick={() => toggleUpscale()}/> : null}
-                            {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={noteToggleOn} style={{filter}} 
+                            {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={getIcon(noteToggleOn)} style={{filter}} 
                                 onClick={() => {setNoteMode(true); setNoteDrawingEnabled(true)}}/> : null}
-                            {!mobile ? <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} 
+                            {!mobile ? <img draggable={false} className="post-image-top-button" src={imageExpand ? getIcon(contract) : getIcon(expand)} 
                                 style={{filter}} onClick={() => setImageExpand(!imageExpand)}/> : null}
                         </div>
                         <div className={`post-image-previous-button ${previousButtonHover ? "show-post-image-mid-buttons" : ""}`} 
                             onMouseEnter={() => setPreviousButtonHover(true)} onMouseLeave={() => setPreviousButtonHover(false)}>
-                            <img draggable={false} className="post-image-mid-button" src={prevIcon} style={{filter}} onClick={() => props.previous?.()}/>
+                            <img draggable={false} className="post-image-mid-button" src={getIcon(prevIcon)} style={{filter}} onClick={() => props.previous?.()}/>
                         </div>
                         <div className={`post-image-next-button ${nextButtonHover ? "show-post-image-mid-buttons" : ""}`} 
                             onMouseEnter={() => setNextButtonHover(true)} onMouseLeave={() => setNextButtonHover(false)}>
-                            <img draggable={false} className="post-image-mid-button" src={nextIcon} style={{filter}} onClick={() => props.next?.()}/>
+                            <img draggable={false} className="post-image-mid-button" src={getIcon(nextIcon)} style={{filter}} onClick={() => props.next?.()}/>
                         </div>
                         <div className="relative-ref" onMouseMove={dragImgDown} onMouseLeave={dragImgUp}>
                             <WrappedComponent 

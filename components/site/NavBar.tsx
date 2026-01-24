@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useReducer} from "react"
 import {useNavigate} from "react-router-dom"
 import searchIcon from "../../assets/svg/search.svg"
-import history from "../../assets/svg/history.svg"
+import history from "../../assets/svg/history-thin.svg"
 import music from "../../assets/svg/music.svg"
 import snowflake from "../../assets/svg/snowflake.svg"
 import hueshift from "../../assets/svg/hueshift.svg"
