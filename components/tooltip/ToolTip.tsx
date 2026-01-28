@@ -3,6 +3,7 @@ import {useNavigate, useLocation} from "react-router-dom"
 import {useSessionSelector, useSessionActions, useSearchSelector, useSearchActions, useInteractionSelector, 
 useFlagActions, useInteractionActions, useThemeSelector, useActiveActions} from "../../store"
 import functions from "../../functions/Functions"
+
 import pixiv from "../../assets/icons/pixiv.png"
 import twitter from "../../assets/icons/twitter.png"
 import deviantart from "../../assets/icons/deviantart.png"
@@ -19,26 +20,30 @@ import soundcloud from "../../assets/icons/soundcloud.png"
 import youtube from "../../assets/icons/youtube.png"
 import bandcamp from "../../assets/icons/bandcamp.png"
 import sketchfab from "../../assets/icons/sketchfab.png"
-import tagIcon from "../../assets/icons/tag.png"
-import image from "../../assets/icons/image.png"
-import animation from "../../assets/icons/animation.png"
-import video from "../../assets/icons/video.png"
-import comic from "../../assets/icons/comic.png"
-import live2d from "../../assets/icons/live2d.png"
-import model from "../../assets/icons/model.png"
-import audio from "../../assets/icons/audio.png"
-import cute from "../../assets/icons/cute.png"
-import sexy from "../../assets/icons/sexy.png"
-import erotic from "../../assets/icons/erotic.png"
-import lewd from "../../assets/icons/lewd.png"
-import $2d from "../../assets/icons/2d.png"
-import $3d from "../../assets/icons/3d.png"
-import pixel from "../../assets/icons/pixel.png"
-import chibi from "../../assets/icons/chibi.png"
-import daki from "../../assets/icons/daki.png"
-import sketch from "../../assets/icons/sketch.png"
-import lineart from "../../assets/icons/lineart.png"
-import promo from "../../assets/icons/promo.png"
+
+import tagIcon from "../../assets/svg/tags.svg"
+
+import image from "../../assets/svg/image.svg"
+import animation from "../../assets/svg/animation.svg"
+import video from "../../assets/svg/video.svg"
+import comic from "../../assets/svg/comic.svg"
+import live2d from "../../assets/svg/live2d.svg"
+import model from "../../assets/svg/model.svg"
+import audio from "../../assets/svg/music.svg"
+
+import cute from "../../assets/svg/cute.svg"
+import sexy from "../../assets/svg/sexy.svg"
+import erotic from "../../assets/svg/erotic.svg"
+import lewd from "../../assets/svg/lewd.svg"
+
+import $2d from "../../assets/svg/2d.svg"
+import $3d from "../../assets/svg/3d.svg"
+import pixel from "../../assets/svg/pixel.svg"
+import chibi from "../../assets/svg/chibi.svg"
+import daki from "../../assets/svg/daki.svg"
+import sketch from "../../assets/svg/sketch.svg"
+import lineart from "../../assets/svg/lineart.svg"
+import promo from "../../assets/svg/promo.svg"
 import {TagCount} from "../../types/Types"
 import "./styles/tooltip.less"
 
@@ -58,6 +63,18 @@ const ToolTip: React.FunctionComponent = (props) => {
     const scrollRef = useRef<HTMLDivElement>(null)
     const navigate = useNavigate()
     const location = useLocation()
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
+
+    const getRedIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--r18Color")
+    }
+    
+    const getBlueIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sketchColor")
+    }
 
     const updateTags = async () => {
         if (session?.username && !session?.showTooltips) return
@@ -240,42 +257,34 @@ const ToolTip: React.FunctionComponent = (props) => {
     }
 
     const getTypeIcon = () => {
-        if (tooltipPost.type === "image") return image
-        if (tooltipPost.type === "comic") return comic
-        if (tooltipPost.type === "animation") return animation
-        if (tooltipPost.type === "video") return video
-        if (tooltipPost.type === "audio") return audio
-        if (tooltipPost.type === "model") return model
-        if (tooltipPost.type === "live2d") return live2d
+        if (tooltipPost.type === "image") return getIcon(image)
+        if (tooltipPost.type === "comic") return getIcon(comic)
+        if (tooltipPost.type === "animation") return getIcon(animation)
+        if (tooltipPost.type === "video") return getIcon(video)
+        if (tooltipPost.type === "audio") return getIcon(audio)
+        if (tooltipPost.type === "model") return getIcon(model)
+        if (tooltipPost.type === "live2d") return getIcon(live2d)
         return image
     }
 
     const getRatingIcon = () => {
-        if (tooltipPost.rating === "cute") return cute
-        if (tooltipPost.rating === "sexy") return sexy
-        if (tooltipPost.rating === "erotic") return erotic
-        if (tooltipPost.rating === "lewd") return lewd
+        if (tooltipPost.rating === "cute") return getIcon(cute)
+        if (tooltipPost.rating === "sexy") return getIcon(sexy)
+        if (tooltipPost.rating === "erotic") return getIcon(erotic)
+        if (tooltipPost.rating === "lewd") return getRedIcon(lewd)
         return cute
     }
 
     const getStyleIcon = () => {
-        if (tooltipPost.style === "2d") return $2d
-        if (tooltipPost.style === "3d") return $3d
-        if (tooltipPost.style === "chibi") return chibi
-        if (tooltipPost.style === "pixel") return pixel
-        if (tooltipPost.style === "daki") return daki
-        if (tooltipPost.style === "promo") return promo
-        if (tooltipPost.style === "sketch") return sketch
-        if (tooltipPost.style === "lineart") return lineart
-        return $2d
-    }
-
-    const getIconStyle = (icon: string) => {
-        if (icon === "lewd") return {filter: `hue-rotate(-10deg)`}
-        if (icon === "promo") return {filter: `hue-rotate(125deg)`}
-        if (icon === "sketch") return {filter: `hue-rotate(125deg)`}
-        if (icon === "lineart") return {filter: `hue-rotate(125deg)`}
-        return {filter: `hue-rotate(60deg)`}
+        if (tooltipPost.style === "2d") return getIcon($2d)
+        if (tooltipPost.style === "3d") return getIcon($3d)
+        if (tooltipPost.style === "chibi") return getIcon(chibi)
+        if (tooltipPost.style === "pixel") return getIcon(pixel)
+        if (tooltipPost.style === "daki") return getIcon(daki)
+        if (tooltipPost.style === "promo") return getBlueIcon(promo)
+        if (tooltipPost.style === "sketch") return getBlueIcon(sketch)
+        if (tooltipPost.style === "lineart") return getBlueIcon(lineart)
+        return getIcon($2d)
     }
  
     return (
@@ -284,7 +293,7 @@ const ToolTip: React.FunctionComponent = (props) => {
                 <div className="tooltip-artist-container">
                     <img className="tooltip-img" src={functions.link.getTagLink(artist.type, artist.image, artist.imageHash)}/>
                     <span className={`tooltip-tag-clickable ${tooltipPost?.hidden ? "strikethrough" : ""}`} style={{marginRight: "5px"}} onClick={searchArtist} onAuxClick={openArtist}>{artist.tag}</span>
-                    <img className="tooltip-img-small" src={tagIcon} onClick={copyTags} onContextMenu={copyTags}/>
+                    <img className="tooltip-img-small" src={getIcon(tagIcon)} onClick={copyTags} onContextMenu={copyTags}/>
                 </div>
                 <div className="tooltip-artist-container">
                     <span className={`tooltip-tag-clickable ${tooltipPost?.hidden ? "strikethrough" : ""}`} onClick={download} onAuxClick={openNewTab}>{getImageDimensions()}</span>
@@ -293,9 +302,9 @@ const ToolTip: React.FunctionComponent = (props) => {
             </div>
             <div className="tooltip-column" ref={scrollRef} style={{overflowY: "auto"}}>
                 <div className="tooltip-tag-container">
-                    <span className={`tooltip-tag-text ${tooltipPost?.hidden ? "strikethrough" : ""}`}><img src={getTypeIcon()} className="tooltip-icon" style={getIconStyle(tooltipPost.type)}/>{tooltipPost.type}</span>
-                    <span className={`tooltip-tag-text ${tooltipPost?.hidden ? "strikethrough" : ""}`}><img src={getRatingIcon()} className="tooltip-icon" style={getIconStyle(tooltipPost.rating)}/>{tooltipPost.rating}</span>
-                    <span className={`tooltip-tag-text ${tooltipPost?.hidden ? "strikethrough" : ""}`}><img src={getStyleIcon()} className="tooltip-icon" style={getIconStyle(tooltipPost.style)}/>{tooltipPost.style}</span>
+                    <span className={`tooltip-tag-text ${tooltipPost?.hidden ? "strikethrough" : ""}`}><img src={getTypeIcon()} className="tooltip-icon"/>{tooltipPost.type}</span>
+                    <span className={`tooltip-tag-text ${tooltipPost?.hidden ? "strikethrough" : ""}`}><img src={getRatingIcon()} className="tooltip-icon"/>{tooltipPost.rating}</span>
+                    <span className={`tooltip-tag-text ${tooltipPost?.hidden ? "strikethrough" : ""}`}><img src={getStyleIcon()} className="tooltip-icon"/>{tooltipPost.style}</span>
                 </div>
                 <div className="tooltip-tag-container">
                     <span className={`tooltip-tag-text ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{tooltipPost.englishTitle || i18n.labels.noTitle}</span>

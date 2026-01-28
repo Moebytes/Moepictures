@@ -39,15 +39,15 @@ const CircleHandle = ({active, cursor, onMouseDown, onDoubleClick, scale, x, y})
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const getBGColor = () => {
-        return "rgba(89, 43, 255, 0.9)"
+        return "rgba(255, 43, 135, 0.9)"
     }
     const getBGColorInactive = () => {
-        return "rgba(89, 43, 255, 0.3)"
+        return "rgba(255, 43, 135, 0.3)"
     }
     const size = Math.ceil(4 / scale)
     return (
         <circle fill={active ? getBGColor() : getBGColorInactive()}
-        stroke={active ? "rgba(53, 33, 140, 1)" : "rgba(53, 33, 140, 0.3)"} strokeWidth={1 / scale}
+        stroke={active ? "rgba(140, 33, 79, 1)" : "rgba(140, 33, 79, 0.3)"} strokeWidth={1 / scale}
         style={{cursor, opacity: active && noteDrawingEnabled ? "1" : "0", filter}} 
         cx={x} cy={-size*5} r={size} onMouseDown={onMouseDown} onDoubleClick={onDoubleClick}/>
     )
@@ -60,16 +60,16 @@ const RectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const getBGColor = () => {
-        return "rgba(89, 43, 255, 0.9)"
+        return "rgba(255, 43, 135, 0.9)"
     }
     const getBGColorInactive = () => {
-        return "rgba(89, 43, 255, 0.3)"
+        return "rgba(255, 43, 135, 0.3)"
     }
     const size = Math.ceil(7/scale)
     return (
         <rect fill={active ? getBGColor() : getBGColorInactive()}
         width={size} height={size} x={x - size / 2} y={y - size / 2}
-        stroke={active ? "rgba(53, 33, 140, 1)" : "rgba(53, 33, 140, 0.3)"} strokeWidth={1 / scale}
+        stroke={active ? "rgba(140, 33, 79, 1)" : "rgba(140, 33, 79, 0.3)"} strokeWidth={1 / scale}
         style={{cursor, opacity: active && noteDrawingEnabled ? "1" : "0", filter}} onMouseDown={onMouseDown}/>
     )
 }
@@ -113,11 +113,11 @@ const RectShape = wrapShape(({width, height, scale, onMouseEnter, onMouseMove, o
 
     const getBGColor = () => {
         if (overlay && !session.forceNoteBubbles) return backgroundColor || "#ffffff"
-        return "rgba(89, 43, 255, 0.1)"
+        return "rgba(255, 43, 131, 0.1)"
     }
     const getStrokeColor = () => {
         if (overlay && !session.forceNoteBubbles) return backgroundColor || "#ffffff"
-        return "rgba(89, 43, 255, 0.9)"
+        return "rgba(255, 43, 131, 0.9)"
     }
     const getTextColor = () => {
         return textColor || "#000000"

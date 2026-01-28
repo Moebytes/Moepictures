@@ -36,7 +36,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
 
     const getFilter2 = () => {
         let hue = siteHue - 180
-        if (isAverage) hue += 10
+        if (isAverage) hue += 20
         return `hue-rotate(${hue}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
@@ -54,7 +54,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     const updateCuteness = async () => {
         if (!cuteness) return
         await functions.http.post("/api/cuteness/update", {cuteness, postID: props.post.postID}, session, setSessionFlag)
-        if (cuteness) setIsAverage(false)
+        setIsAverage(false)
     }
 
     const deleteRating = async () => {
