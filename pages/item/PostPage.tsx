@@ -22,8 +22,8 @@ import Children from "../../components/post/Children"
 import ArtistWorks from "../../components/post/ArtistWorks"
 import Related from "../../components/post/Related"
 import MobileInfo from "../../components/site/MobileInfo"
-import historyIcon from "../../assets/icons/history-state.png"
-import currentIcon from "../../assets/icons/current.png"
+import historyIcon from "../../assets/svg/history-thin.svg"
+import currentIcon from "../../assets/svg/current.svg"
 import {useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
 useLayoutSelector, useSearchSelector, useFlagSelector, useCacheActions, usePostDialogActions, 
 useNoteDialogSelector, useNoteDialogActions, useActiveSelector, usePostDialogSelector,

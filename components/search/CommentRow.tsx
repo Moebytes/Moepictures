@@ -185,7 +185,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                 onClick={imgClick} height={110} lineMultiplier={2} maxLineWidth={2}/>
             </div>
             <div className="commentrow-container-row">
-                <div className="commentrow-container">
+                <div className="commentrow-container" style={{borderLeft: "none", borderRight: "none"}}>
                     <div className="commentrow-user-container" onClick={userClick} onAuxClick={userClick}>
                         <img className="commentrow-user-img" src={getCommentPFP()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? filter : ""}}/>
                         {generateUsernameJSX()}

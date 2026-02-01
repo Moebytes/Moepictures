@@ -8,18 +8,16 @@ import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
-import groupReorder from "../../assets/icons/group-reorder.png"
-import groupReorderActive from "../../assets/icons/group-reorder-active.png"
-import groupAdd from "../../assets/icons/group-add.png"
-import groupEdit from "../../assets/icons/tag-edit.png"
-import groupDelete from "../../assets/icons/tag-delete.png"
-import groupCancel from "../../assets/icons/group-cancel.png"
-import groupCancelActive from "../../assets/icons/group-cancel-active.png"
-import groupAccept from "../../assets/icons/group-accept.png"
-import groupRemap from "../../assets/icons/group-remap.png"
-import lockIcon from "../../assets/icons/private-lock.png"
-import scrollIcon from "../../assets/icons/scroll.png"
-import pageIcon from "../../assets/icons/page.png"
+import groupReorder from "../../assets/svg/reorder.svg"
+import groupCancel from "../../assets/svg/cancel.svg"
+import groupAccept from "../../assets/svg/accept.svg"
+import groupAdd from "../../assets/svg/add.svg"
+import groupEdit from "../../assets/svg/edit.svg"
+import groupRemap from "../../assets/svg/remap.svg"
+import groupDelete from "../../assets/svg/delete.svg"
+import lockIcon from "../../assets/svg/lock.svg"
+import scrollIcon from "../../assets/svg/scroll.svg"
+import pageIcon from "../../assets/svg/pages.svg"
 import Reorder from "react-reorder"
 import TinyImage from "../../components/image/TinyImage"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
@@ -51,6 +49,14 @@ const FavgroupPage: React.FunctionComponent = () => {
     const {username, favgroup: favgroupName} = useParams() as {username: string, favgroup: string}
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--titleButtons")
+    }
+        
+    const getPinkIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "#ff73f6")
+    }
 
     useEffect(() => {
         setHideNavbar(true)
@@ -221,15 +227,15 @@ const FavgroupPage: React.FunctionComponent = () => {
     const favgroupOptionsJSX = () => {
         let jsx = [] as React.ReactElement[]
         if (session.username === username) {
-            jsx.push(<img className="group-opt" src={reorderState ? groupReorderActive : groupReorder} onClick={() => changeReorderState()} style={{filter: reorderState ? "" : filter}}/>)
+            jsx.push(<img className="group-opt" src={reorderState ? getPinkIcon(groupReorder) : getIcon(groupReorder)} onClick={() => changeReorderState()} style={{filter: reorderState ? "" : filter}}/>)
             if (reorderState) {
-                jsx.push(<img className="group-opt" src={groupAccept} onClick={() => commitReorder()} style={{filter}}/>)
+                jsx.push(<img className="group-opt" src={getIcon(groupAccept)} onClick={() => commitReorder()} style={{filter}}/>)
             }
-            jsx.push(<img className="group-opt" src={deleteMode ? groupCancelActive : groupCancel} onClick={() => setDeleteMode((prev: boolean) => !prev)} style={{filter}}/>)
-            jsx.push(<img className="group-opt" src={groupAdd} onClick={() => showFavgroupAddDialog()} style={{filter}}/>)
-            jsx.push(<img className="group-opt" src={groupEdit} onClick={() => showFavgroupEditDialog()} style={{filter}}/>)
-            jsx.push(<img className="group-opt" src={groupRemap} onClick={() => showFavgroupRemapDialog()} style={{filter}}/>)
-            jsx.push(<img className="group-opt" src={groupDelete} onClick={() => showFavgroupDeleteDialog()} style={{filter}}/>)
+            jsx.push(<img className="group-opt" src={deleteMode ? getPinkIcon(groupCancel) : getIcon(groupCancel)} onClick={() => setDeleteMode((prev: boolean) => !prev)} style={{filter}}/>)
+            jsx.push(<img className="group-opt" src={getIcon(groupAdd)} onClick={() => showFavgroupAddDialog()} style={{filter}}/>)
+            jsx.push(<img className="group-opt" src={getIcon(groupEdit)} onClick={() => showFavgroupEditDialog()} style={{filter}}/>)
+            jsx.push(<img className="group-opt" src={getIcon(groupRemap)} onClick={() => showFavgroupRemapDialog()} style={{filter}}/>)
+            jsx.push(<img className="group-opt" src={getIcon(groupDelete)} onClick={() => showFavgroupDeleteDialog()} style={{filter}}/>)
         }
         return jsx
     }

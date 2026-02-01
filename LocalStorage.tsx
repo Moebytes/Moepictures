@@ -52,7 +52,7 @@ const lightColorList = {
     "--progressText": "#000000",
     "--progressBG": "#ffffff",
     "--bubbleBG": "rgba(255, 171, 226, 0.8)",
-    "--buttonBG": "#FF17A6",
+    "--buttonBG": "#FF63BB",
     "--previewBG": "#FFB1E9",
     "--editBG": "#f7afff",
 
@@ -105,7 +105,7 @@ const darkColorList = {
     "--progressText": "#ffffff",
     "--progressBG": "#000000",
     "--bubbleBG": "rgba(255, 43, 188, 0.8)",
-    "--buttonBG": "#FF17A6",
+    "--buttonBG": "#FF63BB",
     "--previewBG": "#FFB1E9",
     "--editBG": "#ff34e1",
     "--audioPlayerColor": "#1D0915",
