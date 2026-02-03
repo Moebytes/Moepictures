@@ -12,25 +12,18 @@ import GroupHistoryRow from "../../components/history/GroupHistoryRow"
 import SearchHistoryRow from "../../components/history/SearchHistoryRow"
 import AliasHistoryRow from "../../components/history/AliasHistoryRow"
 import DeletedPostRow from "../../components/history/DeletedPostRow"
-import scrollIcon from "../../assets/icons/scroll.png"
-import search from "../../assets/icons/search.png"
-import pageIcon from "../../assets/icons/page.png"
-import searchHistoryDelete from "../../assets/icons/delete.png"
+import scrollIcon from "../../assets/svg/scroll.svg"
+import search from "../../assets/svg/search.svg"
+import pageIcon from "../../assets/svg/pages.svg"
+import searchHistoryDelete from "../../assets/svg/delete.svg"
 import permissions from "../../structures/Permissions"
-import historyPost from "../../assets/icons/history-post.png"
-import historyPostActive from "../../assets/icons/history-post-active.png"
-import historySearch from "../../assets/icons/history-search.png"
-import historySearchActive from "../../assets/icons/history-search-active.png"
-import historyTag from "../../assets/icons/history-tag.png"
-import historyTagActive from "../../assets/icons/history-tag-active.png"
-import historyNote from "../../assets/icons/history-note.png"
-import historyNoteActive from "../../assets/icons/history-note-active.png"
-import historyGroup from "../../assets/icons/history-group.png"
-import historyGroupActive from "../../assets/icons/history-group-active.png"
-import historyAlias from "../../assets/icons/history-alias.png"
-import historyAliasActive from "../../assets/icons/history-alias-active.png"
-import historyDelete from "../../assets/icons/tag-delete.png"
-import historyDeleteActive from "../../assets/icons/tag-delete-active.png"
+import historyPost from "../../assets/svg/post.svg"
+import historySearch from "../../assets/svg/search.svg"
+import historyTag from "../../assets/svg/tag-shaded.svg"
+import historyNote from "../../assets/svg/note.svg"
+import historyGroup from "../../assets/svg/group.svg"
+import historyAlias from "../../assets/svg/all.svg"
+import historyDelete from "../../assets/svg/delete.svg"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
 useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
@@ -83,6 +76,18 @@ const HistoryPage: React.FunctionComponent = () => {
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
     const getFilterSearch = functions.color.filter({theme, siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
+
+    const getRedIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "#f71e75")
+    }
+
+    const getPinkIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "#ff54fc")
+    }
 
     useEffect(() => {
         if (!session.cookie) return
@@ -310,7 +315,7 @@ const HistoryPage: React.FunctionComponent = () => {
                         </button>
                     </div>
                     <div className="history-item" onClick={() => toggleScroll()}>
-                        <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter}}/>
+                        <img className="history-img" src={scroll ? getIcon(scrollIcon) : getIcon(pageIcon)} style={{filter}}/>
                         <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                     </div>
                 </div></>
@@ -329,7 +334,7 @@ const HistoryPage: React.FunctionComponent = () => {
                         </button>
                     </div>
                     <div className="history-item" onClick={() => toggleScroll()}>
-                        <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter}}/>
+                        <img className="history-img" src={scroll ? getIcon(scrollIcon) : getIcon(pageIcon)} style={{filter}}/>
                         <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                     </div>
                 </div></>
@@ -348,7 +353,7 @@ const HistoryPage: React.FunctionComponent = () => {
                         </button>
                     </div>
                     <div className="history-item" onClick={() => toggleScroll()}>
-                        <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter}}/>
+                        <img className="history-img" src={scroll ? getIcon(scrollIcon) : getIcon(pageIcon)} style={{filter}}/>
                         <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                     </div>
                 </div></>
@@ -367,7 +372,7 @@ const HistoryPage: React.FunctionComponent = () => {
                         </button>
                     </div>
                     <div className="history-item" onClick={() => toggleScroll()}>
-                        <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter}}/>
+                        <img className="history-img" src={scroll ? getIcon(scrollIcon) : getIcon(pageIcon)} style={{filter}}/>
                         <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                     </div>
                 </div></>
@@ -386,7 +391,7 @@ const HistoryPage: React.FunctionComponent = () => {
                         </button>
                     </div>
                     <div className="history-item" onClick={() => toggleScroll()}>
-                        <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter}}/>
+                        <img className="history-img" src={scroll ? getIcon(scrollIcon) : getIcon(pageIcon)} style={{filter}}/>
                         <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                     </div>
                 </div></>
@@ -405,11 +410,11 @@ const HistoryPage: React.FunctionComponent = () => {
                         </button>
                     </div>
                     <div className="history-item" onClick={() => toggleScroll()}>
-                        <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter}}/>
+                        <img className="history-img" src={scroll ? getIcon(scrollIcon) : getIcon(pageIcon)} style={{filter}}/>
                         <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                     </div>
                     <div className="history-item" onClick={() => setShowDeleteAllHistoryDialog(!showDeleteAllHistoryDialog)}>
-                        <img className="history-img" src={searchHistoryDelete}/>
+                        <img className="history-img" src={getRedIcon(searchHistoryDelete)}/>
                         {!mobile ? <span className="history-opt-text">{i18n.buttons.deleteAll}</span> : null}
                     </div>
                 </div></>
@@ -428,11 +433,11 @@ const HistoryPage: React.FunctionComponent = () => {
                         </button>
                     </div>
                     <div className="history-item" onClick={() => toggleScroll()}>
-                        <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter}}/>
+                        <img className="history-img" src={scroll ? getIcon(scrollIcon) : getIcon(pageIcon)} style={{filter}}/>
                         <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                     </div>
                     <div className="history-item" onClick={() => setPermaDeleteAllDialog(!permaDeleteAllDialog)}>
-                        <img className="history-img" src={searchHistoryDelete}/>
+                        <img className="history-img" src={getRedIcon(searchHistoryDelete)}/>
                         {!mobile ? <span className="history-opt-text">{i18n.buttons.deleteAll}</span> : null}
                     </div>
                 </div></>
@@ -463,13 +468,13 @@ const HistoryPage: React.FunctionComponent = () => {
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="history-page">
                     <div className="history-icons">
-                        <img className="history-icon" onClick={searchHistoryClick} src={historyTab === "search" ? historySearchActive : historySearch} style={{filter: historyTab === "search" ? "" : filter}}/>
-                        <img className="history-icon" onClick={() => setHistoryTab("post")} src={historyTab === "post" ? historyPostActive : historyPost} style={{filter: historyTab === "post" ? "" : filter}}/>
-                        <img className="history-icon" onClick={() => setHistoryTab("tag")} src={historyTab === "tag" ? historyTagActive : historyTag} style={{filter: historyTab === "tag" ? "" : filter}}/>
-                        <img className="history-icon" onClick={() => setHistoryTab("group")} src={historyTab === "group" ? historyGroupActive : historyGroup} style={{filter: historyTab === "group" ? "" : filter}}/>
-                        <img className="history-icon" onClick={() => setHistoryTab("note")} src={historyTab === "note" ? historyNoteActive : historyNote} style={{filter: historyTab === "note" ? "" : filter}}/>
-                        <img className="history-icon" onClick={() => setHistoryTab("alias")} src={historyTab === "alias" ? historyAliasActive : historyAlias} style={{filter: historyTab === "alias" ? "" : filter}}/>
-                        {permissions.isAdmin(session) ? <img className="history-icon" onClick={() => setHistoryTab("delete")} src={historyTab === "delete" ? historyDeleteActive : historyDelete} style={{filter: historyTab === "delete" ? "" : filter}}/> : null}
+                        <img className="history-icon" onClick={searchHistoryClick} src={historyTab === "search" ? getPinkIcon(historySearch) : getIcon(historySearch)} style={{filter: historyTab === "search" ? "" : filter}}/>
+                        <img className="history-icon" onClick={() => setHistoryTab("post")} src={historyTab === "post" ? getPinkIcon(historyPost) : getIcon(historyPost)} style={{filter: historyTab === "post" ? "" : filter}}/>
+                        <img className="history-icon" onClick={() => setHistoryTab("tag")} src={historyTab === "tag" ? getPinkIcon(historyTag) : getIcon(historyTag)} style={{filter: historyTab === "tag" ? "" : filter}}/>
+                        <img className="history-icon" onClick={() => setHistoryTab("group")} src={historyTab === "group" ? getPinkIcon(historyGroup) : getIcon(historyGroup)} style={{filter: historyTab === "group" ? "" : filter}}/>
+                        <img className="history-icon" onClick={() => setHistoryTab("note")} src={historyTab === "note" ? getPinkIcon(historyNote) : getIcon(historyNote)} style={{filter: historyTab === "note" ? "" : filter}}/>
+                        <img className="history-icon" onClick={() => setHistoryTab("alias")} src={historyTab === "alias" ? getPinkIcon(historyAlias) : getIcon(historyAlias)} style={{filter: historyTab === "alias" ? "" : filter}}/>
+                        {permissions.isAdmin(session) ? <img className="history-icon" onClick={() => setHistoryTab("delete")} src={historyTab === "delete" ? getPinkIcon(historyDelete) : getIcon(historyDelete)} style={{filter: historyTab === "delete" ? "" : filter}}/> : null}
                     </div>
                     {generateHeaderJSX()}
                     <div className="history-container">

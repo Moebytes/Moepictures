@@ -261,14 +261,14 @@ const FavgroupPage: React.FunctionComponent = () => {
                 {favgroup ? 
                 <div className="group-page">
                     <div className="group-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        {favgroup.private ? <img className="group-icon" src={lockIcon} style={{filter}}/> : null}
+                        {favgroup.private ? <img className="group-icon" src={getIcon(lockIcon)} style={{filter}}/> : null}
                         <span className="group-heading">{favgroup.name}</span>
                         {favgroupOptionsJSX()}
                     </div>
                     <div className="group-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <span><span className="group-label" onClick={searchGroup}>{i18n.sort.posts}</span> <span className="group-label-alt">{favgroup.postCount}</span></span>
                         <div className="group-page-container" onClick={() => toggleScroll()}>
-                            <img className="group-mini-icon" src={scroll ? scrollIcon : pageIcon} style={{filter}}/>
+                            <img className="group-mini-icon" src={scroll ? getIcon(scrollIcon) : getIcon(pageIcon)} style={{filter}}/>
                             <span className="group-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                         </div>
                     </div>

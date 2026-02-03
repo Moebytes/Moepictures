@@ -35,7 +35,7 @@ const style = /*css*/`
         margin: auto;
         margin-top: 10px;
         margin-bottom: 10px;
-        background-color: #7e7aff;
+        background-color: #ff619b;
         border: 2px solid black;
         padding: 0px 10px !important;
         width: max-content;
@@ -67,7 +67,7 @@ const ChangeEmail = (props: Props) => {
             <Preview>Moepictures Email Change</Preview>
             <Body style={{width: "80%"}}>
                 <Container className="logo-container">
-                    <Link href="https://moepictures.net"><Img className="logo" src="https://i.imgur.com/DGvZWgB.png"/></Link>
+                    <Link href="https://moepictures.net"><Img className="logo" src="https://i.imgur.com/RjiDNHk.png"/></Link>
                 </Container>
                 <Container className="text-container">
                     <Text className="text">
