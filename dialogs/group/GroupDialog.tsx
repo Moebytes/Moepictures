@@ -3,10 +3,7 @@ import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGrou
 useSessionActions, useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import radioButton from "../../assets/icons/radiobutton.png"
-import radioButtonChecked from "../../assets/icons/radiobutton-checked.png"
-import deleteIcon from "../../assets/icons/delete.png"
-import lockIcon from "../../assets/icons/private-lock.png"
+import deleteIcon from "../../assets/svg/delete.svg"
 import Draggable from "react-draggable"
 import {GroupPosts} from "../../types/Types"
 import "../dialog.less"
@@ -27,6 +24,10 @@ const GroupDialog: React.FunctionComponent = (props) => {
     const [removalItems, setRemovalItems] = useState([] as {slug: string, postID: string}[])
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
+
+    const getRedIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "#f71e75")
+    }
 
     const updateGroups = async () => {
         if (!groupPostID) return
@@ -128,7 +129,7 @@ const GroupDialog: React.FunctionComponent = (props) => {
             jsx.push(
                 <div className="dialog-row">
                     <span className={`dialog-text ${strikethrough ? "strikethrough" : ""}`}>{group.name}</span>
-                    <img className="dialog-clickable-icon" src={deleteIcon} onClick={deleteFromGroup}/>
+                    <img className="dialog-clickable-icon" src={getRedIcon(deleteIcon)} onClick={deleteFromGroup}/>
                 </div>
             )
         }

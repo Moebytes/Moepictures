@@ -6,7 +6,7 @@ import Carousel from "../../components/site/Carousel"
 import Draggable from "react-draggable"
 import permissions from "../../structures/Permissions"
 import ReactCrop, {makeAspectCrop, centerCrop, PixelCrop, PercentCrop} from "react-image-crop"
-import {PostSearch, GIFFrame} from "../../types/Types"
+import {GIFFrame} from "../../types/Types"
 import "../dialog.less"
 
 const preventScroll = (event: Event) => event.preventDefault()

@@ -2,8 +2,6 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
-import permissions from "../../structures/Permissions"
-import {PostSearch, PostHistory, UnverifiedPost} from "../../types/Types"
 import "../dialog.less"
 
 const AppealPostDialog: React.FunctionComponent = (props) => {

@@ -1,8 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector} from "../../store"
-import functions from "../../functions/Functions"
+import {useThemeSelector, useInteractionActions, useGroupDialogSelector, 
+useGroupDialogActions, useSessionSelector} from "../../store"
 import Draggable from "react-draggable"
-import permissions from "../../structures/Permissions"
 import "../dialog.less"
 
 const RevertGroupHistoryDialog: React.FunctionComponent = (props) => {

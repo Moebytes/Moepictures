@@ -1,6 +1,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
-import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions} from "../../store"
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
+useGroupDialogSelector, useGroupDialogActions} from "../../store"
 import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import permissions from "../../structures/Permissions"

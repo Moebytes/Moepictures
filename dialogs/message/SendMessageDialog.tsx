@@ -1,51 +1,41 @@
-import React, {useEffect, useState, useRef, useReducer} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useInteractionActions, useMessageDialogSelector, useMessageDialogActions, useSessionSelector, 
-useSessionActions, useCacheSelector, useLayoutSelector} from "../../store"
+useSessionActions} from "../../store"
 import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import emojiSelect from "../../assets/icons/emoji-select.png"
-import highlight from "../../assets/icons/highlight.png"
-import bold from "../../assets/icons/bold.png"
-import italic from "../../assets/icons/italic.png"
-import underline from "../../assets/icons/underline.png"
-import strikethrough from "../../assets/icons/strikethrough.png"
-import spoiler from "../../assets/icons/spoiler.png"
-import link from "../../assets/icons/link-purple.png"
-import details from "../../assets/icons/details.png"
-import hexcolor from "../../assets/icons/hexcolor.png"
-import codeblock from "../../assets/icons/codeblock.png"
+import emojiSelect from "../../assets/svg/emoji-select.svg"
+import MiniTextBox, {MiniTextBoxRef} from "../../ui/MiniTextBox"
 import lewdIcon from "../../assets/icons/lewdgirl.png"
-import radioButton from "../../assets/icons/radiobutton.png"
-import radioButtonChecked from "../../assets/icons/radiobutton-checked.png"
+import radioButton from "../../assets/svg/radiobutton.svg"
+import radioButtonChecked from "../../assets/svg/radiobutton-checked.svg"
 import Draggable from "react-draggable"
 import "../dialog.less"
 
 const SendMessageDialog: React.FunctionComponent = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {dmTarget} = useMessageDialogSelector()
     const {setDMTarget} = useMessageDialogActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const {mobile} = useLayoutSelector()
-    const {emojis} = useCacheSelector()
-    const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
-    const [previewMode, setPreviewMode] = useState(false)
     const [recipients, setRecipients] = useState("")
     const [title, setTitle] = useState("")
     const [content, setContent] = useState("")
     const [r18, setR18] = useState(false)
-    const [error, setError] = useState(false)
     const emojiRef = useRef<HTMLButtonElement>(null)
     const dialogRef = useRef<HTMLDivElement>(null)
     const textRef = useRef<HTMLTextAreaElement>(null)
     const errorRef = useRef<HTMLSpanElement>(null)
+    const textBoxRef = useRef<MiniTextBoxRef>(null)
     const navigate = useNavigate()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--titleButtons")
+    }
 
     useEffect(() => {
         if (dmTarget) {
@@ -61,34 +51,26 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
     const sendMessage = async () => {
         let cleanedRecipients = recipients.split(/\s+/g).map((r) => r.trim())
         if (cleanedRecipients.length < 1) {
-            setError(true)
-            if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = i18n.dialogs.forwardMessage.recipientRequired
+            textBoxRef.current?.showError(i18n.dialogs.forwardMessage.recipientRequired)
             await functions.timeout(2000)
-            return setError(false)
+            return textBoxRef.current?.clearError()
         }
         if (cleanedRecipients.length > 5 && !permissions.isMod(session)) {
-            setError(true)
-            if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = i18n.dialogs.forwardMessage.recipientLimit
+            textBoxRef.current?.showError(i18n.dialogs.forwardMessage.recipientLimit)
             await functions.timeout(2000)
-            return setError(false)
+            return textBoxRef.current?.clearError()
         }
         const badTitle = functions.validation.validateTitle(title, i18n)
         if (badTitle) {
-            setError(true)
-            if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = badTitle
+            textBoxRef.current?.showError(badTitle)
             await functions.timeout(2000)
-            return setError(false)
+            return textBoxRef.current?.clearError()
         }
         const badContent = functions.validation.validateThread(content, i18n)
         if (badContent) {
-            setError(true)
-            if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = badContent
+            textBoxRef.current?.showError(badContent)
             await functions.timeout(2000)
-            return setError(false)
+            return textBoxRef.current?.clearError()
         }
         try {
             const messageID = await functions.http.post("/api/message/create", {title, content, r18, recipients: cleanedRecipients}, session, setSessionFlag)
@@ -96,13 +78,11 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
             setDMTarget(null)
             if (messageID) navigate(`/message/${messageID}`)
         } catch (err: any) {
-            setError(true)
             let errMsg = i18n.dialogs.sendMessage.error
             if (err.message.includes("Cannot send r18 message")) errMsg = i18n.dialogs.sendMessage.errorR18
-            if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = errMsg
+            textBoxRef.current?.showError(errMsg)
             await functions.timeout(2000)
-            setError(false)
+            textBoxRef.current?.clearError()
         }
     }
 
@@ -112,67 +92,6 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
         } else {
             setDMTarget(null)
         }
-    }
-
-    useEffect(() => {
-        if (typeof window === "undefined") return
-        const observer = new ResizeObserver(() => forceUpdate())
-        const dialogElement = dialogRef.current
-        const textareaElement = textRef.current
-        if (dialogElement) observer.observe(dialogElement)
-        if (textareaElement) observer.observe(textareaElement)
-        return () => {
-            observer.disconnect()
-        }
-    }, [])
-
-    const getEmojiMarginRight = () => {
-        if (typeof document === "undefined") return "0px"
-        const rect = emojiRef.current?.getBoundingClientRect()
-        if (!rect) return "0px"
-        const raw = window.innerWidth - rect.right
-        let offset = -120
-        if (mobile) offset += 0
-        return `${raw + offset}px`
-    }
-
-    const getEmojiMarginBottom = () => {
-        if (typeof document === "undefined") return "0px"
-        const bodyRect = dialogRef.current?.getBoundingClientRect()
-        const rect = emojiRef.current?.getBoundingClientRect()
-        if (!rect || !bodyRect) return "0px"
-        const raw = window.innerHeight - rect.bottom
-        let offset = 40
-        if (mobile) offset += 0
-        return `${raw + offset}px`
-    }
-
-    const emojiGrid = () => {
-        let rows = [] as React.ReactElement[]
-        let rowAmount = 7
-        for (let i = 0; i < Object.keys(emojis).length; i++) {
-            let items = [] as React.ReactElement[]
-            for (let j = 0; j < rowAmount; j++) {
-                const k = (i*rowAmount)+j
-                const key = Object.keys(emojis)[k]
-                if (!key) break
-                const appendText = () => {
-                    setContent((prev: string) => prev + ` :${key}:`)
-                    setShowEmojiDropdown(false)
-                }
-                items.push(
-                    <img draggable={false} src={emojis[key]} className="dialog-emoji-big" onClick={appendText}/>
-                )
-            }
-            if (items.length) rows.push(<div className="dialog-emoji-row">{items}</div>)
-        }
-        return (
-            <div className={`dialog-emoji-grid ${showEmojiDropdown ? "" : "hide-dialog-emoji-grid"}`}
-            onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}
-            style={{marginRight: getEmojiMarginRight(), marginBottom: getEmojiMarginBottom()}}>
-                {rows}
-            </div>
-        )
     }
 
     if (dmTarget) {
@@ -195,41 +114,26 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.labels.content}: </span>
                         </div>
-                        <div className="dialog-textarea-buttons">
-                            <button className="dialog-textarea-button"><img src={highlight} onClick={() => functions.render.triggerTextboxButton(textRef.current, setContent, "highlight")} style={{filter}}/></button>
-                            <button className="dialog-textarea-button"><img src={bold} onClick={() => functions.render.triggerTextboxButton(textRef.current, setContent, "bold")} style={{filter}}/></button>
-                            <button className="dialog-textarea-button"><img src={italic} onClick={() => functions.render.triggerTextboxButton(textRef.current, setContent, "italic")} style={{filter}}/></button>
-                            <button className="dialog-textarea-button"><img src={underline} onClick={() => functions.render.triggerTextboxButton(textRef.current, setContent, "underline")} style={{filter}}/></button>
-                            <button className="dialog-textarea-button"><img src={strikethrough} onClick={() => functions.render.triggerTextboxButton(textRef.current, setContent, "strikethrough")} style={{filter}}/></button>
-                            <button className="dialog-textarea-button"><img src={spoiler} onClick={() => functions.render.triggerTextboxButton(textRef.current, setContent, "spoiler")} style={{filter}}/></button>
-                            <button className="dialog-textarea-button"><img src={link} onClick={() => functions.render.triggerTextboxButton(textRef.current, setContent, "link")} style={{filter}}/></button>
-                            <button className="dialog-textarea-button"><img src={details} onClick={() => functions.render.triggerTextboxButton(textRef.current, setContent, "details")} style={{filter}}/></button>
-                            <button className="dialog-textarea-button"><img src={hexcolor} onClick={() => functions.render.triggerTextboxButton(textRef.current, setContent, "color")} style={{filter}}/></button>
-                            <button className="dialog-textarea-button"><img src={codeblock} onClick={() => functions.render.triggerTextboxButton(textRef.current, setContent, "code")} style={{filter}}/></button>
-                        </div>
-                        {previewMode ? <div className="dialog-textarea-preview">{functions.jsx.renderText(content, emojis, "message")}</div> : 
-                        <div style={{marginTop: "0px"}} className="dialog-row">
-                            <textarea className="dialog-textarea" ref={textRef} style={{resize: "vertical", height: "200px"}} spellCheck={false} value={content} onChange={(event) => setContent(event.target.value)}></textarea>
-                        </div>}
+                        <MiniTextBox ref={textBoxRef} type="message" height={200} text={content} setText={setContent} textRef={textRef} emojiRef={emojiRef}/>
                         {session.showR18 ?
                         <div className="dialog-row">
-                            <img className="dialog-checkbox" src={r18 ? radioButtonChecked : radioButton} onClick={() => setR18((prev: boolean) => !prev)} style={{marginLeft: "0px", filter}}/>
+                            <img className="dialog-checkbox" src={r18 ? getIcon(radioButtonChecked) : getIcon(radioButton)} onClick={() => setR18((prev: boolean) => !prev)} style={{marginLeft: "0px", filter}}/>
                             <span className="dialog-text" style={{marginLeft: "10px"}}>R18</span>
                             <img className="dialog-title-img" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter}}/>
                         </div> : null}
-                        {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
-                            <button className="dialog-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
+                            <button className="dialog-emoji-button" ref={emojiRef} onClick={() => textBoxRef.current?.toggleEmojiDropdown()}>
                                 <img src={emojiSelect}/>
                             </button>
-                            <button className={previewMode ? "dialog-edit-button" : "dialog-preview-button"} onClick={() => setPreviewMode((prev: boolean) => !prev)}>{previewMode ? i18n.buttons.unpreview : i18n.buttons.preview}</button>
+                            <button className={textBoxRef.current?.getPreviewMode() ? "dialog-edit-button" : "dialog-preview-button"} 
+                            onClick={() => textBoxRef.current?.togglePreviewMode()}>
+                            {textBoxRef.current?.getPreviewMode() ? i18n.buttons.unpreview : i18n.buttons.preview}</button>
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.send}</button>
                         </div>
                     </div>
                 </div>
                 </Draggable>
-                {emojiGrid()}
             </div>
         )
     }

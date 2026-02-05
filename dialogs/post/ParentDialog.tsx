@@ -4,7 +4,6 @@ useSessionActions, useFlagActions} from "../../store"
 import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import deleteIcon from "../../assets/icons/delete.png"
 import Draggable from "react-draggable"
 import "../dialog.less"
 

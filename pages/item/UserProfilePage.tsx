@@ -18,17 +18,8 @@ import premiumStar from "../../assets/icons/premium-star.png"
 import r18 from "../../assets/icons/r18.png"
 import danger from "../../assets/icons/danger.png"
 import lockIcon from "../../assets/icons/private-lock.png"
-import emojiSelect from "../../assets/icons/emoji-select.png"
-import highlight from "../../assets/icons/highlight.png"
-import bold from "../../assets/icons/bold.png"
-import italic from "../../assets/icons/italic.png"
-import underline from "../../assets/icons/underline.png"
-import strikethrough from "../../assets/icons/strikethrough.png"
-import spoiler from "../../assets/icons/spoiler.png"
-import link from "../../assets/icons/link-purple.png"
-import details from "../../assets/icons/details.png"
-import hexcolor from "../../assets/icons/hexcolor.png"
-import codeblock from "../../assets/icons/codeblock.png"
+import emojiSelect from "../../assets/svg/emoji-select.svg"
+import MiniTextBox, {MiniTextBoxRef} from "../../ui/MiniTextBox"
 import {EditCounts, CommentSearch, Favgroup, PostSearch, UnverifiedPost, TagCount, ForumPostSearch} from "../../types/Types"
 import "./styles/userpage.less"
 
@@ -36,27 +27,22 @@ let intervalTimer = null as any
 let blacklistTimer = null as any
 let limit = 25
 
-const UserProfilePage: React.FunctionComponent = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
+const UserProfilePage: React.FunctionComponent = () => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
     const {session, userImg, userImgPost} = useSessionSelector()
-    const {setSession, setSessionFlag, setUserImg} = useSessionActions()
+    const {setSessionFlag, setUserImg} = useSessionActions()
     const {mobile} = useLayoutSelector()
     const {setActiveFavgroup} = useActiveActions()
     const {ratingType} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
-    const {updateUserFlag} = useFlagSelector()
     const {setRedirect, setCommentSearchFlag} = useFlagActions()
     const {showDeleteAccountDialog} = useMiscDialogSelector()
     const {setPremiumRequired, setR18Confirmation, setShowDeleteAccountDialog} = useMiscDialogActions()
-    const {setDMTarget} = useMessageDialogActions()
     const {emojis} = useCacheSelector()
     const {setPosts, setNavigationPosts} = useCacheActions()
-    const errorRef = useRef<HTMLSpanElement>(null)
-    const [error, setError] = useState(false)
     const [showBioInput, setShowBioInput] = useState(false)
     const [uploadIndex, setUploadIndex] = useState(0)
     const [favoriteIndex, setFavoriteIndex] = useState(0)
@@ -83,10 +69,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const [blacklist, setBlacklist] = useState("")
     const [init, setInit] = useState(true)
     const [bannerHidden, setBannerHidden] = useState(false)
-    const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
-    const [previewMode, setPreviewMode] = useState(false)
     const emojiRef = useRef<HTMLButtonElement>(null)
     const textRef = useRef<HTMLTextAreaElement>(null)
+    const textBoxRef = useRef<MiniTextBoxRef>(null)
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -390,26 +375,21 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const changeBio = async () => {
         const badBio = functions.validation.validateBio(bio, i18n)
         if (badBio) {
-            setError(true)
-            if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = badBio
+            textBoxRef.current?.showError(badBio)
             await functions.timeout(2000)
-            setError(false)
-            return
+            return textBoxRef.current?.clearError()
         }
-        setError(true)
-        if (!errorRef.current) await functions.timeout(20)
-        errorRef.current!.innerText = i18n.buttons.submitting
+        textBoxRef.current?.showError(i18n.buttons.submitting)
         try {
             await functions.http.post("/api/user/changebio", {bio}, session, setSessionFlag)
             functions.cache.clearResponseCacheKey("/api/user/session")
             setSessionFlag(true)
-            setError(false)
+            textBoxRef.current?.clearError()
             setShowBioInput(false)
         } catch {
-            errorRef.current!.innerText = i18n.errors.bio.bad
+            textBoxRef.current?.showError(i18n.errors.bio.bad)
             await functions.timeout(2000)
-            setError(false)
+            textBoxRef.current?.clearError()
         }
     }
 
@@ -625,85 +605,20 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         return jsx
     }
 
-    const getEmojiMarginRight = () => {
-        if (typeof document === "undefined") return "0px"
-        const rect = emojiRef.current?.getBoundingClientRect()
-        if (!rect) return "0px"
-        const raw = window.innerWidth - rect.right
-        let offset = -120
-        if (mobile) offset += 0
-        return `${raw + offset}px`
-    }
-
-    const getEmojiMarginBottom = () => {
-        if (typeof document === "undefined") return "0px"
-        let elementName = ".user-textarea"
-        const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
-        const rect = emojiRef.current?.getBoundingClientRect()
-        if (!rect || !bodyRect) return "0px"
-        const raw = bodyRect.bottom - rect.bottom
-        let offset = 390
-        if (mobile) offset += 0
-        return `${raw + offset}px`
-    }
-
-    const emojiGrid = () => {
-        let rows = [] as React.ReactElement[]
-        let rowAmount = 7
-        for (let i = 0; i < Object.keys(emojis).length; i++) {
-            let items = [] as React.ReactElement[]
-            for (let j = 0; j < rowAmount; j++) {
-                const k = (i*rowAmount)+j
-                const key = Object.keys(emojis)[k]
-                if (!key) break
-                const appendText = () => {
-                    setBio((prev: string) => prev + ` :${key}:`)
-                    setShowEmojiDropdown(false)
-                }
-                items.push(
-                    <img draggable={false} src={emojis[key]} className="dialog-emoji-big" onClick={appendText}/>
-                )
-            }
-            if (items.length) rows.push(<div className="dialog-emoji-row">{items}</div>)
-        }
-        return (
-            <div className={`dialog-emoji-grid ${showEmojiDropdown ? "" : "hide-dialog-emoji-grid"}`}
-            onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}
-            style={{marginRight: getEmojiMarginRight(), marginBottom: getEmojiMarginBottom()}}>
-                {rows}
-            </div>
-        )
-    }
-
     const getBioTextArea = () => {
         return (
             <>
-            <div className="user-column">
-                <div className="dialog-textarea-buttons" style={{width: "50%"}}>
-                    <button className="dialog-textarea-button"><img src={highlight} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "highlight")} style={{filter}}/></button>
-                    <button className="dialog-textarea-button"><img src={bold} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "bold")} style={{filter}}/></button>
-                    <button className="dialog-textarea-button"><img src={italic} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "italic")} style={{filter}}/></button>
-                    <button className="dialog-textarea-button"><img src={underline} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "underline")} style={{filter}}/></button>
-                    <button className="dialog-textarea-button"><img src={strikethrough} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "strikethrough")} style={{filter}}/></button>
-                    <button className="dialog-textarea-button"><img src={spoiler} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "spoiler")} style={{filter}}/></button>
-                    <button className="dialog-textarea-button"><img src={link} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "link")} style={{filter}}/></button>
-                    <button className="dialog-textarea-button"><img src={details} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "details")} style={{filter}}/></button>
-                    <button className="dialog-textarea-button"><img src={hexcolor} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "color")} style={{filter}}/></button>
-                    <button className="dialog-textarea-button"><img src={codeblock} onClick={() => functions.render.triggerTextboxButton(textRef.current, setBio, "code")} style={{filter}}/></button>
-                </div>
-                {previewMode ? <div className="comments-preview" style={{width: "50%", minHeight: "100px"}}>{functions.jsx.renderText(bio, emojis, "reply")}</div> : 
-                <div style={{marginTop: "0px"}} className="user-column">
-                    <textarea ref={textRef} className="user-textarea" spellCheck={false} value={bio} onChange={(event) => setBio(event.target.value)}
-                    onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
-                </div>}
-                {error ? <div className="user-validation-container"><span className="user-validation" ref={errorRef}></span></div> : null}
+            <div className="user-column" style={{marginTop: "0px"}}>
+                <MiniTextBox ref={textBoxRef} type="comment" bio={true} height={100} text={bio} setText={setBio} textRef={textRef} emojiRef={emojiRef}/>
             </div>
             <div className="user-row">
                 <button className="user-button" onClick={changeBio}>{i18n.buttons.ok}</button>
-                <button className="user-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
+                <button className="user-emoji-button" ref={emojiRef} onClick={() => textBoxRef.current?.toggleEmojiDropdown()}>
                     <img src={emojiSelect}/>
                 </button>
-                <button className={previewMode ? "user-edit-button" : "user-preview-button"} onClick={() => setPreviewMode((prev: boolean) => !prev)}>{previewMode ? i18n.buttons.unpreview : i18n.buttons.preview}</button>
+                <button className={textBoxRef.current?.getPreviewMode() ? "user-edit-button" : "user-preview-button"} 
+                onClick={() => textBoxRef.current?.togglePreviewMode()}>
+                {textBoxRef.current?.getPreviewMode() ? i18n.buttons.unpreview : i18n.buttons.preview}</button>
             </div>
             </>
         )
@@ -893,7 +808,6 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         <img className="user-icon" src={danger}/>
                         <span className="user-link" onClick={deleteAccountDialog}>{i18n.buttons.deleteAccount}</span>
                     </div>
-                    {emojiGrid()}
                 </div>
                 <Footer/>
             </div>

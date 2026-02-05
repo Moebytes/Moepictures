@@ -3,8 +3,6 @@ import {useInteractionActions, useSessionSelector, useSessionActions, useGroupDi
 useSearchSelector, useSearchActions} from "../../store"
 import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
-import radioButton from "../../assets/icons/radiobutton.png"
-import radiobuttonChecked from "../../assets/icons/radiobutton-checked.png"
 import permissions from "../../structures/Permissions"
 import Draggable from "react-draggable"
 import "../dialog.less"

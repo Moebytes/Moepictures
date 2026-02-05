@@ -3,8 +3,8 @@ import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionA
 usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import checkbox from "../../assets/icons/checkbox.png"
-import checkboxChecked from "../../assets/icons/checkbox-checked.png"
+import checkbox from "../../assets/svg/checkbox.svg"
+import checkboxChecked from "../../assets/svg/checkbox-checked.svg"
 import Draggable from "react-draggable"
 import "../dialog.less"
 
@@ -19,6 +19,10 @@ const JoinPostDialog: React.FunctionComponent = (props) => {
     const [nestedChildren, setNestedChildren] = useState(false)
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
 
     useEffect(() => {
         if (joinPostID) {
@@ -62,7 +66,7 @@ const JoinPostDialog: React.FunctionComponent = (props) => {
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center"}}>
                                 <span className="dialog-text">{i18n.dialogs.joinPost.nestedChildren}?</span>
-                                <img className="dialog-checkbox" src={nestedChildren ? checkboxChecked : checkbox} onClick={() => setNestedChildren((prev: boolean) => !prev)} style={{marginRight: "10px", filter}}/>
+                                <img className="dialog-checkbox" src={nestedChildren ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setNestedChildren((prev: boolean) => !prev)} style={{marginRight: "10px", filter}}/>
                             </div>
                             <div className="dialog-row">
                                 <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>

@@ -5,8 +5,8 @@ import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import Draggable from "react-draggable"
-import checkbox from "../../assets/icons/checkbox.png"
-import checkboxChecked from "../../assets/icons/checkbox-checked.png"
+import checkbox from "../../assets/svg/checkbox.svg"
+import checkboxChecked from "../../assets/svg/checkbox-checked.svg"
 import "../dialog.less"
 
 const BanDialog: React.FunctionComponent = (props) => {
@@ -27,6 +27,10 @@ const BanDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
 
     useEffect(() => {
         if (banName) {
@@ -146,19 +150,19 @@ const BanDialog: React.FunctionComponent = (props) => {
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.dialogs.ban.unverifiedChanges}</span>
-                            <img className="dialog-checkbox" src={deleteUnverifiedChanges ? checkboxChecked : checkbox} onClick={() => setDeleteUnverifiedChanges((prev: boolean) => !prev)} style={{filter}}/>
+                            <img className="dialog-checkbox" src={deleteUnverifiedChanges ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setDeleteUnverifiedChanges((prev: boolean) => !prev)} style={{filter}}/>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.dialogs.ban.historyChanges}</span>
-                            <img className="dialog-checkbox" src={deleteHistoryChanges ? checkboxChecked : checkbox} onClick={() => setDeleteHistoryChanges((prev: boolean) => !prev)} style={{filter}}/>
+                            <img className="dialog-checkbox" src={deleteHistoryChanges ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setDeleteHistoryChanges((prev: boolean) => !prev)} style={{filter}}/>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.dialogs.ban.comments}</span>
-                            <img className="dialog-checkbox" src={deleteComments ? checkboxChecked : checkbox} onClick={() => setDeleteComments((prev: boolean) => !prev)} style={{filter}}/>
+                            <img className="dialog-checkbox" src={deleteComments ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setDeleteComments((prev: boolean) => !prev)} style={{filter}}/>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.dialogs.ban.messages}</span>
-                            <img className="dialog-checkbox" src={deleteMessages ? checkboxChecked : checkbox} onClick={() => setDeleteMessages((prev: boolean) => !prev)} style={{filter}}/>
+                            <img className="dialog-checkbox" src={deleteMessages ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setDeleteMessages((prev: boolean) => !prev)} style={{filter}}/>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.labels.days}: </span>

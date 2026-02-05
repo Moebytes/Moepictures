@@ -141,27 +141,27 @@ const TextBox = forwardRef<TextBoxRef, Props>((props, ref) => {
 
     const getTextBox = () => {
         if (props.thread && props.thread.locked && !permissions.isMod(session)) return (
-            <div className="textbox-container" style={{justifyContent: "flex-start", marginLeft: props.manualWidth ? "170px" : ""}}>
+            <div className="textbox-container" style={{justifyContent: "flex-start", marginLeft: props.manualWidth && !mobile ? "170px" : ""}}>
                 <span className="textbox-validation" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>{i18n.pages.thread.locked}</span>
             </div>
         )
 
         if (props.message && props.message.role === "system") return (
-            <div className="textbox-container" style={{justifyContent: "flex-start", marginLeft: props.manualWidth ? "170px" : ""}}>
+            <div className="textbox-container" style={{justifyContent: "flex-start", marginLeft: props.manualWidth && !mobile ? "170px" : ""}}>
                 <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>{i18n.pages.message.system}</span>
             </div>
         )
 
         if (session.banned) return (
-            <div className="textbox-container" style={{marginLeft: props.manualWidth ? "170px" : ""}}>
+            <div className="textbox-container" style={{marginLeft: props.manualWidth && !mobile ? "170px" : ""}}>
                 <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "2px" : "10px"}}>{getBanText()}</span>
             </div>
         )
 
         if (session.username) {
             return (
-                <div className="textbox-container" style={{marginLeft: props.manualWidth ? "170px" : ""}}>
-                    <div className="textbox-textarea-buttons" style={{width: props.manualWidth ? "70%" : "100%"}}>
+                <div className="textbox-container" style={{marginLeft: props.manualWidth && !mobile ? "170px" : ""}}>
+                    <div className="textbox-textarea-buttons" style={{width: props.manualWidth && !mobile ? "70%" : ""}}>
                         <button className="textbox-textarea-button"><img src={getIcon(highlight)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "highlight")} style={{filter}}/></button>
                         <button className="textbox-textarea-button"><img src={getIcon(bold)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "bold")} style={{filter}}/></button>
                         <button className="textbox-textarea-button"><img src={getIcon(italic)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "italic")} style={{filter}}/></button>
@@ -175,7 +175,7 @@ const TextBox = forwardRef<TextBoxRef, Props>((props, ref) => {
                     </div>
                     {previewMode ? <div className="textbox-preview">{functions.jsx.renderText(text, emojis, props.type, undefined, r18)}</div> : 
                     <div style={{marginTop: "0px"}} className="textbox-row-start" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <textarea ref={textRef} className="textbox-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)} onKeyDown={(event) => event.stopPropagation()} style={{width: props.manualWidth ? "70%" : "100%"}}></textarea>
+                        <textarea ref={textRef} className="textbox-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)} onKeyDown={(event) => event.stopPropagation()} style={{width: props.manualWidth && !mobile ? "70%" : ""}}></textarea>
                     </div>}
                     {error ? <div className="textbox-validation-container"><span className="textbox-validation" ref={errorRef}></span></div> : null}
                     <div className="textbox-button-container-left">

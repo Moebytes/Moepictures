@@ -2,11 +2,9 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSearchDialogSelector, useSearchDialogActions, useSessionSelector, 
 useSessionActions, useSearchSelector} from "../../store"
 import functions from "../../functions/Functions"
-import uploadIcon from "../../assets/icons/upload.png"
 import Draggable from "react-draggable"
 import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
-import xButton from "../../assets/icons/x-button.png"
 import "../dialog.less"
 
 const SaveSearchDialog: React.FunctionComponent = (props) => {

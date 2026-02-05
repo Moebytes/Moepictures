@@ -4,9 +4,8 @@ useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import permissions from "../../structures/Permissions"
-import takedownIcon from "../../assets/icons/takedown.png"
-import restoreIcon from "../../assets/icons/restore.png"
-import {PostSearch, PostHistory} from "../../types/Types"
+import takedownIcon from "../../assets/svg/takedown.svg"
+import restoreIcon from "../../assets/svg/restore.svg"
 import "../dialog.less"
 
 const TakedownPostDialog: React.FunctionComponent = (props) => {
@@ -19,6 +18,10 @@ const TakedownPostDialog: React.FunctionComponent = (props) => {
     const {setPostFlag} = useFlagActions()
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
 
     useEffect(() => {
         if (takedownPostID) {
@@ -69,11 +72,11 @@ const TakedownPostDialog: React.FunctionComponent = (props) => {
         }
     }
 
-    const getIcon = () => {
+    const getTakedownIcon = () => {
         if (takedownPostID?.post.hidden) {
-            return restoreIcon
+            return getIcon(restoreIcon)
         } else {
-            return takedownIcon
+            return getIcon(takedownIcon)
         }
     }
 
@@ -85,7 +88,7 @@ const TakedownPostDialog: React.FunctionComponent = (props) => {
                     <div className="dialog-box" style={{width: "280px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
-                                <img draggable={false} className="dialog-icon" src={getIcon()}/>
+                                <img draggable={false} className="dialog-icon" src={getTakedownIcon()}/>
                                 <span className="dialog-title">{getTitle()}</span>
                             </div>
                             <div className="dialog-row">

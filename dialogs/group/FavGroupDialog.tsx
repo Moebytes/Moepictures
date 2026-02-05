@@ -3,10 +3,10 @@ import {useInteractionActions, useGroupDialogSelector, useGroupDialogActions, us
 useSessionActions} from "../../store"
 import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
-import radioButton from "../../assets/icons/radiobutton.png"
-import radioButtonChecked from "../../assets/icons/radiobutton-checked.png"
-import deleteIcon from "../../assets/icons/delete.png"
-import lockIcon from "../../assets/icons/private-lock.png"
+import radioButton from "../../assets/svg/radiobutton.svg"
+import radioButtonChecked from "../../assets/svg/radiobutton-checked.svg"
+import deleteIcon from "../../assets/svg/delete.svg"
+import lockIcon from "../../assets/svg/lock.svg"
 import Draggable from "react-draggable"
 import {Favgroup} from "../../types/Types"
 import "../dialog.less"
@@ -26,6 +26,14 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
+
+    const getRedIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "#f71e75")
+    }
 
     const updateFavGroups = async () => {
         if (!favGroupID) return
@@ -82,9 +90,9 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
             }
             jsx.push(
                 <div className="dialog-row">
-                    {favgroup.private ? <img className="dialog-icon" src={lockIcon} style={{marginRight: "5px", height: "18px", filter}}/> : null}
+                    {favgroup.private ? <img className="dialog-icon" src={getIcon(lockIcon)} style={{marginRight: "5px", height: "18px", filter}}/> : null}
                     <span className="dialog-text">{favgroup.name}</span>
-                    <img className="dialog-clickable-icon" src={deleteIcon} onClick={deleteFromFavGroup}/>
+                    <img className="dialog-clickable-icon" src={getRedIcon(deleteIcon)} onClick={deleteFromFavGroup}/>
                 </div>
             )
         }
@@ -106,9 +114,9 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
                         </div>
                         <div className="dialog-row" style={{justifyContent: "center", paddingRight: "20px"}}>
                             <span className="dialog-text" style={{marginTop: "-4px"}}>{i18n.labels.privacy}: </span>
-                            <img className="dialog-checkbox" src={isPrivate ? radioButton : radioButtonChecked} onClick={() => setIsPrivate(false)} style={{marginRight: "10px", filter}}/>
+                            <img className="dialog-checkbox" src={isPrivate ? getIcon(radioButton) : getIcon(radioButtonChecked)} onClick={() => setIsPrivate(false)} style={{marginRight: "10px", filter}}/>
                             <span className="dialog-text">{i18n.labels.public}</span>
-                            <img className="dialog-checkbox" src={isPrivate ? radioButtonChecked : radioButton} onClick={() => setIsPrivate(true)} style={{marginRight: "10px", filter}}/>
+                            <img className="dialog-checkbox" src={isPrivate ? getIcon(radioButtonChecked) : getIcon(radioButton)} onClick={() => setIsPrivate(true)} style={{marginRight: "10px", filter}}/>
                             <span className="dialog-text">{i18n.sort.private}</span>
                         </div>
                         {favgroupJSX()}
