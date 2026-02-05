@@ -35,6 +35,10 @@ const LoginPage: React.FunctionComponent = (props) => {
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--titleButtons")
+    }
+
     const getCaptchaColor = () => {
         if (theme.includes("light")) return "#ffffff"
         return "#09071c"
@@ -80,7 +84,7 @@ const LoginPage: React.FunctionComponent = (props) => {
     }, [session])
 
     const getEye = () => {
-        return showPassword ? hide : show
+        return showPassword ? getIcon(hide) : getIcon(show)
     }
 
     const login = async () => {

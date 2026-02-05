@@ -817,7 +817,7 @@ const UserProfilePage: React.FunctionComponent = () => {
                         onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                     </div>
                     <div className="user-row">
-                        <img className="user-icon" src={getRedIcon(danger)}/>
+                        <img className="user-icon" src={getIcon(danger)}/>
                         <span className="user-link" onClick={deleteAccountDialog}>{i18n.buttons.deleteAccount}</span>
                     </div>
                 </div>
