@@ -3,24 +3,17 @@ import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions,
 useFilterSelector, useInteractionActions} from "../../store"
 import functions from "../../functions/Functions"
-import tagHistoryRevert from "../../assets/icons/revert.png"
-import tagHistoryDelete from "../../assets/icons/delete.png"
-import adminCrown from "../../assets/icons/admin-crown.png"
-import modCrown from "../../assets/icons/mod-crown.png"
-import premiumCuratorStar from "../../assets/icons/premium-curator-star.png"
-import curatorStar from "../../assets/icons/curator-star.png"
-import premiumContributorPencil from "../../assets/icons/premium-contributor-pencil.png"
-import contributorPencil from "../../assets/icons/contributor-pencil.png"
-import premiumStar from "../../assets/icons/premium-star.png"
+import tagHistoryRevert from "../../assets/svg/revert.svg"
+import tagHistoryDelete from "../../assets/svg/delete.svg"
 import permissions from "../../structures/Permissions"
-import website from "../../assets/icons/support.png"
+import website from "../../assets/icons/website.png"
 import fandom from "../../assets/icons/fandom.png"
 import wikipedia from "../../assets/icons/wikipedia.png"
 import pixiv from "../../assets/icons/pixiv.png"
 import soundcloud from "../../assets/icons/soundcloud.png"
 import sketchfab from "../../assets/icons/sketchfab.png"
 import twitter from "../../assets/icons/twitter.png"
-import {PrunedUser, TagHistory} from "../../types/Types"
+import {TagHistory} from "../../types/Types"
 import "./styles/historyrow.less"
 
 interface Props {
@@ -47,6 +40,14 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     const tag = props.tagHistory.tag
     let hasChanges = functions.compare.hasHistoryChanges(props.tagHistory)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
+
+    const getRedIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "#f71e75")
+    }
 
     const updateImage = () => {
         if (!props.tagHistory.image) return
@@ -127,12 +128,12 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="historyrow-options">
                     <div className="historyrow-options-container" onClick={revertTagHistoryDialog}>
-                        <img className="historyrow-options-img" src={tagHistoryRevert}/>
+                        <img className="historyrow-options-img" src={getIcon(tagHistoryRevert)}/>
                         <span className="historyrow-options-text">{i18n.buttons.revert}</span>
                     </div>
                     {permissions.isAdmin(session) ?
                     <div className="historyrow-options-container" onClick={deleteTagHistoryDialog}>
-                        <img className="historyrow-options-img" src={tagHistoryDelete}/>
+                        <img className="historyrow-options-img" src={getRedIcon(tagHistoryDelete)}/>
                         <span className="historyrow-options-text">{i18n.buttons.delete}</span>
                     </div> : null}
                 </div>
@@ -141,7 +142,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="historyrow-options">
                     <div className="historyrow-options-container" onClick={revertTagHistoryDialog}>
-                        <img className="historyrow-options-img" src={tagHistoryRevert}/>
+                        <img className="historyrow-options-img" src={getIcon(tagHistoryRevert)}/>
                         <span className="historyrow-options-text">{i18n.buttons.revert}</span>
                     </div>
                 </div>

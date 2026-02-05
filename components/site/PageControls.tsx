@@ -2,6 +2,7 @@ import {useEffect} from "react"
 import {useLayoutSelector, useFlagSelector, useMiscDialogActions, useFlagActions,
 useInteractionActions} from "../../store"
 import functions from "../../functions/Functions"
+import "./styles/pagecontrols.less"
 
 interface Props {
     page: number

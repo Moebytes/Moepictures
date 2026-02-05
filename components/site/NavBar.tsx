@@ -1,59 +1,26 @@
-import React, {useContext, useState, useEffect, useReducer} from "react"
-import {HashLink as Link} from "react-router-hash-link"
+import React, {useState, useEffect, useReducer} from "react"
 import {useNavigate} from "react-router-dom"
-import favicon from "../../assets/icons/favicon.png"
-import eyedropper from "../../assets/icons/eyedropper.png"
-import light from "../../assets/icons/light.png"
-import logoutIcon from "../../assets/icons/logout.png"
-import logoutModIcon from "../../assets/icons/logout-mod.png"
-import logoutAdminIcon from "../../assets/icons/logout-admin.png"
-import logoutSystemIcon from "../../assets/icons/logout-system.png"
-import logoutPremiumIcon from "../../assets/icons/logout-premium.png"
-import logoutCuratorIcon from "../../assets/icons/logout-curator.png"
-import logoutContributorIcon from "../../assets/icons/logout-contributor.png"
-import searchIcon from "../../assets/icons/search.png"
-import crown from "../../assets/icons/crown.png"
-import mail from "../../assets/icons/mail.png"
-import mailNotif from "../../assets/icons/mail-notif.png"
-import crownLight from "../../assets/icons/crown-light.png"
-import mailLight from "../../assets/icons/mail-light.png"
-import mailNotifLight from "../../assets/icons/mail-notif-light.png"
-import eyedropperLight from "../../assets/icons/eyedropper-light.png"
-import lightLight from "../../assets/icons/light-light.png"
-import dark from "../../assets/icons/dark.png"
-import userHistory from "../../assets/icons/user-history.png"
-import userHistoryLight from "../../assets/icons/user-history-light.png"
-import darkLight from "../../assets/icons/dark-light.png"
+import searchIcon from "../../assets/svg/search.svg"
+import history from "../../assets/svg/history-thin.svg"
+import music from "../../assets/svg/music.svg"
+import snowflake from "../../assets/svg/snowflake.svg"
+import hueshift from "../../assets/svg/hueshift.svg"
+import mail from "../../assets/svg/mail.svg"
+import mailNotif from "../../assets/svg/mail-notif.svg"
+import crown from "../../assets/svg/crown.svg"
+import logoutSVG from "../../assets/svg/logout.svg"
+import snowflakeSVG from "../../assets/svg/snowflake2.svg"
+import premiumStar from "../../assets/svg/star.svg"
+
 import permissions from "../../structures/Permissions"
 import functions from "../../functions/Functions"
 import SearchSuggestions from "../tooltip/SearchSuggestions"
-import scrollIcon from "../../assets/icons/scroll-mobile.png"
-import pageIconLight from "../../assets/icons/page-mobile-light.png"
-import scrollIconLight from "../../assets/icons/scroll-mobile-light.png"
-import pageIcon from "../../assets/icons/page-mobile.png"
-import premiumStar from "../../assets/icons/premium-star.png"
-import snowflake from "../../assets/icons/snowflake.png"
-import snowflakeLight from "../../assets/icons/snowflake-light.png"
-import snowflakeOn from "../../assets/icons/snowflake-on.png"
-import music from "../../assets/icons/music.png"
-import musicLight from "../../assets/icons/music-light.png"
-import musicActive from "../../assets/icons/music-active.png"
-import multiplier1xIcon from "../../assets/icons/1x-mobile.png"
-import multiplier2xIcon from "../../assets/icons/2x-mobile.png"
-import multiplier3xIcon from "../../assets/icons/3x-mobile.png"
-import multiplier4xIcon from "../../assets/icons/4x-mobile.png"
-import multiplier5xIcon from "../../assets/icons/5x-mobile.png"
-import multiplier1xIconLight from "../../assets/icons/1x-mobile-light.png"
-import multiplier2xIconLight from "../../assets/icons/2x-mobile-light.png"
-import multiplier3xIconLight from "../../assets/icons/3x-mobile-light.png"
-import multiplier4xIconLight from "../../assets/icons/4x-mobile-light.png"
-import multiplier5xIconLight from "../../assets/icons/5x-mobile-light.png"
 import MiniAudioPlayer from "./MiniAudioPlayer"
 import Slider from "react-slider"
 import {useThemeSelector, useThemeActions, useLayoutSelector, useSearchActions, useSearchSelector, 
 useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, usePlaybackSelector,
 usePlaybackActions} from "../../store"
-import {Themes} from "../../types/Types"
+import HSLDropdown from "../../ui/HSLDropdown"
 import "./styles/navbar.less"
 
 interface Props {
@@ -62,14 +29,14 @@ interface Props {
 
 const NavBar: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, i18n, siteHue, siteSaturation, siteLightness, particles, particleAmount, particleSize, particleSpeed} = useThemeSelector()
-    const {setTheme, setSiteHue, setSiteSaturation, setSiteLightness, setParticles, setParticleAmount, setParticleSize, setParticleSpeed} = useThemeActions()
+    const {i18n, siteHue, siteSaturation, siteLightness, particles, particleAmount, particleSize, particleSpeed} = useThemeSelector()
+    const {setParticles, setParticleAmount, setParticleSize, setParticleSpeed} = useThemeActions()
     const {mobile, tablet, relative, hideNavbar, hideSidebar, hideSortbar, hideTitlebar, hideMobileNavbar} = useLayoutSelector()
     const {setHideMobileNavbar, setHideNavbar} = useLayoutActions()
     const {audio, showMiniPlayer} = usePlaybackSelector()
     const {setShowMiniPlayer} = usePlaybackActions()
-    const {search, scroll, pageMultiplier} = useSearchSelector()
-    const {setSearch, setSearchFlag, setScroll, setPageMultiplier} = useSearchActions()
+    const {search} = useSearchSelector()
+    const {setSearch, setSearchFlag} = useSearchActions()
     const {setEnableDrag} = useInteractionActions()
     const {session, userImg, hasNotification} = useSessionSelector()
     const {setSessionFlag, setHasNotification} = useSessionActions()
@@ -81,6 +48,22 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const navigate = useNavigate()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--titleButtons")
+    }
+
+    const getBlueIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "#23fbff")
+    }
+
+    const getPinkIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "#ff75fa")
+    }
+
+    const getPremiumIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--premiumColor")
+    }
 
     useEffect(() => {
         setShowMiniTitle(false)
@@ -145,8 +128,6 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
         setActiveParticleDropdown(!activeParticleDropdown)
     }
 
-
-
     const miniPlayer = () => {
         if (!audio) return
         setActiveParticleDropdown(false)
@@ -154,70 +135,22 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
         setShowMiniPlayer(!showMiniPlayer)
     }
 
-    const lightChange = () => {
-        let newTheme = ""
-        if (theme.includes("light")) {
-            newTheme = "dark"
-        } else {
-            newTheme = "light"
-        }
-        setTheme(newTheme as Themes)
+    const getMusicIcon = () => {
+        return audio ? getPinkIcon(music) : getIcon(music)
     }
-
-    const getEyedropperIcon = () => {
-        if (theme.includes("light")) return eyedropperLight
-        return eyedropper
-    }
-
-    const getThemeIcon = () => {
-        if (theme.includes("light")) return darkLight
-        return light
+    
+    const getSnowflakeIcon = () => {
+        return particles ? getBlueIcon(snowflake) : getIcon(snowflake)
     }
 
     const getMailIcon = () => {
-        if (theme.includes("light")) return hasNotification ? mailNotifLight : mailLight
-        return hasNotification ? mailNotif : mail
-    }
-
-    const getHistoryIcon = () => {
-        if (theme.includes("light")) return userHistoryLight
-        return userHistory
-    }
-
-    const getCrownIcon = () => {
-        if (theme.includes("light")) return crownLight
-        return crown
-    }
-
-    const getSnowflakeIcon = () => {
-        if (particles) return snowflakeOn
-        if (theme.includes("light")) return snowflakeLight
-        return snowflake
-    }
-
-    const getMusicIcon = () => {
-        if (audio) return musicActive
-        if (theme.includes("light")) return musicLight
-        return music
-    }
-
-    const getScrollIcon = () => {
-        if (theme.includes("light")) return scroll ? scrollIconLight : pageIconLight
-        return scroll ? scrollIcon : pageIcon
-    }
-
-    const getPageMultiplierIcon = () => {
-        if (pageMultiplier === 1) return theme.includes("light") ? multiplier1xIconLight : multiplier1xIcon
-        if (pageMultiplier === 2) return theme.includes("light") ? multiplier2xIconLight : multiplier2xIcon
-        if (pageMultiplier === 3) return theme.includes("light") ? multiplier3xIconLight : multiplier3xIcon
-        if (pageMultiplier === 4) return theme.includes("light") ? multiplier4xIconLight : multiplier4xIcon
-        if (pageMultiplier === 5) return theme.includes("light") ? multiplier5xIconLight : multiplier5xIcon
+        return hasNotification ? getIcon(mailNotif) : getIcon(mail)
     }
 
     const logout = async () => {
         await functions.http.post("/api/user/logout", null, session, setSessionFlag)
         setSessionFlag(true)
-        history.go(0)
+        navigate(0)
     }
 
     const postsClick = () => {
@@ -240,173 +173,44 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     }, [session, hideSidebar, tablet])
 
     const generateMobileUsernameJSX = () => {
-        if (session.role === "admin") {
-            return (<>
-                <span className="mobile-nav-text mobile-nav-user-text admin-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.util.toProperCase(session.username)}</span>
-                <img className="mobile-nav-logout-img" src={logoutAdminIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
-            </>
-            )
-        } else if (session.role === "mod") {
-            return (<>
-                <span className="mobile-nav-text mobile-nav-user-text mod-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.util.toProperCase(session.username)}</span>
-                <img className="mobile-nav-logout-img" src={logoutModIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
-            </>
-            )
-        } else if (session.role === "system") {
-            return (<>
-                <span className="mobile-nav-text mobile-nav-user-text system-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.util.toProperCase(session.username)}</span>
-                <img className="mobile-nav-logout-img" src={logoutSystemIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
-            </>
-            )
-        } else if (session.role === "premium-curator") {
-            return (<>
-                <span className="mobile-nav-text mobile-nav-user-text curator-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.util.toProperCase(session.username)}</span>
-                <img className="mobile-nav-logout-img" src={logoutCuratorIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
-            </>
-            )
-        } else if (session.role === "curator") {
-            return (<>
-                <span className="mobile-nav-text mobile-nav-user-text curator-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.util.toProperCase(session.username)}</span>
-                <img className="mobile-nav-logout-img" src={logoutCuratorIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
-            </>
-            )
-        } else if (session.role === "premium-contributor") {
-            return (<>
-                <span className="mobile-nav-text mobile-nav-user-text premium-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.util.toProperCase(session.username)}</span>
-                <img className="mobile-nav-logout-img" src={logoutPremiumIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
-            </>
-            )
-        } else if (session.role === "contributor") {
-            return (<>
-                <span className="mobile-nav-text mobile-nav-user-text contributor-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.util.toProperCase(session.username)}</span>
-                <img className="mobile-nav-logout-img" src={logoutContributorIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
-            </>
-            )
-        } else if (session.role === "premium") {
-            return (<>
-                <span className="mobile-nav-text mobile-nav-user-text premium-color" onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.util.toProperCase(session.username)}</span>
-                <img className="mobile-nav-logout-img" src={logoutPremiumIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
-            </>
-            )
-        } else {
-            return (<>
-                    <span className={`mobile-nav-text mobile-nav-user-text ${session.banned ? "banned" : ""}`} onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>{functions.util.toProperCase(session.username)}</span>
-                    <img className="mobile-nav-logout-img" src={logoutIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
-                </>
-            )
+        const colorMap = {
+            "admin": "admin-color",
+            "mod": "mod-color",
+            "system": "system-color",
+            "premium-curator": "curator-color",
+            "curator": "curator-color",
+            "premium-contributor": "premium-color",
+            "contributor": "contributor-color",
+            "premium": "premium-color"
         }
-    }
-
-    const generateUsernameJSX = () => {
-        if (session.role === "admin") {
-            return (<>
-                <span className="nav-text nav-user-text admin-color" onClick={() => navigate("/profile")}>
-                    {functions.util.toProperCase(session.username)}
-                </span>
-                <img className="nav-logout-img" src={logoutAdminIcon} onClick={logout}/>
-            </>
-            )
-        } else if (session.role === "mod") {
-            return (<>
-                <span className="nav-text nav-user-text mod-color" onClick={() => navigate("/profile")}>
-                    {functions.util.toProperCase(session.username)}
-                </span>
-                <img className="nav-logout-img" src={logoutModIcon} onClick={logout}/>
-            </>
-            )
-        } else if (session.role === "system") {
-            return (<>
-                <span className="nav-text nav-user-text system-color" onClick={() => navigate("/profile")}>
-                    {functions.util.toProperCase(session.username)}
-                </span>
-                <img className="nav-logout-img" src={logoutSystemIcon} onClick={logout}/>
-            </>
-            )
-        } else if (session.role === "premium-curator") {
-            return (<>
-                <span className="nav-text nav-user-text curator-color" onClick={() => navigate("/profile")}>
-                    {functions.util.toProperCase(session.username)}
-                </span>
-                <img className="nav-logout-img" src={logoutCuratorIcon} onClick={logout}/>
-            </>
-            )
-        } else if (session.role === "curator") {
-            return (<>
-                <span className="nav-text nav-user-text curator-color" onClick={() => navigate("/profile")}>
-                    {functions.util.toProperCase(session.username)}
-                </span>
-                <img className="nav-logout-img" src={logoutCuratorIcon} onClick={logout}/>
-            </>
-            )
-        } else if (session.role === "premium-contributor") {
-            return (<>
-                <span className="nav-text nav-user-text premium-color" onClick={() => navigate("/profile")}>
-                    {functions.util.toProperCase(session.username)}
-                </span>
-                <img className="nav-logout-img" src={logoutPremiumIcon} onClick={logout}/>
-            </>
-            )
-        } else if (session.role === "contributor") {
-            return (<>
-                <span className="nav-text nav-user-text contributor-color" onClick={() => navigate("/profile")}>
-                    {functions.util.toProperCase(session.username)}
-                </span>
-                <img className="nav-logout-img" src={logoutContributorIcon} onClick={logout}/>
-            </>
-            )
-        } else if (session.role === "premium") {
-            return (<>
-                <span className="nav-text nav-user-text premium-color" onClick={() => navigate("/profile")}>
-                    {functions.util.toProperCase(session.username)}
-                </span>
-                <img className="nav-logout-img" src={logoutPremiumIcon} onClick={logout}/>
-            </>
-            )
-        } else {
-            return (<>
-                <span className={`nav-text nav-user-text ${session.banned ? "banned" : ""}`} onClick={() => navigate("/profile")}>
-                    {functions.util.toProperCase(session.username)}
-                </span>
-                <img className="nav-logout-img" src={logoutIcon} onClick={logout}/>
-            </>
-            )
+        const svgMap = {
+            "admin": "--adminColor",
+            "mod": "--modColor",
+            "system": "--systemColor",
+            "premium-curator": "--curatorColor",
+            "curator": "--curatorColor",
+            "premium-contributor": "--premiumColor",
+            "contributor": "--contributorColor",
+            "premium": "--premiumColor",
+            "user": "--userColor"
         }
+        const colorClass = session.banned ? "banned" : colorMap[session.role] ?? ""
+        const svgColor = session.banned ? "--banText" : svgMap[session.role] ?? "--userColor"
+        const logoutIcon = functions.color.colorizeSVG(logoutSVG, svgColor)
+        return (
+            <>
+            <span className={`mobile-nav-text mobile-nav-user-text ${colorClass}`} 
+                onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>
+                {functions.util.toProperCase(session.username)}
+            </span>
+            <img className="mobile-nav-logout-img" src={logoutIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
+            </>
+        )
     }
 
     useEffect(() => {
         if (mobile) setTimeout(() => forceUpdate(), 50)
     }, [mobile])
-
-    const resetFilters = () => {
-        setSiteHue(180)
-        setSiteSaturation(100)
-        setSiteLightness(50)
-    }
-
-    const getColorDropdownJSX = () => {
-        let style = mobile ? {top: "500px"} : {top: "40px"}
-        if (typeof window !== "undefined") style = {top: `${functions.dom.navbarHeight()}px`}
-        return (
-            <div className={`title-dropdown ${activeColorDropdown ? "" : "hide-title-dropdown"}`} style={style} onMouseEnter={() => setHideNavbar(false)} onMouseLeave={() => setHideNavbar(true)}>
-                <div className="title-dropdown-row">
-                    <span className="title-dropdown-text">{i18n.filters.hue}</span>
-                    <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setSiteHue(value)} min={60} max={272} step={1} value={siteHue}/>
-                </div>
-                <div className="title-dropdown-row">
-                    <span className="title-dropdown-text">{i18n.filters.saturation}</span>
-                    <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setSiteSaturation(value)} min={50} max={100} step={1} value={siteSaturation}/>
-                </div>
-                <div className="title-dropdown-row">
-                    <span className="title-dropdown-text">{i18n.filters.lightness}</span>
-                    <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setSiteLightness(value)} min={45} max={55} step={1} value={siteLightness}/>
-                </div>
-                <div className="title-dropdown-row" style={{justifyContent: "space-evenly"}}>
-                    <button className="title-dropdown-button" onClick={() => resetFilters()}>{i18n.filters.reset}</button>
-                    <button className="title-dropdown-button" onClick={() => lightChange()} style={{backgroundColor: theme.includes("light") ? "#f536ac" : "#36eaf7"}}>{theme.includes("light") ? i18n.buttons.dark : i18n.buttons.light}</button>
-                </div>
-            </div>
-        )
-    }
 
     const resetParticles = () => {
         setParticleAmount(25)
@@ -415,7 +219,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const getParticleDropdownJSX = () => {
-        let style = mobile ? {top: "500px"} : {top: "40px"}
+        let style = mobile ? {top: "500px"} : {top: "30px"}
         if (typeof window !== "undefined") style = {top: `${functions.dom.navbarHeight()}px`}
         return (
             <div className={`title-dropdown ${activeParticleDropdown ? "" : "hide-title-dropdown"}`} style={style} onMouseEnter={() => setHideNavbar(false)} onMouseLeave={() => setHideNavbar(true)}>
@@ -433,23 +237,13 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                 </div>
                 <div className="title-dropdown-row" style={{justifyContent: "space-evenly"}}>
                     <button className="title-dropdown-button" onClick={() => resetParticles()}>{i18n.filters.reset}</button>
-                    <button style={{backgroundColor: particles ? "#f536ac" : "#36eaf7"}} className="title-dropdown-button" onClick={() => setParticles(!particles)}>{particles ? i18n.buttons.disable : i18n.buttons.enable}</button>
+                    <button style={{backgroundColor: particles ? "#f536ac" : "#36eaf7"}} className="title-dropdown-button" onClick={() => setParticles(!particles)}>
+                        {/*particles ? i18n.buttons.disable : i18n.buttons.enable*/}
+                        <img src={snowflakeSVG}/>
+                    </button>
                 </div>
             </div>
         )
-    }
-
-    const toggleScroll = () => {
-        const newValue = !scroll
-        setScroll(newValue)
-    }
-
-    const togglePageMultiplier = () => {
-        if (pageMultiplier === 1) return setPageMultiplier(2)
-        if (pageMultiplier === 2) return setPageMultiplier(3)
-        if (pageMultiplier === 3) return setPageMultiplier(4)
-        if (pageMultiplier === 4) return setPageMultiplier(5)
-        if (pageMultiplier === 5) return setPageMultiplier(1)
     }
 
     const getFontSize = () => {
@@ -483,26 +277,21 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span className="mobile-nav-text" onClick={() => {navigate("/groups"); setHideMobileNavbar(true)}}>{i18n.sort.groups}</span>
                     <span className="mobile-nav-text" onClick={() => {navigate("/forum"); setHideMobileNavbar(true)}}>{i18n.navbar.forum}</span>
                     <span className="mobile-nav-text" onClick={() => {navigate("/help"); setHideMobileNavbar(true)}}>{i18n.navbar.help}</span>
-                    {/* <span className="mobile-nav-text" onClick={() => {navigate("/terms"); setHideMobileNavbar(true)}}>{i18n.navbar.terms}</span> */}
-                    {/* <span className="mobile-nav-text" onClick={() => {navigate("/contact"); setHideMobileNavbar(true)}}>{i18n.navbar.contact}</span> */}
                     {permissions.isPremiumEnabled() && session.username ? <div className="mobile-nav-img-container" onClick={() => {navigate("/premium"); setHideMobileNavbar(true)}}>
-                        <img className="mobile-nav-img" src={premiumStar} style={{marginRight: "10px"}}/>
+                        <img className="mobile-nav-img" src={getPremiumIcon(premiumStar)} style={{marginRight: "10px"}}/>
                         <span className="mobile-nav-text" style={{margin: "0px", color: "var(--premiumColor)"}}>{i18n.roles.premium}</span>
                     </div> : null}
                 </div>
                 <div className="mobile-nav-color-container">
-                    {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => navigate("/history")} style={{filter}}/> : null}
+                    {session.username ? <img className="nav-color" src={getIcon(history)} onClick={() => navigate("/history")} style={{filter}}/> : null}
                     <img className="mobile-nav-color" src={getMusicIcon()} onClick={miniPlayer} style={{filter}}/>
                     <img className="mobile-nav-color" src={getSnowflakeIcon()} onClick={particleChange} style={{filter}}/>
-                    <img className="mobile-nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter}}/>
-                    {/* <img className="mobile-nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter}}/> */}
+                    <img className="mobile-nav-color" src={getIcon(hueshift)} onClick={colorChange} style={{filter}}/>
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => navigate("/mail")} style={{filter}}/> : null}
-                    {permissions.isMod(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => navigate("/mod-queue")} style={{filter}}/> : null}
-                    <img className="mobile-nav-color" src={getScrollIcon()} onClick={toggleScroll} style={{filter, marginRight: "7px"}}/>
-                    <img className="mobile-nav-color" src={getPageMultiplierIcon()} onClick={togglePageMultiplier} style={{filter}}/>
+                    {permissions.isMod(session) ? <img className="nav-color" src={getIcon(crown)} onClick={() => navigate("/mod-queue")} style={{filter}}/> : null}
                 </div>
                 <MiniAudioPlayer/>
-                {getColorDropdownJSX()}
+                <HSLDropdown active={activeColorDropdown}/>
                 {getParticleDropdownJSX()}
             </div>
         )
@@ -528,28 +317,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
             <SearchSuggestions active={suggestionsActive && hideSidebar} width={180} x={getX()} y={getY()}/>
             <div className={`navbar ${hideTitlebar ? "translate-navbar" : ""} ${hideSortbar && hideTitlebar && hideSidebar ? "hide-navbar" : ""} ${hideSortbar && hideNavbar && showMiniTitle ? "hide-navbar" : ""}
             ${relative ? "navbar-relative" : ""}`} onMouseEnter={() => setEnableDrag(false)}>
-                {/*showMiniTitle && !relative ? 
-                    <Link to="/" className="nav-mini-title-container">
-                        <span className="nav-mini-title-a">M</span>
-                        <span className="nav-mini-title-b">o</span>
-                        <span className="nav-mini-title-a">e</span>
-                        <span className="nav-mini-title-b">p</span>
-                        <span className="nav-mini-title-a">i</span>
-                        <span className="nav-mini-title-b">c</span>
-                        <span className="nav-mini-title-a">t</span>
-                        <span className="nav-mini-title-b">u</span>
-                        <span className="nav-mini-title-a">r</span>
-                        <span className="nav-mini-title-b">e</span>
-                        <span className="nav-mini-title-a">s</span>
-                    </Link>
-                : null*/}
                 <div className="nav-text-container">
-                    {session.username ? 
-                    <div className="nav-user-container" style={{marginRight: marginR}}>
-                        <img className="nav-user-img" src={userImg} style={{filter: session.image ? "" : filter}}/>
-                        {generateUsernameJSX()}
-                    </div> :
-                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text nav-login-text" onClick={() => navigate("/login")}>{i18n.navbar.login}</span>}
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => postsClick()}>{i18n.sort.posts}</span>
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/comments")}>{i18n.navbar.comments}</span>
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/notes")}>{i18n.navbar.notes}</span>
@@ -560,23 +328,22 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/groups")}>{i18n.sort.groups}</span>
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/forum")}>{i18n.navbar.forum}</span>
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/help")}>{i18n.navbar.help}</span>
-                    {permissions.isPremiumEnabled() && session.username ? <img style={{marginRight: "0px", marginTop: "2px"}} className="nav-img" onClick={() => navigate("/premium")} src={premiumStar}/> : null}
-                </div>
-                <div className="nav-color-container">
+                    {permissions.isPremiumEnabled() && session.username ? <img style={{marginTop: "2px"}} className="nav-img" onClick={() => navigate("/premium")} src={getPremiumIcon(premiumStar)}/> : null}
                     <div className={`nav-search-container ${!hideSidebar || tablet ? "hide-nav-search" : ""}`}>
-                        <img className="nav-search-icon" src={searchIcon} onClick={() => setSearchFlag(true)}/>
+                        <img className="nav-search-icon" src={getIcon(searchIcon)} onClick={() => setSearchFlag(true)}/>
                         <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
                     </div>
-                    {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => navigate("/history")} style={{filter}}/> : null}
+                </div>
+                <div className="nav-color-container">
+                    {session.username ? <img className="nav-color" src={getIcon(history)} onClick={() => navigate("/history")} style={{filter}}/> : null}
                     <img className="nav-color" src={getMusicIcon()} onClick={miniPlayer} style={{filter}}/>
                     <img className="nav-color" src={getSnowflakeIcon()} onClick={particleChange} style={{filter}}/>
-                    <img className="nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter}}/>
-                    {/* <img className="nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter}}/> */}
+                    <img className="nav-color" src={getIcon(hueshift)} onClick={colorChange} style={{filter}}/>
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => navigate("/mail")} style={{filter}}/> : null}
-                    {permissions.isMod(session) && !hideSidebar ? <img className="nav-color" src={getCrownIcon()} onClick={() => navigate("/mod-queue")} style={{filter}}/> : null}
+                    {permissions.isMod(session) && !hideSidebar ? <img className="nav-color" src={getIcon(crown)} onClick={() => navigate("/mod-queue")} style={{filter}}/> : null}
                 </div>
                 <MiniAudioPlayer/>
-                {getColorDropdownJSX()}
+                <HSLDropdown active={activeColorDropdown}/>
                 {getParticleDropdownJSX()}
             </div>
             </>

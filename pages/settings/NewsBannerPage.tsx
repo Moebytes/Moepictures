@@ -7,19 +7,17 @@ import SideBar from "../../components/site/SideBar"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
-useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
+useLayoutActions, useActiveActions, useLayoutSelector} from "../../store"
 import "./styles/sitepage.less"
 
-const NewsBannerPage: React.FunctionComponent = (props) => {
-    const {i18n, siteHue, siteLightness, siteSaturation} = useThemeSelector()
+const NewsBannerPage: React.FunctionComponent = () => {
+    const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText, setNewsBanner, setActionBanner} = useActiveActions()
-    const {setRedirect} = useFlagActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
-    const [submitted, setSubmitted] = useState(false)
     const [text, setText] = useState("")
     const [link, setLink] = useState("")
     const [error, setError] = useState(false)

@@ -3,11 +3,11 @@
 .audio-player {
     position: sticky;
     z-index: 5000;
-    left: 0; //@sidebar-width;
+    left: 0;
     bottom: 0;
     display: flex;
     flex-direction: column;
-    width: 100%; //calc(100% - @sidebar-width);
+    width: 100%;
     height: 100px;
     background-color: var(--audioPlayerColor);
 }
@@ -20,10 +20,9 @@
 }
 
 .audio-player-title {
-    font-family: Tahoma, sans-serif;
-    color: var(--text);
+    font-family: "Honoka Shin Antique-Kaku", sans-serif;
+    color: var(--sortbarText);
     font-size: 18px;
-    font-style: italic;
     margin-left: 20px;
     margin-top: 5px;
     margin-bottom: 5px;
@@ -53,8 +52,10 @@
 }
 
 .audio-player-img {
-    width: auto;
-    height: 80px;
+    width: auto;  
+    height: 50px;
+    margin-right: 10px;
+    margin-left: 5px;
 }
 
 .audio-player-play-icon {
@@ -79,7 +80,7 @@
 }
 
 .audio-player-text {
-    font-family: Tahoma, sans-serif;
+    font-family: "Tsunagi Gothic Black", sans-serif;
     color: white;
     .stroke-black();
     font-size: 25px;
@@ -100,7 +101,7 @@
 
 .audio-player-slider-track-0 {
     height: 12px;
-    background-color: var(--text);
+    background-color: var(--navbarText);
     border-radius: 0.2;
 }
 
@@ -161,7 +162,7 @@
 
 .audio-player-volume-slider-track-0 {
     width: 12px;
-    background-color: var(--text);
+    background-color: var(--navbarText);
     border-radius: 0.2;
 }
 
@@ -224,7 +225,7 @@
     display: flex;
     flex-direction: row;
     justify-content: center;
-    border: 1px solid var(--text);
+    border: 1px solid var(--navbarText);
     background-color: var(--sortbarBG);
     width: 80px;
     padding: 5px;
@@ -235,9 +236,9 @@
 }
 
 .audio-player-speed-dropdown-text {
-    font-family: Tahoma, sans-serif;
+    font-family: "Honoka Shin Antique-Kaku", sans-serif;
     font-size: 20px;
-    color: var(--text);
+    color: var(--navbarText);
     .stroke-black-thin();
 }
 
@@ -245,7 +246,7 @@
     display: flex;
     flex-direction: row;
     justify-content: center;
-    border: 1px solid var(--text);
+    border: 1px solid var(--navbarText);
     background-color: var(--sortbarBG);
     width: 80px;
     padding: 5px;
@@ -256,9 +257,9 @@
 }
 
 .audio-player-pitch-dropdown-text {
-    font-family: Tahoma, sans-serif;
+    font-family: "Honoka Shin Antique-Kaku", sans-serif;
     font-size: 20px;
-    color: var(--text);
+    color: var(--navbarText);
     .stroke-black-thin();
 }
 

@@ -5,8 +5,8 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import show from "../../assets/icons/show.png"
-import hide from "../../assets/icons/hide.png"
+import show from "../../assets/svg/show.svg"
+import hide from "../../assets/svg/hide.svg"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useActiveSelector,
 useFlagSelector} from "../../store"
@@ -34,6 +34,10 @@ const LoginPage: React.FunctionComponent = (props) => {
     const navigate = useNavigate()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--titleButtons")
+    }
 
     const getCaptchaColor = () => {
         if (theme.includes("light")) return "#ffffff"
@@ -80,7 +84,7 @@ const LoginPage: React.FunctionComponent = (props) => {
     }, [session])
 
     const getEye = () => {
-        return showPassword ? hide : show
+        return showPassword ? getIcon(hide) : getIcon(show)
     }
 
     const login = async () => {

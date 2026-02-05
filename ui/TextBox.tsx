@@ -1,0 +1,207 @@
+import React, {useState, useRef, forwardRef, useImperativeHandle} from "react"
+import {useInteractionActions, useThemeSelector, useSessionSelector,
+useLayoutSelector,  useCacheSelector} from "../store"
+import functions from "../functions/Functions"
+import permissions from "../structures/Permissions"
+import lewdIcon from "../assets/icons/lewdgirl.png"
+import radioButton from "../assets/svg/radiobutton.svg"
+import radioButtonChecked from "../assets/svg/radiobutton-checked.svg"
+import emojiSelect from "../assets/svg/emoji-select.svg"
+import highlight from "../assets/svg/highlight.svg"
+import bold from "../assets/svg/bold.svg"
+import italic from "../assets/svg/italic.svg"
+import underline from "../assets/svg/underline.svg"
+import strikethrough from "../assets/svg/strikethrough.svg"
+import spoiler from "../assets/svg/spoiler.svg"
+import link from "../assets/svg/link.svg"
+import details from "../assets/svg/details.svg"
+import hexcolor from "../assets/svg/hash.svg"
+import codeblock from "../assets/svg/codeblock.svg"
+import {ThreadUser, MessageUser} from "../types/Types"
+import "./styles/textbox.less"
+
+export interface TextBoxRef {
+    getText: () => string
+    updateText: (text: string) => void
+    getR18: () => boolean
+    showError: (msg: string) => void
+    clearError: () => void
+}
+
+interface Props {
+    type: "comment" | "reply" | "message"
+    onPost: () => Promise<void>
+    r18Toggle?: boolean
+    thread?: ThreadUser
+    message?: MessageUser
+    manualWidth?: boolean
+}
+
+const TextBox = forwardRef<TextBoxRef, Props>((props, ref) => {
+    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
+    const {session} = useSessionSelector()
+    const {setEnableDrag} = useInteractionActions()
+    const {mobile} = useLayoutSelector()
+    const {emojis} = useCacheSelector()
+    const [text, setText] = useState("")
+    const [r18, setR18] = useState(false)
+    const [error, setError] = useState(false)
+    const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
+    const [previewMode, setPreviewMode] = useState(false)
+    const errorRef = useRef<HTMLSpanElement>(null)
+    const emojiRef = useRef<HTMLButtonElement>(null)
+    const textRef = useRef<HTMLTextAreaElement>(null)
+
+    useImperativeHandle(ref, () => ({
+        getText: () => {
+            return text
+        },
+        updateText: (text: string) => {
+            setText(text)
+        },
+        getR18: () => {
+            return r18
+        },
+        showError: async (msg: string) => {
+            setError(true)
+            if (!errorRef.current) await functions.timeout(20)
+            errorRef.current!.innerText = msg
+        },
+        clearError: () => {
+            setError(false)
+        }
+    }))
+
+    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+    
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--titleButtons")
+    }
+
+    const getEmojiMarginRight = () => {
+        if (typeof document === "undefined") return "0px"
+        const rect = emojiRef.current?.getBoundingClientRect()
+        if (!rect) return "0px"
+        const raw = window.innerWidth - rect.right
+        let offset = -145
+        if (mobile) offset -= 20
+        return `${raw + offset}px`
+    }
+
+    const getEmojiMarginBottom = () => {
+        if (typeof document === "undefined") return "0px"
+        let elementName = ".textbox-textarea"
+        const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
+        const rect = emojiRef.current?.getBoundingClientRect()
+        if (!rect || !bodyRect) return "0px"
+        const raw = bodyRect.bottom - rect.bottom
+        let offset = 110
+        if (mobile) offset += 0
+        return `${raw + offset}px`
+    }
+
+    const emojiGrid = () => {
+        let rows = [] as React.ReactElement[]
+        let rowAmount = 7
+        for (let i = 0; i < Object.keys(emojis).length; i++) {
+            let items = [] as React.ReactElement[]
+            for (let j = 0; j < rowAmount; j++) {
+                const k = (i*rowAmount)+j
+                const key = Object.keys(emojis)[k]
+                if (!key) break
+                const appendText = () => {
+                    setText((prev: string) => prev + ` :${key}:`)
+                    setShowEmojiDropdown(false)
+                }
+                items.push(
+                    <img draggable={false} src={emojis[key]} className="emoji-big" onClick={appendText}/>
+                )
+            }
+            if (items.length) rows.push(<div className="emoji-row">{items}</div>)
+        }
+        return (
+            <div className={`emoji-grid ${showEmojiDropdown ? "" : "hide-emoji-grid"}`}
+            style={{marginRight: getEmojiMarginRight(), marginBottom: getEmojiMarginBottom()}}>
+                {rows}
+            </div>
+        )
+    }
+
+    const getBanText = () => {
+        if (props.type === "comment") return i18n.pages.comment.banned
+        if (props.type === "reply") return i18n.pages.thread.banned
+        if (props.type === "message") return i18n.pages.message.banned
+    }
+
+    const getButtonText = () => {
+        if (props.type === "comment") return i18n.buttons.post
+        if (props.type === "reply") return i18n.buttons.reply
+        if (props.type === "message") return i18n.buttons.message
+    }
+
+    const getTextBox = () => {
+        if (props.thread && props.thread.locked && !permissions.isMod(session)) return (
+            <div className="textbox-container" style={{justifyContent: "flex-start", marginLeft: props.manualWidth && !mobile ? "170px" : ""}}>
+                <span className="textbox-validation" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>{i18n.pages.thread.locked}</span>
+            </div>
+        )
+
+        if (props.message && props.message.role === "system") return (
+            <div className="textbox-container" style={{justifyContent: "flex-start", marginLeft: props.manualWidth && !mobile ? "170px" : ""}}>
+                <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>{i18n.pages.message.system}</span>
+            </div>
+        )
+
+        if (session.banned) return (
+            <div className="textbox-container" style={{marginLeft: props.manualWidth && !mobile ? "170px" : ""}}>
+                <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "2px" : "10px"}}>{getBanText()}</span>
+            </div>
+        )
+
+        if (session.username) {
+            return (
+                <div className="textbox-container" style={{marginLeft: props.manualWidth && !mobile ? "170px" : ""}}>
+                    <div className="textbox-textarea-buttons" style={{width: props.manualWidth && !mobile ? "70%" : ""}}>
+                        <button className="textbox-textarea-button"><img src={getIcon(highlight)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "highlight")} style={{filter}}/></button>
+                        <button className="textbox-textarea-button"><img src={getIcon(bold)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "bold")} style={{filter}}/></button>
+                        <button className="textbox-textarea-button"><img src={getIcon(italic)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "italic")} style={{filter}}/></button>
+                        <button className="textbox-textarea-button"><img src={getIcon(underline)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "underline")} style={{filter}}/></button>
+                        <button className="textbox-textarea-button"><img src={getIcon(strikethrough)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "strikethrough")} style={{filter}}/></button>
+                        <button className="textbox-textarea-button"><img src={getIcon(spoiler)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "spoiler")} style={{filter}}/></button>
+                        <button className="textbox-textarea-button"><img src={getIcon(link)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "link")} style={{filter}}/></button>
+                        <button className="textbox-textarea-button"><img src={getIcon(details)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "details")} style={{filter}}/></button>
+                        <button className="textbox-textarea-button"><img src={getIcon(hexcolor)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "color")} style={{filter}}/></button>
+                        <button className="textbox-textarea-button"><img src={getIcon(codeblock)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "code")} style={{filter}}/></button>
+                    </div>
+                    {previewMode ? <div className="textbox-preview" style={{width: props.manualWidth && !mobile ? "70%" : ""}}>{functions.jsx.renderText(text, emojis, props.type, undefined, r18)}</div> : 
+                    <div style={{marginTop: "0px"}} className="textbox-row-start" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <textarea ref={textRef} className="textbox-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)} onKeyDown={(event) => event.stopPropagation()} style={{width: props.manualWidth && !mobile ? "70%" : ""}}></textarea>
+                    </div>}
+                    {error ? <div className="textbox-validation-container"><span className="textbox-validation" ref={errorRef}></span></div> : null}
+                    <div className="textbox-button-container-left">
+                    <button className="textbox-button" onClick={() => props.onPost()}>{getButtonText()}</button>
+                    <button className="textbox-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
+                        <img src={emojiSelect}/>
+                    </button>
+                    <button className={previewMode ? "textbox-edit-button" : "textbox-preview-button"} onClick={() => setPreviewMode((prev: boolean) => !prev)}>{previewMode ? i18n.buttons.unpreview : i18n.buttons.preview}</button>
+                    {props.r18Toggle && session.showR18 ?
+                    <div className="textbox-replybox-row">
+                        <img className="textbox-checkbox" src={r18 ? getIcon(radioButtonChecked) : getIcon(radioButton)} onClick={() => setR18((prev: boolean) => !prev)} style={{filter}}/>
+                        <span className="textbox-replybox-text" style={{marginLeft: "10px"}}>R18</span>
+                        <img className="textbox-icon" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter}}/>
+                    </div> : null}
+                    </div>
+                </div>
+            )
+        }
+    }
+
+    return (
+        <>
+        {getTextBox()}
+        {emojiGrid()}
+        </>
+    )
+})
+
+export default TextBox

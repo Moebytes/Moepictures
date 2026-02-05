@@ -3,10 +3,8 @@ import {useInteractionActions, useSessionSelector, useSessionActions, useGroupDi
 useSearchSelector, useSearchActions} from "../../store"
 import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
-import radioButton from "../../assets/icons/radiobutton.png"
-import radiobuttonChecked from "../../assets/icons/radiobutton-checked.png"
-import deleteIcon from "../../assets/icons/delete.png"
-import lockIcon from "../../assets/icons/private-lock.png"
+import radioButton from "../../assets/svg/radiobutton.svg"
+import radiobuttonChecked from "../../assets/svg/radiobutton-checked.svg"
 import Draggable from "react-draggable"
 import "../dialog.less"
 
@@ -25,6 +23,10 @@ const BulkFavgroupDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
 
     useEffect(() => {
         const savedFavgroupName = localStorage.getItem("favgroupName")
@@ -80,9 +82,9 @@ const BulkFavgroupDialog: React.FunctionComponent = (props) => {
                         </div>
                         <div className="dialog-row" style={{justifyContent: "center", paddingRight: "20px"}}>
                             <span className="dialog-text" style={{marginTop: "-4px"}}>{i18n.labels.privacy}: </span>
-                            <img className="dialog-checkbox" src={isPrivate ? radioButton : radiobuttonChecked} onClick={() => setIsPrivate(false)} style={{marginRight: "10px", filter}}/>
+                            <img className="dialog-checkbox" src={isPrivate ? getIcon(radioButton) : getIcon(radiobuttonChecked)} onClick={() => setIsPrivate(false)} style={{marginRight: "10px", filter}}/>
                             <span className="dialog-text">{i18n.labels.public}</span>
-                            <img className="dialog-checkbox" src={isPrivate ? radiobuttonChecked : radioButton} onClick={() => setIsPrivate(true)} style={{marginRight: "10px", filter}}/>
+                            <img className="dialog-checkbox" src={isPrivate ? getIcon(radiobuttonChecked) : getIcon(radioButton)} onClick={() => setIsPrivate(true)} style={{marginRight: "10px", filter}}/>
                             <span className="dialog-text">{i18n.sort.private}</span>
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}

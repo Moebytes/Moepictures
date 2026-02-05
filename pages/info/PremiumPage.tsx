@@ -6,13 +6,13 @@ import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useLayoutSelector} from "../../store"
-import premiumStar from "../../assets/icons/premium-star.png"
+import premiumStar from "../../assets/svg/premium-star.svg"
 import premiumImg from "../../assets/images/premiumupgrade.png"
 import upscaledImg from "../../assets/images/upscaled.png"
 import bookmarksImg from "../../assets/images/bookmarks.png"
-import historyImg from "../../assets/images/history.png"
+import historyImg from "../../assets/images/searchhistory.png"
 import unlimitedTagsImg from "../../assets/images/unlimitedtags.png"
-import autosearchImg from "../../assets/images/autosearch.png"
+import autosearchImg from "../../assets/images/autosearchimg.png"
 import animatedImg from "../../assets/images/animatedavatar.gif"
 import changeUsernameImg from "../../assets/images/changeusername.png"
 import upscaledImages from "../../assets/images/premium-upscaled-images.png"
@@ -25,7 +25,7 @@ import changeUsername from "../../assets/images/premium-change-username.png"
 import noAds from "../../assets/images/premium-no-ads.png"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import bitcoin from "../../assets/icons/bitcoin.png"
+import bitcoin from "../../assets/svg/bitcoin.svg"
 import "./styles/premiumpage.less"
 
 const PaymentButton: React.FunctionComponent = (props) => {
@@ -66,6 +66,10 @@ const PremiumPage: React.FunctionComponent = (props) => {
     const {mobile} = useLayoutSelector()
     const [premiumFeature, setPremiumFeature] = useState("premium")
     const navigate = useNavigate()
+
+    const getPremiumIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--premiumColor")
+    }
 
     useEffect(() => {
         if (!session.cookie) return
@@ -127,7 +131,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
             return (
                 <><div className="premium-row">
                     <span className="premium-heading">{i18n.premium.premium.title}</span>
-                    <img className="premium-star" src={premiumStar}/>
+                    <img className="premium-star" src={getPremiumIcon(premiumStar)}/>
                 </div>
                 <span className="premium-text">
                     {i18n.premium.premium.line1}<br/><br/>

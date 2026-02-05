@@ -5,7 +5,6 @@ import {HashLink as Link} from "react-router-hash-link"
 import functions from "../../functions/Functions"
 import Carousel from "../site/Carousel"
 import fandom from "../../assets/icons/fandom.png"
-import permissions from "../../structures/Permissions"
 import {TagCategorySearch} from "../../types/Types"
 import "./styles/characterrow.less"
 

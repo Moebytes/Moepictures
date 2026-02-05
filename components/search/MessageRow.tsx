@@ -2,11 +2,10 @@ import React, {useEffect, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useMessageDialogActions} from "../../store"
 import functions from "../../functions/Functions"
-import softDelete from "../../assets/icons/soft-delete.png"
-import unread from "../../assets/icons/unread.png"
-import read from "../../assets/icons/read.png"
-import readLight from "../../assets/icons/read-light.png"
 import favicon from "../../assets/icons/favicon.png"
+import softDelete from "../../assets/svg/soft-delete.svg"
+import unread from "../../assets/svg/unread.svg"
+import read from "../../assets/svg/read.svg"
 import {MessageSearch, PrunedUser} from "../../types/Types"
 import "./styles/message.less"
 
@@ -30,6 +29,10 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
     const navigate = useNavigate()
     
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
 
     const updateRecipient = async () => {
         if (!props.message?.recipients[0]) return
@@ -165,9 +168,8 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const getReadIcon = () => {
-        if (!readStatus()) return unread
-        if (theme.includes("light")) return readLight
-        return read
+        if (!readStatus()) return getIcon(unread)
+        return getIcon(read)
     }
 
     return (
@@ -176,7 +178,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
                 <div className="message-container">
                     <div className="message-row" style={{width: "100%"}}>
                         <img draggable={false} className="message-opt-icon" src={getReadIcon()} onClick={toggleRead} style={{filter}}/>
-                        <img draggable={false} className="message-opt-icon" src={softDelete} onClick={toggleSoftDelete} style={{filter}}/>
+                        <img draggable={false} className="message-opt-icon" src={getIcon(softDelete)} onClick={toggleSoftDelete} style={{filter}}/>
                         <span className={`message-title ${readStatus() ? "message-read" : ""}`} onClick={messagePage} onAuxClick={messagePage}>
                             {props.message?.r18 ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
                             {props.message?.title || ""}

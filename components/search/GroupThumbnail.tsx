@@ -1,7 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useSessionSelector, useLayoutSelector, useFilterSelector} from "../../store"
-import functions from "../../functions/Functions"
 import TinyImage from "../image/TinyImage"
 import {GroupSearch, GroupPosts} from "../../types/Types"
 import "./styles/groupthumbnail.less"

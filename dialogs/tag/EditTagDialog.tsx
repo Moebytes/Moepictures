@@ -2,12 +2,12 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useTagDialogSelector, useTagDialogActions, useSessionSelector, useSessionActions} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import uploadIcon from "../../assets/icons/upload.png"
 import Draggable from "react-draggable"
-import xButton from "../../assets/icons/x-button.png"
 import lewdIcon from "../../assets/icons/lewdgirl.png"
-import radioButton from "../../assets/icons/radiobutton.png"
-import radioButtonChecked from "../../assets/icons/radiobutton-checked.png"
+import uploadIcon from "../../assets/svg/upload-arrow.svg"
+import xButton from "../../assets/svg/x-button.svg"
+import radioButton from "../../assets/svg/radiobutton.svg"
+import radioButtonChecked from "../../assets/svg/radiobutton-checked.svg"
 import "../dialog.less"
 
 const EditTagDialog: React.FunctionComponent = (props) => {
@@ -22,6 +22,10 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
 
     useEffect(() => {
         if (editTagObj) {
@@ -286,7 +290,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
             </div>
             {!functions.util.arrayIncludes(editTagObj.type, ["artist", "character", "series"]) && session.showR18 ?
             <div className="dialog-row">
-                <img className="dialog-checkbox" src={editTagObj.r18 ? radioButtonChecked : radioButton} onClick={() => setEditTagObj({...editTagObj, r18: !editTagObj.r18})} style={{marginLeft: "0px", filter}}/>
+                <img className="dialog-checkbox" src={editTagObj.r18 ? getIcon(radioButtonChecked) : getIcon(radioButton)} onClick={() => setEditTagObj({...editTagObj, r18: !editTagObj.r18})} style={{marginLeft: "0px", filter}}/>
                 <span className="dialog-text" style={{marginLeft: "10px"}}>R18</span>
                 <img className="dialog-title-img" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter}}/>
             </div> : null}

@@ -3,7 +3,7 @@ import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useSearchDialogSelector, useSearchDialogActions, useLayoutSelector,
 useInteractionActions} from "../../store"
 import functions from "../../functions/Functions"
-import searchHistoryDelete from "../../assets/icons/delete.png"
+import searchHistoryDelete from "../../assets/svg/delete.svg"
 import {SearchHistory} from "../../types/Types"
 import TinyImage from "../image/TinyImage"
 import "./styles/historyrow.less"
@@ -22,6 +22,10 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {deleteSearchHistoryID, deleteSearchHistoryFlag} = useSearchDialogSelector()
     const {setDeleteSearchHistoryID, setDeleteSearchHistoryFlag} = useSearchDialogActions()
     const navigate = useNavigate()
+
+    const getRedIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "#f71e75")
+    }
 
     const deleteSearchHistory = async () => {
         await functions.http.delete("/api/user/history/delete", {postID: props.history.postID}, session, setSessionFlag)
@@ -44,7 +48,7 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="historyrow-options">
                 <div className="historyrow-options-container" onClick={deleteSearchHistoryDialog}>
-                    <img className="historyrow-options-img" src={searchHistoryDelete}/>
+                    <img className="historyrow-options-img" src={getRedIcon(searchHistoryDelete)}/>
                     <span className="historyrow-options-text">{i18n.buttons.delete}</span>
                 </div>
             </div>

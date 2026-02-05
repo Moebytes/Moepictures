@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from "react"
+import React, {useEffect, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import Footer from "../../components/site/Footer"
@@ -14,8 +14,8 @@ import "./styles/sitepage.less"
 
 let pageAmount = 50
 
-const LoginHistoryPage: React.FunctionComponent = (props) => {
-    const {siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()
+const LoginHistoryPage: React.FunctionComponent = () => {
+    const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -25,7 +25,6 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
     const {scroll} = useSearchSelector()
     const {mobile, tablet} = useLayoutSelector()
     const {setActionBanner} = useActiveActions()
-    const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
 
     useEffect(() => {

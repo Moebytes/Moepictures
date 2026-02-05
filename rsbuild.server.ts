@@ -16,6 +16,11 @@ export default defineConfig({
         rspack(config) {
             config.module = config.module || {}
             config.module.rules = config.module.rules || []
+            
+            config.module.rules.push({
+                test: /\.svg$/i,
+                type: "asset/inline",
+            })
 
             config.module.rules.push({
                 test: /\.(sql|txt)$/,
@@ -39,6 +44,7 @@ export default defineConfig({
     output: {
         target: "node",
         minify: minimize,
+        dataUriLimit: 0,
         filenameHash: false,
         distPath: {root: "./dist/server"},
         copy: [

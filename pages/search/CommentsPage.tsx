@@ -4,15 +4,16 @@ import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
-import search from "../../assets/icons/search.png"
-import sort from "../../assets/icons/sort.png"
-import sortRev from "../../assets/icons/sort-reverse.png"
+import search from "../../assets/svg/search.svg"
+import sort from "../../assets/svg/sort.svg"
+import sortRev from "../../assets/svg/sort-reverse.svg"
+import scrollIcon from "../../assets/svg/scroll.svg"
+import pageIcon from "../../assets/svg/pages.svg"
 import CommentRow from "../../components/search/CommentRow"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchSelector, usePageSelector, useFlagSelector} from "../../store"
-import scrollIcon from "../../assets/icons/scroll.png"
-import pageIcon from "../../assets/icons/page.png"
+
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
 import {CommentSearch, CommentSort} from "../../types/Types"
@@ -52,6 +53,10 @@ const CommentsPage: React.FunctionComponent = (props) => {
     
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
     const getFilterSearch = functions.color.filter({theme, siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
 
     useEffect(() => {
         setHideNavbar(true)
@@ -145,7 +150,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const getSortJSX = () => {
         return (
             <div className="itemsort-item" ref={sortRef}>
-                <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter}} onClick={() => setSortReverse(!sortReverse)}/>
+                <img className="itemsort-img" src={sortReverse ? getIcon(sortRev) : getIcon(sort)} style={{filter}} onClick={() => setSortReverse(!sortReverse)}/>
                 <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{i18n.sort[sortType]}</span>
             </div>
         )
@@ -185,11 +190,11 @@ const CommentsPage: React.FunctionComponent = (props) => {
                         </div>
                         {getSortJSX()}
                         {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>
-                            <img className="itemsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter}}/>
+                            <img className="itemsort-img" src={scroll ? getIcon(scrollIcon) : getIcon(pageIcon)} style={{filter}}/>
                             <span className="itemsort-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                         </div> : null}
                         <div className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 
-                        style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
+                        style={{marginRight: getSortMargin(), top: mobile ? "220px" : "190px"}} onClick={() => setActiveDropdown("none")}>
                             <div className="item-dropdown-row" onClick={() => setSortType("random")}>
                                 <span className="item-dropdown-text">{i18n.sort.random}</span>
                             </div>

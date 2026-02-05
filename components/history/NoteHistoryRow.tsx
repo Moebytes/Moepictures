@@ -3,17 +3,10 @@ import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useNoteDialogSelector, useNoteDialogActions, useLayoutSelector,
 useFilterSelector, useInteractionActions} from "../../store"
 import functions from "../../functions/Functions"
-import noteHistoryRevert from "../../assets/icons/revert.png"
-import noteHistoryDelete from "../../assets/icons/delete.png"
-import adminCrown from "../../assets/icons/admin-crown.png"
-import modCrown from "../../assets/icons/mod-crown.png"
-import premiumCuratorStar from "../../assets/icons/premium-curator-star.png"
-import curatorStar from "../../assets/icons/curator-star.png"
-import premiumContributorPencil from "../../assets/icons/premium-contributor-pencil.png"
-import contributorPencil from "../../assets/icons/contributor-pencil.png"
-import premiumStar from "../../assets/icons/premium-star.png"
+import noteHistoryRevert from "../../assets/svg/revert.svg"
+import noteHistoryDelete from "../../assets/svg/delete.svg"
 import permissions from "../../structures/Permissions"
-import {NoteHistory, Note, PrunedUser} from "../../types/Types"
+import {NoteHistory, Note} from "../../types/Types"
 import TinyImage from "../image/TinyImage"
 import "./styles/historyrow.less"
 
@@ -39,6 +32,14 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     const order = props.noteHistory.order
     let hasChanges = functions.compare.hasHistoryChanges(props.noteHistory)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
+
+    const getRedIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "#f71e75")
+    }
 
     const revertNoteHistory = async () => {
         if (props.current) return Promise.reject()
@@ -94,12 +95,12 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="historyrow-options">
                     <div className="historyrow-options-container" onClick={revertNoteHistoryDialog}>
-                        <img className="historyrow-options-img" src={noteHistoryRevert}/>
+                        <img className="historyrow-options-img" src={getIcon(noteHistoryRevert)}/>
                         <span className="historyrow-options-text">{i18n.buttons.revert}</span>
                     </div>
                     {permissions.isAdmin(session) ?
                     <div className="historyrow-options-container" onClick={deleteNoteHistoryDialog}>
-                        <img className="historyrow-options-img" src={noteHistoryDelete}/>
+                        <img className="historyrow-options-img" src={getRedIcon(noteHistoryDelete)}/>
                         <span className="historyrow-options-text">{i18n.buttons.delete}</span>
                     </div> : null}
                 </div>
@@ -108,7 +109,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="historyrow-options">
                     <div className="historyrow-options-container" onClick={revertNoteHistoryDialog}>
-                        <img className="historyrow-options-img" src={noteHistoryRevert}/>
+                        <img className="historyrow-options-img" src={getIcon(noteHistoryRevert)}/>
                         <span className="historyrow-options-text">{i18n.buttons.revert}</span>
                     </div>
                 </div>

@@ -5,32 +5,37 @@ import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
-import uploadIcon from "../../assets/icons/upload.png"
-import xIcon from "../../assets/icons/x.png"
-import rightIcon from "../../assets/icons/right.png"
-import leftIcon from "../../assets/icons/left.png"
-import linkIcon from "../../assets/icons/link.png"
-import upscaleIcon from "../../assets/icons/upscale.png"
-import originalIcon from "../../assets/icons/original.png"
-import image from "../../assets/icons/image.png"
-import animation from "../../assets/icons/animation.png"
-import video from "../../assets/icons/video.png"
-import comic from "../../assets/icons/comic.png"
-import audio from "../../assets/icons/audio.png"
-import model from "../../assets/icons/model.png"
-import live2d from "../../assets/icons/live2d.png"
-import cute from "../../assets/icons/cute.png"
-import sexy from "../../assets/icons/sexy.png"
-import erotic from "../../assets/icons/erotic.png"
-import lewd from "../../assets/icons/lewd.png"
-import $2d from "../../assets/icons/2d.png"
-import $3d from "../../assets/icons/3d.png"
-import pixel from "../../assets/icons/pixel.png"
-import chibi from "../../assets/icons/chibi.png"
-import daki from "../../assets/icons/daki.png"
-import sketch from "../../assets/icons/sketch.png"
-import lineart from "../../assets/icons/lineart.png"
-import promo from "../../assets/icons/promo.png"
+
+import uploadIcon from "../../assets/svg/upload-arrow.svg"
+import xIcon from "../../assets/svg/x-button.svg"
+import rightIcon from "../../assets/svg/right-thick.svg"
+import leftIcon from "../../assets/svg/left-thick.svg"
+import linkIcon from "../../assets/svg/link.svg"
+import upscaleIcon from "../../assets/svg/upscale.svg"
+import originalIcon from "../../assets/svg/original.svg"
+
+import image from "../../assets/svg/image.svg"
+import animation from "../../assets/svg/animation.svg"
+import video from "../../assets/svg/video.svg"
+import comic from "../../assets/svg/comic.svg"
+import live2d from "../../assets/svg/live2d.svg"
+import model from "../../assets/svg/model.svg"
+import audio from "../../assets/svg/music.svg"
+
+import cute from "../../assets/svg/cute.svg"
+import sexy from "../../assets/svg/sexy.svg"
+import erotic from "../../assets/svg/erotic.svg"
+import lewd from "../../assets/svg/lewd.svg"
+
+import $2d from "../../assets/svg/2d.svg"
+import $3d from "../../assets/svg/3d.svg"
+import pixel from "../../assets/svg/pixel.svg"
+import chibi from "../../assets/svg/chibi.svg"
+import daki from "../../assets/svg/daki.svg"
+import sketch from "../../assets/svg/sketch.svg"
+import lineart from "../../assets/svg/lineart.svg"
+import promo from "../../assets/svg/promo.svg"
+
 import Carousel from "../../components/site/Carousel"
 import PostImage from "../../components/image/PostImage"
 import PostAnimation from "../../components/image/PostAnimation"
@@ -41,13 +46,11 @@ import PostSong from "../../components/image/PostSong"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagSelector, useFlagActions, useLayoutSelector, useSearchActions, 
 useSearchSelector, useCacheSelector, useCacheActions, useFilterActions} from "../../store"
-import JSZip from "jszip"
 import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
 import {ProgressBar} from "react-bootstrap"
 import permissions from "../../structures/Permissions"
 import {Post, PostType, PostRating, PostStyle, UploadTag, UploadImage, SourceLookup, TagLookup} from "../../types/Types"
-import path from "path"
 import "./styles/uploadpage.less"
 
 let enterLinksTimer = null as any
@@ -109,6 +112,10 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     const metaInputRef = useRef<HTMLInputElement>(null!)
     const appendTagsRef = useRef<HTMLTextAreaElement>(null!)
     const navigate = useNavigate()
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--titleButtons")
+    }
 
     useEffect(() => {
         setHideNavbar(true)

@@ -1,8 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions} from "../../store"
-import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
-import permissions from "../../structures/Permissions"
 import "../dialog.less"
 
 const DeleteGroupHistoryDialog: React.FunctionComponent = (props) => {

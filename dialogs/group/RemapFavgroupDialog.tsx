@@ -4,8 +4,6 @@ import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGrou
 useSessionActions, useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
-import radioButton from "../../assets/icons/radiobutton.png"
-import radioButtonChecked from "../../assets/icons/radiobutton-checked.png"
 import "../dialog.less"
 
 const RemapFavgroupDialog: React.FunctionComponent = (props) => {

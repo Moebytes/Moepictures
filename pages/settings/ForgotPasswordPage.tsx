@@ -4,7 +4,7 @@ import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
-useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
+useLayoutActions, useActiveActions, useLayoutSelector} from "../../store"
 import functions from "../../functions/Functions"
 import "./styles/sitepage.less"
 
@@ -13,7 +13,6 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
-    const {setRedirect} = useFlagActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()

@@ -38,19 +38,19 @@
 }
 
 .nav-text {
-    font-family: Tahoma, sans-serif;
-    font-size: 19px;
+    font-family: "Tsunagi Gothic Black", sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
     color: var(--navbarText);
     cursor: pointer;
     &:hover {
         filter: brightness(150%);
     }
-    //.stroke-black-thin();
 }
 
 .nav-img {
     width: auto;
-    height: 19px;
+    height: 18px;
     cursor: pointer;
     &:hover {
         filter: brightness(150%);
@@ -58,7 +58,7 @@
 }
 
 .nav-login-text {
-    color: var(--navbarUserText);
+    color: var(--loginText);
     margin-right: 0px;
 }
 
@@ -74,7 +74,7 @@
 }
 
 .nav-color {
-    height: 25px;
+    height: 21px;
     width: auto;
     margin-right: 14px;
     cursor: pointer;
@@ -106,18 +106,15 @@
     background-color: var(--sidebarSearchBG);
     border: none;
     border: 1px solid black;
-    font-family: Tahoma, sans-serif;
+    font-family: "irohamaru mikami", sans-serif;
     font-size: 17px;
     margin-right: 10px;
     transition: width 0.3s;
-    height: 26px;
-    width: 150px;
+    height: 24px;
+    width: 200px;
     padding-left: 28px;
     &:hover {
         filter: brightness(110%);
-    }
-    &:focus {
-        width: 180px;
     }
 }
 
@@ -139,20 +136,19 @@
 }
 
 .nav-mini-title {
-    font-family: Tahoma, sans-serif;
+    font-family: "GenEi M Gothic v2", sans-serif;
     font-size: 25px;
     color: var(--text);
-    //.stroke-black-thin();
 }
 
 .nav-mini-title-a {
     .nav-mini-title();
-    color: var(--titleTextB);
+    color: var(--moeTextB);
 }
 
 .nav-mini-title-b {
     .nav-mini-title();
-    color: var(--titleTextB);
+    color: var(--moeTextB);
     filter: brightness(70%);
 }
 
@@ -160,28 +156,6 @@
     width: auto;
     height: 28px;
     margin-left: 5px;
-}
-
-.nav-user-container {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-.nav-user-img {
-    width: auto;
-    height: 30px;
-    margin-right: 10px;
-}
-
-.nav-logout-img {
-    width: auto;
-    height: 15px;
-    margin-left: 7px;
-    cursor: pointer;
-    &:hover {
-        filter: brightness(130%);
-    }
 }
 
 .mobile-navbar {
@@ -211,14 +185,13 @@
 
 .mobile-nav-text {
     margin-top: 5px;
-    font-family: Tahoma, sans-serif;
+    font-family: "GenEi M Gothic v2", sans-serif;
     font-size: 20px;
     color: var(--navbarText);
     cursor: pointer;
     &:hover {
         filter: brightness(150%);
     }
-    //.stroke-black-thin();
 }
 
 .mobile-nav-img-container {
@@ -237,7 +210,7 @@
 }
 
 .mobile-nav-login-text {
-    color: var(--navbarUserText);
+    color: var(--loginText);
 }
 
 .mobile-nav-user-text {
@@ -261,7 +234,7 @@
     height: 18px;
     margin-left: 7px;
     cursor: pointer;
-    margin-top: 6px;
+    margin-top: 9px;
     &:hover {
         filter: brightness(130%);
     }
@@ -317,9 +290,6 @@
     &:last-child {
         justify-content: center;
     }
-    &:hover {
-        filter: brightness(140%);
-    }
 }
 
 .title-dropdown-icon {
@@ -329,11 +299,11 @@
 }
 
 .title-dropdown-text {
-    font-family: Arial, sans-serif;
+    font-family: "Tsunagi Gothic Black", sans-serif;
     font-size: 16px;
     margin-left: 5px;
     margin-right: 5px;
-    color: var(--text);
+    color: var(--sortbarText);
 }
 
 .title-dropdown-slider {
@@ -348,11 +318,11 @@
 .title-dropdown-slider-track {
     display: flex;
     height: 9px;
-    background-color: var(--text);
+    background-color: var(--navbarText);
 }
 
 .title-dropdown-slider-track.title-dropdown-slider-track-1 {
-    background-color: var(--titlebarBG);
+    background-color: var(--progressBG);
 }
 
 .title-dropdown-slider-thumb {
@@ -363,7 +333,7 @@
     border-radius: 10;
     height: 8px;
     width: 8px;
-    background-color: var(--text);
+    background-color: var(--navbarText);
     &:active {
         outline: none;
     }
@@ -373,20 +343,31 @@
 }
 
 .title-dropdown-button {
-    background-color: var(--text);
+    background-color: var(--navbarText);
     color: black;
     border: 1px solid black;
-    font-family: Arial, sans-serif;
+    font-family: "Tsunagi Gothic Black", sans-serif;
     font-weight: bold;
     font-size: 15px;
     padding: 3px;
     cursor: pointer;
     transition: all 0.1s;
     margin-top: -5px;
+    border-radius: 10px;
     margin-bottom: 3px;
+    padding: 5px 7px;
     &:hover {
         border: 1px solid #c9daff;
         color: #c8d7ff;
+        & > img {
+            filter: invert(1);
+        }
+    }
+    & > img {
+        height: 19px;
+        width: auto;
+        cursor: pointer;
+        margin-bottom: 2px;
     }
 }
 

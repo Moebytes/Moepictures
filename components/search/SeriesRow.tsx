@@ -1,7 +1,6 @@
 import React, {useContext, useEffect, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useSessionSelector, useLayoutSelector, useSearchSelector, useCacheActions} from "../../store"
-import {HashLink as Link} from "react-router-hash-link"
 import functions from "../../functions/Functions"
 import Carousel from "../site/Carousel"
 import website from "../../assets/icons/website.png"

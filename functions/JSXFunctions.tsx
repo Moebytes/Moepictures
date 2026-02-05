@@ -6,14 +6,10 @@ import ResetPassword from "../emails/ResetPassword"
 import ChangedPassword from "../emails/ChangedPassword"
 import VerifyLogin from "../emails/VerifyLogin"
 import email from "../assets/icons/email.png"
-import adminCrown from "../assets/icons/admin-crown.png"
-import modCrown from "../assets/icons/mod-crown.png"
-import systemCrown from "../assets/icons/system-crown.png"
-import premiumCuratorStar from "../assets/icons/premium-curator-star.png"
-import curatorStar from "../assets/icons/curator-star.png"
-import premiumContributorPencil from "../assets/icons/premium-contributor-pencil.png"
-import contributorPencil from "../assets/icons/contributor-pencil.png"
-import premiumStar from "../assets/icons/premium-star.png"
+import crown from "../assets/svg/crown.svg"
+import curatorStar from "../assets/svg/curator-star.svg"
+import contributorPencil from "../assets/svg/pencil.svg"
+import premiumStar from "../assets/svg/premium-star.svg"
 import enLocale from "../assets/locales/en.json"
 import {Session} from "../types/Types"
 
@@ -394,6 +390,35 @@ export default class JSXFunctions {
         profilePictureClass?: string, recipientClass?: string, editText?: string, date?: string, profilePicture?: string, 
         filter?: string, recipientAmount?: number, session?: Session, setSessionFlag?: (value: boolean) => void}, 
         i18n: typeof enLocale, navigate: NavigateFunction) => {
+
+        const getAdminIcon = (icon: string) => {
+            return functions.color.colorizeSVG(icon, "--adminColor")
+        }
+
+        const getModIcon = (icon: string) => {
+            return functions.color.colorizeSVG(icon, "--modColor")
+        }
+
+        const getSystemIcon = (icon: string) => {
+            return functions.color.colorizeSVG(icon, "--systemColor")
+        }
+
+        const getPremiumIcon = (icon: string) => {
+            return functions.color.colorizeSVG(icon, "--premiumColor")
+        }
+
+        const getCuratorIcon = (icon: string) => {
+            return functions.color.colorizeSVG(icon, "--curatorColor")
+        }
+
+        const getContributorIcon = (icon: string) => {
+            return functions.color.colorizeSVG(icon, "--contributorColor")
+        }
+
+        const getUserIcon = (icon: string) => {
+            return functions.color.colorizeSVG(icon, "--userColor")
+        }
+
         let {containerClass, textClass, imageClass, profilePictureClass, recipientClass, editText, date, 
             profilePicture, filter, recipientAmount, session, setSessionFlag} = classNames
         let timeString = editText && date ? `${editText} ${functions.date.timeAgo(date, i18n)} ${i18n.time.by} `  : ""
@@ -419,7 +444,7 @@ export default class JSXFunctions {
                     <span className={`${textClass} admin-color`}>
                         {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
-                    <img className={imageClass} src={adminCrown}/>
+                    <img className={imageClass} src={getAdminIcon(crown)}/>
                     {(recipientAmount ?? 0) > 1 ? <span className={recipientClass}>(+{recipientAmount! - 1})</span> : null}
                 </div>
             )
@@ -430,7 +455,7 @@ export default class JSXFunctions {
                     <span className={`${textClass} mod-color`}>
                         {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
-                    <img className={imageClass} src={modCrown}/>
+                    <img className={imageClass} src={getModIcon(crown)}/>
                     {(recipientAmount ?? 0) > 1 ? <span className={recipientClass}>(+{recipientAmount! - 1})</span> : null}
                 </div>
             )
@@ -440,7 +465,7 @@ export default class JSXFunctions {
                     {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
                     <span className={`${textClass} system-color`}>
                         {timeString}{functions.util.toProperCase(userData.username)}</span>
-                    <img className={imageClass} src={systemCrown}/>
+                    <img className={imageClass} src={getSystemIcon(crown)}/>
                     {(recipientAmount ?? 0) > 1 ? <span className={recipientClass}>(+{recipientAmount! - 1})</span> : null}
                 </div>
             )
@@ -451,7 +476,7 @@ export default class JSXFunctions {
                     <span className={`${textClass} curator-color`}>
                         {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
-                    <img className={imageClass} src={premiumCuratorStar}/>
+                    <img className={imageClass} src={getPremiumIcon(curatorStar)}/>
                     {(recipientAmount ?? 0) > 1 ? <span className={recipientClass}>(+{recipientAmount! - 1})</span> : null}
                 </div>
             )
@@ -462,7 +487,7 @@ export default class JSXFunctions {
                     <span className={`${textClass} curator-color`}>
                         {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
-                    <img className={imageClass} src={curatorStar}/>
+                    <img className={imageClass} src={getCuratorIcon(curatorStar)}/>
                     {(recipientAmount ?? 0) > 1 ? <span className={recipientClass}>(+{recipientAmount! - 1})</span> : null}
                 </div>
             )
@@ -473,7 +498,7 @@ export default class JSXFunctions {
                     <span className={`${textClass} premium-color`}>
                         {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
-                    <img className={imageClass} src={premiumContributorPencil}/>
+                    <img className={imageClass} src={getPremiumIcon(contributorPencil)}/>
                     {(recipientAmount ?? 0) > 1 ? <span className={recipientClass}>(+{recipientAmount! - 1})</span> : null}
                 </div>
             )
@@ -484,7 +509,7 @@ export default class JSXFunctions {
                     <span className={`${textClass} contributor-color`}>
                         {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
-                    <img className={imageClass} src={contributorPencil}/>
+                    <img className={imageClass} src={getContributorIcon(contributorPencil)}/>
                     {(recipientAmount ?? 0) > 1 ? <span className={recipientClass}>(+{recipientAmount! - 1})</span> : null}
                 </div>
             )
@@ -495,7 +520,7 @@ export default class JSXFunctions {
                     <span className={`${textClass} premium-color`}>
                         {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
-                    <img className={imageClass} src={premiumStar}/>
+                    <img className={imageClass} src={getPremiumIcon(premiumStar)}/>
                     {(recipientAmount ?? 0) > 1 ? <span className={recipientClass}>(+{recipientAmount! - 1})</span> : null}
                 </div>
             )

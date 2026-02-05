@@ -330,7 +330,7 @@ export default class SQLTag {
             values: [tag]
         }
         const result = await SQLQuery.run(query, `tag/related${tag}`)
-        return (result[0]?.related || []) as Promise<string[]>
+        return result.flatMap((r: any) => r.related ?? []) as Promise<string[]>
     }
 
     /** Delete tag. */

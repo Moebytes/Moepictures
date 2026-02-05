@@ -3,15 +3,12 @@ import {useNavigate} from "react-router-dom"
 import withPostWrapper, {PostWrapperProps, PostWrapperRef} from "./withPostWrapper"
 import {useSessionSelector, useFilterSelector, usePlaybackSelector, usePlaybackActions, useSearchSelector, useInteractionActions} from "../../store"
 import Slider from "react-slider"
-import gifReverseIcon from "../../assets/icons/gif-reverse.png"
-import gifSpeedIcon from "../../assets/icons/gif-speed.png"
-import gifClearIcon from "../../assets/icons/gif-clear.png"
-import gifPlayIcon from "../../assets/icons/gif-play.png"
-import gifPauseIcon from "../../assets/icons/gif-pause.png"
-import gifRewindIcon from "../../assets/icons/gif-rewind.png"
-import gifFastforwardIcon from "../../assets/icons/gif-fastforward.png"
-import gifFullscreenIcon from "../../assets/icons/gif-fullscreen.png"
-import {TransformWrapper, TransformComponent, ReactZoomPanPinchRef} from "react-zoom-pan-pinch"
+import reverseIcon from "../../assets/svg/reverse.svg"
+import speedIcon from "../../assets/svg/speed.svg"
+import clearIcon from "../../assets/svg/clear.svg"
+import playIcon from "../../assets/svg/play.svg"
+import pauseIcon from "../../assets/svg/pause.svg"
+import fullscreenIcon from "../../assets/svg/fullscreen.svg"
 import path from "path"
 import functions from "../../functions/Functions"
 
@@ -44,6 +41,10 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
     const {showSpeedDropdown, setShowSpeedDropdown} = props
     const {animationRef, imageRef, lightnessRef, overlayRef, effectRef, pixelateRef, onLoaded} = props
     const navigate = useNavigate()
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "#ee2d87")
+    }
 
     useImperativeHandle(parentRef, () => ({
         download: download
@@ -300,8 +301,8 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
     }
 
     const getPlayIcon = () => {
-        if (paused) return gifPlayIcon
-        return gifPauseIcon
+        if (paused) return getIcon(playIcon)
+        return getIcon(pauseIcon)
     }
 
     const getSpeedMarginRight = () => {
@@ -338,8 +339,8 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
             </div> : null}
             <div className="gif-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <div className="gif-control-row-container">
-                    <img draggable={false} className="gif-control-img" onClick={() => changeReverse()} src={gifReverseIcon}/>
-                    <img draggable={false} className="gif-control-img" ref={gifSpeedRef} src={gifSpeedIcon} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
+                    <img draggable={false} className="gif-control-img" onClick={() => changeReverse()} src={getIcon(reverseIcon)}/>
+                    <img draggable={false} className="gif-control-img" ref={gifSpeedRef} src={getIcon(speedIcon)} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
                 </div> 
                 <div className="gif-control-row-container">
                     {/* <img className="control-img" src={gifRewindIcon}/> */}
@@ -347,14 +348,14 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
                     {/* <img className="control-img" src={gifFastforwardIcon}/> */}
                 </div>    
                 <div className="gif-control-row-container">
-                    <img draggable={false} className="gif-control-img" src={gifClearIcon} onClick={reset}/>
+                    <img draggable={false} className="gif-control-img" src={getIcon(clearIcon)} onClick={reset}/>
                 </div> 
                 <div className="gif-control-row-container">
-                    <img draggable={false} className="gif-control-img" src={gifFullscreenIcon} onClick={() => toggleFullscreen()}/>
+                    <img draggable={false} className="gif-control-img" src={getIcon(fullscreenIcon)} onClick={() => toggleFullscreen()}/>
                 </div> 
             </div>
             <div className={`gif-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), 
-                marginTop: "-240px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                marginTop: "-230px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(4); setShowSpeedDropdown(false)}}>
                     <span className="gif-speed-dropdown-text">4x</span>
                 </div>

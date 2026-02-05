@@ -4,9 +4,9 @@ import {useThemeSelector, useSessionSelector, useSessionActions, useTagDialogSel
 useInteractionActions} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import aliasHistoryUndo from "../../assets/icons/revert.png"
-import aliasHistoryRedo from "../../assets/icons/unrevert.png"
-import aliasHistoryDelete from "../../assets/icons/delete.png"
+import aliasHistoryUndo from "../../assets/svg/revert.svg"
+import aliasHistoryRedo from "../../assets/svg/unrevert.svg"
+import aliasHistoryDelete from "../../assets/svg/delete.svg"
 import {AliasHistorySearch} from "../../types/Types"
 import "./styles/historyrow.less"
 
@@ -24,6 +24,14 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {deleteAliasHistoryID, deleteAliasHistoryFlag, revertAliasHistoryID, revertAliasHistoryFlag} = useTagDialogSelector()
     const {setDeleteAliasHistoryID, setDeleteAliasHistoryFlag, setRevertAliasHistoryID, setRevertAliasHistoryFlag} = useTagDialogActions()
     const navigate = useNavigate()
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
+
+    const getRedIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "#f71e75")
+    }
 
     const revertAliasHistory = async () => {
         if (props.history.type === "alias") {
@@ -81,16 +89,16 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
                 <div className="historyrow-options">
                     {props.history.type?.includes("undo") ?
                     <div className="historyrow-options-container" onClick={revertAliasHistoryDialog}>
-                        <img className="historyrow-options-img" src={aliasHistoryRedo}/>
+                        <img className="historyrow-options-img" src={getIcon(aliasHistoryRedo)}/>
                         <span className="historyrow-options-text">{i18n.buttons.redo}</span>
                     </div> : 
                     <div className="historyrow-options-container" onClick={revertAliasHistoryDialog}>
-                        <img className="historyrow-options-img" src={aliasHistoryUndo}/>
+                        <img className="historyrow-options-img" src={getIcon(aliasHistoryUndo)}/>
                         <span className="historyrow-options-text">{i18n.buttons.undo}</span>
                     </div>}
                     {permissions.isAdmin(session) ?
                     <div className="historyrow-options-container" onClick={deleteAliasHistoryDialog}>
-                        <img className="historyrow-options-img" src={aliasHistoryDelete}/>
+                        <img className="historyrow-options-img" src={getRedIcon(aliasHistoryDelete)}/>
                         <span className="historyrow-options-text">{i18n.buttons.delete}</span>
                     </div> : null}
                 </div>

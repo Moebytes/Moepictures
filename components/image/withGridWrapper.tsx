@@ -3,8 +3,8 @@ import {useNavigate, useLocation} from "react-router-dom"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, useCacheActions, useThemeSelector, 
 useSearchSelector, useSessionSelector, useFlagSelector, useFlagActions, useSearchActions} from "../../store"
 import functions from "../../functions/Functions"
-import privateIcon from "../../assets/icons/lock-opt.png"
-import musicNote from "../../assets/icons/music-note.png"
+import privateIcon from "../../assets/svg/lock.svg"
+import musicNote from "../../assets/svg/music-note.svg"
 import {PostSearch, GIFFrame} from "../../types/Types"
 import "./styles/gridimage.less"
 
@@ -460,18 +460,10 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         }
     
         const getBorder = () => {
-            if (sizeType === "tiny" || sizeType === "small" || session.captchaNeeded) {
-                if (selected) {
-                    return "0px 0px 0px 2px var(--selectBorder)"
-                } else {
-                    return `0px 0px 0px 1px ${functions.post.borderColor(props.post)}`
-                }
+            if (selected) {
+                return "0px 0px 0px 3px var(--selectBorder)"
             } else {
-                if (selected) {
-                    return "0px 0px 0px 4px var(--selectBorder)"
-                } else {
-                    return `0px 0px 0px 2px ${functions.post.borderColor(props.post)}`
-                }
+                return `0px 0px 0px 1px ${functions.post.borderColor(props.post)}`
             }
         }
     
@@ -535,18 +527,18 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         }
 
         const cornerIcon = () => {
-            if (props.post.private) return privateIcon
-            if (audioRef.current) return musicNote
+            if (props.post.private) return functions.color.colorizeSVG(privateIcon, "--audioPlayerIcons")
+            if (audioRef.current) return functions.color.colorizeSVG(musicNote, "--audioPlayerIcons")
             return null
         }
         
         const refWidth = getRef()?.clientWidth
     
         return (
-            <div style={{opacity: visible && refWidth ? "1" : "0", transition: "opacity 0.1s", borderRadius: `${props.borderRadius || 0}px`}} className="image-box" id={String(props.id)} ref={containerRef} 
+            <div style={{opacity: visible && refWidth ? "1" : "0", transition: "opacity 0.1s", borderRadius: `${props.borderRadius || 5}px`}} className="image-box" id={String(props.id)} ref={containerRef} 
             onClick={onClick} onAuxClick={onClick} onContextMenu={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
                 <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
-                    {cornerIcon() ? <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s", filter}} className="song-icon" src={cornerIcon()} 
+                    {cornerIcon() ? <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s"}} className="song-icon" src={cornerIcon()} 
                     onClick={childRef.current?.songClick} onMouseDown={(event) => {event.stopPropagation()}} onMouseUp={(event) => {event.stopPropagation()}}/> : null}
     
                     <WrappedComponent 

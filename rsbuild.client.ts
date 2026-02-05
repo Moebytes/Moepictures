@@ -15,6 +15,14 @@ let typecheck = env.TYPECHECK === "yes"
 export default defineConfig({
     tools: {
         rspack(config) {
+            config.module = config.module || {}
+            config.module.rules = config.module.rules || []
+
+            config.module.rules.push({
+                test: /\.svg$/i,
+                type: "asset/inline",
+            })
+
             if (obfuscator) {
                 config.plugins = config.plugins || []
                 config.plugins.push(new WebpackObfuscator())
@@ -39,6 +47,7 @@ export default defineConfig({
     output: {
         target: "web",
         minify: minimize,
+        dataUriLimit: 0,
         filenameHash: false,
         sourceMap: false,
         legalComments: "none",

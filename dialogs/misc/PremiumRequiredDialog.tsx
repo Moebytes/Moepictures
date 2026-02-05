@@ -3,7 +3,7 @@ import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useMiscDialogSelector, useMiscDialogActions} from "../../store"
 import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
-import premiumStar from "../../assets/icons/premium-star.png"
+import premiumStar from "../../assets/svg/premium-star.svg"
 import "../dialog.less"
 
 const PremiumRequiredDialog: React.FunctionComponent = (props) => {
@@ -14,6 +14,10 @@ const PremiumRequiredDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
+
+    const getPremiumIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--premiumColor")
+    }
 
     useEffect(() => {
         if (premiumRequired) {
@@ -46,7 +50,7 @@ const PremiumRequiredDialog: React.FunctionComponent = (props) => {
                     <div className="dialog-container">
                         <div className="dialog-title-container">
                             <span className="dialog-title" style={{color: "var(--premiumColor)"}}>{i18n.dialogs.premium.title}</span>
-                            <img className="dialog-title-img" src={premiumStar}/>
+                            <img className="dialog-title-img" src={getPremiumIcon(premiumStar)}/>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text" style={{color: "var(--premiumColor)"}}>{getPremiumText()}</span>

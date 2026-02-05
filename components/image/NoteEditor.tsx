@@ -5,21 +5,18 @@ useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions,
 useSessionActions, useActiveActions, useFlagActions, useNoteDialogSelector, 
 useNoteDialogActions, useInteractionSelector, useFlagSelector} from "../../store"
 import functions from "../../functions/Functions"
-import {ShapeEditor, ImageLayer, DrawLayer, wrapShape} from "react-shape-editor"
-import noteDelete from "../../assets/icons/note-delete.png"
-import noteEdit from "../../assets/icons/note-edit.png"
-import noteView from "../../assets/icons/note-view.png"
-import noteHistory from "../../assets/icons/note-history.png"
-import noteSave from "../../assets/icons/note-save.png"
-import noteText from "../../assets/icons/note-text.png"
-import noteToggleOn from "../../assets/icons/note-toggle-on.png"
-import noteToggleOff from "../../assets/icons/note-toggle-off.png"
-import translationEN from "../../assets/icons/translation-en.png"
-import translationJA from "../../assets/icons/translation-ja.png"
-import noteClear from "../../assets/icons/note-clear.png"
-import noteCopy from "../../assets/icons/note-copy.png"
-import notePaste from "../../assets/icons/note-paste.png"
-import noteOCR from "../../assets/icons/note-ocr.png"
+import {ShapeEditor, DrawLayer, wrapShape} from "react-shape-editor"
+import noteHistory from "../../assets/svg/history.svg"
+import noteOCR from "../../assets/svg/ocr.svg"
+import noteSave from "../../assets/svg/save.svg"
+import noteClear from "../../assets/svg/clear-all.svg"
+import noteCopy from "../../assets/svg/copy-notes.svg"
+import notePaste from "../../assets/svg/paste-notes.svg"
+import translationEN from "../../assets/svg/english.svg"
+import translationJA from "../../assets/svg/japanese.svg"
+import noteEdit from "../../assets/svg/edit-note.svg"
+import noteView from "../../assets/svg/view-note.svg"
+import noteToggleOff from "../../assets/svg/note-toggle-off.svg"
 import {PostFull, PostHistory, UnverifiedPost, Note, BubbleData} from "../../types/Types"
 import "./styles/noteeditor.less"
 
@@ -41,15 +38,15 @@ const CircleHandle = ({active, cursor, onMouseDown, onDoubleClick, scale, x, y})
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const getBGColor = () => {
-        return "rgba(89, 43, 255, 0.9)"
+        return "rgba(255, 43, 188, 0.9)"
     }
     const getBGColorInactive = () => {
-        return "rgba(89, 43, 255, 0.3)"
+        return "rgba(255, 43, 188, 0.3)"
     }
     const size = Math.ceil(4 / scale)
     return (
         <circle fill={active ? getBGColor() : getBGColorInactive()}
-        stroke={active ? "rgba(53, 33, 140, 1)" : "rgba(53, 33, 140, 0.3)"} strokeWidth={1 / scale}
+        stroke={active ? "rgba(140, 33, 103, 1)" : "rgba(140, 33, 103, 0.3)"} strokeWidth={1 / scale}
         style={{cursor, opacity: active && noteDrawingEnabled ? "1" : "0", filter}} 
         cx={x} cy={-size*5} r={size} onMouseDown={onMouseDown} onDoubleClick={onDoubleClick}/>
     )
@@ -62,16 +59,16 @@ const RectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const getBGColor = () => {
-        return "rgba(89, 43, 255, 0.9)"
+        return "rgba(255, 43, 188, 0.9)"
     }
     const getBGColorInactive = () => {
-        return "rgba(89, 43, 255, 0.3)"
+        return "rgba(255, 43, 188, 0.3)"
     }
     const size = Math.ceil(7/scale)
     return (
         <rect fill={active ? getBGColor() : getBGColorInactive()}
         width={size} height={size} x={x - size / 2} y={y - size / 2}
-        stroke={active ? "rgba(53, 33, 140, 1)" : "rgba(53, 33, 140, 0.3)"} strokeWidth={1 / scale}
+        stroke={active ? "rgba(140, 33, 103, 1)" : "rgba(140, 33, 103, 0.3)"} strokeWidth={1 / scale}
         style={{cursor, opacity: active && noteDrawingEnabled ? "1" : "0", filter}} onMouseDown={onMouseDown}/>
     )
 }
@@ -115,11 +112,11 @@ const RectShape = wrapShape(({width, height, scale, onMouseEnter, onMouseMove, o
 
     const getBGColor = () => {
         if (overlay && !session.forceNoteBubbles) return backgroundColor || "#ffffff"
-        return "rgba(89, 43, 255, 0.1)"
+        return "rgba(255, 43, 170, 0.1)"
     }
     const getStrokeColor = () => {
         if (overlay && !session.forceNoteBubbles) return backgroundColor || "#ffffff"
-        return "rgba(89, 43, 255, 0.9)"
+        return "rgba(255, 43, 170, 0.9)"
     }
     const getTextColor = () => {
         return textColor || "#000000"
@@ -179,7 +176,7 @@ const CharacterRectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
         return "rgba(0, 0, 0, 0)"
     }
     const getBGColorInactive = () => {
-        return "rgba(255, 43, 131, 0.3)"
+        return "rgba(255, 43, 170, 0.3)"
     }
     const size = Math.ceil(7/scale)
     return (
@@ -201,7 +198,7 @@ const CharacterRectShape = wrapShape(({width, height, scale, onMouseEnter, onMou
     }
     const getStrokeColor = () => {
         let condition = bubbleToggle || (noteDrawingEnabled && focus)
-        return condition ? "rgba(255, 43, 131, 0.9)" : "rgba(0, 0, 0, 0)"
+        return condition ? "rgba(255, 43, 170, 0.9)" : "rgba(0, 0, 0, 0)"
     }
 
     const rectStrokeWidth = Math.ceil(1/scale)
@@ -252,6 +249,10 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const navigate = useNavigate()
 
     let filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--titleButtons")
+    }
 
     const updateNotes = async () => {
         if (!props.post) return
@@ -568,17 +569,15 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         <div className="note-editor" style={{display: noteMode ? "flex" : "none", marginTop: props.reader ? "0px" : "20px", marginBottom: props.reader ? "0px" : "20px"}}>
             <div className="note-editor-filters" ref={filtersRef} onMouseDown={() => {if (enableDrag) setEnableDrag(false)}}>
                 <div className={`note-editor-buttons ${buttonHover ? "show-note-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
-                    {!props.unverified ? <img draggable={false} className="note-editor-button" src={noteHistory} style={{filter}} onClick={() => showHistory()}/> : null}
-                    <img draggable={false} className="note-editor-button" src={noteOCR} style={{filter}} onClick={() => ocrDialog()}/>
-                    <img draggable={false} className="note-editor-button" src={noteSave} style={{filter}} onClick={() => saveTextDialog()}/>
-                    <img draggable={false} className="note-editor-button" src={noteClear} style={{filter}} onClick={() => clearNotes()}/>
-                    <img draggable={false} className="note-editor-button" src={noteCopy} style={{filter}} onClick={() => copyNotes()}/>
-                    <img draggable={false} className="note-editor-button" src={notePaste} style={{filter}} onClick={() => pasteNotes()}/>
-                    <img draggable={false} className="note-editor-button" src={showTranscript ? translationJA : translationEN} style={{filter}} onClick={() => setShowTranscript(!showTranscript)}/>
-                    {/* <img draggable={false} className="note-editor-button" src={noteText} style={{filter}} onClick={() => editTextDialog()}/> */}
-                    {/* <img draggable={false} className="note-editor-button" src={noteDelete} style={{filter}} onClick={() => deleteFocused()}/> */}
-                    <img draggable={false} className="note-editor-button" src={noteDrawingEnabled ? noteEdit : noteView} style={{filter}} onClick={() => setNoteDrawingEnabled(!noteDrawingEnabled)}/>
-                    <img draggable={false} className="note-editor-button" src={noteToggleOff} style={{filter}} onClick={() => setNoteMode(false)}/>
+                    {!props.unverified ? <img draggable={false} className="note-editor-button" src={getIcon(noteHistory)} style={{filter}} onClick={() => showHistory()}/> : null}
+                    <img draggable={false} className="note-editor-button" src={getIcon(noteOCR)} style={{filter}} onClick={() => ocrDialog()}/>
+                    <img draggable={false} className="note-editor-button" src={getIcon(noteSave)} style={{filter}} onClick={() => saveTextDialog()}/>
+                    <img draggable={false} className="note-editor-button" src={getIcon(noteClear)} style={{filter}} onClick={() => clearNotes()}/>
+                    <img draggable={false} className="note-editor-button" src={getIcon(noteCopy)} style={{filter}} onClick={() => copyNotes()}/>
+                    <img draggable={false} className="note-editor-button" src={getIcon(notePaste)} style={{filter}} onClick={() => pasteNotes()}/>
+                    <img draggable={false} className="note-editor-button" src={showTranscript ? getIcon(translationJA) : getIcon(translationEN)} style={{filter, height: "22px"}} onClick={() => setShowTranscript(!showTranscript)}/>
+                    <img draggable={false} className="note-editor-button" src={noteDrawingEnabled ? getIcon(noteEdit) : getIcon(noteView)} style={{filter}} onClick={() => setNoteDrawingEnabled(!noteDrawingEnabled)}/>
+                    <img draggable={false} className="note-editor-button" src={getIcon(noteToggleOff)} style={{filter}} onClick={() => setNoteMode(false)}/>
                 </div>
                 {bubbleJSX()}
                 <ShapeEditor vectorWidth={targetWidth} vectorHeight={targetHeight} scale={scale} style={{pointerEvents: noteDrawingEnabled ? "all" : "none"}}>

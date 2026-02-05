@@ -9,14 +9,15 @@ import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import takedown from "../../assets/icons/takedown.png"
-import tagHistory from "../../assets/icons/tag-history.png"
-import tagCategorize from "../../assets/icons/tag-category.png"
-import tagEdit from "../../assets/icons/tag-edit.png"
-import tagDelete from "../../assets/icons/tag-delete.png"
-import tagHeart from "../../assets/icons/tag-heart.png"
-import tagHearted from "../../assets/icons/tag-hearted.png"
-import restore from "../../assets/icons/restore.png"
+
+import tagHeart from "../../assets/svg/heart.svg"
+import tagHistory from "../../assets/svg/history.svg"
+import tagCategorize from "../../assets/svg/category.svg"
+import tagEdit from "../../assets/svg/edit.svg"
+import tagDelete from "../../assets/svg/delete.svg"
+import takedown from "../../assets/svg/takedown.svg"
+import restore from "../../assets/svg/restore.svg"
+
 import website from "../../assets/icons/website.png"
 import fandom from "../../assets/icons/fandom.png"
 import wikipedia from "../../assets/icons/wikipedia.png"
@@ -25,8 +26,8 @@ import soundcloud from "../../assets/icons/soundcloud.png"
 import sketchfab from "../../assets/icons/sketchfab.png"
 import twitter from "../../assets/icons/twitter.png"
 import Carousel from "../../components/site/Carousel"
-import historyIcon from "../../assets/icons/history-state.png"
-import currentIcon from "../../assets/icons/current.png"
+import historyIcon from "../../assets/svg/history-thin.svg"
+import currentIcon from "../../assets/svg/current.svg"
 import Related from "../../components/post/Related"
 import {Tag, TagHistory, PostSearch, Alias, Implication} from "../../types/Types"
 import AdBanner from "../../components/banner/AdBanner"
@@ -66,6 +67,14 @@ const TagPage: React.FunctionComponent = () => {
     tagName = decodeURIComponent(tagName)
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--titleButtons")
+    }
+
+    const getPinkIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "#ff73f6")
+    }
 
     useEffect(() => {
         setHideNavbar(true)
@@ -340,14 +349,14 @@ const TagPage: React.FunctionComponent = () => {
         let jsx = [] as React.ReactElement[]
         if (!tag) return jsx
         if (session.username) {
-            jsx.push(<img className="tag-social" src={favorited ? tagHearted : tagHeart} onClick={() => favoriteTag()} style={{filter}}/>)
-            jsx.push(<img className="tag-social" src={tagHistory} onClick={() => showTagHistory()} style={{filter}}/>)
-            jsx.push(<img className="tag-social" src={tagCategorize} onClick={() => showTagCategorizeDialog()} style={{filter}}/>)
-            jsx.push(<img className="tag-social" src={tagEdit} onClick={() => showTagEditDialog()} style={{filter}}/>)
-            jsx.push(<img className="tag-social" src={tagDelete} onClick={() => showTagDeleteDialog()} style={{filter}}/>)
+            jsx.push(<img className="tag-social" src={favorited ? getPinkIcon(tagHeart) : getIcon(tagHeart)} onClick={() => favoriteTag()} style={{filter}}/>)
+            jsx.push(<img className="tag-social" src={getIcon(tagHistory)} onClick={() => showTagHistory()} style={{filter}}/>)
+            jsx.push(<img className="tag-social" src={getIcon(tagCategorize)} onClick={() => showTagCategorizeDialog()} style={{filter}}/>)
+            jsx.push(<img className="tag-social" src={getIcon(tagEdit)} onClick={() => showTagEditDialog()} style={{filter}}/>)
+            jsx.push(<img className="tag-social" src={getIcon(tagDelete)} onClick={() => showTagDeleteDialog()} style={{filter}}/>)
         }
         if (permissions.isMod(session)) {
-            jsx.push(<img className="tag-social" src={tag.banned ? restore : takedown} onClick={() => setTakedownTag(tag)} style={{filter}}/>)
+            jsx.push(<img className="tag-social" src={tag.banned ? getIcon(restore) : getIcon(takedown)} onClick={() => setTakedownTag(tag)} style={{filter}}/>)
         }
         return jsx
     }

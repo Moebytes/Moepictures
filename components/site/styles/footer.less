@@ -27,26 +27,24 @@
 }
 
 .footer-title {
-    font-family: Tahoma, sans-serif;
-    font-size: 20px;
-    color: var(--text);
-    //.stroke-black-thin();
+    font-family: "GenEi M Gothic v2", sans-serif;
+    font-size: 18px;
+    color: var(--sortbarText);
 }
 
 .footer-title-a {
     .footer-title();
-    color: var(--titleTextB);
+    color: var(--moeTextB);
 }
 
 .footer-title-b {
     .footer-title();
-    color: var(--titleTextB);
-    filter: brightness(70%);
+    color: var(--moeTextB);
 }
 
 .footer-text {
     .footer-title();
-    font-size: 15px;
+    font-size: 14px;
     &:hover {
         filter: brightness(130%);
     }
@@ -85,8 +83,6 @@
 
 @media screen and (max-width: 500px) {
     .footer {
-        //padding-bottom: 50px;    
-        //padding-top: 20px;
         height: 75px;
     }
 
@@ -99,11 +95,10 @@
     }
 
     .footer-text {
-        font-size: 17px;
+        font-size: 15px;
     }
 
     .footer-img {
         height: 14px;
     }
-
 }

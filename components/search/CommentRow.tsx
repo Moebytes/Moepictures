@@ -5,10 +5,10 @@ useFilterSelector, useCommentDialogSelector, useCommentDialogActions, useFlagAct
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import favicon from "../../assets/icons/favicon.png"
-import commentQuote from "../../assets/icons/commentquote.png"
-import commentReport from "../../assets/icons/commentreport.png"
-import commentEdit from "../../assets/icons/commentedit.png"
-import commentDelete from "../../assets/icons/commentdelete.png"
+import commentQuote from "../../assets/svg/quote.svg"
+import commentReport from "../../assets/svg/report.svg"
+import commentEdit from "../../assets/svg/edit.svg"
+import commentDelete from "../../assets/svg/delete.svg"
 import TinyImage from "../image/TinyImage"
 import {CommentSearch} from "../../types/Types"
 import "./styles/commentrow.less"
@@ -35,6 +35,10 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
     
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
+
     const defaultIcon = props.comment?.image ? false : true
 
     const getCommentPFP = () => {
@@ -121,11 +125,11 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="commentrow-options">
                     <div className="commentrow-options-container" onClick={editCommentDialog}>
-                        <img className="commentrow-options-img" src={commentEdit}/>
+                        <img className="commentrow-options-img" src={getIcon(commentEdit)}/>
                         <span className="commentrow-options-text">{i18n.buttons.edit}</span>
                     </div>
                     <div className="commentrow-options-container" onClick={deleteCommentDialog}>
-                        <img className="commentrow-options-img" src={commentDelete}/>
+                        <img className="commentrow-options-img" src={getIcon(commentDelete)}/>
                         <span className="commentrow-options-text">{i18n.buttons.delete}</span>
                     </div>
                 </div>
@@ -135,20 +139,20 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="commentrow-options">
                     <div className="commentrow-options-container" onClick={triggerQuote}>
-                        <img className="commentrow-options-img" src={commentQuote}/>
+                        <img className="commentrow-options-img" src={getIcon(commentQuote)}/>
                         <span className="commentrow-options-text">{i18n.buttons.quote}</span>
                     </div>
                     {permissions.isMod(session) ? <>
                     <div className="commentrow-options-container" onClick={editCommentDialog}>
-                        <img className="commentrow-options-img" src={commentEdit}/>
+                        <img className="commentrow-options-img" src={getIcon(commentEdit)}/>
                         <span className="commentrow-options-text">{i18n.buttons.edit}</span>
                     </div>
                     <div className="commentrow-options-container" onClick={deleteCommentDialog}>
-                        <img className="commentrow-options-img" src={commentDelete}/>
+                        <img className="commentrow-options-img" src={getIcon(commentDelete)}/>
                         <span className="commentrow-options-text">{i18n.buttons.delete}</span>
                     </div></> : 
                     <div className="commentrow-options-container" onClick={reportCommentDialog}>
-                        <img className="commentrow-options-img" src={commentReport}/>
+                        <img className="commentrow-options-img" src={getIcon(commentReport)}/>
                         <span className="commentrow-options-text">{i18n.buttons.report}</span>
                     </div>}
                 </div>
@@ -185,7 +189,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                 onClick={imgClick} height={110} lineMultiplier={2} maxLineWidth={2}/>
             </div>
             <div className="commentrow-container-row">
-                <div className="commentrow-container">
+                <div className="commentrow-container" style={{borderLeft: "none", borderRight: "none"}}>
                     <div className="commentrow-user-container" onClick={userClick} onAuxClick={userClick}>
                         <img className="commentrow-user-img" src={getCommentPFP()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? filter : ""}}/>
                         {generateUsernameJSX()}

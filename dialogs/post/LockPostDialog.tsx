@@ -3,9 +3,8 @@ import {useThemeSelector, useInteractionActions, usePostDialogSelector, usePostD
 import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import permissions from "../../structures/Permissions"
-import lockIcon from "../../assets/icons/lock-red.png"
-import unlockIcon from "../../assets/icons/unlock-red.png"
-import {PostSearch, PostHistory} from "../../types/Types"
+import lockIcon from "../../assets/svg/lock.svg"
+import unlockIcon from "../../assets/svg/unlock.svg"
 import "../dialog.less"
 
 const LockPostDialog: React.FunctionComponent = (props) => {
@@ -16,8 +15,10 @@ const LockPostDialog: React.FunctionComponent = (props) => {
     const {setPostFlag} = useFlagActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const [error, setError] = useState(false)
-    const errorRef = useRef<HTMLSpanElement>(null)
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--lockColor")
+    }
 
     useEffect(() => {
         if (lockPostID) {
@@ -62,11 +63,11 @@ const LockPostDialog: React.FunctionComponent = (props) => {
         }
     }
 
-    const getIcon = () => {
+    const getLockIcon = () => {
         if (lockPostID?.post.locked) {
-            return unlockIcon
+            return getIcon(unlockIcon)
         } else {
-            return lockIcon
+            return getIcon(lockIcon)
         }
     }
 
@@ -78,7 +79,7 @@ const LockPostDialog: React.FunctionComponent = (props) => {
                     <div className="dialog-box" style={{width: "280px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
-                                <img draggable={false} className="dialog-icon" src={getIcon()}/>
+                                <img draggable={false} className="dialog-icon" src={getLockIcon()}/>
                                 <span className="dialog-title">{getTitle()}</span>
                             </div>
                             <div className="dialog-row">

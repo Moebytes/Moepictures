@@ -2,13 +2,12 @@ import React, {useEffect} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useLayoutSelector, useActiveActions, useSessionActions, 
 useCommentDialogSelector, useCommentDialogActions, useCacheSelector} from "../../store"
-import {HashLink as Link} from "react-router-hash-link"
 import functions from "../../functions/Functions"
 import favicon from "../../assets/icons/favicon.png"
-import commentQuote from "../../assets/icons/commentquote.png"
-import commentReport from "../../assets/icons/commentreport.png"
-import commentEdit from "../../assets/icons/commentedit.png"
-import commentDelete from "../../assets/icons/commentdelete.png"
+import commentQuote from "../../assets/svg/quote.svg"
+import commentReport from "../../assets/svg/report.svg"
+import commentEdit from "../../assets/svg/edit.svg"
+import commentDelete from "../../assets/svg/delete.svg"
 import permissions from "../../structures/Permissions"
 import {UserComment} from "../../types/Types"
 import "./styles/comment.less"
@@ -32,6 +31,10 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     const navigate = useNavigate()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
 
     const defaultIcon = props.comment?.image ? false : true
 
@@ -109,11 +112,11 @@ const Comment: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="comment-options">
                     <div className="comment-options-container" onClick={editCommentDialog}>
-                        <img className="comment-options-img" src={commentEdit}/>
+                        <img className="comment-options-img" src={getIcon(commentEdit)}/>
                         <span className="comment-options-text">{i18n.buttons.edit}</span>
                     </div>
                     <div className="comment-options-container" onClick={deleteCommentDialog}>
-                        <img className="comment-options-img" src={commentDelete}/>
+                        <img className="comment-options-img" src={getIcon(commentDelete)}/>
                         <span className="comment-options-text">{i18n.buttons.delete}</span>
                     </div>
                 </div>
@@ -123,20 +126,20 @@ const Comment: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="comment-options">
                     <div className="comment-options-container" onClick={triggerQuote}>
-                        <img className="comment-options-img" src={commentQuote}/>
+                        <img className="comment-options-img" src={getIcon(commentQuote)}/>
                         <span className="comment-options-text">{i18n.buttons.quote}</span>
                     </div>
                     {permissions.isMod(session) ? <>
                     <div className="comment-options-container" onClick={editCommentDialog}>
-                        <img className="comment-options-img" src={commentEdit}/>
+                        <img className="comment-options-img" src={getIcon(commentEdit)}/>
                         <span className="comment-options-text">{i18n.buttons.edit}</span>
                     </div>
                     <div className="comment-options-container" onClick={deleteCommentDialog}>
-                        <img className="comment-options-img" src={commentDelete}/>
+                        <img className="comment-options-img" src={getIcon(commentDelete)}/>
                         <span className="comment-options-text">{i18n.buttons.delete}</span>
                     </div></> : 
                     <div className="comment-options-container" onClick={reportCommentDialog}>
-                        <img className="comment-options-img" src={commentReport}/>
+                        <img className="comment-options-img" src={getIcon(commentReport)}/>
                         <span className="comment-options-text">{i18n.buttons.report}</span>
                     </div>}
                 </div>

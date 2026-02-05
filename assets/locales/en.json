@@ -692,12 +692,16 @@
         "tag": {
             "bannedArtist": "You may not upload artwork from this artist."
         },
+        "comment": {
+            "banned": "You are banned. Cannot comment."
+        },
         "message": {
             "system": "Cannot respond to system messages.",
-            "banned": "You are banned. Cannot reply."
+            "banned": "You are banned. Cannot message."
         },
         "thread": {
-            "locked": "This thread is locked."
+            "locked": "This thread is locked.",
+            "banned": "You are banned. Cannot reply."
         },
         "contact": {
             "heading": "This is a contact form for general inquiries. If you would like to remove your work, please fill out our",

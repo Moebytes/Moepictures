@@ -1,5 +1,5 @@
 import functions from "./Functions"
-import {Session, Image, PostFull, PostSearch, UnverifiedPost} from "../types/Types"
+import {Session, Image} from "../types/Types"
 
 export default class LinkFunctions {
     public static getImagePath = (folder: string, postID: string, order: number, filename: string) => {

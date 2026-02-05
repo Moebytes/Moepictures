@@ -1,50 +1,118 @@
-@import "assets/fonts/inter.less";
 @import "node_modules/bootstrap/dist/css/bootstrap.min.css";
 @import "node_modules/react-image-crop/dist/ReactCrop.css";
 
-@title-bar-height: 64px;
-@nav-bar-height: 40px;
-@sort-bar-height: 38px;
-@tag-banner-height: 38px;
+@font-face {
+    font-family: "GenEi M Gothic v2";
+    src: url("assets/fonts/GenEiMGothic2-Medium.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Honoka Shin Antique-Kaku";
+    src: url("assets/fonts/Honoka-Shin-Antique-Kaku_M.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "irohamaru mikami";
+    src: url("assets/fonts/irohamaru-mikami-Medium.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "JK Gothic M";
+    src: url("assets/fonts/JKG-M_3.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Tsunagi Gothic Black";
+    src: url("assets/fonts/TsunagiGothic.ttf") format("truetype");
+}
+
+@title-bar-height: 60px;
+@nav-bar-height: 30px;
+@sort-bar-height: 35px;
+@tag-banner-height: 35px;
 @footer-height: 25px;
 @sidebar-width: 220px;
 
 :root {
-    --selection: #6c69fc;
-    --background: #09071c;
-    --background2: #080622;
-    --titlebarBG: #090420;
-    --titleTextA: #6814ff;
-    --titleTextB: #4214ff;
-    --titlebarText: #431dff;
-    --navbarBG: #0b0322;
-    --navbarText: #4f35ff;
-    --navbarUserText: #fe23ae;
-    --sidebarBG: #0a041e;
-    --sidebarText: #ff11df;
-    --sidebarSearchFocus: #2908e0;
-    --sidebarSearchBG: #0e0631;
-    --sidebarSearchButtonBG: #2908e0;
-    --sidebarRandomButtonBG: #ff11df;
+    --selection: #ffe0f4;
+    --background: #FFFFFF;
+    --black: #000000;
+    --white: #FFFFFF;
+
+    --titlebarBG: #FFD6EB;
+    --moeTextA: #FF5099;
+    --moeTextB: #FF307F;
+    --titleText: #FF579D;
+
+    --navbarBG: #FFD6EB;
+    --navbarText: #FF579D;
+    --titleButtons: #FF44A1;
+    --loginText: #ff3ca4;
+
+    --sidebarBG: #FFEFF7;
+    --sidebarText: #000000;
+    --sidebarButtons: #FF529A;
+    --sidebarSearchBG: #FFFFFF;
+    --sidebarSearchFocus: #ff81c4;
+    --sidebarTitleText: #FF2194;
+    --sidebarTextA: #FF328B;
+    --sidebarTextB: #ff4bb9;
+
+    --tagReadColor: rgba(255, 87, 205, 0.5);
+    --text: #000000;
+    --text-alt: #ff3891;
+    --inputBG: #ffffff;
+    --inputBorder: #000000;
+    --itemBorder: rgba(255, 66, 179, 0.04);
+    --textBoxBorder: #ff42b3;
+    --bannerText: #000000;
+
+    --sortbarBG: rgba(255, 255, 255, 0.75);
+    --sortbarIcons: #FF579D;
+    --sortbarText: #000000;
+
+    --tooltipBG: rgba(255, 240, 251, 0.7);
+
+    --footerBG: #FFD6EB;
+
+    --imageBorder: #FF77CB;
+    --pageButton: #FF93CB;
+    --drop-color1: rgba(250, 112, 213, 0.7);
+    --drop-color2: rgba(252, 124, 194, 0.9);
+    --selectBorder: #ff73ce;
+    --r18BGColor: #e2067f4a;
+
+    --progressText: #000000;
+    --progressBG: #ffffff;
+    --previewBG: #AAABFF;
+    --editBG: #f7afff;
+    --bubbleBG: rgba(255, 171, 226, 0.8);
+    --buttonBG: #FF63BB;
+
+    --audioPlayerColor: #FFEFF7;
+    --audioPlayerIcons: #FF579D;
+    --audioFilterColor: #ff4d97;
+
+    --sidebarSearchButtonBG: #FF579D;
+    --sidebarRandomButtonBG: #FF549B;
     --sidebarSaveSearchButtonBG: #5f51fe;
     --sidebarFavSearchButtonBG: #ff2897;
-    --tagReadColor: rgba(98, 31, 255, 0.5);
+    --tagCountColor: #ff59ba;
+    --text-strong: #FF16A6;
+
     --artistTagColor: #ff1994;
     --characterTagColor: #ff1ce6;
     --seriesTagColor: #b32fff;
     --metaTagColor: #339fff;
     --appearanceTagColor: #8928ff;
     --outfitTagColor: #ff29b5;
-    --accessoryTagColor: #17fd32;
-    --actionTagColor: #fff12b;
+    --accessoryTagColor: #2be941;
+    --actionTagColor: #ff8e2b;
     --sceneryTagColor: #2b6aff;
     --tagColor: #641fff;
     --tagCountColor: #ff1fe7;
     --savedSearchColor: #8d5dff;
-    --sortbarBG: rgba(11, 3, 34, 0.95);
-    --tooltipBG: rgba(11, 3, 34, 0.85);
-    --sortbarText: #5053ff;
-    --imageBorder: #0a0f7f;
+
     --favoriteBorder: #e72d95;
     --favgroupBorder: #c22de7;
     --variationBorder: #1664de;
@@ -53,75 +121,84 @@
     --groupBorder: #ff5c2e;
     --takendownBorder: #7f0a0a;
     --lockedBorder: #b40e1d;
-    --inputBorder: #0d0325;
-    --text: #716fff;
-    --text-alt: #8b4dff;
-    --text-strong: #ff26ba;
-    --inputBG: #050020;
-    --buttonBG: #ff11af;
-    --previewBG: #4a44ff;
-    --editBG: #347bff;
-    --footerBG: #0b0322;
-    --drop-color1: rgba(59, 13, 165, 0.7);
-    --drop-color2: rgba(86, 26, 226, 0.9);
-    --bubbleBG: rgba(89, 43, 255, 0.8);
-    --banText: #fc1657;
-    --selectBorder: #6710e6;
-    --progressText: #ffffff;
-    --progressBG: #000000;
-    --userColor: #4b48ff;
-    --premiumColor: #ff2cd0;
-    --r18Color: #e20644;
-    --sketchColor: #189af7;
-    --r18BGColor: #5603033d;
+
     --historyColor: #ed1287;
     --noteColor: #5612ed;
-    --audioPlayerColor: #130737;
     --actionBannerColor: #ce1a4d;
     --pendingColor: #286be7;
     --deletedColor: #b21740;
-    --audioFilterColor: #ff4d97;
+
+    --banText: #fc1657;
+    --r18Color: #e20644;
+    --sketchColor: #189af7;
+    --lockColor: #f71e75;
+
+    --userColor: #4b48ff;
+    --contributorColor: #b948ff;
+    --curatorColor: #fc279f;
+    --premiumColor: #ff22e5;
+    --systemColor: #ffa923;
+    --modColor: #1365f6;
+    --adminColor: #d70c67;
+
+    --cookieColor: #FB2493;
 }
 
-.purple-light {
-    --selection: #e0e0ff;
-    --background: #ffffff;
-    --background2: #f9f9ff;
-    --titlebarBG: #e0e4ff;
-    --titleTextA: #745dff;
-    --titleTextB: #5d60ff;
-    --titlebarText: #7e66ff;
-    --navbarBG: #e0e4ff;
-    --navbarText: #6c47ff;
-    --navbarUserText: #ad3cff;
-    --sidebarBG: #e0e4ff;
-    --sidebarText: #a92fff;
-    --sidebarSearchFocus: #8581ff;
-    --sidebarSearchBG: #dbdaff;
-    --tagReadColor: rgba(154, 87, 255, 0.5);
-    --tagColor: #9957ff;
-    --tagCountColor: #6b59ff;
-    --sortbarBG: rgba(240, 240, 255, 0.5);
-    --tooltipBG: rgba(240, 240, 255, 0.7);
-    --sortbarText: #6d77ff;
-    --imageBorder: #7fa0ff;
-    --inputBorder: #7fa0ff;
-    --text: #7b6dff;
-    --text-alt: #cb7cff;
-    --text-strong: #b264df;
-    --inputBG: #f4f2ff;
-    --buttonBG: #ff92ff;
-    --previewBG: #b2d0ff;
-    --editBG: #afe6ff;
-    --footerBG: #dfdfff;
-    --drop-color1: rgba(153, 112, 250, 0.7);
-    --drop-color2: rgba(158, 124, 252, 0.9);
-    --bubbleBG: rgba(202, 171, 255, 0.8);
-    --selectBorder: #8373ff;
-    --progressText: #000000;
-    --progressBG: #ffffff;
-    --r18BGColor: #e206444a;
-    --audioPlayerColor: #c2c2ff;
+.dark {
+    --selection: #fc69bc;
+    --background: #10030C;
+
+    --titlebarBG: #1C0713;
+    --moeTextA: #FF5099;
+    --moeTextB: #FF307F;
+    --titleText: #FF5099;
+
+    --navbarBG: #1C0713;
+    --navbarText: #FF3CA4;
+    --titleButtons: #FF42A1;
+    --loginText: #fe2391;
+
+    --sidebarBG: #16050F;
+    --sidebarText: #ff54ed;
+    --sidebarSearchBG: #2D0D1A;
+    --sidebarSearchFocus: #e00882;
+    --sidebarTitleText: #FF0CB2;
+    --sidebarTextA: #FF3281;
+    --sidebarTextB: #FF32EE;
+
+    --tagReadColor: rgba(255, 31, 158, 0.5);
+    --text: #ffffff;
+    --text-alt: #ff3891;
+    --text-strong: #FF16A6;
+    --itemBorder: rgba(255, 66, 179, 0.04);
+    --textBoxBorder: #ff42b3;
+    --inputBG: #200014;
+    --bannerText: #ff5fa2;
+
+    --sortbarBG: rgba(14, 1, 10, 0.95);
+    --sortbarIcons: #FF4391;
+    --sortbarText: #FFFFFF;
+
+    --tooltipBG: rgba(34, 3, 22, 0.85);
+
+    --footerBG: #1C0713;
+
+    --imageBorder: #FF77CB;
+    --pageButton: #FF4E92;
+    --drop-color1: rgba(165, 13, 152, 0.7);
+    --drop-color2: rgba(226, 26, 173, 0.9);
+    --selectBorder: #e610a6;
+    --r18BGColor: #5603383d;
+
+    --progressText: #ffffff;
+    --progressBG: #000000;
+    --buttonBG: #FF41AC;
+    --previewBG: #AAABFF;
+    --editBG: #ff34e1;
+    --bubbleBG: rgba(255, 43, 188, 0.8);
+
+    --audioPlayerColor: #1D0915;
+    --audioPlayerIcons: #FF1F7C;
 }
 
 * {
@@ -289,47 +366,6 @@ img {
     }
 }
 
-.cloth-background() {
-    @color: var(--background);
-    @color2: var(--background2);
-    background-color: @color;
-    background-image: linear-gradient(90deg, @color2 50%, transparent 50%),
-    linear-gradient(@color2 50%, transparent 50%);
-    background-size: 60px 60px;
-}
-
-.polkadot-background() {
-    @color: var(--background);
-    @color2: var(--background2);
-    background-color: @color;
-    background-image: radial-gradient(@color2 15%, transparent 16%),
-    radial-gradient(@color2 15%, transparent 16%);
-    background-size: 30px 30px;
-    background-position: 0 0, 30px 30px;
-}
-
-.zags-background() {
-    @color: var(--background);
-    @color2: var(--background2);
-    background: linear-gradient(135deg, @color2 25%, transparent 25%) -50px 0,
-      linear-gradient(225deg, @color2 25%, transparent 25%) -50px 0,
-      linear-gradient(315deg, @color2 25%, transparent 25%),
-      linear-gradient(45deg, @color2 25%, transparent 25%);
-    background-size: 100px 100px;
-    background-color: @color;
-}
-  
-.arrow-background() {
-    @color: var(--background);
-    @color2: var(--background2);
-    background:
-    linear-gradient(45deg, @color2 45px, transparent 45px)64px 64px,
-    linear-gradient(45deg, @color2 45px, transparent 45px, transparent 91px, @color 91px, @color 135px, transparent 135px),
-    linear-gradient(-45deg, @color2 23px, transparent 23px, transparent 68px, @color2 68px, @color2 113px,transparent 113px, transparent 158px, @color2 158px);
-    background-color: @color;
-    background-size: 128px 128px;
-}
-
 .emoji {
     margin-top: 5px;
     width: auto;
@@ -357,31 +393,31 @@ img {
 }
 
 .user-color {
-    color: #4b48ff !important;
+    color: var(--userColor) !important;
 }
 
 .contributor-color {
-    color: #b948ff !important;
+    color: var(--contributorColor) !important;
 }
 
 .curator-color {
-    color: #fc279f !important;
+    color: var(--curatorColor) !important;
 }
 
 .premium-color {
-    color: #ff22e5 !important;
+    color: var(--premiumColor) !important;
 }
 
 .system-color {
-    color: #ffa923 !important;
+    color: var(--systemColor) !important;
 }
 
 .mod-color {
-    color: #1365f6 !important;
+    color: var(--modColor) !important;
 }
 
 .admin-color {
-    color: #d70c67 !important;
+    color: var(--adminColor) !important;
 }
 
 .tag-reg-color {

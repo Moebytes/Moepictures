@@ -5,11 +5,11 @@ import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
 import Draggable from "react-draggable"
 import permissions from "../../structures/Permissions"
-import radioButton from "../../assets/icons/radiobutton.png"
-import radioButtonChecked from "../../assets/icons/radiobutton-checked.png"
-import checkbox from "../../assets/icons/checkbox.png"
-import checkboxChecked from "../../assets/icons/checkbox-checked.png"
-import {PostSearch, PostHistory, UnverifiedPost, Upscaler} from "../../types/Types"
+import radioButton from "../../assets/svg/radiobutton.svg"
+import radioButtonChecked from "../../assets/svg/radiobutton-checked.svg"
+import checkbox from "../../assets/svg/checkbox.svg"
+import checkboxChecked from "../../assets/svg/checkbox-checked.svg"
+import {Upscaler} from "../../types/Types"
 import "../dialog.less"
 
 const UpscalePostDialog: React.FunctionComponent = (props) => {
@@ -26,6 +26,10 @@ const UpscalePostDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
 
     useEffect(() => {
         if (upscalePostID) {
@@ -64,11 +68,11 @@ const UpscalePostDialog: React.FunctionComponent = (props) => {
                                 <span className="dialog-title">{i18n.dialogs.upscale.title}</span>
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center", paddingRight: "20px"}}>
-                                <img className="dialog-checkbox" src={upscaler === "waifu2x" ? radioButtonChecked : radioButton} onClick={() => setUpscaler("waifu2x")} style={{marginRight: "10px", filter}}/>
+                                <img className="dialog-checkbox" src={upscaler === "waifu2x" ? getIcon(radioButtonChecked) : getIcon(radioButton)} onClick={() => setUpscaler("waifu2x")} style={{marginRight: "10px", filter}}/>
                                 <span className="dialog-text">waifu2x</span>
-                                <img className="dialog-checkbox" src={upscaler === "real-esrgan" ? radioButtonChecked : radioButton} onClick={() => setUpscaler("real-esrgan")} style={{marginRight: "10px", filter}}/>
+                                <img className="dialog-checkbox" src={upscaler === "real-esrgan" ? getIcon(radioButtonChecked) : getIcon(radioButton)} onClick={() => setUpscaler("real-esrgan")} style={{marginRight: "10px", filter}}/>
                                 <span className="dialog-text">esrgan</span>
-                                <img className="dialog-checkbox" src={upscaler === "real-cugan" ? radioButtonChecked : radioButton} onClick={() => setUpscaler("real-cugan")} style={{marginRight: "10px", filter}}/>
+                                <img className="dialog-checkbox" src={upscaler === "real-cugan" ? getIcon(radioButtonChecked) : getIcon(radioButton)} onClick={() => setUpscaler("real-cugan")} style={{marginRight: "10px", filter}}/>
                                 <span className="dialog-text">cugan</span>
                             </div>
                             <div className="dialog-row">
@@ -77,7 +81,7 @@ const UpscalePostDialog: React.FunctionComponent = (props) => {
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center"}}>
                                 <span className="dialog-text">{i18n.labels.compressTo} {upscalePostID.post.type === "animation" ? "WebP" : "JPG"}</span>
-                                <img className="dialog-checkbox" src={compressJPG ? checkboxChecked : checkbox} onClick={() => setCompressJPG((prev: boolean) => !prev)} style={{marginRight: "10px", filter}}/>
+                                <img className="dialog-checkbox" src={compressJPG ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setCompressJPG((prev: boolean) => !prev)} style={{marginRight: "10px", filter}}/>
                             </div>
                             <div className="dialog-row">
                                 <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>

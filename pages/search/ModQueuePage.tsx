@@ -21,42 +21,31 @@ import ModGroupDeletions from "../../components/mod/ModGroupDeletions"
 import ModReports from "../../components/mod/ModReports"
 import ModRejected from "../../components/mod/ModRejected"
 import functions from "../../functions/Functions"
-import modPostUploadIcon from "../../assets/icons/mod-post-upload.png"
-import modPostEditIcon from "../../assets/icons/mod-post-edit.png"
-import modPostDeleteIcon from "../../assets/icons/mod-post-delete.png"
-import modTagEditIcon from "../../assets/icons/mod-tag-edit.png"
-import modTagAliasIcon from "../../assets/icons/mod-tag-alias.png"
-import modTagDeleteIcon from "../../assets/icons/mod-tag-delete.png"
-import modGroupAddIcon from "../../assets/icons/mod-group-add.png"
-import modGroupEditIcon from "../../assets/icons/mod-group-edit.png"
-import modGroupDeleteIcon from "../../assets/icons/mod-group-delete.png"
-import modNoteIcon from "../../assets/icons/history-note.png"
-import modReportIcon from "../../assets/icons/mod-report.png"
-import modRejectedIcon from "../../assets/icons/tag-delete.png"
-import modPostUploadActiveIcon from "../../assets/icons/mod-post-upload-active.png"
-import modGroupAddActiveIcon from "../../assets/icons/mod-group-add-active.png"
-import modPostEditActiveIcon from "../../assets/icons/mod-post-edit-active.png"
-import modPostDeleteActiveIcon from "../../assets/icons/mod-post-delete-active.png"
-import modTagEditActiveIcon from "../../assets/icons/mod-tag-edit-active.png"
-import modTagAliasActiveIcon from "../../assets/icons/mod-tag-alias-active.png"
-import modTagDeleteActiveIcon from "../../assets/icons/mod-tag-delete-active.png"
-import modGroupEditActiveIcon from "../../assets/icons/mod-group-edit-active.png"
-import modGroupDeleteActiveIcon from "../../assets/icons/mod-group-delete-active.png"
-import modNoteActiveIcon from "../../assets/icons/history-note-active.png"
-import modReportActiveIcon from "../../assets/icons/mod-report-active.png"
-import modRejectedActiveIcon from "../../assets/icons/tag-delete-active.png"
-import modPostUploadNotifIcon from "../../assets/icons/mod-post-upload-notif.png"
-import modGroupAddNotifIcon from "../../assets/icons/mod-group-add-notif.png"
-import modPostEditNotifIcon from "../../assets/icons/mod-post-edit-notif.png"
-import modPostDeleteNotifIcon from "../../assets/icons/mod-post-delete-notif.png"
-import modTagEditNotifIcon from "../../assets/icons/mod-tag-edit-notif.png"
-import modTagAliasNotifIcon from "../../assets/icons/mod-tag-alias-notif.png"
-import modTagDeleteNotifIcon from "../../assets/icons/mod-tag-delete-notif.png"
-import modGroupEditNotifIcon from "../../assets/icons/mod-group-edit-notif.png"
-import modGroupDeleteNotifIcon from "../../assets/icons/mod-group-delete-notif.png"
-import modNoteNotifIcon from "../../assets/icons/history-note-notif.png"
-import modReportNotifIcon from "../../assets/icons/mod-report-notif.png"
-import modRejectedNotifIcon from "../../assets/icons/tag-delete-notif.png"
+import modPostUploadIcon from "../../assets/svg/mod-post-upload.svg"
+import modPostEditIcon from "../../assets/svg/mod-post-edit.svg"
+import modPostDeleteIcon from "../../assets/svg/mod-post-delete.svg"
+import modTagEditIcon from "../../assets/svg/mod-tag-edit.svg"
+import modTagAliasIcon from "../../assets/svg/mod-tag-alias.svg"
+import modTagDeleteIcon from "../../assets/svg/mod-tag-delete.svg"
+import modGroupAddIcon from "../../assets/svg/mod-group-add.svg"
+import modGroupEditIcon from "../../assets/svg/mod-group-edit.svg"
+import modGroupDeleteIcon from "../../assets/svg/mod-group-delete.svg"
+import modNoteIcon from "../../assets/svg/note.svg"
+import modReportIcon from "../../assets/svg/report.svg"
+import modRejectedIcon from "../../assets/svg/delete.svg"
+
+import modPostUploadNotifIcon from "../../assets/svg/mod-post-upload-notif.svg"
+import modGroupAddNotifIcon from "../../assets/svg/mod-group-add-notif.svg"
+import modPostEditNotifIcon from "../../assets/svg/mod-post-edit-notif.svg"
+import modPostDeleteNotifIcon from "../../assets/svg/mod-post-delete-notif.svg"
+import modTagEditNotifIcon from "../../assets/svg/mod-tag-edit-notif.svg"
+import modTagAliasNotifIcon from "../../assets/svg/mod-tag-alias-notif.svg"
+import modTagDeleteNotifIcon from "../../assets/svg/mod-tag-delete-notif.svg"
+import modGroupEditNotifIcon from "../../assets/svg/mod-group-edit-notif.svg"
+import modGroupDeleteNotifIcon from "../../assets/svg/mod-group-delete-notif.svg"
+import modNoteNotifIcon from "../../assets/svg/note-notif.svg"
+import modReportNotifIcon from "../../assets/svg/report-notif.svg"
+import modRejectedNotifIcon from "../../assets/svg/delete-notif.svg"
 import "./styles/modqueuepage.less"
 
 let replace = true
@@ -108,6 +97,14 @@ const ModQueuePage: React.FunctionComponent = (props) => {
     }, [])
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
+    
+    const getPinkIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "#ff54fc")
+    }
 
     useEffect(() => {
         localStorage.setItem("modState", modState)
@@ -217,20 +214,20 @@ const ModQueuePage: React.FunctionComponent = (props) => {
         return ""
     }
 
-    const getIcon = (type: string) => {
+    const getModIcon = (type: string) => {
         const hasNotifications = items[type]?.length
-        if (type === "posts") return modState === "posts" ? modPostUploadActiveIcon : (hasNotifications ? modPostUploadNotifIcon : modPostUploadIcon)
-        if (type === "post-edits") return modState === "post-edits" ? modPostEditActiveIcon : (hasNotifications ? modPostEditNotifIcon : modPostEditIcon)
-        if (type === "post-deletions") return modState === "post-deletions" ? modPostDeleteActiveIcon : (hasNotifications ? modPostDeleteNotifIcon : modPostDeleteIcon)
-        if (type === "tag-edits") return modState === "tag-edits" ? modTagEditActiveIcon : (hasNotifications ? modTagEditNotifIcon : modTagEditIcon)
-        if (type === "tag-aliases") return modState === "tag-aliases" ? modTagAliasActiveIcon : (hasNotifications ? modTagAliasNotifIcon : modTagAliasIcon)
-        if (type === "tag-deletions") return modState === "tag-deletions" ? modTagDeleteActiveIcon : (hasNotifications ? modTagDeleteNotifIcon : modTagDeleteIcon)
-        if (type === "groups") return modState === "groups" ? modGroupAddActiveIcon : (hasNotifications ? modGroupAddNotifIcon : modGroupAddIcon)
-        if (type === "group-edits") return modState === "group-edits" ? modGroupEditActiveIcon : (hasNotifications ? modGroupEditNotifIcon : modGroupEditIcon)
-        if (type === "group-deletions") return modState === "group-deletions" ? modGroupDeleteActiveIcon : (hasNotifications ? modGroupDeleteNotifIcon : modGroupDeleteIcon)
-        if (type === "notes") return modState === "notes" ? modNoteActiveIcon : (hasNotifications ? modNoteNotifIcon : modNoteIcon)
-        if (type === "reports") return modState === "reports" ? modReportActiveIcon : (hasNotifications ? modReportNotifIcon : modReportIcon)
-        if (type === "rejected") return modState === "rejected" ? modRejectedActiveIcon : (hasNotifications ? modRejectedNotifIcon : modRejectedIcon)
+        if (type === "posts") return modState === "posts" ? getPinkIcon(modPostUploadIcon) : (hasNotifications ? getIcon(modPostUploadNotifIcon) : getIcon(modPostUploadIcon))
+        if (type === "post-edits") return modState === "post-edits" ? getPinkIcon(modPostEditIcon) : (hasNotifications ? getIcon(modPostEditNotifIcon) : getIcon(modPostEditIcon))
+        if (type === "post-deletions") return modState === "post-deletions" ? getPinkIcon(modPostDeleteIcon) : (hasNotifications ? getIcon(modPostDeleteNotifIcon) : getIcon(modPostDeleteIcon))
+        if (type === "tag-edits") return modState === "tag-edits" ? getPinkIcon(modTagEditIcon) : (hasNotifications ? getIcon(modTagEditNotifIcon) : getIcon(modTagEditIcon))
+        if (type === "tag-aliases") return modState === "tag-aliases" ? getPinkIcon(modTagAliasIcon) : (hasNotifications ? getIcon(modTagAliasNotifIcon) : getIcon(modTagAliasIcon))
+        if (type === "tag-deletions") return modState === "tag-deletions" ? getPinkIcon(modTagDeleteIcon) : (hasNotifications ? getIcon(modTagDeleteNotifIcon) : getIcon(modTagDeleteIcon))
+        if (type === "groups") return modState === "groups" ? getPinkIcon(modGroupAddIcon) : (hasNotifications ? getIcon(modGroupAddNotifIcon) : getIcon(modGroupAddIcon))
+        if (type === "group-edits") return modState === "group-edits" ? getPinkIcon(modGroupEditIcon) : (hasNotifications ? getIcon(modGroupEditNotifIcon) : getIcon(modGroupEditIcon))
+        if (type === "group-deletions") return modState === "group-deletions" ? getPinkIcon(modGroupDeleteIcon) : (hasNotifications ? getIcon(modGroupDeleteNotifIcon) : getIcon(modGroupDeleteIcon))
+        if (type === "notes") return modState === "notes" ? getPinkIcon(modNoteIcon) : (hasNotifications ? getIcon(modNoteNotifIcon) : getIcon(modNoteIcon))
+        if (type === "reports") return modState === "reports" ? getPinkIcon(modReportIcon) : (hasNotifications ? getIcon(modReportNotifIcon) : getIcon(modReportIcon))
+        if (type === "rejected") return modState === "rejected" ? getPinkIcon(modRejectedIcon) : (hasNotifications ? getIcon(modRejectedNotifIcon) : getIcon(modRejectedIcon))
         return ""
     }
 
@@ -246,66 +243,66 @@ const ModQueuePage: React.FunctionComponent = (props) => {
                 <div className="modqueue" onMouseEnter={() => setEnableDrag(true)} onMouseLeave={() => setEnableDrag(false)}>
                     {mobile ? <>
                     <div className="modqueue-icons">
-                        <img className="modqueue-icon" src={getIcon("posts")} 
+                        <img className="modqueue-icon" src={getModIcon("posts")} 
                         style={{filter: modState === "posts" ? "" : filter}} onClick={() => setModState("posts")}/>
-                        <img className="modqueue-icon" src={getIcon("post-edits")} 
+                        <img className="modqueue-icon" src={getModIcon("post-edits")} 
                         style={{filter: modState === "post-edits" ? "" : filter}} onClick={() => setModState("post-edits")}/>
                         {permissions.isAdmin(session) ? 
-                            <img className="modqueue-icon" src={getIcon("post-deletions")} 
+                            <img className="modqueue-icon" src={getModIcon("post-deletions")} 
                             style={{filter: modState === "post-deletions" ? "" : filter}} onClick={() => setModState("post-deletions")}/> 
                         : null}
                     </div>
                     <div className="modqueue-icons">
-                        <img className="modqueue-icon" src={getIcon("tag-edits")} 
+                        <img className="modqueue-icon" src={getModIcon("tag-edits")} 
                         style={{filter: modState === "tag-edits" ? "" : filter}} onClick={() => setModState("tag-edits")}/>
-                        <img className="modqueue-icon" src={getIcon("tag-aliases")} 
+                        <img className="modqueue-icon" src={getModIcon("tag-aliases")} 
                         style={{filter: modState === "tag-aliases" ? "" : filter}} onClick={() => setModState("tag-aliases")}/>
-                        <img className="modqueue-icon" src={getIcon("tag-deletions")} 
+                        <img className="modqueue-icon" src={getModIcon("tag-deletions")} 
                         style={{filter: modState === "tag-deletions" ? "" : filter}} onClick={() => setModState("tag-deletions")}/>
                     </div>
                     <div className="modqueue-icons">
-                        <img className="modqueue-icon" src={getIcon("groups")} 
+                        <img className="modqueue-icon" src={getModIcon("groups")} 
                         style={{filter: modState === "groups" ? "" : filter}} onClick={() => setModState("groups")}/>
-                        <img className="modqueue-icon" src={getIcon("group-edits")} 
+                        <img className="modqueue-icon" src={getModIcon("group-edits")} 
                         style={{filter: modState === "group-edits" ? "" : filter}} onClick={() => setModState("group-edits")}/>
-                        <img className="modqueue-icon" src={getIcon("group-deletions")} 
+                        <img className="modqueue-icon" src={getModIcon("group-deletions")} 
                         style={{filter: modState === "group-deletions" ? "" : filter}} onClick={() => setModState("group-deletions")}/>
                     </div>
                     <div className="modqueue-icons">
-                        <img className="modqueue-icon" src={getIcon("notes")} 
+                        <img className="modqueue-icon" src={getModIcon("notes")} 
                         style={{filter: modState === "notes" ? "" : filter}} onClick={() => setModState("notes")}/>
-                        <img className="modqueue-icon" src={getIcon("reports")} 
+                        <img className="modqueue-icon" src={getModIcon("reports")} 
                         style={{filter: modState === "reports" ? "" : filter}} onClick={() => setModState("reports")}/>
-                        <img className="modqueue-icon" src={getIcon("rejected")} 
+                        <img className="modqueue-icon" src={getModIcon("rejected")} 
                         style={{filter: modState === "rejected" ? "" : filter}} onClick={() => setModState("rejected")}/>
                     </div>
                     </> : <>
                     <div className="modqueue-icons">
-                        <img className="modqueue-icon" src={getIcon("posts")} 
+                        <img className="modqueue-icon" src={getModIcon("posts")} 
                         style={{filter: modState === "posts" ? "" : filter}} onClick={() => setModState("posts")}/>
-                        <img className="modqueue-icon" src={getIcon("post-edits")} 
+                        <img className="modqueue-icon" src={getModIcon("post-edits")} 
                         style={{filter: modState === "post-edits" ? "" : filter}} onClick={() => setModState("post-edits")}/>
                         {permissions.isAdmin(session) ? 
-                            <img className="modqueue-icon" src={getIcon("post-deletions")} 
+                            <img className="modqueue-icon" src={getModIcon("post-deletions")} 
                             style={{filter: modState === "post-deletions" ? "" : filter}} onClick={() => setModState("post-deletions")}/> 
                         : null}
-                        <img className="modqueue-icon" src={getIcon("tag-edits")} 
+                        <img className="modqueue-icon" src={getModIcon("tag-edits")} 
                         style={{filter: modState === "tag-edits" ? "" : filter}} onClick={() => setModState("tag-edits")}/>
-                        <img className="modqueue-icon" src={getIcon("tag-aliases")} 
+                        <img className="modqueue-icon" src={getModIcon("tag-aliases")} 
                         style={{filter: modState === "tag-aliases" ? "" : filter}} onClick={() => setModState("tag-aliases")}/>
-                        <img className="modqueue-icon" src={getIcon("tag-deletions")} 
+                        <img className="modqueue-icon" src={getModIcon("tag-deletions")} 
                         style={{filter: modState === "tag-deletions" ? "" : filter}} onClick={() => setModState("tag-deletions")}/>
-                        <img className="modqueue-icon" src={getIcon("groups")} 
+                        <img className="modqueue-icon" src={getModIcon("groups")} 
                         style={{filter: modState === "groups" ? "" : filter}} onClick={() => setModState("groups")}/>
-                        <img className="modqueue-icon" src={getIcon("group-edits")} 
+                        <img className="modqueue-icon" src={getModIcon("group-edits")} 
                         style={{filter: modState === "group-edits" ? "" : filter}} onClick={() => setModState("group-edits")}/>
-                        <img className="modqueue-icon" src={getIcon("group-deletions")} 
+                        <img className="modqueue-icon" src={getModIcon("group-deletions")} 
                         style={{filter: modState === "group-deletions" ? "" : filter}} onClick={() => setModState("group-deletions")}/>
-                        <img className="modqueue-icon" src={getIcon("notes")} 
+                        <img className="modqueue-icon" src={getModIcon("notes")} 
                         style={{filter: modState === "notes" ? "" : filter}} onClick={() => setModState("notes")}/>
-                        <img className="modqueue-icon" src={getIcon("reports")} 
+                        <img className="modqueue-icon" src={getModIcon("reports")} 
                         style={{filter: modState === "reports" ? "" : filter}} onClick={() => setModState("reports")}/>
-                        <img className="modqueue-icon" src={getIcon("rejected")} 
+                        <img className="modqueue-icon" src={getModIcon("rejected")} 
                         style={{filter: modState === "rejected" ? "" : filter}} onClick={() => setModState("rejected")}/>
                     </div></>}
                     <div className="modqueue-heading-container">

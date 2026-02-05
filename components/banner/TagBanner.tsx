@@ -150,12 +150,6 @@ const TagBanner: React.FunctionComponent = (props) => {
     const bannerTagJSX = () => {
         let jsx = [] as React.ReactElement[]
         for (const bannerTag of bannerTags) {
-            const getClass = () => {
-                if (bannerTag.type === "artist") return "tagbanner-artist-tag"
-                if (bannerTag.type === "character") return "tagbanner-character-tag"
-                if (bannerTag.type === "series") return "tagbanner-series-tag"
-                return "tagbanner-tag"
-            }
             const tagClick = () => {
                 setSearch(bannerTag.tag)
                 setSearchFlag(true)

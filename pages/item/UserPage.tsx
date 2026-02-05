@@ -13,10 +13,10 @@ import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import Carousel from "../../components/site/Carousel"
 import VerticalCarousel from "../../components/site/VerticalCarousel"
-import banIcon from "../../assets/icons/ban.png"
-import unbanIcon from "../../assets/icons/unban.png"
-import promoteIcon from "../../assets/icons/promote.png"
-import dmIcon from "../../assets/icons/dm.png"
+import banIcon from "../../assets/svg/ban.svg"
+import unbanIcon from "../../assets/svg/unban.svg"
+import promoteIcon from "../../assets/svg/promote.svg"
+import dmIcon from "../../assets/svg/dm.svg"
 import {EditCounts, PrunedUser, CommentSearch, Favgroup, PostSearch, TagCount, ForumPostSearch} from "../../types/Types"
 import "./styles/userpage.less"
 
@@ -56,6 +56,10 @@ const UserPage: React.FunctionComponent = () => {
     const [counts, setCounts] = useState(null as EditCounts | null)
     const navigate = useNavigate()
     const {username} = useParams() as {username: string}
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--lockColor")
+    }
 
     useEffect(() => {
         limit = mobile ? 5 : 25
@@ -388,9 +392,9 @@ const UserPage: React.FunctionComponent = () => {
                     <div className="user-top-container">
                         <img className="user-img" src={getUserImg()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? filter : ""}}/>
                         {generateUsernameJSX()}
-                        {session.username && (session.username !== username) && user.role !== "system" && !session.banned ? <img className="user-opt-icon" src={dmIcon} onClick={dmDialog}/> : null}
-                        {permissions.isMod(session) && !permissions.isMod(user) ? <img className="user-opt-icon" src={user.banned ? unbanIcon : banIcon} onClick={banDialog}/> : null}
-                        {permissions.isAdmin(session) && (session.username !== username) ? <img className="user-opt-icon" src={promoteIcon} onClick={promoteDialog}/> : null}
+                        {session.username && (session.username !== username) && user.role !== "system" && !session.banned ? <img className="user-opt-icon" src={getIcon(dmIcon)} onClick={dmDialog}/> : null}
+                        {permissions.isMod(session) && !permissions.isMod(user) ? <img className="user-opt-icon" src={user.banned ? getIcon(unbanIcon) : getIcon(banIcon)} onClick={banDialog}/> : null}
+                        {permissions.isAdmin(session) && (session.username !== username) ? <img className="user-opt-icon" src={getIcon(promoteIcon)} onClick={promoteDialog}/> : null}
                     </div>
                     {banJSX()}
                     {user.deleted ? <button className="user-deleted-button">{i18n.user.deletedAccount}</button> : null}
