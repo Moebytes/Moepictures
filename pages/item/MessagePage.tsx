@@ -11,11 +11,11 @@ useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageAc
 useActiveSelector, useSearchSelector, usePageSelector, useFlagSelector,
 useMessageDialogActions, useMessageDialogSelector, useCacheSelector} from "../../store"
 import permissions from "../../structures/Permissions"
-import editOptIcon from "../../assets/icons/edit-opt.png"
-import deleteOptIcon from "../../assets/icons/delete-opt.png"
-import quoteOptIcon from "../../assets/icons/quote-opt.png"
-import forwardOptIcon from "../../assets/icons/forward-opt.png"
 import favicon from "../../assets/icons/favicon.png"
+import editIcon from "../../assets/svg/edit.svg"
+import deleteIcon from "../../assets/svg/delete.svg"
+import quoteIcon from "../../assets/svg/quote.svg"
+import forwardIcon from "../../assets/svg/forward.svg"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import TextBox, {TextBoxRef} from "../../ui/TextBox"
 import PageControls from "../../components/site/PageControls"
@@ -53,6 +53,10 @@ const MessagePage: React.FunctionComponent = () => {
     const {id: messageID} = useParams() as {id: string}
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--titleButtons")
+    }
 
     useEffect(() => {
         const replyParam = new URLSearchParams(window.location.search).get("reply")
@@ -279,15 +283,15 @@ const MessagePage: React.FunctionComponent = () => {
         if (!message) return
         if (message.role !== "system" && session.username && !session.banned) {
             return (
-                <img draggable={false} className="thread-page-opt-icon" src={quoteOptIcon} onClick={triggerQuote} style={{filter}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={getIcon(quoteIcon)} onClick={triggerQuote} style={{filter}}/>
             )
         }
         if (session.username === message.creator || permissions.isMod(session)) {
             return(
                 <>
-                <img draggable={false} className="thread-page-opt-icon" src={forwardOptIcon} onClick={forwardMessageDialog} style={{filter}}/>
-                <img draggable={false} className="thread-page-opt-icon" src={editOptIcon} onClick={editMessageDialog} style={{filter}}/>
-                <img draggable={false} className="thread-page-opt-icon" src={deleteOptIcon} onClick={deleteMessageDialog} style={{filter}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={getIcon(forwardIcon)} onClick={forwardMessageDialog} style={{filter}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={getIcon(editIcon)} onClick={editMessageDialog} style={{filter}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={getIcon(deleteIcon)} onClick={deleteMessageDialog} style={{filter}}/>
                 </>
             )
         }

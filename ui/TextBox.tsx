@@ -173,7 +173,7 @@ const TextBox = forwardRef<TextBoxRef, Props>((props, ref) => {
                         <button className="textbox-textarea-button"><img src={getIcon(hexcolor)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "color")} style={{filter}}/></button>
                         <button className="textbox-textarea-button"><img src={getIcon(codeblock)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "code")} style={{filter}}/></button>
                     </div>
-                    {previewMode ? <div className="textbox-preview">{functions.jsx.renderText(text, emojis, props.type, undefined, r18)}</div> : 
+                    {previewMode ? <div className="textbox-preview" style={{width: props.manualWidth && !mobile ? "70%" : ""}}>{functions.jsx.renderText(text, emojis, props.type, undefined, r18)}</div> : 
                     <div style={{marginTop: "0px"}} className="textbox-row-start" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <textarea ref={textRef} className="textbox-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)} onKeyDown={(event) => event.stopPropagation()} style={{width: props.manualWidth && !mobile ? "70%" : ""}}></textarea>
                     </div>}

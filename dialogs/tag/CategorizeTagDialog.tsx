@@ -10,7 +10,7 @@ import {TagType} from "../../types/Types"
 import "../dialog.less"
 
 const CategorizeTagDialog: React.FunctionComponent = (props) => {
-    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
+    const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {categorizeTag} = useTagDialogSelector()
     const {setCategorizeTag} = useTagDialogActions()
@@ -23,8 +23,44 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
 
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    const getArtistIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--artistTagColor")
+    }
+
+    const getCharacterIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--characterTagColor")
+    }
+
+    const getSeriesIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--seriesTagColor")
+    }
+
+    const getMetaIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--metaTagColor")
+    }
+
+    const getAppearanceIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--appearanceTagColor")
+    }
+
+    const getOutfitIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--outfitTagColor")
+    }
+
+    const getAccessoryIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--accessoryTagColor")
+    }
+
+    const getActionIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--actionTagColor")
+    }
+
+    const getSceneryIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sceneryTagColor")
+    }
+
+    const getTagIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--tagColor")
     }
 
     useEffect(() => {
@@ -76,43 +112,43 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
             <>
             <div className="dialog-row">
                 <span className="dialog-text artist-tag-color">{i18n.tag.artist}:</span>
-                <img className="dialog-checkbox" src={category === "artist" ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setCategory("artist")} style={{filter: "hue-rotate(53deg) saturate(100%) brightness(120%)"}}/>
+                <img className="dialog-checkbox" src={category === "artist" ? getArtistIcon(checkboxChecked) : getArtistIcon(checkbox)} onClick={() => setCategory("artist")}/>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text character-tag-color">{i18n.tag.character}:</span>
-                <img className="dialog-checkbox" src={category === "character" ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setCategory("character")} style={{filter: "hue-rotate(38deg) saturate(100%) brightness(120%)"}}/>
+                <img className="dialog-checkbox" src={category === "character" ? getCharacterIcon(checkboxChecked) : getCharacterIcon(checkbox)} onClick={() => setCategory("character")}/>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text series-tag-color">{i18n.tag.series}:</span>
-                <img className="dialog-checkbox" src={category === "series" ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setCategory("series")} style={{filter: "hue-rotate(15deg) saturate(100%) brightness(120%)"}}/>
+                <img className="dialog-checkbox" src={category === "series" ? getSeriesIcon(checkboxChecked) : getSeriesIcon(checkbox)} onClick={() => setCategory("series")}/>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text meta-tag-color">{i18n.tag.meta}:</span>
-                <img className="dialog-checkbox" src={category === "meta" ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setCategory("meta")} style={{filter: "hue-rotate(-70deg) saturate(100%) brightness(200%)"}}/>
+                <img className="dialog-checkbox" src={category === "meta" ? getMetaIcon(checkboxChecked) : getMetaIcon(checkbox)} onClick={() => setCategory("meta")}/>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text appearance-tag-color">{i18n.tag.appearance}:</span>
-                <img className="dialog-checkbox" src={category === "appearance" ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setCategory("appearance")} style={{filter: "hue-rotate(-5deg) saturate(100%) brightness(200%)"}}/>
+                <img className="dialog-checkbox" src={category === "appearance" ? getAppearanceIcon(checkboxChecked) : getAppearanceIcon(checkbox)} onClick={() => setCategory("appearance")}/>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text outfit-tag-color">{i18n.tag.outfit}:</span>
-                <img className="dialog-checkbox" src={category === "outfit" ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setCategory("outfit")} style={{filter: "hue-rotate(75deg) saturate(80%) brightness(400%)"}}/>
+                <img className="dialog-checkbox" src={category === "outfit" ? getOutfitIcon(checkboxChecked) : getOutfitIcon(checkbox)} onClick={() => setCategory("outfit")}/>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text accessory-tag-color">{i18n.tag.accessory}:</span>
-                <img className="dialog-checkbox" src={category === "accessory" ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setCategory("accessory")} style={{filter: "hue-rotate(-120deg) saturate(100%) brightness(200%)"}}/>
+                <img className="dialog-checkbox" src={category === "accessory" ? getAccessoryIcon(checkboxChecked) : getAccessoryIcon(checkbox)} onClick={() => setCategory("accessory")}/>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text action-tag-color">{i18n.tag.action}:</span>
-                <img className="dialog-checkbox" src={category === "action" ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setCategory("action")} style={{filter: "hue-rotate(160deg) saturate(100%) brightness(500%)"}}/>
+                <img className="dialog-checkbox" src={category === "action" ? getActionIcon(checkboxChecked) : getActionIcon(checkbox)} onClick={() => setCategory("action")}/>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text scenery-tag-color">{i18n.tag.scenery}:</span>
-                <img className="dialog-checkbox" src={category === "scenery" ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setCategory("scenery")} style={{filter: "hue-rotate(-40deg) saturate(100%) brightness(200%)"}}/>
+                <img className="dialog-checkbox" src={category === "scenery" ? getSceneryIcon(checkboxChecked) : getSceneryIcon(checkbox)} onClick={() => setCategory("scenery")}/>
             </div>
             <div className="dialog-row">
                 <span className="dialog-text tag-color">{i18n.tag.tag}:</span>
-                <img className="dialog-checkbox" src={category === "tag" ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setCategory("tag")}/>
+                <img className="dialog-checkbox" src={category === "tag" ? getTagIcon(checkboxChecked) : getTagIcon(checkbox)} onClick={() => setCategory("tag")}/>
             </div>
             </>
         )

@@ -6,7 +6,7 @@ import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useLayoutSelector} from "../../store"
-import premiumStar from "../../assets/icons/premium-star.png"
+import premiumStar from "../../assets/svg/premium-star.svg"
 import premiumImg from "../../assets/images/premiumupgrade.png"
 import upscaledImg from "../../assets/images/upscaled.png"
 import bookmarksImg from "../../assets/images/bookmarks.png"
@@ -66,6 +66,10 @@ const PremiumPage: React.FunctionComponent = (props) => {
     const {mobile} = useLayoutSelector()
     const [premiumFeature, setPremiumFeature] = useState("premium")
     const navigate = useNavigate()
+
+    const getPremiumIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--premiumColor")
+    }
 
     useEffect(() => {
         if (!session.cookie) return
@@ -127,7 +131,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
             return (
                 <><div className="premium-row">
                     <span className="premium-heading">{i18n.premium.premium.title}</span>
-                    <img className="premium-star" src={premiumStar}/>
+                    <img className="premium-star" src={getPremiumIcon(premiumStar)}/>
                 </div>
                 <span className="premium-text">
                     {i18n.premium.premium.line1}<br/><br/>

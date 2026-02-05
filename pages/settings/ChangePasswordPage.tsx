@@ -4,8 +4,8 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import show from "../../assets/icons/show.png"
-import hide from "../../assets/icons/hide.png"
+import show from "../../assets/svg/show.svg"
+import hide from "../../assets/svg/hide.svg"
 import functions from "../../functions/Functions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
@@ -32,6 +32,10 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
     const navigate = useNavigate()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--titleButtons")
+    }
 
     useEffect(() => {
         setHideNavbar(false)
@@ -65,15 +69,15 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
     }, [session])
 
     const getEye = () => {
-        return showPassword ? hide : show
+        return showPassword ? getIcon(hide) : getIcon(show)
     }
 
     const getEye2 = () => {
-        return showPassword2 ? hide : show
+        return showPassword2 ? getIcon(hide) : getIcon(show)
     }
 
     const getEye3 = () => {
-        return showPassword3 ? hide : show
+        return showPassword3 ? getIcon(hide) : getIcon(show)
     }
 
     const submit = async () => {

@@ -5,8 +5,8 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import show from "../../assets/icons/show.png"
-import hide from "../../assets/icons/hide.png"
+import show from "../../assets/svg/show.svg"
+import hide from "../../assets/svg/hide.svg"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useActiveSelector,
 useFlagSelector} from "../../store"

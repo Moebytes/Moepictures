@@ -11,17 +11,15 @@ useLayoutActions, useActiveActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchSelector, usePageSelector,
 useThreadDialogActions, useThreadDialogSelector, useCacheSelector} from "../../store"
 import permissions from "../../structures/Permissions"
-import lockIcon from "../../assets/icons/lock.png"
-import stickyIcon from "../../assets/icons/sticky.png"
-import lockOptIcon from "../../assets/icons/lock-opt.png"
-import stickyOptIcon from "../../assets/icons/sticky-opt.png"
-import unlockOptIcon from "../../assets/icons/unlock-opt.png"
-import unstickyOptIcon from "../../assets/icons/unsticky-opt.png"
-import editOptIcon from "../../assets/icons/edit-opt.png"
-import deleteOptIcon from "../../assets/icons/delete-opt.png"
-import quoteOptIcon from "../../assets/icons/quote-opt.png"
-import reportOptIcon from "../../assets/icons/report-opt.png"
 import favicon from "../../assets/icons/favicon.png"
+import lockIcon from "../../assets/svg/lock.svg"
+import stickyIcon from "../../assets/svg/sticky.svg"
+import unlockIcon from "../../assets/svg/unlock.svg"
+import unstickyIcon from "../../assets/svg/unsticky.svg"
+import editIcon from "../../assets/svg/edit.svg"
+import deleteIcon from "../../assets/svg/delete.svg"
+import quoteIcon from "../../assets/svg/quote.svg"
+import reportIcon from "../../assets/svg/report.svg"
 import TextBox, {TextBoxRef} from "../../ui/TextBox"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
@@ -57,6 +55,10 @@ const ThreadPage: React.FunctionComponent = () => {
     const {id: threadID} = useParams() as {id: string}
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--titleButtons")
+    }
 
     useEffect(() => {
         const replyParam = new URLSearchParams(window.location.search).get("reply")
@@ -274,24 +276,24 @@ const ThreadPage: React.FunctionComponent = () => {
         if (permissions.isMod(session)) {
             jsx.push(
                 <>
-                <img draggable={false} className="thread-page-opt-icon" src={thread.sticky ? unstickyOptIcon : stickyOptIcon} onClick={updateSticky} style={{marginTop: "3px", filter}}/>
-                <img draggable={false} className="thread-page-opt-icon" src={thread.locked ? unlockOptIcon : lockOptIcon} onClick={updateLocked} style={{filter}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={thread.sticky ? getIcon(unstickyIcon) : getIcon(stickyIcon)} onClick={updateSticky} style={{marginTop: "3px", filter}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={thread.locked ? getIcon(unlockIcon) : getIcon(lockIcon)} onClick={updateLocked} style={{filter}}/>
                 </>
             )
         }
         if (session.username && !session.banned) {
             jsx.push(
                 <>
-                <img draggable={false} className="thread-page-opt-icon" src={quoteOptIcon} onClick={triggerQuote} style={{filter}}/>
-                <img draggable={false} className="thread-page-opt-icon" src={reportOptIcon} onClick={reportThreadDialog} style={{filter}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={getIcon(quoteIcon)} onClick={triggerQuote} style={{filter}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={getIcon(reportIcon)} onClick={reportThreadDialog} style={{filter}}/>
                 </>
             )
         }
         if (session.username === thread.creator || permissions.isMod(session)) {
             jsx.push(
                 <>
-                <img draggable={false} className="thread-page-opt-icon" src={editOptIcon} onClick={editThreadDialog} style={{filter}}/>
-                <img draggable={false} className="thread-page-opt-icon" src={deleteOptIcon} onClick={deleteThreadDialog} style={{filter}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={getIcon(editIcon)} onClick={editThreadDialog} style={{filter}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={getIcon(deleteIcon)} onClick={deleteThreadDialog} style={{filter}}/>
                 </>
             )
         }
@@ -337,8 +339,8 @@ const ThreadPage: React.FunctionComponent = () => {
                 {thread ?
                 <div className="thread-page" onMouseEnter={() => setEnableDrag(false)}>
                     <div className="thread-page-title-container">
-                        {thread.sticky ? <img draggable={false} className="thread-page-icon" src={stickyIcon}/> : null}
-                        {thread.locked ? <img draggable={false} className="thread-page-icon" src={lockIcon}/> : null}
+                        {thread.sticky ? <img draggable={false} className="thread-page-icon" src={getIcon(stickyIcon)}/> : null}
+                        {thread.locked ? <img draggable={false} className="thread-page-icon" src={getIcon(lockIcon)}/> : null}
                         <span className="thread-page-title">
                             {thread.r18 ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
                             {thread.title}

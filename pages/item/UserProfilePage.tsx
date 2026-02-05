@@ -1,23 +1,23 @@
-import React, {useEffect, useContext, useState, useReducer, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import uploadPfpIcon from "../../assets/icons/uploadpfp.png"
+import uploadPfpIcon from "../../assets/svg/uploadpfp.svg"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import {useThemeSelector, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchActions, 
-useSearchSelector, useFlagSelector, useMiscDialogActions, useMessageDialogActions,
-useCacheSelector, useCacheActions, useInteractionActions, useMiscDialogSelector} from "../../store"
+useSearchSelector, useMiscDialogActions, useCacheSelector, useCacheActions, 
+useInteractionActions, useMiscDialogSelector} from "../../store"
 import functions from "../../functions/Functions"
 import Carousel from "../../components/site/Carousel"
 import VerticalCarousel from "../../components/site/VerticalCarousel"
 import permissions from "../../structures/Permissions"
-import premiumStar from "../../assets/icons/premium-star.png"
-import r18 from "../../assets/icons/r18.png"
-import danger from "../../assets/icons/danger.png"
-import lockIcon from "../../assets/icons/private-lock.png"
+import premiumStar from "../../assets/svg/premium-star.svg"
+import r18 from "../../assets/svg/lewd.svg"
+import danger from "../../assets/svg/danger.svg"
+import lockIcon from "../../assets/svg/lock.svg"
 import emojiSelect from "../../assets/svg/emoji-select.svg"
 import MiniTextBox, {MiniTextBoxRef} from "../../ui/MiniTextBox"
 import {EditCounts, CommentSearch, Favgroup, PostSearch, UnverifiedPost, TagCount, ForumPostSearch} from "../../types/Types"
@@ -73,6 +73,18 @@ const UserProfilePage: React.FunctionComponent = () => {
     const textRef = useRef<HTMLTextAreaElement>(null)
     const textBoxRef = useRef<MiniTextBoxRef>(null)
     const navigate = useNavigate()
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
+
+    const getRedIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--r18Color")
+    }
+
+    const getPremiumIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--premiumColor")
+    }
 
     useEffect(() => {
         limit = mobile ? 5 : 25
@@ -595,7 +607,7 @@ const UserProfilePage: React.FunctionComponent = () => {
             jsx.push(
                 <div className="user-column">
                     <div className="user-title-container">
-                        {favgroup.private ? <img className="user-icon" src={lockIcon} style={{height: "20px", marginTop: "3px", filter}}/> : null}
+                        {favgroup.private ? <img className="user-icon" src={getIcon(lockIcon)} style={{height: "20px", marginTop: "3px", filter}}/> : null}
                         <span className="user-title" onClick={viewFavgroup}>{favgroup.name} <span className="user-text-alt">{favgroup.postCount}</span></span>
                     </div>
                     <Carousel images={images} noKey={true} set={setFavgroup} index={0} unlimited={true}/>
@@ -637,7 +649,7 @@ const UserProfilePage: React.FunctionComponent = () => {
                         {generateUsernameJSX()}
                         {!mobile && permissions.isAdmin(session) && <>
                         <label htmlFor="upload-pfp" className="uploadpfp-label">
-                            <img className="user-uploadimg" src={uploadPfpIcon} style={{filter}}/>
+                            <img className="user-uploadimg" src={getIcon(uploadPfpIcon)} style={{filter}}/>
                         </label>
                         <input id="upload-pfp" type="file" onChange={(event) => uploadPfp(event)}/>
                         </>}
@@ -695,17 +707,17 @@ const UserProfilePage: React.FunctionComponent = () => {
                         <span className="user-text">{i18n.user.liveModelPreview}: <span className="user-text-action" onClick={liveModelPreview}>{session.liveModelPreview ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div>
                     <div className="user-row">
-                        {permissions.isPremiumEnabled() ? <img className="user-icon" src={premiumStar}/> : null}
+                        {permissions.isPremiumEnabled() ? <img className="user-icon" src={getPremiumIcon(premiumStar)}/> : null}
                         <span style={permissions.isPremiumEnabled() ? {color: "var(--premiumColor)"} : {}} className="user-text">{i18n.user.upscaledImages}: <span style={permissions.isPremiumEnabled() ? {color: "var(--premiumColor)"} : {}} className="user-text-action" onClick={upscaledImages}>{session.upscaledImages ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div>
                     <div className="user-row">
-                        {permissions.isPremiumEnabled() ? <img className="user-icon" src={premiumStar}/> : null}
+                        {permissions.isPremiumEnabled() ? <img className="user-icon" src={getPremiumIcon(premiumStar)}/> : null}
                         <span style={permissions.isPremiumEnabled() ? {color: "var(--premiumColor)"} : {}} className="user-text">{i18n.user.autosearchInterval}: </span>
                         <input style={permissions.isPremiumEnabled() ? {color: "var(--premiumColor)"} : {}} className="user-input" spellCheck={false} value={interval} onChange={(event) => setInterval(event.target.value)}
                         onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></input>
                     </div>
                     {permissions.isAdmin(session) ? <div className="user-row">
-                        <img className="user-icon" src={r18}/>
+                        <img className="user-icon" src={getRedIcon(r18)}/>
                         <span style={{color: "var(--r18Color)"}} className="user-text">{i18n.user.showR18}: <span style={{color: "var(--r18Color)"}} className="user-text-action" onClick={showR18}>{session.showR18 ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div> : null}
                     <div onClick={clearPfp} className="user-row">
@@ -719,7 +731,7 @@ const UserProfilePage: React.FunctionComponent = () => {
                         <span className="user-link">{i18n.user.showBanner}</span>
                     </div> : null}
                     <div onClick={changeUsername} className="user-row">
-                        {permissions.isPremiumEnabled() ? <img className="user-icon" src={premiumStar} style={{height: "14px", marginRight: "5px"}}/> : null}
+                        {permissions.isPremiumEnabled() ? <img className="user-icon" src={getPremiumIcon(premiumStar)} style={{height: "14px", marginRight: "5px"}}/> : null}
                         <span style={permissions.isPremiumEnabled() ? {color: "var(--premiumColor)"} : {}} className="user-link">{i18n.user.changeUsername}</span>
                     </div>
                     <Link to="/change-email" className="user-row">
@@ -805,7 +817,7 @@ const UserProfilePage: React.FunctionComponent = () => {
                         onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                     </div>
                     <div className="user-row">
-                        <img className="user-icon" src={danger}/>
+                        <img className="user-icon" src={getRedIcon(danger)}/>
                         <span className="user-link" onClick={deleteAccountDialog}>{i18n.buttons.deleteAccount}</span>
                     </div>
                 </div>
