@@ -61,7 +61,7 @@ import promo from "../../assets/svg/promo.svg"
 
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import Filters from "../post/Filters"
+import Filters from "../../ui/Filters"
 import {PostSort} from "../../types/Types"
 import "./styles/sortbar.less"
 

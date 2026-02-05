@@ -1,25 +1,25 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useNavigate, useParams} from "react-router-dom"
-import {useThemeSelector, useThemeActions, useInteractionActions, useLayoutSelector, 
+import {useThemeSelector, useInteractionActions, useLayoutSelector, 
 useSessionSelector, useSessionActions, usePageSelector, usePageActions, useSearchSelector,
-useSearchActions, useActiveActions, useFlagActions, useMiscDialogActions} from "../../store"
-import Slider from "react-slider"
-import hamburger from "../../assets/icons/reader-hamburger.png"
-import back from "../../assets/icons/reader-back.png"
-import zoomIn from "../../assets/icons/reader-zoomIn.png"
-import zoomOut from "../../assets/icons/reader-zoomOut.png"
-import rightToLeft from "../../assets/icons/reader-rightToLeft.png"
-import topToBottom from "../../assets/icons/reader-topToBottom.png"
-import reset from "../../assets/icons/reader-reset.png"
-import prevPage from "../../assets/icons/reader-prevPage.png"
-import nextPage from "../../assets/icons/reader-nextPage.png"
-import invertOnIcon from "../../assets/icons/reader-invert-on.png"
-import invertIcon from "../../assets/icons/reader-invert.png"
-import englishToJapanese from "../../assets/icons/reader-englishToJapanese.png"
-import japaneseToEnglish from "../../assets/icons/reader-japaneseToEnglish.png"
-import color from "../../assets/icons/reader-color.png"
-import waifu2x from "../../assets/icons/reader-waifu2x.png"
-import fx from "../../assets/icons/reader-fx.png"
+useSearchActions, useActiveActions, useMiscDialogActions} from "../../store"
+import hamburger from "../../assets/svg/hamburger.svg"
+import rightToLeft from "../../assets/svg/reader-left.svg"
+import topToBottom from "../../assets/svg/reader-bottom.svg"
+import zoomOut from "../../assets/svg/reader-zoom-out.svg"
+import zoomIn from "../../assets/svg/reader-zoom-in.svg"
+import reset from "../../assets/svg/reader-reset.svg"
+import prevPage from "../../assets/svg/reader-prev.svg"
+import nextPage from "../../assets/svg/reader-next.svg"
+import back from "../../assets/svg/reader-back.svg"
+import invertOnIcon from "../../assets/svg/invert-on.svg"
+import invertIcon from "../../assets/svg/invert.svg"
+import waifu2x from "../../assets/svg/waifu2x.svg"
+import fx from "../../assets/svg/filters.svg"
+import englishToJapanese from "../../assets/svg/reader-en-to-ja.svg"
+import japaneseToEnglish from "../../assets/svg/reader-ja-to-en.svg"
+import color from "../../assets/svg/color.svg"
+
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import DragScroll from "../../components/site/DragScroll"
@@ -27,8 +27,9 @@ import LocalStorage from "../../LocalStorage"
 import PostImage from "../../components/image/PostImage"
 import TinyImage from "../../components/image/TinyImage"
 import {useInView} from "react-intersection-observer"
-import Filters from "../../components/post/Filters"
-import {Themes, PostFull} from "../../types/Types"
+import Filters from "../../ui/Filters"
+import HSLDropdown from "../../ui/HSLDropdown"
+import {PostFull} from "../../types/Types"
 import "./styles/readerpage.less"
 
 const ReaderImage = ({pageNumber, img, post, order, loaded}) => {
@@ -62,13 +63,11 @@ const ReaderImage = ({pageNumber, img, post, order, loaded}) => {
 }
 
 const ReaderPage: React.FunctionComponent = () => {
-    const {theme, language, i18n, siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {setTheme, setSiteHue, setSiteSaturation, setSiteLightness} = useThemeActions()
+    const {language, i18n, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const {setRedirect} = useFlagActions()
     const {setPremiumRequired} = useMiscDialogActions()
     const {setActionBanner} = useActiveActions()
     const {readerPage} = usePageSelector()
@@ -77,18 +76,22 @@ const ReaderPage: React.FunctionComponent = () => {
     const {setReaderHorizontal, setReaderThumbnails, setReaderInvert, setReaderZoom, setShowTranscript} = useSearchActions()
     const [lastPage, setLastPage] = useState(1)
     const [lastZoom, setLastZoom] = useState(100)
-    const [colorDropdown, setColorDropdown] = useState(false)
     const [images, setImages] = useState([] as string[])
     const [thumbnails, setThumbnails] = useState([] as string[])
     const [post, setPost] = useState(null as PostFull | null)
     const [loaded, setLoaded] = useState(false)
     const [showFilterDropdown, setShowFilterDropdown] = useState(false)
+    const [showColorDropdown, setShowColorDropdown] = useState(false)
     const rootRef = useRef<HTMLDivElement>(null)
     const filterRef = useRef<HTMLImageElement>(null)
     const navigate = useNavigate()
     const {id: postID, slug} = useParams() as {id: string, slug: string}
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--titleButtons")
+    }
 
     useEffect(() => {
         document.title = "Post"
@@ -236,22 +239,6 @@ const ReaderPage: React.FunctionComponent = () => {
         }, 500)
     }
 
-    const resetFilters = () => {
-        setSiteHue(180)
-        setSiteSaturation(100)
-        setSiteLightness(50)
-    }
-
-    const lightChange = () => {
-        let newTheme = ""
-        if (theme.includes("light")) {
-            newTheme = "dark"
-        } else {
-            newTheme = "light"
-        }
-        setTheme(newTheme as Themes)
-    }
-
     const toggleUpscale = async () => {
         if (!session.username) {
             setActionBanner("login-required")
@@ -360,58 +347,32 @@ const ReaderPage: React.FunctionComponent = () => {
         <div className="reader-page">
             <div className="reader-controls" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <div className="reader-controls-box">
-                    {!mobile ? <img className="reader-controls-icon-small" src={hamburger} onClick={() => setReaderThumbnails(!readerThumbnails)} style={{filter}}/> : null}
+                    {!mobile ? <img className="reader-controls-icon-small" src={getIcon(hamburger)} onClick={() => setReaderThumbnails(!readerThumbnails)} style={{filter}}/> : null}
                     <div className="reader-controls-page-container">
                         {!mobile ? <span className="reader-controls-page-text" style={{filter}}>{i18n.labels.page}:</span> : null}
                         <input className="reader-controls-page-input" type="number" spellCheck={false} value={readerPage} onChange={(event) => setReaderPage(Number(event.target.value))} onBlur={() => updatePage()}
                         onMouseEnter={() => setEnableDrag(false)} style={{filter, marginLeft: mobile ? "0px" : ""}}/>
                         <span className="reader-controls-page-text" style={{filter}}>/ {images.length}</span>
                     </div>
-                    {!mobile ? <img className="reader-controls-icon-mid" src={rightToLeft} onClick={() => changeHorizontal(true)} style={{filter}}/> : null}
-                    {!mobile ? <img className="reader-controls-icon-mid" src={topToBottom} onClick={() => changeHorizontal(false)} style={{filter}}/> : null}
+                    {!mobile ? <img className="reader-controls-icon-mid" src={getIcon(rightToLeft)} onClick={() => changeHorizontal(true)} style={{filter}}/> : null}
+                    {!mobile ? <img className="reader-controls-icon-mid" src={getIcon(topToBottom)} onClick={() => changeHorizontal(false)} style={{filter}}/> : null}
                 </div>
                 {!mobile ?
                 <div className="reader-controls-box">
-                    <img className="reader-controls-icon-small-alt" src={zoomOut} onClick={triggerZoomOut} style={{filter}}/>
-                    <img className="reader-controls-icon-small" src={zoomIn} onClick={triggerZoomIn} style={{filter}}/>
+                    <img className="reader-controls-icon-small-alt" src={getIcon(zoomOut)} onClick={triggerZoomOut} style={{filter}}/>
+                    <img className="reader-controls-icon-small" src={getIcon(zoomIn)} onClick={triggerZoomIn} style={{filter}}/>
                     <input className="reader-controls-zoom-input" type="number" spellCheck={false} value={readerZoom} onChange={(event) => setReaderZoom(Number(event.target.value))} onBlur={() => updateZoom()} style={{filter}}/>
-                    <img className="reader-controls-icon-small" src={reset} onClick={() => setReaderZoom(100)} style={{height: "13px", filter}}/>
-                    <img className="reader-controls-icon-small" src={prevPage} onClick={triggerPrev} style={{filter}}/>
-                    <img className="reader-controls-icon-small" src={nextPage} onClick={triggerNext} style={{filter}}/>
+                    <img className="reader-controls-icon-small" src={getIcon(reset)} onClick={() => setReaderZoom(100)} style={{height: "13px", filter}}/>
+                    <img className="reader-controls-icon-small" src={getIcon(prevPage)} onClick={triggerPrev} style={{filter}}/>
+                    <img className="reader-controls-icon-small" src={getIcon(nextPage)} onClick={triggerNext} style={{filter}}/>
                 </div> : null}
                 <div className="reader-controls-box">
-                    <img className="reader-controls-icon" src={back} onClick={triggerBack} style={{filter}}/>
-                    <img className="reader-controls-icon" src={readerInvert ? invertOnIcon : invertIcon} onClick={() => setReaderInvert(!readerInvert)} style={{filter}}/>
-                    <img className="reader-controls-icon" src={waifu2x} onClick={() => toggleUpscale()} style={{filter}}/>
-                    <img className="reader-controls-icon" src={fx} ref={filterRef} onClick={() => setShowFilterDropdown((prev) => !prev)} style={{filter}}/>
-                    <img className="reader-controls-icon" src={!showTranscript ? englishToJapanese : japaneseToEnglish} onClick={() => setShowTranscript(!showTranscript)} style={{filter}}/>
-                    <img className="reader-controls-icon" src={color} onClick={() => setColorDropdown((prev) => !prev)} style={{filter}}/>
-                </div>
-                <div className={`reader-dropdown ${colorDropdown ? "" : "hide-reader-dropdown"}`} style={{top: "40px"}}>
-                    <div className="reader-dropdown-row" style={{filter}}>
-                        <span className="reader-dropdown-text">{i18n.filters.hue}</span>
-                        <Slider className="reader-dropdown-slider" trackClassName="reader-dropdown-slider-track" 
-                        thumbClassName="reader-dropdown-slider-thumb" onChange={(value) => setSiteHue(value)} 
-                        min={60} max={300} step={1} value={siteHue}/>
-                    </div>
-                    <div className="reader-dropdown-row" style={{filter}}>
-                        <span className="reader-dropdown-text">{i18n.filters.saturation}</span>
-                        <Slider className="reader-dropdown-slider" trackClassName="reader-dropdown-slider-track" 
-                        thumbClassName="reader-dropdown-slider-thumb" onChange={(value) => setSiteSaturation(value)} 
-                        min={50} max={100} step={1} value={siteSaturation}/>
-                    </div>
-                    <div className="reader-dropdown-row" style={{filter}}>
-                        <span className="reader-dropdown-text">{i18n.filters.lightness}</span>
-                        <Slider className="reader-dropdown-slider" trackClassName="reader-dropdown-slider-track" 
-                        thumbClassName="reader-dropdown-slider-thumb" onChange={(value) => setSiteLightness(value)} 
-                        min={45} max={55} step={1} value={siteLightness}/>
-                    </div>
-                    <div className="reader-dropdown-row" style={{justifyContent: "space-evenly", filter}}>
-                        <button className="reader-dropdown-button" onClick={() => resetFilters()}>{i18n.filters.reset}</button>
-                        <button className="reader-dropdown-button" onClick={() => lightChange()} 
-                        style={{backgroundColor: theme.includes("light") ? "#f536ac" : "#36eaf7"}}>
-                        {theme.includes("light") ? i18n.buttons.dark : i18n.buttons.light}</button>
-                    </div>
+                    <img className="reader-controls-icon" src={getIcon(back)} onClick={triggerBack} style={{filter}}/>
+                    <img className="reader-controls-icon" src={readerInvert ? getIcon(invertOnIcon) : getIcon(invertIcon)} onClick={() => setReaderInvert(!readerInvert)} style={{filter}}/>
+                    <img className="reader-controls-icon" src={getIcon(waifu2x)} onClick={() => toggleUpscale()} style={{filter}}/>
+                    <img className="reader-controls-icon" src={getIcon(fx)} ref={filterRef} onClick={() => setShowFilterDropdown((prev) => !prev)} style={{filter}}/>
+                    <img className="reader-controls-icon" src={!showTranscript ? getIcon(englishToJapanese) : getIcon(japaneseToEnglish)} onClick={() => setShowTranscript(!showTranscript)} style={{filter}}/>
+                    <img className="reader-controls-icon" src={getIcon(color)} onClick={() => setShowColorDropdown((prev) => !prev)} style={{filter}}/>
                 </div>
             </div>
             <div className={`reader-renderer ${readerHorizontal ? "reader-renderer-horizontal" : ""}`} ref={rootRef} style={{maxHeight: readerHorizontal ? 773 : 1400}} onClick={((e) => e.currentTarget.focus())}>
@@ -419,6 +380,7 @@ const ReaderPage: React.FunctionComponent = () => {
                 {generateImages()}
             </div>
             <Filters active={showFilterDropdown} right={getFiltersMargin()} top={40}/>
+            <HSLDropdown active={showColorDropdown} top={40}/>
         </div>
         </>
     )

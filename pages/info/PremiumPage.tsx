@@ -25,7 +25,7 @@ import changeUsername from "../../assets/images/premium-change-username.png"
 import noAds from "../../assets/images/premium-no-ads.png"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import bitcoin from "../../assets/icons/bitcoin.png"
+import bitcoin from "../../assets/svg/bitcoin.svg"
 import "./styles/premiumpage.less"
 
 const PaymentButton: React.FunctionComponent = (props) => {

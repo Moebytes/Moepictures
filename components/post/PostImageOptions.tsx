@@ -10,7 +10,7 @@ import download from "../../assets/svg/download.svg"
 import filters from "../../assets/svg/filters.svg"
 import nextIcon from "../../assets/svg/next.svg"
 import prevIcon from "../../assets/svg/prev.svg"
-import Filters from "./Filters"
+import Filters from "../../ui/Filters"
 import {PostFull, PostHistory, UnverifiedPost} from "../../types/Types"
 import "./styles/postimageoptions.less"
 

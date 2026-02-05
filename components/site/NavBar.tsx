@@ -9,8 +9,6 @@ import mail from "../../assets/svg/mail.svg"
 import mailNotif from "../../assets/svg/mail-notif.svg"
 import crown from "../../assets/svg/crown.svg"
 import logoutSVG from "../../assets/svg/logout.svg"
-import lightSVG from "../../assets/svg/light.svg"
-import darkSVG from "../../assets/svg/dark.svg"
 import snowflakeSVG from "../../assets/svg/snowflake2.svg"
 import premiumStar from "../../assets/svg/star.svg"
 
@@ -22,7 +20,7 @@ import Slider from "react-slider"
 import {useThemeSelector, useThemeActions, useLayoutSelector, useSearchActions, useSearchSelector, 
 useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, usePlaybackSelector,
 usePlaybackActions} from "../../store"
-import {Themes} from "../../types/Types"
+import HSLDropdown from "../../ui/HSLDropdown"
 import "./styles/navbar.less"
 
 interface Props {
@@ -31,14 +29,14 @@ interface Props {
 
 const NavBar: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, i18n, siteHue, siteSaturation, siteLightness, particles, particleAmount, particleSize, particleSpeed} = useThemeSelector()
-    const {setTheme, setSiteHue, setSiteSaturation, setSiteLightness, setParticles, setParticleAmount, setParticleSize, setParticleSpeed} = useThemeActions()
+    const {i18n, siteHue, siteSaturation, siteLightness, particles, particleAmount, particleSize, particleSpeed} = useThemeSelector()
+    const {setParticles, setParticleAmount, setParticleSize, setParticleSpeed} = useThemeActions()
     const {mobile, tablet, relative, hideNavbar, hideSidebar, hideSortbar, hideTitlebar, hideMobileNavbar} = useLayoutSelector()
     const {setHideMobileNavbar, setHideNavbar} = useLayoutActions()
     const {audio, showMiniPlayer} = usePlaybackSelector()
     const {setShowMiniPlayer} = usePlaybackActions()
-    const {search, scroll, pageMultiplier} = useSearchSelector()
-    const {setSearch, setSearchFlag, setScroll, setPageMultiplier} = useSearchActions()
+    const {search} = useSearchSelector()
+    const {setSearch, setSearchFlag} = useSearchActions()
     const {setEnableDrag} = useInteractionActions()
     const {session, userImg, hasNotification} = useSessionSelector()
     const {setSessionFlag, setHasNotification} = useSessionActions()
@@ -137,16 +135,6 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
         setShowMiniPlayer(!showMiniPlayer)
     }
 
-    const lightChange = () => {
-        let newTheme = ""
-        if (theme.includes("light")) {
-            newTheme = "dark"
-        } else {
-            newTheme = "light"
-        }
-        setTheme(newTheme as Themes)
-    }
-
     const getMusicIcon = () => {
         return audio ? getPinkIcon(music) : getIcon(music)
     }
@@ -223,39 +211,6 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (mobile) setTimeout(() => forceUpdate(), 50)
     }, [mobile])
-
-    const resetFilters = () => {
-        setSiteHue(180)
-        setSiteSaturation(100)
-        setSiteLightness(50)
-    }
-
-    const getColorDropdownJSX = () => {
-        let style = mobile ? {top: "500px"} : {top: "30px"}
-        if (typeof window !== "undefined") style = {top: `${functions.dom.navbarHeight()}px`}
-        return (
-            <div className={`title-dropdown ${activeColorDropdown ? "" : "hide-title-dropdown"}`} style={style} onMouseEnter={() => setHideNavbar(false)} onMouseLeave={() => setHideNavbar(true)}>
-                <div className="title-dropdown-row">
-                    <span className="title-dropdown-text">{i18n.filters.hue}</span>
-                    <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setSiteHue(value)} min={60} max={272} step={1} value={siteHue}/>
-                </div>
-                <div className="title-dropdown-row">
-                    <span className="title-dropdown-text">{i18n.filters.saturation}</span>
-                    <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setSiteSaturation(value)} min={50} max={100} step={1} value={siteSaturation}/>
-                </div>
-                <div className="title-dropdown-row">
-                    <span className="title-dropdown-text">{i18n.filters.lightness}</span>
-                    <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setSiteLightness(value)} min={45} max={55} step={1} value={siteLightness}/>
-                </div>
-                <div className="title-dropdown-row" style={{justifyContent: "space-evenly"}}>
-                    <button className="title-dropdown-button" onClick={() => resetFilters()}>{i18n.filters.reset}</button>
-                    <button className="title-dropdown-button" onClick={() => lightChange()}>
-                        <img src={theme.includes("light") ? darkSVG : lightSVG}/>
-                    </button>
-                </div>
-            </div>
-        )
-    }
 
     const resetParticles = () => {
         setParticleAmount(25)
@@ -336,7 +291,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     {permissions.isMod(session) ? <img className="nav-color" src={getIcon(crown)} onClick={() => navigate("/mod-queue")} style={{filter}}/> : null}
                 </div>
                 <MiniAudioPlayer/>
-                {getColorDropdownJSX()}
+                <HSLDropdown active={activeColorDropdown}/>
                 {getParticleDropdownJSX()}
             </div>
         )
@@ -388,7 +343,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     {permissions.isMod(session) && !hideSidebar ? <img className="nav-color" src={getIcon(crown)} onClick={() => navigate("/mod-queue")} style={{filter}}/> : null}
                 </div>
                 <MiniAudioPlayer/>
-                {getColorDropdownJSX()}
+                <HSLDropdown active={activeColorDropdown}/>
                 {getParticleDropdownJSX()}
             </div>
             </>
