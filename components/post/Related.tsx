@@ -1,11 +1,9 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useNavigate} from "react-router-dom"
 import {useCacheActions, useLayoutSelector, useSearchSelector, useSessionSelector, useThemeSelector,
-useSessionActions, useSearchActions, usePageSelector, usePageActions, useMiscDialogActions,
-useFlagSelector, useFlagActions, useCacheSelector} from "../../store"
+useSessionActions, useSearchActions, usePageSelector, usePageActions, useCacheSelector} from "../../store"
 import {TrackablePromise} from "../../structures/TrackablePromise"
 import functions from "../../functions/Functions"
-import permissions from "../../structures/Permissions"
 import scrollSVG from "../../assets/svg/scroll.svg"
 import pagesSVG from "../../assets/svg/pages.svg"
 import squareSVG from "../../assets/svg/square.svg"

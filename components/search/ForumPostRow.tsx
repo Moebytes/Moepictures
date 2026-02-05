@@ -1,14 +1,14 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useLayoutSelector, useActiveActions, useSessionActions, 
-useFilterSelector, useThreadDialogSelector, useThreadDialogActions, useFlagActions, useCacheSelector} from "../../store"
+useThreadDialogSelector, useThreadDialogActions, useCacheSelector} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import favicon from "../../assets/icons/favicon.png"
-import quoteOptIcon from "../../assets/icons/quote-opt.png"
-import reportOptIcon from "../../assets/icons/report-opt.png"
-import editOptIcon from "../../assets/icons/edit-opt.png"
-import deleteOptIcon from "../../assets/icons/delete-opt.png"
+import quoteOptIcon from "../../assets/svg/quote.svg"
+import reportOptIcon from "../../assets/svg/report.svg"
+import editOptIcon from "../../assets/svg/edit.svg"
+import deleteOptIcon from "../../assets/svg/delete.svg"
 import {ForumPostSearch} from "../../types/Types"
 import "./styles/commentrow.less"
 
@@ -26,16 +26,19 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {emojis} = useCacheSelector()
     const {setQuoteText} = useActiveActions()
-    const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {deleteReplyID, deleteReplyFlag, editReplyID, editReplyFlag, editReplyContent, editReplyR18, 
     deleteThreadID, deleteThreadFlag, editThreadID, editThreadFlag, editThreadTitle, editThreadContent,
-    editThreadR18, reportReplyID, reportThreadID} = useThreadDialogSelector()
+    editThreadR18} = useThreadDialogSelector()
     const {setDeleteReplyID, setDeleteReplyFlag, setEditReplyID, setEditReplyFlag, setEditReplyContent, setEditReplyR18,
     setDeleteThreadID, setDeleteThreadFlag, setEditThreadID, setEditThreadFlag, setEditThreadTitle, setEditThreadContent, 
     setEditThreadR18, setReportReplyID, setReportThreadID} = useThreadDialogActions()
     const navigate = useNavigate()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
 
     const defaultIcon = props.forumPost?.image ? false : true
 
@@ -173,11 +176,11 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="commentrow-options">
                     <div className="commentrow-options-container" onClick={editForumPostDialog}>
-                        <img className="commentrow-options-img" src={editOptIcon}/>
+                        <img className="commentrow-options-img" src={getIcon(editOptIcon)}/>
                         <span className="commentrow-options-text" style={{color: "var(--text)"}}>{i18n.buttons.edit}</span>
                     </div>
                     <div className="commentrow-options-container" onClick={deleteForumPostDialog}>
-                        <img className="commentrow-options-img" src={deleteOptIcon}/>
+                        <img className="commentrow-options-img" src={getIcon(deleteOptIcon)}/>
                         <span className="commentrow-options-text" style={{color: "var(--text)"}}>{i18n.buttons.delete}</span>
                     </div>
                 </div>
@@ -187,20 +190,20 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="commentrow-options">
                     <div className="commentrow-options-container" onClick={triggerQuote}>
-                        <img className="commentrow-options-img" src={quoteOptIcon}/>
+                        <img className="commentrow-options-img" src={getIcon(quoteOptIcon)}/>
                         <span className="commentrow-options-text" style={{color: "var(--text)"}}>{i18n.buttons.quote}</span>
                     </div>
                     {permissions.isMod(session) ? <>
                     <div className="commentrow-options-container" onClick={editForumPostDialog}>
-                        <img className="commentrow-options-img" src={editOptIcon}/>
+                        <img className="commentrow-options-img" src={getIcon(editOptIcon)}/>
                         <span className="commentrow-options-text" style={{color: "var(--text)"}}>{i18n.buttons.edit}</span>
                     </div>
                     <div className="commentrow-options-container" onClick={deleteForumPostDialog}>
-                        <img className="commentrow-options-img" src={deleteOptIcon}/>
+                        <img className="commentrow-options-img" src={getIcon(deleteOptIcon)}/>
                         <span className="commentrow-options-text" style={{color: "var(--text)"}}>{i18n.buttons.delete}</span>
                     </div></> : 
                     <div className="commentrow-options-container" onClick={reportForumPostDialog}>
-                        <img className="commentrow-options-img" src={reportOptIcon}/>
+                        <img className="commentrow-options-img" src={getIcon(reportOptIcon)}/>
                         <span className="commentrow-options-text" style={{color: "var(--text)"}}>{i18n.buttons.report}</span>
                     </div>}
                 </div>

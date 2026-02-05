@@ -4,9 +4,9 @@ import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActio
 useCacheSelector, useActiveActions, useMessageDialogSelector, useInteractionActions} from "../../store"
 import functions from "../../functions/Functions"
 import favicon from "../../assets/icons/favicon.png"
-import quoteOptIcon from "../../assets/icons/quote-opt.png"
-import editOptIcon from "../../assets/icons/edit-opt.png"
-import deleteOptIcon from "../../assets/icons/delete-opt.png"
+import quoteOptIcon from "../../assets/svg/quote.svg"
+import editOptIcon from "../../assets/svg/edit.svg"
+import deleteOptIcon from "../../assets/svg/delete.svg"
 import permissions from "../../structures/Permissions"
 import {MessageUserReply} from "../../types/Types"
 import "./styles/reply.less"
@@ -33,6 +33,10 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
     const defaultIcon = props.reply?.image ? false : true
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
 
     const getReplyPFP = () => {
         if (props.reply?.image) {
@@ -105,11 +109,11 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="reply-options">
                     <div className="reply-options-container" onClick={editReplyDialog}>
-                        <img className="reply-options-img" src={editOptIcon} style={{filter}}/>
+                        <img className="reply-options-img" src={getIcon(editOptIcon)} style={{filter}}/>
                         <span className="reply-options-text">{i18n.buttons.edit}</span>
                     </div>
                     <div className="reply-options-container" onClick={deleteReplyDialog}>
-                        <img className="reply-options-img" src={deleteOptIcon} style={{filter}}/>
+                        <img className="reply-options-img" src={getIcon(deleteOptIcon)} style={{filter}}/>
                         <span className="reply-options-text">{i18n.buttons.delete}</span>
                     </div>
                 </div>
@@ -119,16 +123,16 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="reply-options">
                     <div className="reply-options-container" onClick={triggerQuote}>
-                        <img className="reply-options-img" src={quoteOptIcon} style={{filter}}/>
+                        <img className="reply-options-img" src={getIcon(quoteOptIcon)} style={{filter}}/>
                         <span className="reply-options-text">{i18n.buttons.quote}</span>
                     </div>
                     {permissions.isMod(session) ? <>
                     <div className="reply-options-container" onClick={editReplyDialog}>
-                        <img className="reply-options-img" src={editOptIcon} style={{filter}}/>
+                        <img className="reply-options-img" src={getIcon(editOptIcon)} style={{filter}}/>
                         <span className="reply-options-text">{i18n.buttons.edit}</span>
                     </div>
                     <div className="reply-options-container" onClick={deleteReplyDialog}>
-                        <img className="reply-options-img" src={deleteOptIcon} style={{filter}}/>
+                        <img className="reply-options-img" src={getIcon(deleteOptIcon)} style={{filter}}/>
                         <span className="reply-options-text">{i18n.buttons.delete}</span>
                     </div></> : null}
                 </div>

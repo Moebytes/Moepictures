@@ -3,8 +3,8 @@ import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions, useLayoutSelector,
 useInteractionActions} from "../../store"
 import functions from "../../functions/Functions"
-import undeleteIcon from "../../assets/icons/revert.png"
-import deleteIcon from "../../assets/icons/delete.png"
+import undeleteIcon from "../../assets/svg/revert.svg"
+import deleteIcon from "../../assets/svg/delete.svg"
 import {DeletedPost} from "../../types/Types"
 import TinyImage from "../image/TinyImage"
 import "./styles/historyrow.less"
@@ -23,6 +23,14 @@ const DeletedPostRow: React.FunctionComponent<Props> = (props) => {
     const {permaDeletePostID, permaDeletePostFlag} = usePostDialogSelector()
     const {setUndeletePostID, setPermaDeletePostID, setPermaDeletePostFlag} = usePostDialogActions()
     const navigate = useNavigate()
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
+
+    const getRedIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "#f71e75")
+    }
 
     const undeletePostDialog = async () => {
         setUndeletePostID({postID: props.post.postID})
@@ -49,11 +57,11 @@ const DeletedPostRow: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="historyrow-options">
                 <div className="historyrow-options-container" onClick={undeletePostDialog}>
-                    <img className="historyrow-options-img" src={undeleteIcon}/>
+                    <img className="historyrow-options-img" src={getIcon(undeleteIcon)}/>
                     <span className="historyrow-options-text">{i18n.buttons.undelete}</span>
                 </div>
                 <div className="historyrow-options-container" onClick={deletePostDialog}>
-                    <img className="historyrow-options-img" src={deleteIcon}/>
+                    <img className="historyrow-options-img" src={getRedIcon(deleteIcon)}/>
                     <span className="historyrow-options-text">{i18n.buttons.delete}</span>
                 </div>
             </div>

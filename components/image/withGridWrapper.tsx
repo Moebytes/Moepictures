@@ -3,7 +3,7 @@ import {useNavigate, useLocation} from "react-router-dom"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, useCacheActions, useThemeSelector, 
 useSearchSelector, useSessionSelector, useFlagSelector, useFlagActions, useSearchActions} from "../../store"
 import functions from "../../functions/Functions"
-import privateIcon from "../../assets/icons/lock-opt.png"
+import privateIcon from "../../assets/svg/lock.svg"
 import musicNote from "../../assets/svg/music-note.svg"
 import {PostSearch, GIFFrame} from "../../types/Types"
 import "./styles/gridimage.less"
@@ -527,7 +527,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         }
 
         const cornerIcon = () => {
-            if (props.post.private) return privateIcon
+            if (props.post.private) return functions.color.colorizeSVG(privateIcon, "--audioPlayerIcons")
             if (audioRef.current) return functions.color.colorizeSVG(musicNote, "--audioPlayerIcons")
             return null
         }

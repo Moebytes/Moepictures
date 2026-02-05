@@ -4,12 +4,11 @@ import {useThemeSelector, useSessionSelector, useSessionActions, useLayoutAction
 useLayoutSelector, useFlagSelector, useCacheActions, useInteractionActions, useSearchActions, useTagDialogActions,
 useTagDialogSelector, useSearchSelector} from "../../store"
 import functions from "../../functions/Functions"
-import permissions from "../../structures/Permissions"
-import alias from "../../assets/icons/alias.png"
-import edit from "../../assets/icons/edit.png"
-import historyIcon from "../../assets/icons/history.png"
-import deleteIcon from "../../assets/icons/delete.png"
-import categoryIcon from "../../assets/icons/category.png"
+import alias from "../../assets/svg/all.svg"
+import edit from "../../assets/svg/edit.svg"
+import historyIcon from "../../assets/svg/history.svg"
+import deleteIcon from "../../assets/svg/delete.svg"
+import categoryIcon from "../../assets/svg/category.svg"
 import website from "../../assets/icons/website.png"
 import fandom from "../../assets/icons/fandom.png"
 import wikipedia from "../../assets/icons/wikipedia.png"
@@ -37,6 +36,10 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const {setEditTagObj, setEditTagFlag, setDeleteTagID, setDeleteTagFlag, setCategorizeTag, setAliasTagID, setAliasTagFlag, setAliasTagName} = useTagDialogActions()
     const navigate = useNavigate()
     const scrollRef = useRef<HTMLSpanElement>(null)
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--lockColor")
+    }
 
     useEffect(() => {
         if (!scrollRef.current) return
@@ -278,11 +281,11 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             </div>
             {session.username ?
             <div className="tag-buttons">
-                <img className="tag-button" src={categoryIcon} onClick={categorizeTagDialog}/>
-                <img className="tag-button" src={historyIcon} onClick={tagHistory}/>
-                <img className="tag-button" src={alias} onClick={aliasTagDialog}/>
-                <img className="tag-button" src={edit} onClick={editTagDialog}/>
-                <img className="tag-button" src={deleteIcon} onClick={deleteTagDialog}/>
+                <img className="tag-button" src={getIcon(categoryIcon)} onClick={categorizeTagDialog}/>
+                <img className="tag-button" src={getIcon(historyIcon)} onClick={tagHistory}/>
+                <img className="tag-button" src={getIcon(alias)} onClick={aliasTagDialog}/>
+                <img className="tag-button" src={getIcon(edit)} onClick={editTagDialog}/>
+                <img className="tag-button" src={getIcon(deleteIcon)} onClick={deleteTagDialog}/>
             </div> : null}
         </div>
     )

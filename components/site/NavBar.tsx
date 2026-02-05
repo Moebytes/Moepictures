@@ -12,8 +12,7 @@ import logoutSVG from "../../assets/svg/logout.svg"
 import lightSVG from "../../assets/svg/light.svg"
 import darkSVG from "../../assets/svg/dark.svg"
 import snowflakeSVG from "../../assets/svg/snowflake2.svg"
-
-import premiumStar from "../../assets/icons/premium-star.png"
+import premiumStar from "../../assets/svg/star.svg"
 
 import permissions from "../../structures/Permissions"
 import functions from "../../functions/Functions"
@@ -62,6 +61,10 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
 
     const getPinkIcon = (icon: string) => {
         return functions.color.colorizeSVG(icon, "#ff75fa")
+    }
+
+    const getPremiumIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--premiumColor")
     }
 
     useEffect(() => {
@@ -320,7 +323,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span className="mobile-nav-text" onClick={() => {navigate("/forum"); setHideMobileNavbar(true)}}>{i18n.navbar.forum}</span>
                     <span className="mobile-nav-text" onClick={() => {navigate("/help"); setHideMobileNavbar(true)}}>{i18n.navbar.help}</span>
                     {permissions.isPremiumEnabled() && session.username ? <div className="mobile-nav-img-container" onClick={() => {navigate("/premium"); setHideMobileNavbar(true)}}>
-                        <img className="mobile-nav-img" src={premiumStar} style={{marginRight: "10px"}}/>
+                        <img className="mobile-nav-img" src={getPremiumIcon(premiumStar)} style={{marginRight: "10px"}}/>
                         <span className="mobile-nav-text" style={{margin: "0px", color: "var(--premiumColor)"}}>{i18n.roles.premium}</span>
                     </div> : null}
                 </div>
@@ -370,7 +373,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/groups")}>{i18n.sort.groups}</span>
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/forum")}>{i18n.navbar.forum}</span>
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/help")}>{i18n.navbar.help}</span>
-                    {permissions.isPremiumEnabled() && session.username ? <img style={{marginTop: "2px"}} className="nav-img" onClick={() => navigate("/premium")} src={premiumStar}/> : null}
+                    {permissions.isPremiumEnabled() && session.username ? <img style={{marginTop: "2px"}} className="nav-img" onClick={() => navigate("/premium")} src={getPremiumIcon(premiumStar)}/> : null}
                     <div className={`nav-search-container ${!hideSidebar || tablet ? "hide-nav-search" : ""}`}>
                         <img className="nav-search-icon" src={getIcon(searchIcon)} onClick={() => setSearchFlag(true)}/>
                         <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>

@@ -3,15 +3,8 @@ import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions, useLayoutSelector,
 useFilterSelector, useInteractionActions} from "../../store"
 import functions from "../../functions/Functions"
-import postHistoryRevert from "../../assets/icons/revert.png"
-import postHistoryDelete from "../../assets/icons/delete.png"
-import adminCrown from "../../assets/icons/admin-crown.png"
-import modCrown from "../../assets/icons/mod-crown.png"
-import premiumCuratorStar from "../../assets/icons/premium-curator-star.png"
-import curatorStar from "../../assets/icons/curator-star.png"
-import premiumContributorPencil from "../../assets/icons/premium-contributor-pencil.png"
-import contributorPencil from "../../assets/icons/contributor-pencil.png"
-import premiumStar from "../../assets/icons/premium-star.png"
+import postHistoryRevert from "../../assets/svg/revert.svg"
+import postHistoryDelete from "../../assets/svg/delete.svg"
 import permissions from "../../structures/Permissions"
 import TinyImage from "../image/TinyImage"
 import {PostHistory, PrunedUser, SourceData, TagCategories} from "../../types/Types"
@@ -42,6 +35,14 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const imageFiltersRef = useRef<HTMLDivElement>(null)
     const postID = props.postHistory.postID
     let hasChanges = functions.compare.hasHistoryChanges(props.postHistory)
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
+
+    const getRedIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "#f71e75")
+    }
 
     const updateTagCategories = async () => {
         if (!props.postHistory.addedTags || !props.postHistory.removedTags) return
@@ -151,12 +152,12 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="historyrow-options">
                     <div className="historyrow-options-container" onClick={revertPostHistoryDialog}>
-                        <img className="historyrow-options-img" src={postHistoryRevert}/>
+                        <img className="historyrow-options-img" src={getIcon(postHistoryRevert)}/>
                         <span className="historyrow-options-text">{i18n.buttons.revert}</span>
                     </div>
                     {permissions.isAdmin(session) ?
                     <div className="historyrow-options-container" onClick={deletePostHistoryDialog}>
-                        <img className="historyrow-options-img" src={postHistoryDelete}/>
+                        <img className="historyrow-options-img" src={getRedIcon(postHistoryDelete)}/>
                         <span className="historyrow-options-text">{i18n.buttons.delete}</span>
                     </div> : null}
                 </div>
@@ -165,7 +166,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="historyrow-options">
                     <div className="historyrow-options-container" onClick={revertPostHistoryDialog}>
-                        <img className="historyrow-options-img" src={postHistoryRevert}/>
+                        <img className="historyrow-options-img" src={getIcon(postHistoryRevert)}/>
                         <span className="historyrow-options-text">{i18n.buttons.revert}</span>
                     </div>
                 </div>

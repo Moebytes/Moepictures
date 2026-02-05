@@ -8,7 +8,6 @@ import pixiv from "../../assets/icons/pixiv.png"
 import soundcloud from "../../assets/icons/soundcloud.png"
 import sketchfab from "../../assets/icons/sketchfab.png"
 import twitter from "../../assets/icons/twitter.png"
-import permissions from "../../structures/Permissions"
 import {TagCategorySearch} from "../../types/Types"
 import "./styles/artistrow.less"
 

@@ -12,17 +12,15 @@ import favicon from "../../assets/icons/favicon.png"
 import searchIcon from "../../assets/svg/search.svg"
 import searchImage from "../../assets/svg/search-image.svg"
 import random from "../../assets/svg/random.svg"
-
 import autoSearchIcon from "../../assets/svg/autosearch.svg"
 import saveSearchIcon from "../../assets/svg/bookmark.svg"
 import favSearchIcon from "../../assets/svg/heart.svg"
-
 import terms from "../../assets/svg/terms.svg"
 import privacy from "../../assets/svg/privacy.svg"
 import contact from "../../assets/svg/contact.svg"
-import question from "../../assets/icons/question.png"
-import unheart from "../../assets/icons/unheart.png"
-import bookmark from "../../assets/icons/bookmark.png"
+import question from "../../assets/svg/question.svg"
+import unheart from "../../assets/svg/unheart.svg"
+import bookmark from "../../assets/svg/bookmark.svg"
 
 import hashIcon from "../../assets/svg/hash.svg"
 import infoIcon from "../../assets/svg/info.svg"
@@ -46,13 +44,12 @@ import unlockIcon from "../../assets/svg/unlock.svg"
 import historyIcon from "../../assets/svg/history.svg"
 import deleteIcon from "../../assets/svg/delete.svg"
 import undeleteIcon from "../../assets/svg/undelete.svg"
-
 import rejectRed from "../../assets/svg/reject.svg"
 import approveGreen from "../../assets/svg/approve.svg"
 import tagIcon from "../../assets/svg/tags.svg"
-import compressIcon from "../../assets/icons/compress.png"
-import upscaleIcon from "../../assets/icons/waifu2x.png"
-import appealIcon from "../../assets/icons/appeal.png"
+import compressIcon from "../../assets/svg/compress.svg"
+import upscaleIcon from "../../assets/svg/waifu2x.svg"
+import appealIcon from "../../assets/svg/appeal.svg"
 
 import website from "../../assets/icons/website.png"
 import fandom from "../../assets/icons/fandom.png"
@@ -149,6 +146,10 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const getPurpleIcon = (icon: string) => {
         return functions.color.colorizeSVG(icon, "#5e38f6")
+    }
+
+    const getPinkIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "#fe019c")
     }
 
     const updateTags = async () => {
@@ -416,7 +417,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     </div> : null}
                     <div className="sidebar-row">
                         <span className="tag-hover" onMouseEnter={(event) => tagMouseEnter(event, props.artists?.[i].tag)}>
-                            <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.artists?.[i].tag)} onAuxClick={(event) => tagInfo(event, props.artists?.[i].tag)}/>
+                            <img className="tag-info" src={getPinkIcon(question)} onClick={(event) => tagInfo(event, props.artists?.[i].tag)} onAuxClick={(event) => tagInfo(event, props.artists?.[i].tag)}/>
                             <span className="tag artist-tag-color" onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, props.artists?.[i].tag)}>{props.artists[i].tag?.replaceAll("-", " ")}</span>
                             {artistSocials()}
                             <span className={`tag-count ${props.artists[i].count === "1" ? "artist-tag-color" : ""}`}>{props.artists[i].count}</span>
@@ -456,7 +457,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 </div> : null}
                 <div className="sidebar-row">
                     <span className="tag-hover" onMouseEnter={(event) => tagMouseEnter(event, props.characters?.[i].tag)}>
-                        <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.characters?.[i].tag)} onAuxClick={(event) => tagInfo(event, props.characters?.[i].tag)}/>
+                        <img className="tag-info" src={getPinkIcon(question)} onClick={(event) => tagInfo(event, props.characters?.[i].tag)} onAuxClick={(event) => tagInfo(event, props.characters?.[i].tag)}/>
                         <span className="tag character-tag-color" onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, props.characters?.[i].tag)}>{props.characters[i].tag?.replaceAll("-", " ")}</span>
                         {characterSocials()}
                         <span className={`tag-count ${props.characters[i].count === "1" ? "artist-tag-color" : ""}`}>{props.characters[i].count}</span>
@@ -502,7 +503,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 </div> : null}
                 <div className="sidebar-row">
                     <span className="tag-hover" onMouseEnter={(event) => tagMouseEnter(event, props.series?.[i].tag)}>
-                        <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.series?.[i].tag)} onAuxClick={(event) => tagInfo(event, props.series?.[i].tag)}/>
+                        <img className="tag-info" src={getPinkIcon(question)} onClick={(event) => tagInfo(event, props.series?.[i].tag)} onAuxClick={(event) => tagInfo(event, props.series?.[i].tag)}/>
                         <span className="tag series-tag-color" onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, props.series?.[i].tag)}>{props.series[i].tag?.replaceAll("-", " ")}</span>
                         {seriesSocials()}
                         <span className={`tag-count ${props.series[i].count === "1" ? "artist-tag-color" : ""}`}>{props.series[i].count}</span>
@@ -527,7 +528,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             jsx.push(
                 <div className="sidebar-row">
                     <span className="tag-hover" onMouseEnter={(event) => tagMouseEnter(event, props.meta?.[i].tag)}>
-                        <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.meta?.[i].tag)} onAuxClick={(event) => tagInfo(event, props.meta?.[i].tag)}/>
+                        <img className="tag-info" src={getPinkIcon(question)} onClick={(event) => tagInfo(event, props.meta?.[i].tag)} onAuxClick={(event) => tagInfo(event, props.meta?.[i].tag)}/>
                         <span className="tag meta-tag-color" onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, props.meta?.[i].tag)}>{props.meta[i].tag?.replaceAll("-", " ")}</span>
                         <span className={`tag-count ${props.meta[i].count === "1" ? "artist-tag-color" : ""}`}>{props.meta[i].count}</span>
                     </span>
@@ -628,7 +629,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 jsx.push(
                     <div className="sidebar-row">
                         <span className="tag-hover" onMouseEnter={(event) => tagMouseEnter(event, currentTags[i].tag)}>
-                            <img className="tag-info" src={question} onClick={(event) => tagInfo(event, currentTags[i].tag)} onAuxClick={(event) => tagInfo(event, currentTags[i].tag)}/>
+                            <img className="tag-info" src={getPinkIcon(question)} onClick={(event) => tagInfo(event, currentTags[i].tag)} onAuxClick={(event) => tagInfo(event, currentTags[i].tag)}/>
                             <span className={`tag ${functions.tag.getTagColor(currentTags[i])}`} onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, currentTags[i].tag)}>{currentTags[i].tag?.replaceAll("-", " ")}</span>
                             <span className={`tag-count ${currentTags[i].count === "1" ? "artist-tag-color" : ""}`}>{currentTags[i].count}</span>
                         </span>
@@ -663,7 +664,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             jsx.push(
                 <div className="sidebar-row">
                     <span className="tag-hover" onMouseEnter={(event) => tagMouseEnter(event, currentTags[i].tag)}>
-                        <img className="tag-info" src={question} onClick={(event) => tagInfo(event, currentTags[i].tag)} onAuxClick={(event) => tagInfo(event, currentTags[i].tag)}/>
+                        <img className="tag-info" src={getPinkIcon(question)} onClick={(event) => tagInfo(event, currentTags[i].tag)} onAuxClick={(event) => tagInfo(event, currentTags[i].tag)}/>
                         <span className={`tag ${functions.tag.getTagColor(currentTags[i])}`} onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, currentTags[i].tag)}>{currentTags[i].tag?.replaceAll("-", " ")}</span>
                         <span className={`tag-count ${currentTags[i].count === "1" ? "artist-tag-color" : ""}`}>{currentTags[i].count}</span>
                     </span>

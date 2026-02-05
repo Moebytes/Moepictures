@@ -2,9 +2,8 @@ import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useLayoutSelector, useSessionActions, useFilterSelector} from "../../store"
 import functions from "../../functions/Functions"
-import permissions from "../../structures/Permissions"
 import favicon from "../../assets/icons/favicon.png"
-import noteHistory from "../../assets/icons/history.png"
+import noteHistory from "../../assets/svg/history.svg"
 import TinyImage from "../image/TinyImage"
 import {NoteSearch} from "../../types/Types"
 import "./styles/commentrow.less"
@@ -24,6 +23,10 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
     const navigate = useNavigate()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
 
     const defaultIcon = props.note?.image ? false : true
 
@@ -75,7 +78,7 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="commentrow-options">
                 <div className="commentrow-options-container" onClick={showHistory}>
-                    <img className="commentrow-options-img" src={noteHistory}/>
+                    <img className="commentrow-options-img" src={getIcon(noteHistory)}/>
                     <span className="commentrow-options-text">{i18n.sidebar.history}</span>
                 </div>
             </div>

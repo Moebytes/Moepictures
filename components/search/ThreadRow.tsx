@@ -2,20 +2,11 @@ import React, {useEffect, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions} from "../../store"
 import functions from "../../functions/Functions"
-import adminCrown from "../../assets/icons/admin-crown.png"
-import modCrown from "../../assets/icons/mod-crown.png"
-import systemCrown from "../../assets/icons/system-crown.png"
-import premiumCuratorStar from "../../assets/icons/premium-curator-star.png"
-import curatorStar from "../../assets/icons/curator-star.png"
-import premiumContributorPencil from "../../assets/icons/premium-contributor-pencil.png"
-import contributorPencil from "../../assets/icons/contributor-pencil.png"
-import premiumStar from "../../assets/icons/premium-star.png"
-import unread from "../../assets/icons/unread.png"
-import read from "../../assets/icons/read.png"
-import readLight from "../../assets/icons/read-light.png"
 import favicon from "../../assets/icons/favicon.png"
-import sticky from "../../assets/icons/sticky.png"
-import lock from "../../assets/icons/lock.png"
+import unread from "../../assets/svg/unread.svg"
+import read from "../../assets/svg/read.svg"
+import sticky from "../../assets/svg/sticky.svg"
+import lock from "../../assets/svg/lock.svg"
 import {ThreadSearch, PrunedUser} from "../../types/Types"
 import "./styles/thread.less"
 
@@ -38,6 +29,10 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     const navigate = useNavigate()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
+
+    const getIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
 
     const updateUpdater = async () => {
         if (!props.thread) return
@@ -128,9 +123,8 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const getReadIcon = () => {
-        if (!readStatus()) return unread
-        if (theme.includes("light")) return readLight
-        return read
+        if (!readStatus()) return getIcon(unread)
+        return getIcon(read)
     }
 
     const dateTextJSX = () => {
@@ -168,8 +162,8 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
                 <div className="thread-container">
                     <div className="thread-row" style={{width: "100%"}}>
                         {session.username ? <img draggable={false} className="thread-opt-icon" src={getReadIcon()} onClick={toggleRead} style={{filter}}/> : null}
-                        {props.thread?.sticky ? <img draggable={false} className="thread-icon" src={sticky} style={{marginTop: "4px"}}/> : null}
-                        {props.thread?.locked ? <img draggable={false} className="thread-icon" src={lock}/> : null}
+                        {props.thread?.sticky ? <img draggable={false} className="thread-icon" src={getIcon(sticky)} style={{marginTop: "4px"}}/> : null}
+                        {props.thread?.locked ? <img draggable={false} className="thread-icon" src={getIcon(lock)}/> : null}
                         <span className={`thread-title ${readStatus() ? "thread-read" : ""}`} onClick={threadPage} onAuxClick={threadPage}>
                             {props.thread?.r18 ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
                             {props.thread?.title || ""}

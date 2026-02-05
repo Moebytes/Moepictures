@@ -3,7 +3,6 @@ import {useNavigate, useLocation} from "react-router-dom"
 import {useSessionSelector, useSessionActions, useSearchSelector, useSearchActions, useInteractionSelector, 
 useFlagActions, useInteractionActions, useThemeSelector, useActiveActions} from "../../store"
 import functions from "../../functions/Functions"
-
 import pixiv from "../../assets/icons/pixiv.png"
 import twitter from "../../assets/icons/twitter.png"
 import deviantart from "../../assets/icons/deviantart.png"
@@ -22,7 +21,6 @@ import bandcamp from "../../assets/icons/bandcamp.png"
 import sketchfab from "../../assets/icons/sketchfab.png"
 
 import tagIcon from "../../assets/svg/tags.svg"
-
 import image from "../../assets/svg/image.svg"
 import animation from "../../assets/svg/animation.svg"
 import video from "../../assets/svg/video.svg"
@@ -30,12 +28,10 @@ import comic from "../../assets/svg/comic.svg"
 import live2d from "../../assets/svg/live2d.svg"
 import model from "../../assets/svg/model.svg"
 import audio from "../../assets/svg/music.svg"
-
 import cute from "../../assets/svg/cute.svg"
 import sexy from "../../assets/svg/sexy.svg"
 import erotic from "../../assets/svg/erotic.svg"
 import lewd from "../../assets/svg/lewd.svg"
-
 import $2d from "../../assets/svg/2d.svg"
 import $3d from "../../assets/svg/3d.svg"
 import pixel from "../../assets/svg/pixel.svg"

@@ -6,7 +6,6 @@ useSessionActions, useActiveActions, useFlagActions, useNoteDialogSelector,
 useNoteDialogActions, useInteractionSelector, useFlagSelector} from "../../store"
 import functions from "../../functions/Functions"
 import {ShapeEditor, DrawLayer, wrapShape} from "react-shape-editor"
-
 import noteHistory from "../../assets/svg/history.svg"
 import noteOCR from "../../assets/svg/ocr.svg"
 import noteSave from "../../assets/svg/save.svg"
@@ -576,9 +575,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                     <img draggable={false} className="note-editor-button" src={getIcon(noteClear)} style={{filter}} onClick={() => clearNotes()}/>
                     <img draggable={false} className="note-editor-button" src={getIcon(noteCopy)} style={{filter}} onClick={() => copyNotes()}/>
                     <img draggable={false} className="note-editor-button" src={getIcon(notePaste)} style={{filter}} onClick={() => pasteNotes()}/>
-                    <img draggable={false} className="note-editor-button" src={showTranscript ? getIcon(translationJA) : getIcon(translationEN)} style={{filter}} onClick={() => setShowTranscript(!showTranscript)}/>
-                    {/* <img draggable={false} className="note-editor-button" src={getIcon(noteText)} style={{filter}} onClick={() => editTextDialog()}/> */}
-                    {/* <img draggable={false} className="note-editor-button" src={getIcon(noteDelete)} style={{filter}} onClick={() => deleteFocused()}/> */}
+                    <img draggable={false} className="note-editor-button" src={showTranscript ? getIcon(translationJA) : getIcon(translationEN)} style={{filter, height: "22px"}} onClick={() => setShowTranscript(!showTranscript)}/>
                     <img draggable={false} className="note-editor-button" src={noteDrawingEnabled ? getIcon(noteEdit) : getIcon(noteView)} style={{filter}} onClick={() => setNoteDrawingEnabled(!noteDrawingEnabled)}/>
                     <img draggable={false} className="note-editor-button" src={getIcon(noteToggleOff)} style={{filter}} onClick={() => setNoteMode(false)}/>
                 </div>

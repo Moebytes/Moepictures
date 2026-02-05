@@ -8,8 +8,8 @@ import functions from "../../functions/Functions"
 import hamburger from "../../assets/svg/hamburger.svg"
 import key from "../../assets/svg/key.svg"
 import logoutSVG from "../../assets/svg/logout.svg"
-import lockIcon from "../../assets/icons/lock-red.png"
-import privateIcon from "../../assets/icons/private.png"
+import lockIcon from "../../assets/svg/lock.svg"
+import privateIcon from "../../assets/svg/private.svg"
 import {PostFull, PostHistory, UnverifiedPost, Themes} from "../../types/Types"
 import "./styles/titlebar.less"
 
@@ -63,6 +63,10 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
 
     const getLoginIcon = (icon: string) => {
         return functions.color.colorizeSVG(icon, "--loginText")
+    }
+
+    const getLockIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "--lockColor")
     }
 
     const toggleMobileNavbar = () => {
@@ -172,8 +176,8 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
             </div>
             {!mobile ? 
             <div className="titlebar-search-text-container">
-                {props.post?.private ? <img draggable={false} className="titlebar-search-icon" src={privateIcon}/> : null}
-                {props.post?.locked ? <img draggable={false} className="titlebar-search-icon" src={lockIcon}/> : null}
+                {props.post?.private ? <img draggable={false} className="titlebar-search-icon" src={getIcon(privateIcon)}/> : null}
+                {props.post?.locked ? <img draggable={false} className="titlebar-search-icon" src={getLockIcon(lockIcon)}/> : null}
                 <span className={`titlebar-search-text ${props.post?.hidden ? "strikethrough" : ""}`}>
                     {props.unverified && !props.post?.deleted ? <span style={{color: "var(--pendingColor)", marginRight: "10px"}}>[{i18n.labels.pending}]</span> : null}
                     {props.post?.deleted ? <span style={{color: "var(--deletedColor)", marginRight: "10px"}}>[{i18n.time.deleted} {functions.date.timeUntil(props.post.deletionDate, i18n)}]</span> : null}

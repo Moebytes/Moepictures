@@ -283,7 +283,6 @@ const App: React.FunctionComponent = (props) => {
 
     return (
         <div className={`app ${!loaded ? " stop-transitions" : ""}`}>
-            <DragScroll/>
             <ParticleEffect/>
             <DragAndDrop/>
             <NewsBanner/>

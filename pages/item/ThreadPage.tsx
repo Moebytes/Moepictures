@@ -11,14 +11,6 @@ useLayoutActions, useActiveActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchSelector, usePageSelector,
 useThreadDialogActions, useThreadDialogSelector, useCacheSelector} from "../../store"
 import permissions from "../../structures/Permissions"
-import adminCrown from "../../assets/icons/admin-crown.png"
-import modCrown from "../../assets/icons/mod-crown.png"
-import systemCrown from "../../assets/icons/system-crown.png"
-import premiumCuratorStar from "../../assets/icons/premium-curator-star.png"
-import curatorStar from "../../assets/icons/curator-star.png"
-import premiumContributorPencil from "../../assets/icons/premium-contributor-pencil.png"
-import contributorPencil from "../../assets/icons/contributor-pencil.png"
-import premiumStar from "../../assets/icons/premium-star.png"
 import lockIcon from "../../assets/icons/lock.png"
 import stickyIcon from "../../assets/icons/sticky.png"
 import lockOptIcon from "../../assets/icons/lock-opt.png"
@@ -29,21 +21,8 @@ import editOptIcon from "../../assets/icons/edit-opt.png"
 import deleteOptIcon from "../../assets/icons/delete-opt.png"
 import quoteOptIcon from "../../assets/icons/quote-opt.png"
 import reportOptIcon from "../../assets/icons/report-opt.png"
-import emojiSelect from "../../assets/icons/emoji-select.png"
 import favicon from "../../assets/icons/favicon.png"
-import lewdIcon from "../../assets/icons/lewdgirl.png"
-import radioButton from "../../assets/icons/radiobutton.png"
-import radioButtonChecked from "../../assets/icons/radiobutton-checked.png"
-import highlight from "../../assets/icons/highlight.png"
-import bold from "../../assets/icons/bold.png"
-import italic from "../../assets/icons/italic.png"
-import underline from "../../assets/icons/underline.png"
-import strikethrough from "../../assets/icons/strikethrough.png"
-import spoiler from "../../assets/icons/spoiler.png"
-import link from "../../assets/icons/link-purple.png"
-import details from "../../assets/icons/details.png"
-import hexcolor from "../../assets/icons/hexcolor.png"
-import codeblock from "../../assets/icons/codeblock.png"
+import TextBox, {TextBoxRef} from "../../ui/TextBox"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
 import {ThreadReply, ThreadUser} from "../../types/Types"
@@ -72,15 +51,8 @@ const ThreadPage: React.FunctionComponent = () => {
     const [thread, setThread] = useState(null as ThreadUser | null)
     const [replyID, setReplyID] = useState(-1)
     const [replyJumpFlag, setReplyJumpFlag] = useState(false)
-    const [text, setText] = useState("")
-    const [r18, setR18] = useState(false)
     const [defaultIcon, setDefaultIcon] = useState(false)
-    const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
-    const [previewMode, setPreviewMode] = useState(false)
-    const [error, setError] = useState(false)
-    const errorRef = useRef<HTMLDivElement>(null)
-    const emojiRef = useRef<HTMLButtonElement>(null)
-    const textRef = useRef<HTMLTextAreaElement>(null)
+    const textBoxRef = useRef<TextBoxRef>(null)
     const navigate = useNavigate()
     const {id: threadID} = useParams() as {id: string}
 
@@ -213,15 +185,6 @@ const ThreadPage: React.FunctionComponent = () => {
         }
     }
 
-    const creatorClick = (event: React.MouseEvent) => {
-        if (!thread) return
-        if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/user/${thread.creator}`, "_blank")
-        } else {
-            navigate(`/user/${thread.creator}`)
-        }
-    }
-
     const creatorImgClick = (event: React.MouseEvent) => {
         if (!thread?.imagePost) return
         event.stopPropagation()
@@ -337,131 +300,31 @@ const ThreadPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         if (quoteText) {
+            const text = textBoxRef.current?.getText() ?? ""
             const prevText = text.trim() ? `${text.trim()}\n` : ""
-            setText(`${prevText}${quoteText.trim()}`)
+            textBoxRef.current?.updateText(`${prevText}${quoteText.trim()}`)
             setQuoteText("")
             window.scrollTo(0, document.body.scrollHeight)
         }
     }, [quoteText])
 
     const reply = async () => {
+        const text = textBoxRef.current?.getText() ?? ""
+        const r18 = textBoxRef.current?.getR18() ?? false
         const badReply = functions.validation.validateReply(text, i18n)
         if (badReply) {
-            setError(true)
-            if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = badReply
+            textBoxRef.current?.showError(badReply)
             await functions.timeout(2000)
-            return setError(false)
+            return textBoxRef.current?.clearError()
         }
         await functions.http.post("/api/thread/reply", {threadID, content: text, r18}, session, setSessionFlag)
         initItems()
-        setText("")
-    }
-
-    const getEmojiMarginRight = () => {
-        if (typeof document === "undefined") return "0px"
-        const rect = emojiRef.current?.getBoundingClientRect()
-        if (!rect) return "0px"
-        const raw = window.innerWidth - rect.right
-        let offset = -145
-        if (mobile) offset -= 20
-        return `${raw + offset}px`
-    }
-
-    const getEmojiMarginBottom = () => {
-        if (typeof document === "undefined") return "0px"
-        let elementName = ".thread-page-textarea"
-        const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
-        const rect = emojiRef.current?.getBoundingClientRect()
-        if (!rect || !bodyRect) return "0px"
-        const raw = bodyRect.bottom - rect.bottom
-        let offset = 120
-        if (mobile) offset += 0
-        return `${raw + offset}px`
-    }
-
-    const emojiGrid = () => {
-        let rows = [] as React.ReactElement[]
-        let rowAmount = 7
-        for (let i = 0; i < Object.keys(emojis).length; i++) {
-            let items = [] as React.ReactElement[]
-            for (let j = 0; j < rowAmount; j++) {
-                const k = (i*rowAmount)+j
-                const key = Object.keys(emojis)[k]
-                if (!key) break
-                const appendText = () => {
-                    setText((prev: string) => prev + ` :${key}:`)
-                    setShowEmojiDropdown(false)
-                }
-                items.push(
-                    <img draggable={false} src={emojis[key]} className="emoji-big" onClick={appendText}/>
-                )
-            }
-            if (items.length) rows.push(<div className="emoji-row">{items}</div>)
-        }
-        return (
-            <div className={`emoji-grid ${showEmojiDropdown ? "" : "hide-emoji-grid"}`}
-            style={{marginRight: getEmojiMarginRight(), marginBottom: getEmojiMarginBottom()}}>
-                {rows}
-            </div>
-        )
+        textBoxRef.current?.updateText("")
     }
 
     const viewThreads = () => {
         if (!thread) return
         navigate(`/posts/${thread.creator}`)
-    }
-
-    const getReplyBoxJSX = () => {
-        if (!thread) return
-        if (thread.locked && !permissions.isMod(session)) return (
-            <div className="thread-page-reply-box" style={{justifyContent: "flex-start"}}>
-                <span className="thread-page-validation" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>{i18n.pages.thread.locked}</span>
-            </div>
-        )
-        if (session.banned) return (
-            <div className="thread-page-reply-box" style={{justifyContent: "flex-start"}}>
-                <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>{i18n.pages.message.banned}</span>
-            </div>
-        )
-        if (session.username) {
-            return (
-                <div className="thread-page-reply-box">
-                    <div className="thread-page-input-container">
-                        <div className="thread-page-textarea-buttons">
-                            <button className="thread-page-textarea-button"><img src={highlight} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "highlight")} style={{filter}}/></button>
-                            <button className="thread-page-textarea-button"><img src={bold} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "bold")} style={{filter}}/></button>
-                            <button className="thread-page-textarea-button"><img src={italic} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "italic")} style={{filter}}/></button>
-                            <button className="thread-page-textarea-button"><img src={underline} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "underline")} style={{filter}}/></button>
-                            <button className="thread-page-textarea-button"><img src={strikethrough} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "strikethrough")} style={{filter}}/></button>
-                            <button className="thread-page-textarea-button"><img src={spoiler} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "spoiler")} style={{filter}}/></button>
-                            <button className="comments-textarea-button"><img src={link} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "link")} style={{filter}}/></button>
-                            <button className="comments-textarea-button"><img src={details} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "details")} style={{filter}}/></button>
-                            <button className="comments-textarea-button"><img src={hexcolor} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "color")} style={{filter}}/></button>
-                            <button className="comments-textarea-button"><img src={codeblock} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "code")} style={{filter}}/></button>
-                        </div>
-                        {previewMode ? <div className="thread-page-preview">{functions.jsx.renderText(text, emojis, "reply", undefined, r18)}</div> : 
-                        <div style={{marginTop: "0px"}} className="thread-page-row-start" onMouseEnter={() => setEnableDrag(false)}>
-                            <textarea ref={textRef} className="thread-page-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)}></textarea>
-                        </div>}
-                        {error ? <div className="thread-page-validation-container"><span className="thread-page-validation" ref={errorRef}></span></div> : null}
-                        <div className="thread-page-button-container-left">
-                            <button className="thread-page-button" onClick={reply}>{i18n.buttons.reply}</button>
-                            <button className="comments-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
-                                <img src={emojiSelect}/>
-                            </button>
-                            <button className={previewMode ? "thread-page-edit-button" : "thread-page-preview-button"} onClick={() => setPreviewMode((prev: boolean) => !prev)}>{previewMode ? i18n.buttons.unpreview : i18n.buttons.preview}</button>
-                            {session.showR18 ?
-                            <div className="thread-page-replybox-row">
-                                <img className="thread-page-checkbox" src={r18 ? radioButtonChecked : radioButton} onClick={() => setR18((prev: boolean) => !prev)} style={{filter}}/>
-                                <span className="thread-page-replybox-text" style={{marginLeft: "10px"}}>R18</span>
-                                <img className="thread-page-icon" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter}}/>
-                            </div> : null}
-                        </div>
-                    </div>
-                </div>
-            )
-        }
     }
 
     return (
@@ -497,8 +360,7 @@ const ThreadPage: React.FunctionComponent = () => {
                     <div className="thread-page-container">
                         {generateRepliesJSX()}
                     </div>
-                    {getReplyBoxJSX()}
-                    {emojiGrid()}
+                    <TextBox ref={textBoxRef} type="reply" onPost={reply} r18Toggle={true} manualWidth={true}/>
                     {!scroll ? <PageControls page={page} maxPage={maxPage} setPage={setPage} scrollToTop={true}/> : null}
                 </div> : null}
                 <Footer/>
