@@ -280,7 +280,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             if (imageFilterRefs[i].current?.style) imageFilterRefs[i].current!.style.border = "0"
         }
         if (!active) return
-        if (active.current) active.current.style.border = "3px solid var(--text)"
+        if (active.current) active.current.style.border = "3px solid var(--text-alt)"
         setLastActive(active)
     }, [active, imageFilterRefs])
 
