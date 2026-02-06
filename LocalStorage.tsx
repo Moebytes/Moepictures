@@ -76,7 +76,7 @@ const darkColorList = {
     "--navbarText": "#FF3CA4",
 
     "--sidebarBG": "#16050F",
-    "--sidebarText": "#ff54ed",
+    "--sidebarText": "#ff54bc",
     "--sidebarSearchBG": "#2D0D1A",
     "--sidebarSearchFocus": "#e00882",
     "--sidebarTitleText": "#FF0CB2",
