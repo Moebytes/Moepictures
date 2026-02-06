@@ -24,7 +24,7 @@ const AdBanner: React.FunctionComponent<Props> = (props) => {
             const ins = adRef.current.querySelector(".adsbygoogle") as HTMLElement | null
             if (!ins || !ins.childElementCount || ins.offsetHeight === 0 || getComputedStyle(ins).display === "none") {
                 const status = ins?.getAttribute("data-ad-status")
-                if (!status) setShowAdDialog(true)
+                // if (!status) setShowAdDialog(true)
             }
         }
 
