@@ -229,21 +229,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             }, 500)
             return
         }
-        const checkLoaded = () => {
-            if (searchFlag !== initData.searchFlag ||
-                imageType !== initData.imageType ||
-                ratingType !== initData.ratingType ||
-                styleType !== initData.styleType || 
-                sortType !== initData.sortType ||
-                sortReverse !== initData.sortReverse) {
-                    if (init) {
-                        return init = false
-                    } else {
-                        initItems()
-                    }
-                }
-        }
-        loaded ? initItems() : checkLoaded()
+        initItems()
     }, [searchFlag, imageType, ratingType, styleType, sortType, sortReverse, 
         pageMultiplier, showChildren, favSearch, loaded])
 
