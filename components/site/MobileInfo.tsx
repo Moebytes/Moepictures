@@ -714,7 +714,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                 <div className="mobileinfo-subcontainer-column">
                     <div className="mobileinfo-row">
                         <span className="tag-hover" onClick={copyTags} onContextMenu={copyTags}>
-                            <img className="mobileinfo-icon" src={tagIcon}/>
+                            <img className="mobileinfo-icon" src={getIcon(tagIcon)}/>
                             <span className="tag-red">{i18n.sidebar.copyTags}</span>
                         </span>
                     </div>
@@ -735,7 +735,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                 <div className="mobileinfo-subcontainer-column">
                     <div className="mobileinfo-row">
                         <span className="tag-hover" onClick={toggleCaptcha}>
-                            <img className="mobileinfo-icon" src={tagIcon}/>
+                            <img className="mobileinfo-icon" src={getIcon(tagIcon)}/>
                             <span className="tag-red">{i18n.sidebar.unlockPost}</span>
                         </span>
                     </div>
