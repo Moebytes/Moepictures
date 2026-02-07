@@ -35,6 +35,11 @@ notes may also be overlayed on the image with some styling. Notes can also be us
 Tags support custom grouping, useful to separate each characters specific tags in images with multiple characters. The syntax is 
 `Character-1{tag-1 tag-2 tag-3} Character-2{tag-1 tag-2 tag-3}`. 
 
+### MoeText
+
+MoeText is our custom language used to format styling in comments and replies. It also handles linking to items such as posts. 
+See https://moepictures.net/help#commenting for the list of formatting replacements. 
+
 ### Design
 
 Our design is available here: https://www.figma.com/design/f7fQmrcMwfKOGYUnHnXZ0B/Moepictures-Website 
@@ -89,4 +94,5 @@ mainly a hassle for me. You update at your own risk and handle changes manually.
 `sql/CreateDB.sql` to see if anything changed. 
 
 That's pretty much it. Following our license (CC BY-NC 4.0) you may not commercialize self-hosted instances.
+
 
