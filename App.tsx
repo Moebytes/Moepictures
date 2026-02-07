@@ -68,6 +68,7 @@ import NewsBanner from "./components/banner/NewsBanner"
 import CookieBanner from "./components/banner/CookieBanner"
 import TagToolTip from "./components/tooltip/TagToolTip"
 import ToolTip from "./components/tooltip/ToolTip"
+import PostToolTip from "./components/tooltip/PostToolTip"
 import ParticleEffect from "./components/site/ParticleEffect"
 import LocalStorage from "./LocalStorage"
 import DragScroll from "./components/site/DragScroll"
@@ -291,6 +292,7 @@ const App: React.FunctionComponent = (props) => {
             <Dialogs/>
             <LocalStorage/>
             <TagToolTip/>
+            <PostToolTip/>
             <ToolTip/>
             <Routes>
                 <Route path="/" element={<PostsPage/>}/>

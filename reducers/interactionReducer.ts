@@ -14,10 +14,13 @@ const interactionSlice = createSlice({
         tooltipY: 0,
         tooltipEnabled: false,
         tooltipPost: null as PostSearch | null,
-        tooltipImg: "",
         tagTooltipY: 0,
         tagTooltipTag: null as string | null,
-        tagTooltipEnabled: false
+        tagTooltipEnabled: false,
+        postTooltipX: 0,
+        postTooltipY: 0,
+        postTooltipEnabled: false,
+        postTooltipID: null as string | null,
     },
     reducers: {
         setEnableDrag: (state, action) => {state.enableDrag = action.payload},
@@ -28,18 +31,22 @@ const interactionSlice = createSlice({
         setToolTipY: (state, action) => {state.tooltipY = action.payload},
         setToolTipEnabled: (state, action) => {state.tooltipEnabled = action.payload},
         setToolTipPost: (state, action) => {state.tooltipPost = action.payload},
-        setToolTipImg: (state, action) => {state.tooltipImg = action.payload},
         setTagToolTipY: (state, action) => {state.tagTooltipY = action.payload},
         setTagToolTipTag: (state, action) => {state.tagTooltipTag = action.payload},
         setTagToolTipEnabled: (state, action) => {state.tagTooltipEnabled = action.payload},
+        setPostToolTipX: (state, action) => {state.postTooltipX = action.payload},
+        setPostToolTipY: (state, action) => {state.postTooltipY = action.payload},
+        setPostTooltipEnabled: (state, action) => {state.postTooltipEnabled = action.payload},
+        setPostTooltipID: (state, action) => {state.postTooltipID = action.payload},
     }    
 })
 
 const {
     setEnableDrag, setSidebarHover, setMobileScrolling, setScrollY,
     setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, 
-    setToolTipImg, setTagToolTipTag, setTagToolTipEnabled,
-    setTagToolTipY
+    setTagToolTipTag, setTagToolTipEnabled, setTagToolTipY,
+    setPostToolTipX, setPostToolTipY, setPostTooltipEnabled,
+    setPostTooltipID
 } = interactionSlice.actions
 
 export const useInteractionSelector = () => {
@@ -53,10 +60,13 @@ export const useInteractionSelector = () => {
         tooltipY: selector((state) => state.interaction.tooltipY),
         tooltipEnabled: selector((state) => state.interaction.tooltipEnabled),
         tooltipPost: selector((state) => state.interaction.tooltipPost),
-        tooltipImg: selector((state) => state.interaction.tooltipImg),
         tagTooltipY: selector((state) => state.interaction.tagTooltipY),
         tagTooltipTag: selector((state) => state.interaction.tagTooltipTag),
-        tagTooltipEnabled: selector((state) => state.interaction.tagTooltipEnabled)
+        tagTooltipEnabled: selector((state) => state.interaction.tagTooltipEnabled),
+        postTooltipX: selector((state) => state.interaction.postTooltipX),
+        postTooltipY: selector((state) => state.interaction.postTooltipY),
+        postTooltipEnabled: selector((state) => state.interaction.postTooltipEnabled),
+        postTooltipID: selector((state) => state.interaction.postTooltipID)
     }
 }
 
@@ -71,10 +81,13 @@ export const useInteractionActions = () => {
         setToolTipY: (state: number) => dispatch(setToolTipY(state)),
         setToolTipEnabled: (state: boolean) => dispatch(setToolTipEnabled(state)),
         setToolTipPost: (state: PostSearch | null) => dispatch(setToolTipPost(state)),
-        setToolTipImg: (state: string) => dispatch(setToolTipImg(state)),
         setTagToolTipY: (state: number) => dispatch(setTagToolTipY(state)),
         setTagToolTipTag: (state: string | null) => dispatch(setTagToolTipTag(state)),
-        setTagToolTipEnabled: (state: boolean) => dispatch(setTagToolTipEnabled(state))
+        setTagToolTipEnabled: (state: boolean) => dispatch(setTagToolTipEnabled(state)),
+        setPostToolTipX: (state: number) => dispatch(setPostToolTipX(state)),
+        setPostToolTipY: (state: number) => dispatch(setPostToolTipY(state)),
+        setPostTooltipEnabled: (state: boolean) => dispatch(setPostTooltipEnabled(state)),
+        setPostTooltipID: (state: string | null) => dispatch(setPostTooltipID(state))
     }
 }
 

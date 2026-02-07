@@ -89,7 +89,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         const {setSelectionItems, setSelectionPosts} = useSearchActions()
         const {downloadFlag, downloadIDs} = useFlagSelector()
         const {setPostFlag, setDownloadFlag, setDownloadIDs} = useFlagActions()
-        const {setScrollY, setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, setToolTipImg} = useInteractionActions()
+        const {setScrollY, setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost} = useInteractionActions()
         const {setPost} = useCacheActions()
         const [visible, setVisible] = useState(true)
         const [drag, setDrag] = useState(false)
@@ -447,7 +447,6 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
                 setToolTipX(Math.floor(midpoint - (toolTipWidth / 2)))
                 setToolTipY(Math.floor(rect.y - (toolTipHeight / 1.05)))
                 setToolTipPost(props.post)
-                setToolTipImg(getImg()!)
                 setToolTipEnabled(true)
             }, timerTimeout)
         }

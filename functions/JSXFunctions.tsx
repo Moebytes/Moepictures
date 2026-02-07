@@ -11,7 +11,11 @@ import curatorStar from "../assets/svg/curator-star.svg"
 import contributorPencil from "../assets/svg/pencil.svg"
 import premiumStar from "../assets/svg/premium-star.svg"
 import enLocale from "../assets/locales/en.json"
+import {useInteractionActions} from "../store"
 import {Session} from "../types/Types"
+
+let tooltipTimer = null as any
+let timerTimeout = 300
 
 export default class JSXFunctions {
     public static verifyEmailJSX = (username: string, link: string) => {
@@ -306,8 +310,26 @@ export default class JSXFunctions {
     }
 
     public static parseLinks = (text: string) => {
+        const {setPostToolTipX, setPostToolTipY, setPostTooltipEnabled, setPostTooltipID} = useInteractionActions()
         let items = [] as {text: any, jsx: any}[]
         const parts = text.split(/(\[.*?\]\(.*?\)|https?:\/\/[^\s]+)/g)
+
+        const mouseEnter = async (event: React.MouseEvent, postID: string) => {
+            tooltipTimer = setTimeout(() => {
+                const toolTipWidth = 420
+                const toolTipHeight = 250
+                setPostToolTipX(Math.floor(event.clientX - (toolTipWidth / 2)))
+                setPostToolTipY(Math.floor(event.clientY - (toolTipHeight / 1.05)))
+                setPostTooltipID(postID)
+                setPostTooltipEnabled(true)
+            }, timerTimeout)
+        }
+    
+        const mouseLeave = () => {
+            if (tooltipTimer) clearTimeout(tooltipTimer)
+            setPostTooltipEnabled(false)
+        }
+
         parts.forEach((part, index) => {
             if (part.match(/^\[.*?\]\(.*?\)$/)) {
                 const match = part.match(/^\[(.*?)\]\((.*?)\)$/)
@@ -318,17 +340,23 @@ export default class JSXFunctions {
             } else if (part.match(/(https?:\/\/[^\s]+)/g)) {
                 let name = part
                 let domain = functions.config.getDomain()
-                let directRender = false
-                if (name.includes(`${domain}/post`)) name = `Post #${name.replace(domain, "").match(/\d+/)?.[0] || ""}`
+                let tagLink = false
+                let postID = ""
+                if (name.includes(`${domain}/post`)) {
+                    postID = name.replace(domain, "").match(/\d+/)?.[0] || ""
+                    name = `Post #${postID}`
+                }
                 if (name.includes(`${domain}/thread`)) name = `Thread #${name.replace(domain, "").match(/\d+/)?.[0] || ""}`
                 if (name.includes(`${domain}/message`)) name = `Message #${name.replace(domain, "").match(/\d+/)?.[0] || ""}`
                 if (name.includes(`${domain}/user`)) name = `${name.replace(domain, "").match(/(?<=\/user\/)(.+)/)?.[0] || ""}`
                 if (name.includes(`${domain}/tag`)) {
                     name = `[${name.replace(domain, "").match(/(?<=\/tag\/)(.+)/)?.[0] || ""}]`
-                    directRender = true
+                    tagLink = true
                 }
 
-                if (functions.util.arrayIncludes(name, ["Post", "Thread", "Message"]) || directRender) {
+                if (functions.util.arrayIncludes(name, ["Post"])) {
+                    items.push({text: null, jsx: <a href={part} target="_blank" rel="noopener" onMouseEnter={(event) => mouseEnter(event, postID)} onMouseLeave={mouseLeave}>{name}</a>})
+                } else if (functions.util.arrayIncludes(name, ["Thread", "Message"]) || tagLink) {
                     items.push({text: null, jsx: <a href={part} target="_blank" rel="noopener">{name}</a>})
                 } else if (functions.file.isImage(part) || functions.file.isGIF(part)) {
                     items.push({text: null, jsx: <img key={index} className="comment-image" src={part} crossOrigin="anonymous"/>})
