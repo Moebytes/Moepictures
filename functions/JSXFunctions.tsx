@@ -310,7 +310,7 @@ export default class JSXFunctions {
     }
 
     public static parseLinks = (text: string) => {
-        const {setPostToolTipX, setPostToolTipY, setPostTooltipEnabled, setPostTooltipID} = useInteractionActions()
+        const {setToolTipX, setToolTipY, setToolTipEnabled, setPostTooltipID} = useInteractionActions()
         let items = [] as {text: any, jsx: any}[]
         const parts = text.split(/(\[.*?\]\(.*?\)|https?:\/\/[^\s]+)/g)
 
@@ -318,16 +318,16 @@ export default class JSXFunctions {
             tooltipTimer = setTimeout(() => {
                 const toolTipWidth = 420
                 const toolTipHeight = 250
-                setPostToolTipX(Math.floor(event.clientX - (toolTipWidth / 2)))
-                setPostToolTipY(Math.floor(event.clientY - (toolTipHeight / 1.05)))
+                setToolTipX(Math.floor(event.clientX - (toolTipWidth / 2)))
+                setToolTipY(Math.floor(event.clientY - (toolTipHeight / 1.05)))
                 setPostTooltipID(postID)
-                setPostTooltipEnabled(true)
+                setToolTipEnabled(true)
             }, timerTimeout)
         }
     
         const mouseLeave = () => {
             if (tooltipTimer) clearTimeout(tooltipTimer)
-            setPostTooltipEnabled(false)
+            setToolTipEnabled(false)
         }
 
         parts.forEach((part, index) => {

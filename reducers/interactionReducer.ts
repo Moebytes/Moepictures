@@ -17,9 +17,6 @@ const interactionSlice = createSlice({
         tagTooltipY: 0,
         tagTooltipTag: null as string | null,
         tagTooltipEnabled: false,
-        postTooltipX: 0,
-        postTooltipY: 0,
-        postTooltipEnabled: false,
         postTooltipID: null as string | null,
     },
     reducers: {
@@ -34,9 +31,6 @@ const interactionSlice = createSlice({
         setTagToolTipY: (state, action) => {state.tagTooltipY = action.payload},
         setTagToolTipTag: (state, action) => {state.tagTooltipTag = action.payload},
         setTagToolTipEnabled: (state, action) => {state.tagTooltipEnabled = action.payload},
-        setPostToolTipX: (state, action) => {state.postTooltipX = action.payload},
-        setPostToolTipY: (state, action) => {state.postTooltipY = action.payload},
-        setPostTooltipEnabled: (state, action) => {state.postTooltipEnabled = action.payload},
         setPostTooltipID: (state, action) => {state.postTooltipID = action.payload},
     }    
 })
@@ -45,7 +39,6 @@ const {
     setEnableDrag, setSidebarHover, setMobileScrolling, setScrollY,
     setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, 
     setTagToolTipTag, setTagToolTipEnabled, setTagToolTipY,
-    setPostToolTipX, setPostToolTipY, setPostTooltipEnabled,
     setPostTooltipID
 } = interactionSlice.actions
 
@@ -63,9 +56,6 @@ export const useInteractionSelector = () => {
         tagTooltipY: selector((state) => state.interaction.tagTooltipY),
         tagTooltipTag: selector((state) => state.interaction.tagTooltipTag),
         tagTooltipEnabled: selector((state) => state.interaction.tagTooltipEnabled),
-        postTooltipX: selector((state) => state.interaction.postTooltipX),
-        postTooltipY: selector((state) => state.interaction.postTooltipY),
-        postTooltipEnabled: selector((state) => state.interaction.postTooltipEnabled),
         postTooltipID: selector((state) => state.interaction.postTooltipID)
     }
 }
@@ -84,9 +74,6 @@ export const useInteractionActions = () => {
         setTagToolTipY: (state: number) => dispatch(setTagToolTipY(state)),
         setTagToolTipTag: (state: string | null) => dispatch(setTagToolTipTag(state)),
         setTagToolTipEnabled: (state: boolean) => dispatch(setTagToolTipEnabled(state)),
-        setPostToolTipX: (state: number) => dispatch(setPostToolTipX(state)),
-        setPostToolTipY: (state: number) => dispatch(setPostToolTipY(state)),
-        setPostTooltipEnabled: (state: boolean) => dispatch(setPostTooltipEnabled(state)),
         setPostTooltipID: (state: string | null) => dispatch(setPostTooltipID(state))
     }
 }

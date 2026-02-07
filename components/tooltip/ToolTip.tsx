@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useNavigate, useLocation} from "react-router-dom"
 import {useSessionSelector, useSessionActions, useSearchSelector, useSearchActions, useInteractionSelector, 
-useFlagActions, useInteractionActions, useThemeSelector, useActiveActions} from "../../store"
+useFlagActions, useInteractionActions, useThemeSelector, useActiveActions, useLayoutSelector} from "../../store"
 import functions from "../../functions/Functions"
 import pixiv from "../../assets/icons/pixiv.png"
 import twitter from "../../assets/icons/twitter.png"
@@ -40,19 +40,22 @@ import daki from "../../assets/svg/daki.svg"
 import sketch from "../../assets/svg/sketch.svg"
 import lineart from "../../assets/svg/lineart.svg"
 import promo from "../../assets/svg/promo.svg"
-import {TagCount} from "../../types/Types"
+import {TagCount, PostFull} from "../../types/Types"
 import "./styles/tooltip.less"
 
 const ToolTip: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
+    const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {selectionMode} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
-    const {tooltipX, tooltipY, tooltipEnabled, tooltipPost} = useInteractionSelector()
-    const {setEnableDrag, setToolTipEnabled} = useInteractionActions()
+    const {tooltipX, tooltipY, tooltipEnabled, tooltipPost, postTooltipID} = useInteractionSelector()
+    const {setEnableDrag, setToolTipEnabled, setToolTipPost, setPostTooltipID} = useInteractionActions()
     const {setActionBanner} = useActiveActions()
+    const [post, setPost] = useState(null as PostFull | null)
+    const [img, setImg] = useState("")
     const [tags, setTags] = useState([] as TagCount[])
     const [metaTags, setMetaTags] = useState([] as string[])
     const [artist, setArtist] = useState(null as TagCount | null)
@@ -72,10 +75,32 @@ const ToolTip: React.FunctionComponent = (props) => {
         return functions.color.colorizeSVG(icon, "--sketchColor")
     }
 
+    const updatePost = async () => {
+        if (tooltipPost) setPost(tooltipPost)
+        if (postTooltipID) {
+            const post = await functions.http.get("/api/post", {postID: postTooltipID ?? ""}, session, setSessionFlag)
+            if (post) {
+                setPost(post)
+                const image = post.images[0]
+                const imageLink = typeof image === "string" ?
+                functions.link.getRawThumbnailLink(image, "medium", mobile) : 
+                functions.link.getThumbnailLink(image, "tiny", session, mobile)
+                let img = await functions.crypto.decryptThumb(imageLink, session, imageLink, mobile)
+                setImg(img)
+            }
+        }
+        
+    }
+
+    useEffect(() => {
+        setImg("")
+        updatePost()
+    }, [tooltipPost, postTooltipID, session])
+
     const updateTags = async () => {
         if (session?.username && !session?.showTooltips) return
-        if (!tooltipPost) return
-        const result = await functions.tag.parseTags([tooltipPost], session, setSessionFlag)
+        if (!post) return
+        const result = await functions.tag.parseTags([post], session, setSessionFlag)
         const artists = result.filter((t) => t.type === "artist")
         const characters = result.filter((t) => t.type === "character")
         const series = result.filter((t) => t.type === "series")
@@ -92,8 +117,8 @@ const ToolTip: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        if (tooltipPost) updateTags()
-    }, [tooltipPost, session])
+        if (post) updateTags()
+    }, [post, session])
 
     useEffect(() => {
        if (scrollRef.current) scrollRef.current.scrollTop = 0
@@ -111,6 +136,8 @@ const ToolTip: React.FunctionComponent = (props) => {
 
     const getStyle = () => {
         return {
+            width: img ? "420px" : "325px",
+            height: img ? "250px" : "175px",
             opacity: tooltipEnabled ? "1" : "0", 
             pointerEvents: tooltipEnabled ? "all" : "none",
             left: `${tooltipX}px`, 
@@ -147,14 +174,14 @@ const ToolTip: React.FunctionComponent = (props) => {
     }
 
     const download = () => {
-        if (!tooltipPost) return
-        setDownloadIDs([tooltipPost.postID])
+        if (!post) return
+        setDownloadIDs([post.postID])
         setDownloadFlag(true)
     }
 
     const openNewTab = async () => {
-        if (!tooltipPost) return
-        const postImage = tooltipPost.images[0]
+        if (!post) return
+        const postImage = post.images[0]
         let img = ""
         if (session.upscaledImages) {
             img = functions.link.getImageLink(postImage, true)
@@ -166,40 +193,40 @@ const ToolTip: React.FunctionComponent = (props) => {
     }
 
     const getImageDimensions = () => {
-        if (!tooltipPost) return
-        return `${tooltipPost.images[0].width}x${tooltipPost.images[0].height}`
+        if (!post) return
+        return `${post.images[0].width}x${post.images[0].height}`
     }
 
     const getPostLinkJSX = () => {
         let jsx = [] as React.ReactElement[]
-        if (!tooltipPost) return jsx
-        if (tooltipPost.source?.includes("pixiv")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={pixiv} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
-        if (tooltipPost.source?.includes("soundcloud")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={soundcloud} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
-        if (tooltipPost.source?.includes("sketchfab")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={sketchfab} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
-        if (tooltipPost.source?.includes("twitter") || tooltipPost.source?.includes("x.com")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={twitter} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
-        if (tooltipPost.source?.includes("deviantart")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={deviantart} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
-        if (tooltipPost.source?.includes("artstation")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={artstation} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
-        if (tooltipPost.source?.includes("danbooru")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={danbooru} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
-        if (tooltipPost.source?.includes("yande.re")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={yandere} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
-        if (tooltipPost.source?.includes("youtube")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={youtube} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
-        if (tooltipPost.source?.includes("bandcamp")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={bandcamp} onClick={() => window.open(tooltipPost.source, "_blank")}/>)
-        if (tooltipPost.mirrors) {
-            if (tooltipPost.mirrors.pixiv) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={pixiv} onClick={() => window.open(tooltipPost.mirrors?.pixiv, "_blank")}/>)
-            if (tooltipPost.mirrors.soundcloud) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={soundcloud} onClick={() => window.open(tooltipPost.mirrors?.soundcloud, "_blank")}/>)
-            if (tooltipPost.mirrors.sketchfab) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={sketchfab} onClick={() => window.open(tooltipPost.mirrors?.sketchfab, "_blank")}/>)
-            if (tooltipPost.mirrors.twitter) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={twitter} onClick={() => window.open(tooltipPost.mirrors?.twitter, "_blank")}/>)
-            if (tooltipPost.mirrors.deviantart) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={deviantart} onClick={() => window.open(tooltipPost.mirrors?.deviantart, "_blank")}/>)
-            if (tooltipPost.mirrors.artstation) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={artstation} onClick={() => window.open(tooltipPost.mirrors?.artstation, "_blank")}/>)
-            if (tooltipPost.mirrors.danbooru) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={danbooru} onClick={() => window.open(tooltipPost.mirrors?.danbooru, "_blank")}/>)
-            if (tooltipPost.mirrors.gelbooru) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={gelbooru} onClick={() => window.open(tooltipPost.mirrors?.gelbooru, "_blank")}/>)
-            if (tooltipPost.mirrors.safebooru) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={safebooru} onClick={() => window.open(tooltipPost.mirrors?.safebooru, "_blank")}/>)
-            if (tooltipPost.mirrors.yandere) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={yandere} onClick={() => window.open(tooltipPost.mirrors?.yandere, "_blank")}/>)
-            if (tooltipPost.mirrors.konachan) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={konachan} onClick={() => window.open(tooltipPost.mirrors?.konachan, "_blank")}/>)
-            if (tooltipPost.mirrors.zerochan) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={zerochan} onClick={() => window.open(tooltipPost.mirrors?.zerochan, "_blank")}/>)
-            if (tooltipPost.mirrors.eshuushuu) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={eshuushuu} onClick={() => window.open(tooltipPost.mirrors?.eshuushuu, "_blank")}/>)
-            if (tooltipPost.mirrors.animepictures) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={animepictures} onClick={() => window.open(tooltipPost.mirrors?.animepictures, "_blank")}/>)
-            if (tooltipPost.mirrors.youtube) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={youtube} onClick={() => window.open(tooltipPost.mirrors?.youtube, "_blank")}/>)
-            if (tooltipPost.mirrors.bandcamp) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={bandcamp} onClick={() => window.open(tooltipPost.mirrors?.bandcamp, "_blank")}/>)
+        if (!post) return jsx
+        if (post.source?.includes("pixiv")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={pixiv} onClick={() => window.open(post.source, "_blank")}/>)
+        if (post.source?.includes("soundcloud")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={soundcloud} onClick={() => window.open(post.source, "_blank")}/>)
+        if (post.source?.includes("sketchfab")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={sketchfab} onClick={() => window.open(post.source, "_blank")}/>)
+        if (post.source?.includes("twitter") || post.source?.includes("x.com")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={twitter} onClick={() => window.open(post.source, "_blank")}/>)
+        if (post.source?.includes("deviantart")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={deviantart} onClick={() => window.open(post.source, "_blank")}/>)
+        if (post.source?.includes("artstation")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={artstation} onClick={() => window.open(post.source, "_blank")}/>)
+        if (post.source?.includes("danbooru")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={danbooru} onClick={() => window.open(post.source, "_blank")}/>)
+        if (post.source?.includes("yande.re")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={yandere} onClick={() => window.open(post.source, "_blank")}/>)
+        if (post.source?.includes("youtube")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={youtube} onClick={() => window.open(post.source, "_blank")}/>)
+        if (post.source?.includes("bandcamp")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={bandcamp} onClick={() => window.open(post.source, "_blank")}/>)
+        if (post.mirrors) {
+            if (post.mirrors.pixiv) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={pixiv} onClick={() => window.open(post.mirrors?.pixiv, "_blank")}/>)
+            if (post.mirrors.soundcloud) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={soundcloud} onClick={() => window.open(post.mirrors?.soundcloud, "_blank")}/>)
+            if (post.mirrors.sketchfab) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={sketchfab} onClick={() => window.open(post.mirrors?.sketchfab, "_blank")}/>)
+            if (post.mirrors.twitter) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={twitter} onClick={() => window.open(post.mirrors?.twitter, "_blank")}/>)
+            if (post.mirrors.deviantart) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={deviantart} onClick={() => window.open(post.mirrors?.deviantart, "_blank")}/>)
+            if (post.mirrors.artstation) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={artstation} onClick={() => window.open(post.mirrors?.artstation, "_blank")}/>)
+            if (post.mirrors.danbooru) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={danbooru} onClick={() => window.open(post.mirrors?.danbooru, "_blank")}/>)
+            if (post.mirrors.gelbooru) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={gelbooru} onClick={() => window.open(post.mirrors?.gelbooru, "_blank")}/>)
+            if (post.mirrors.safebooru) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={safebooru} onClick={() => window.open(post.mirrors?.safebooru, "_blank")}/>)
+            if (post.mirrors.yandere) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={yandere} onClick={() => window.open(post.mirrors?.yandere, "_blank")}/>)
+            if (post.mirrors.konachan) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={konachan} onClick={() => window.open(post.mirrors?.konachan, "_blank")}/>)
+            if (post.mirrors.zerochan) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={zerochan} onClick={() => window.open(post.mirrors?.zerochan, "_blank")}/>)
+            if (post.mirrors.eshuushuu) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={eshuushuu} onClick={() => window.open(post.mirrors?.eshuushuu, "_blank")}/>)
+            if (post.mirrors.animepictures) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={animepictures} onClick={() => window.open(post.mirrors?.animepictures, "_blank")}/>)
+            if (post.mirrors.youtube) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={youtube} onClick={() => window.open(post.mirrors?.youtube, "_blank")}/>)
+            if (post.mirrors.bandcamp) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={bandcamp} onClick={() => window.open(post.mirrors?.bandcamp, "_blank")}/>)
         }
         return jsx
     }
@@ -233,7 +260,7 @@ const ToolTip: React.FunctionComponent = (props) => {
     }
 
     if (selectionMode) return null
-    if (!artist || !tags || !tooltipPost) return null
+    if (!artist || !tags || !post) return null
     if (session?.username && !session?.showTooltips) return null
 
     const openArtist = () => {
@@ -253,61 +280,76 @@ const ToolTip: React.FunctionComponent = (props) => {
     }
 
     const getTypeIcon = () => {
-        if (tooltipPost.type === "image") return getIcon(image)
-        if (tooltipPost.type === "comic") return getIcon(comic)
-        if (tooltipPost.type === "animation") return getIcon(animation)
-        if (tooltipPost.type === "video") return getIcon(video)
-        if (tooltipPost.type === "audio") return getIcon(audio)
-        if (tooltipPost.type === "model") return getIcon(model)
-        if (tooltipPost.type === "live2d") return getIcon(live2d)
+        if (post.type === "image") return getIcon(image)
+        if (post.type === "comic") return getIcon(comic)
+        if (post.type === "animation") return getIcon(animation)
+        if (post.type === "video") return getIcon(video)
+        if (post.type === "audio") return getIcon(audio)
+        if (post.type === "model") return getIcon(model)
+        if (post.type === "live2d") return getIcon(live2d)
         return image
     }
 
     const getRatingIcon = () => {
-        if (tooltipPost.rating === "cute") return getIcon(cute)
-        if (tooltipPost.rating === "sexy") return getIcon(sexy)
-        if (tooltipPost.rating === "erotic") return getIcon(erotic)
-        if (tooltipPost.rating === "lewd") return getRedIcon(lewd)
+        if (post.rating === "cute") return getIcon(cute)
+        if (post.rating === "sexy") return getIcon(sexy)
+        if (post.rating === "erotic") return getIcon(erotic)
+        if (post.rating === "lewd") return getRedIcon(lewd)
         return cute
     }
 
     const getStyleIcon = () => {
-        if (tooltipPost.style === "2d") return getIcon($2d)
-        if (tooltipPost.style === "3d") return getIcon($3d)
-        if (tooltipPost.style === "chibi") return getIcon(chibi)
-        if (tooltipPost.style === "pixel") return getIcon(pixel)
-        if (tooltipPost.style === "daki") return getIcon(daki)
-        if (tooltipPost.style === "promo") return getBlueIcon(promo)
-        if (tooltipPost.style === "sketch") return getBlueIcon(sketch)
-        if (tooltipPost.style === "lineart") return getBlueIcon(lineart)
+        if (post.style === "2d") return getIcon($2d)
+        if (post.style === "3d") return getIcon($3d)
+        if (post.style === "chibi") return getIcon(chibi)
+        if (post.style === "pixel") return getIcon(pixel)
+        if (post.style === "daki") return getIcon(daki)
+        if (post.style === "promo") return getBlueIcon(promo)
+        if (post.style === "sketch") return getBlueIcon(sketch)
+        if (post.style === "lineart") return getBlueIcon(lineart)
         return getIcon($2d)
     }
  
+    const imgClick = (event: React.MouseEvent) => {
+        functions.post.openPost(post, event, navigate, session, setSessionFlag)
+    }
+
+    const closeTooltip = () => {
+        setToolTipEnabled(false)
+        setToolTipPost(null)
+        setPostTooltipID(null)
+    }
+
     return (
-        <div className="tooltip" style={getStyle()} onMouseEnter={() => setToolTipEnabled(true)} onMouseLeave={() => setToolTipEnabled(false)}>
+        <div className="tooltip" style={getStyle()} onMouseEnter={() => setToolTipEnabled(true)} onMouseLeave={closeTooltip}>
             <div className="tooltip-row">
                 <div className="tooltip-artist-container">
                     <img className="tooltip-img" src={functions.link.getTagLink(artist.type, artist.image, artist.imageHash)}/>
-                    <span className={`tooltip-tag-clickable ${tooltipPost?.hidden ? "strikethrough" : ""}`} style={{marginRight: "5px"}} onClick={searchArtist} onAuxClick={openArtist}>{artist.tag}</span>
+                    <span className={`tooltip-tag-clickable ${post?.hidden ? "strikethrough" : ""}`} style={{marginRight: "5px"}} onClick={searchArtist} onAuxClick={openArtist}>{artist.tag}</span>
                     <img className="tooltip-img-small" src={getIcon(tagIcon)} onClick={copyTags} onContextMenu={copyTags}/>
                 </div>
                 <div className="tooltip-artist-container">
-                    <span className={`tooltip-tag-clickable ${tooltipPost?.hidden ? "strikethrough" : ""}`} onClick={download} onAuxClick={openNewTab}>{getImageDimensions()}</span>
+                    <span className={`tooltip-tag-clickable ${post?.hidden ? "strikethrough" : ""}`} onClick={download} onAuxClick={openNewTab}>{getImageDimensions()}</span>
                     {getPostLinkJSX()}
                 </div>
             </div>
-            <div className="tooltip-column" ref={scrollRef} style={{overflowY: "auto"}}>
-                <div className="tooltip-tag-container">
-                    <span className={`tooltip-tag-text ${tooltipPost?.hidden ? "strikethrough" : ""}`}><img src={getTypeIcon()} className="tooltip-icon"/>{tooltipPost.type}</span>
-                    <span className={`tooltip-tag-text ${tooltipPost?.hidden ? "strikethrough" : ""}`}><img src={getRatingIcon()} className="tooltip-icon"/>{tooltipPost.rating}</span>
-                    <span className={`tooltip-tag-text ${tooltipPost?.hidden ? "strikethrough" : ""}`}><img src={getStyleIcon()} className="tooltip-icon"/>{tooltipPost.style}</span>
-                </div>
-                <div className="tooltip-tag-container">
-                    <span className={`tooltip-tag-text ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{tooltipPost.englishTitle || i18n.labels.noTitle}</span>
-                    <span className={`tooltip-tag-text ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{functions.date.formatDate(new Date(tooltipPost.posted))}</span>
-                </div>
-                <div className="tooltip-tag-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    {getTagsJSX()}
+            <div className="tooltip-column" ref={scrollRef} style={{overflowY: "auto", flexDirection: img ? "row" : "column"}}>
+                {img ? <div className="tooltip-column-container">
+                        <img className="tooltip-image" src={img} onClick={imgClick} fetchPriority="high" draggable={false}/>
+                </div> : null}
+                <div className="tooltip-column-container">
+                    <div className="tooltip-tag-container">
+                        <span className={`tooltip-tag-text ${post?.hidden ? "strikethrough" : ""}`}><img src={getTypeIcon()} className="tooltip-icon"/>{post.type}</span>
+                        <span className={`tooltip-tag-text ${post?.hidden ? "strikethrough" : ""}`}><img src={getRatingIcon()} className="tooltip-icon"/>{post.rating}</span>
+                        <span className={`tooltip-tag-text ${post?.hidden ? "strikethrough" : ""}`}><img src={getStyleIcon()} className="tooltip-icon"/>{post.style}</span>
+                    </div>
+                    <div className="tooltip-tag-container">
+                        <span className={`tooltip-tag-text ${post?.hidden ? "strikethrough" : ""}`}>{post.englishTitle || i18n.labels.noTitle}</span>
+                        <span className={`tooltip-tag-text ${post?.hidden ? "strikethrough" : ""}`}>{functions.date.formatDate(new Date(post.posted))}</span>
+                    </div>
+                    <div className="tooltip-tag-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        {getTagsJSX()}
+                    </div>
                 </div>
             </div>
         </div>

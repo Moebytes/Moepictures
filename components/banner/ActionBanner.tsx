@@ -15,59 +15,59 @@ const ActionBanner: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (actionBanner === "login-required") {
             setStickyText(i18n.sidebar.loginRequired)
-            document.documentElement.style.setProperty("--actionBannerColor", "#d91442CC")
+            document.documentElement.style.setProperty("--actionBannerColor", "#ff547cCC")
         }
         if (actionBanner === "copy-tags") {
             setStickyText(i18n.banner.copiedTags)
-            document.documentElement.style.setProperty("--actionBannerColor", "#ce1a4dCC")
+            document.documentElement.style.setProperty("--actionBannerColor", "#ed517dCC")
         }
         if (actionBanner === "copy-hash") {
             setStickyText(i18n.banner.copiedHash)
-            document.documentElement.style.setProperty("--actionBannerColor", "#501aceCC")
+            document.documentElement.style.setProperty("--actionBannerColor", "#de62bfCC")
         }
         if (actionBanner === "tag-edit") {
             setStickyText(i18n.banner.editedTags)
-            document.documentElement.style.setProperty("--actionBannerColor", "#1a62ceCC")
+            document.documentElement.style.setProperty("--actionBannerColor", "#5c8fdbCC")
         }
         if (actionBanner === "source-edit") {
             setStickyText(i18n.banner.editedSource)
-            document.documentElement.style.setProperty("--actionBannerColor", "#1a62ceCC")
+            document.documentElement.style.setProperty("--actionBannerColor", "#5c8fdbCC")
         }
         if (actionBanner === "copy-notes") {
             setStickyText(i18n.banner.copiedNotes)
-            document.documentElement.style.setProperty("--actionBannerColor", "#1a62ceCC")
+            document.documentElement.style.setProperty("--actionBannerColor", "#5c8fdbCC")
         }
         if (actionBanner === "paste-notes") {
             setStickyText(i18n.banner.pastedNotes)
-            document.documentElement.style.setProperty("--actionBannerColor", "#1ea3d4CC")
+            document.documentElement.style.setProperty("--actionBannerColor", "#73c1deCC")
         }
         if (actionBanner === "edit-thumbnail") {
             setStickyText(i18n.banner.updatedThumbnail)
-            document.documentElement.style.setProperty("--actionBannerColor", "#501aceCC")
+            document.documentElement.style.setProperty("--actionBannerColor", "#db70b0CC")
         }
         if (actionBanner === "logout-sessions") {
             setStickyText(i18n.banner.logoutSessions)
-            document.documentElement.style.setProperty("--actionBannerColor", "#f71b86CC")
+            document.documentElement.style.setProperty("--actionBannerColor", "#ff8ac3CC")
         }
         if (actionBanner === "blacklist") {
             setStickyText(i18n.banner.blacklist)
-            document.documentElement.style.setProperty("--actionBannerColor", "#f71b86CC")
+            document.documentElement.style.setProperty("--actionBannerColor", "#ff8ac3CC")
         }
         if (actionBanner === "unblacklist") {
             setStickyText(i18n.banner.unblacklist)
-            document.documentElement.style.setProperty("--actionBannerColor", "#501aceCC")
+            document.documentElement.style.setProperty("--actionBannerColor", "#db70b0CC")
         }
         if (actionBanner === "remove-banner") {
             setStickyText(i18n.banner.removeBanner)
-            document.documentElement.style.setProperty("--actionBannerColor", "#ce1a4dCC")
+            document.documentElement.style.setProperty("--actionBannerColor", "#d66082CC")
         }
         if (actionBanner === "account-restored") {
             setStickyText(i18n.banner.accountRestored)
-            document.documentElement.style.setProperty("--actionBannerColor", "#32a4f0CC")
+            document.documentElement.style.setProperty("--actionBannerColor", "#89caf5CC")
         }
         if (actionBanner === "image-source") {
             setStickyText(i18n.banner.changedSource)
-            document.documentElement.style.setProperty("--actionBannerColor", "#c432f0CC")
+            document.documentElement.style.setProperty("--actionBannerColor", "#d488ebCC")
         }
     }, [actionBanner])
 
