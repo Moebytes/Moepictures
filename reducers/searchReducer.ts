@@ -77,6 +77,9 @@ const {
     setShowTranscript
 } = searchSlice.actions
 
+const selectSelectionItems = createSelector((state: StoreState) => state.search, (search) => new Set<string>(search.selectionItems))
+const selectSelectionPosts = createSelector((state: StoreState) => state.search, (search) => new Map<string, PostSearch>(Object.entries(search.selectionPosts)))
+
 export const useSearchSelector = () => {
     const selector = useSelector.withTypes<StoreState>()
     return {
@@ -91,8 +94,8 @@ export const useSearchSelector = () => {
         square: selector((state) => state.search.square),
         scroll: selector((state) => state.search.scroll),
         selectionMode: selector((state) => state.search.selectionMode),
-        selectionItems: selector(createSelector((state: StoreState) => state.search, (search) => new Set<string>(search.selectionItems))),
-        selectionPosts: selector(createSelector((state: StoreState) => state.search, (search) => new Map<string, PostSearch>(Object.entries(search.selectionPosts)))),
+        selectionItems: selector(selectSelectionItems),
+        selectionPosts: selector(selectSelectionPosts),
         pageMultiplier: selector((state) => state.search.pageMultiplier),
         format: selector((state) => state.search.format),
         autoSearch: selector((state) => state.search.autoSearch),

@@ -1,15 +1,31 @@
 import localforage from "localforage"
 import functions from "./Functions"
-import {GetEndpoint, TagCount, Tag, Alias, Session, PostSearchParams} from "../types/Types"
+import {GetEndpoint, TagCount, Alias, Session, PostSearchParams} from "../types/Types"
 
 export default class CacheFunctions {
     public static cachedThumbs = new Map<string, string>()
     public static cachedImages = new Map<string, string>()
     public static cachedResponses = new Map<string, {data: any, expires: number}>()
     public static cacheDuration = 1000
+    public static cacheExpiryTime = 15 * 60 * 1000
+    public static cacheExpiry = Date.now() + this.cacheExpiryTime
 
     public static getThumbCache = (cacheKey: string) => {
+        if (Date.now() > this.cacheExpiry) {
+            this.cachedThumbs.clear()
+            this.cacheExpiry = Date.now() + this.cacheExpiryTime
+            return ""
+        }
         return this.cachedThumbs.get(cacheKey) || ""
+    }
+
+    public static getImageCache = (cacheKey: string) => {
+        if (Date.now() > this.cacheExpiry) {
+            this.cachedImages.clear()
+            this.cacheExpiry = Date.now() + this.cacheExpiryTime
+            return ""
+        }
+        return this.cachedImages.get(cacheKey) || ""
     }
 
     public static responseCached = <T extends string>(endpoint: T, params: GetEndpoint<T>["params"]) => {

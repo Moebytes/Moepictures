@@ -38,7 +38,7 @@ export default class CryptoFunctions {
         let serverPublicKey = await functions.http.updateServerPublicKey(session)
 
         if (!cacheKey) cacheKey = img
-        const cached = functions.cache.cachedThumbs.get(cacheKey)
+        const cached = functions.cache.getThumbCache(cacheKey)
         if (cached) return cached
         let isAnimatedWebP = false
         let isAnimatedPNG = false
@@ -101,7 +101,7 @@ export default class CryptoFunctions {
         let serverPublicKey = await functions.http.updateServerPublicKey(session)
 
         if (!cacheKey) cacheKey = img
-        const cached = functions.cache.cachedImages.get(cacheKey)
+        const cached = functions.cache.getImageCache(cacheKey)
         if (cached) return cached
         if (functions.file.isVideo(img)) {
             return img

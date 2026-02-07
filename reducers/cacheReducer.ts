@@ -1,6 +1,7 @@
 import {createSlice} from "@reduxjs/toolkit"
 import {createSelector} from "reselect"
 import {useSelector, useDispatch} from "react-redux"
+import {useMemo} from "react"
 import type {StoreState, StoreDispatch} from "../store"
 import {PostSearch, PostOrdered, Post, PostHistory, MiniTag, TagCount, TagCategories, TagGroupCategory, UnverifiedPost, TagCategorySearch} from "../types/Types"
 
@@ -84,26 +85,50 @@ const {
     setSeries, setTagGroupCategories, setNavigationPosts, setSortedTags
 } = cacheSlice.actions
 
+const selectEmojis = createSelector((state: StoreState) => state.cache, (cache) => cache.emojis)
+const selectPosts = createSelector((state: StoreState) => state.cache, (cache) => cache.posts)
+const selectNavigationPosts = createSelector((state: StoreState) => state.cache, (cache) => cache.navigationPosts)
+const selectTags = createSelector((state: StoreState) => state.cache, (cache) => cache.tags)
+const selectSortedTags = createSelector((state: StoreState) => state.cache, (cache) => cache.sortedTags)
+const selectVisiblePosts = createSelector((state: StoreState) => state.cache, (cache) => cache.visiblePosts)
+const selectUnverifiedPosts = createSelector((state: StoreState) => state.cache, (cache) => cache.unverifiedPosts)
+const selectUploadDropFiles = createSelector((state: StoreState) => state.cache, (cache) => cache.uploadDropFiles)
+const selectBannerTags = createSelector((state: StoreState) => state.cache, (cache) => cache.bannerTags)
+const selectPost = createSelector((state: StoreState) => state.cache, (cache) => cache.post)
+const selectTagCategories = createSelector((state: StoreState) => state.cache, (cache) => cache.tagCategories)
+const selectTagGroupCategories = createSelector((state: StoreState) => state.cache, (cache) => cache.tagGroupCategories)
+const selectOrder = createSelector((state: StoreState) => state.cache, (cache) => cache.order)
+const selectRelated = createSelector((state: StoreState) => state.cache, (cache) => cache.related)
+const selectArtists = createSelector((state: StoreState) => state.cache, (cache) => cache.artists)
+const selectCharacters = createSelector((state: StoreState) => state.cache, (cache) => cache.characters)
+const selectSeries = createSelector((state: StoreState) => state.cache, (cache) => cache.series)
+
 export const useCacheSelector = () => {
     const selector = useSelector.withTypes<StoreState>()
+    const uploadDropFilesSelect = selector(selectUploadDropFiles)
+
+    const uploadDropFiles = useMemo(() => {
+        return uploadDropFilesSelect.map(unserializeFile)
+    }, [uploadDropFilesSelect])
+
     return {
-        emojis: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.emojis)),
-        posts: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.posts)),
-        navigationPosts: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.navigationPosts)),
-        tags: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.tags)),
-        sortedTags: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.sortedTags)),
-        visiblePosts: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.visiblePosts)),
-        unverifiedPosts: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.unverifiedPosts)),
-        uploadDropFiles: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.uploadDropFiles.map((file) => unserializeFile(file)))),
-        bannerTags: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.bannerTags)),
-        post: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.post)),
-        tagCategories: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.tagCategories)),
-        tagGroupCategories: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.tagGroupCategories)),
-        order: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.order)),
-        related: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.related)),
-        artists: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.artists)),
-        characters: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.characters)),
-        series: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.series))
+        emojis: selector(selectEmojis),
+        posts: selector(selectPosts),
+        navigationPosts: selector(selectNavigationPosts),
+        tags: selector(selectTags),
+        sortedTags: selector(selectSortedTags),
+        visiblePosts: selector(selectVisiblePosts),
+        unverifiedPosts: selector(selectUnverifiedPosts),
+        bannerTags: selector(selectBannerTags),
+        post: selector(selectPost),
+        tagCategories: selector(selectTagCategories),
+        tagGroupCategories: selector(selectTagGroupCategories),
+        order: selector(selectOrder),
+        related: selector(selectRelated),
+        artists: selector(selectArtists),
+        characters: selector(selectCharacters),
+        series: selector(selectSeries),
+        uploadDropFiles
     }
 }
 

@@ -78,6 +78,8 @@ export default class HTTPFunctions {
             let cachedResponse = functions.cache.cachedResponses.get(cacheKey)
             if (cachedResponse && Date.now() < cachedResponse.expires) {
                 return cachedResponse.data as GetEndpoint<T>["response"]
+            } else {
+                functions.cache.cachedResponses.delete(cacheKey)
             }
         }
 
