@@ -36,8 +36,9 @@ const EditMessageReplyDialog: React.FunctionComponent = () => {
         }
     }, [editMsgReplyID])
 
-    const click = (button: "accept" | "reject") => {
+    const click = async (button: "accept" | "reject") => {
         if (button === "accept") {
+            await textBoxRef.current?.resolveReplacements()
             setEditMsgReplyFlag(true)
         } else {
             setEditMsgReplyID(null)

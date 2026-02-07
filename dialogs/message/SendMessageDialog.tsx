@@ -49,6 +49,7 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
     }, [dmTarget])
 
     const sendMessage = async () => {
+        const content = await textBoxRef.current!.resolveReplacements()
         let cleanedRecipients = recipients.split(/\s+/g).map((r) => r.trim())
         if (cleanedRecipients.length < 1) {
             textBoxRef.current?.showError(i18n.dialogs.forwardMessage.recipientRequired)

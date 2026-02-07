@@ -233,7 +233,7 @@ const ThreadPage: React.FunctionComponent = () => {
 
     const editThreadDialog = () => {
         if (!thread) return
-        setEditThreadContent(thread.content)
+        setEditThreadContent(functions.jsx.undoLinkReplacements(thread.content))
         setEditThreadTitle(thread.title)
         setEditThreadID(thread.threadID)
         setEditThreadR18(thread.r18 ?? false)
@@ -310,8 +310,7 @@ const ThreadPage: React.FunctionComponent = () => {
         }
     }, [quoteText])
 
-    const reply = async () => {
-        const text = textBoxRef.current?.getText() ?? ""
+    const reply = async (text: string) => {
         const r18 = textBoxRef.current?.getR18() ?? false
         const badReply = functions.validation.validateReply(text, i18n)
         if (badReply) {

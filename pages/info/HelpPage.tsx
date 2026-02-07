@@ -721,14 +721,34 @@ const HelpPage: React.FunctionComponent = (props) => {
                     {i18n.help.commenting.moetext.code.line1}<br/>
                     </span>
 
+                    {i18n.help.commenting.moetext.emojis.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.commenting.moetext.emojis.line1}<br/>
+                    </span>
+
+                    {i18n.help.commenting.moetext.links.postTitle}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.commenting.moetext.links.postLine}<br/>
+                    </span>
+
+                    {i18n.help.commenting.moetext.links.threadTitle}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.commenting.moetext.links.threadLine}<br/>
+                    </span>
+
+                    {i18n.help.commenting.moetext.links.messageTitle}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.commenting.moetext.links.messageLine}<br/>
+                    </span>
+
                     {i18n.help.commenting.moetext.mention.title}
                     <span className="help-alt" style={{marginLeft: "10px"}}>
                     {i18n.help.commenting.moetext.mention.line1}<br/>
                     </span>
 
-                    {i18n.help.commenting.moetext.emojis.title}
+                    {i18n.help.commenting.moetext.links.tagTitle}
                     <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moetext.emojis.line1}<br/><br/>
+                    {i18n.help.commenting.moetext.links.tagLine}<br/><br/>
                     </span>
 
                     {i18n.help.commenting.moetext.images.header}

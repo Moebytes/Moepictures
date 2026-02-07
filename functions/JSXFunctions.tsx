@@ -252,6 +252,59 @@ export default class JSXFunctions {
         return items
     }
 
+    public static linkReplacements = async (text: string, session: Session, setSessionFlag?: (value: boolean) => void) => {
+        let domain = functions.config.getDomain()
+        let parsed = text
+
+        const postMatches = [...parsed.matchAll(/\bPost\s+#(\d+)\b/gi)]
+        for (const match of postMatches) {
+            const full = match[0]
+            const id = match[1]
+
+            try {
+                const post = await functions.http.get(`/api/post`, {postID: id}, session, setSessionFlag)
+                const link = `${domain}/post/${id}${post?.slug ? `/${post.slug}` : ""}`
+                parsed = parsed.replace(full, link)
+            } catch {
+                parsed = parsed.replace(full, `${domain}/post/${id}`)
+            }
+        }
+
+        parsed = parsed.replace(/\b(Thread|Message)\s+#(\d+)\b/gi, (match, type, id) => {
+            const lower = type.toLowerCase()
+            return `${domain}/${lower}/${id}`
+        })
+
+        parsed = parsed.replace(/\[(?!.*?\]\()([^\]\s]+)\]/g, (match, tag) => {
+            return `${domain}/tag/${tag}`
+        })
+
+        return parsed
+    }
+
+    public static undoLinkReplacements = (text: string) => {
+        const domain = functions.config.getDomain()
+        const escapedDomain = domain.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+        let parsed = text
+
+        let postRegex = new RegExp(`${escapedDomain}/post/(\\d+)(?:/[^\\s]+)?`, "gi")
+        parsed = parsed.replace(postRegex, (match, id) => `Post #${id}`)
+
+        let threadRegex = new RegExp(`${escapedDomain}/thread/(\\d+)`, "gi")
+        parsed = parsed.replace(threadRegex, (match, id) => `Thread #${id}`)
+
+        let messageRegex = new RegExp(`${escapedDomain}/message/(\\d+)`, "gi")
+        parsed = parsed.replace(messageRegex, (match, id) => `Message #${id}`)
+
+        let userRegex = new RegExp(`${escapedDomain}/user/([^\\s/]+)`, "gi")
+        parsed = parsed.replace(userRegex, (match, username) => username)
+
+        let tagRegex = new RegExp(`${escapedDomain}/tag/([^\\s/]+)`, "gi")
+        parsed = parsed.replace(tagRegex, (match, tag) => `[${tag}]`)
+
+        return parsed
+    }
+
     public static parseLinks = (text: string) => {
         let items = [] as {text: any, jsx: any}[]
         const parts = text.split(/(\[.*?\]\(.*?\)|https?:\/\/[^\s]+)/g)
@@ -265,13 +318,17 @@ export default class JSXFunctions {
             } else if (part.match(/(https?:\/\/[^\s]+)/g)) {
                 let name = part
                 let domain = functions.config.getDomain()
+                let directRender = false
                 if (name.includes(`${domain}/post`)) name = `Post #${name.replace(domain, "").match(/\d+/)?.[0] || ""}`
                 if (name.includes(`${domain}/thread`)) name = `Thread #${name.replace(domain, "").match(/\d+/)?.[0] || ""}`
                 if (name.includes(`${domain}/message`)) name = `Message #${name.replace(domain, "").match(/\d+/)?.[0] || ""}`
-                if (name.includes(`${domain}/user`)) name = `User ${name.replace(domain, "").match(/(?<=\/user\/)(.+)/)?.[0] || ""}`
-                if (name.includes(`${domain}/tag`)) name = `Tag ${name.replace(domain, "").match(/(?<=\/tag\/)(.+)/)?.[0] || ""}`
+                if (name.includes(`${domain}/user`)) name = `${name.replace(domain, "").match(/(?<=\/user\/)(.+)/)?.[0] || ""}`
+                if (name.includes(`${domain}/tag`)) {
+                    name = `[${name.replace(domain, "").match(/(?<=\/tag\/)(.+)/)?.[0] || ""}]`
+                    directRender = true
+                }
 
-                if (functions.util.arrayIncludes(name, ["Post", "Thread", "Message", "User", "Tag"])) {
+                if (functions.util.arrayIncludes(name, ["Post", "Thread", "Message"]) || directRender) {
                     items.push({text: null, jsx: <a href={part} target="_blank" rel="noopener">{name}</a>})
                 } else if (functions.file.isImage(part) || functions.file.isGIF(part)) {
                     items.push({text: null, jsx: <img key={index} className="comment-image" src={part} crossOrigin="anonymous"/>})

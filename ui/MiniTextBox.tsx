@@ -1,5 +1,6 @@
-import React, {useState, useRef, useReducer, forwardRef, useImperativeHandle} from "react"
-import {useInteractionActions, useThemeSelector, useLayoutSelector, useCacheSelector} from "../store"
+import React, {useState, useEffect, useRef, forwardRef, useImperativeHandle} from "react"
+import {useInteractionActions, useThemeSelector, useLayoutSelector, useCacheSelector,
+useSessionSelector, useSessionActions} from "../store"
 import functions from "../functions/Functions"
 import highlight from "../assets/svg/highlight.svg"
 import bold from "../assets/svg/bold.svg"
@@ -14,6 +15,7 @@ import codeblock from "../assets/svg/codeblock.svg"
 import "./styles/minitextbox.less"
 
 export interface MiniTextBoxRef {
+    resolveReplacements: () => Promise<string>
     toggleEmojiDropdown: () => void
     togglePreviewMode: () => void
     getPreviewMode: () => boolean
@@ -33,15 +35,23 @@ interface Props {
 
 const MiniTextBox = forwardRef<MiniTextBoxRef, Props>((props, ref) => {
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const {setEnableDrag} = useInteractionActions()
     const {mobile} = useLayoutSelector()
     const {emojis} = useCacheSelector()
     const [error, setError] = useState(false)
     const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
     const [previewMode, setPreviewMode] = useState(false)
+    const [previewText, setPreviewText] = useState("")
     const errorRef = useRef<HTMLSpanElement>(null)
 
     useImperativeHandle(ref, () => ({
+        resolveReplacements: async () => {
+            const replaced = await functions.jsx.linkReplacements(props.text, session, setSessionFlag)
+            props.setText(replaced)
+            return replaced
+        },
         toggleEmojiDropdown: () => {
             setShowEmojiDropdown((prev: boolean) => !prev)
         },
@@ -66,6 +76,14 @@ const MiniTextBox = forwardRef<MiniTextBoxRef, Props>((props, ref) => {
     const getIcon = (icon: string) => {
         return functions.color.colorizeSVG(icon, "--titleButtons")
     }
+
+    useEffect(() => {
+        const updatePreviewText = async () => {
+            const replaced = await functions.jsx.linkReplacements(props.text, session, setSessionFlag)
+            setPreviewText(replaced)
+        }
+        updatePreviewText()
+    }, [previewMode])
 
     const getEmojiMarginRight = () => {
         if (typeof document === "undefined") return "0px"
@@ -136,7 +154,7 @@ const MiniTextBox = forwardRef<MiniTextBoxRef, Props>((props, ref) => {
                     <button className="minitextbox-textarea-button"><img src={getIcon(hexcolor)} onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "color")} style={{filter}}/></button>
                     <button className="minitextbox-textarea-button"><img src={getIcon(codeblock)} onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "code")} style={{filter}}/></button>
                 </div>
-                {previewMode ? <div className="minitextbox-preview" style={{marginLeft: props.bio ? "0px" : "10px"}}>{functions.jsx.renderText(props.text, emojis, props.type)}</div> : 
+                {previewMode ? <div className="minitextbox-preview" style={{marginLeft: props.bio ? "0px" : "10px"}}>{functions.jsx.renderText(previewText, emojis, props.type)}</div> : 
                 <div style={{marginTop: "0px"}} className="minitextbox-row-start" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <textarea ref={props.textRef} className="minitextbox-textarea" style={{resize: "vertical", height: `${props.height ?? 140}px`, marginLeft: props.bio ? "0px" : "10px"}} 
                     spellCheck={false} value={props.text} onChange={(event) => props.setText(event.target.value)} 

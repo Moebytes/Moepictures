@@ -241,7 +241,7 @@ const MessagePage: React.FunctionComponent = () => {
 
     const editMessageDialog = () => {
         if (!message) return
-        setEditMessageContent(message.content)
+        setEditMessageContent(functions.jsx.undoLinkReplacements(message.content))
         setEditMessageTitle(message.title)
         setEditMessageID(message.messageID)
         setEditMessageR18(message.r18 ?? false)
@@ -307,8 +307,7 @@ const MessagePage: React.FunctionComponent = () => {
         }
     }, [quoteText])
 
-    const reply = async () => {
-        const text = textBoxRef.current?.getText() ?? ""
+    const reply = async (text: string) => {
         const r18 = textBoxRef.current?.getR18() ?? false
         const badReply = functions.validation.validateReply(text, i18n)
         if (badReply) {

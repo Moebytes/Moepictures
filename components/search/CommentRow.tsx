@@ -111,7 +111,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     }, [editCommentFlag, session])
 
     const editCommentDialog = async () => {
-        setEditCommentText(props.comment?.comment)
+        setEditCommentText(functions.jsx.undoLinkReplacements(props.comment?.comment))
         setEditCommentID(props.comment?.commentID)
     }
 

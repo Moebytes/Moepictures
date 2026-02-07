@@ -1714,6 +1714,16 @@
                     "title": "ユーザー・メンション：",
                     "line1": "@ユーザー名"
                 },
+                "links": {
+                    "postTitle": "投稿リンク：",
+                    "postLine": "Post #id",
+                    "threadTitle": "スレッドリンク:",
+                    "threadLine": "Thread #id",
+                    "messageTitle": "メッセージリンク：",
+                    "messageLine": "Message #id",
+                    "tagTitle": "タグリンク:",
+                    "tagLine": "[タグ]"
+                },
                 "images": {
                     "header": "投稿された画像や動画のリンクは自動的に表示されます。"
                 }

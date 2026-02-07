@@ -1713,6 +1713,16 @@
                     "title": "User Mention:",
                     "line1": "@username"
                 },
+                "links": {
+                    "postTitle": "Post Link:",
+                    "postLine": "Post #id",
+                    "threadTitle": "Thread Link:",
+                    "threadLine": "Thread #id",
+                    "messageTitle": "Message Link:",
+                    "messageLine": "Message #id",
+                    "tagTitle": "Tag Link:",
+                    "tagLine": "[tag]"
+                },
                 "images": {
                     "header": "Posted image and video links are automatically displayed."
                 }

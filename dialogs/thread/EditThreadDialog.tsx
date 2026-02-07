@@ -35,13 +35,10 @@ const EditThreadDialog: React.FunctionComponent = () => {
         }
     }, [editThreadID])
 
-    const editThread = async () => {
-        setEditThreadFlag(true)
-    }
-
-    const click = (button: "accept" | "reject") => {
+    const click = async (button: "accept" | "reject") => {
         if (button === "accept") {
-            editThread()
+            await textBoxRef.current!.resolveReplacements()
+            setEditThreadFlag(true)
         } else {
             setEditThreadID(null)
         }

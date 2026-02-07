@@ -35,8 +35,9 @@ const EditMessageDialog: React.FunctionComponent = (props) => {
         }
     }, [editMessageID])
 
-    const click = (button: "accept" | "reject") => {
+    const click = async (button: "accept" | "reject") => {
         if (button === "accept") {
+            await textBoxRef.current?.resolveReplacements()
             setEditMessageFlag(true)
         } else {
             setEditMessageID(null)

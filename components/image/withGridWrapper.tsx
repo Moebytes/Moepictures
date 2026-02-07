@@ -529,7 +529,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         const cornerIcon = () => {
             if (props.post.private) return functions.color.colorizeSVG(privateIcon, "--audioPlayerIcons")
             if (audioRef.current) return functions.color.colorizeSVG(musicNote, "--audioPlayerIcons")
-            return null
+            return ""
         }
         
         const refWidth = getRef()?.clientWidth

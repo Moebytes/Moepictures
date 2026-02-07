@@ -151,12 +151,12 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
 
     const editForumPostDialog = async () => {
         if (props.forumPost.type === "reply") {
-            setEditReplyContent(props.forumPost.content)
+            setEditReplyContent(functions.jsx.undoLinkReplacements(props.forumPost.content))
             setEditReplyID(props.forumPost.id)
             setEditReplyR18(props.forumPost.r18 ?? false)
         } else if (props.forumPost.type === "thread") {
             setEditThreadTitle(props.forumPost.title)
-            setEditThreadContent(props.forumPost.content)
+            setEditThreadContent(functions.jsx.undoLinkReplacements(props.forumPost.content))
             setEditThreadID(props.forumPost.id)
             setEditThreadR18(props.forumPost.r18 ?? false)
         }

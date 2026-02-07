@@ -35,13 +35,10 @@ const EditReplyDialog: React.FunctionComponent = (props) => {
         }
     }, [editReplyID])
 
-    const editReply = async () => {
-        setEditReplyFlag(true)
-    }
-
-    const click = (button: "accept" | "reject") => {
+    const click = async (button: "accept" | "reject") => {
         if (button === "accept") {
-            editReply()
+            await textBoxRef.current!.resolveReplacements()
+            setEditReplyFlag(true)
         } else {
             setEditReplyID(null)
         }

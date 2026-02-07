@@ -24,8 +24,9 @@ const EditCommentDialog: React.FunctionComponent = (props) => {
         }
     }, [editCommentID])
 
-    const click = (button: "accept" | "reject") => {
+    const click = async (button: "accept" | "reject") => {
         if (button === "accept") {
+            await textBoxRef.current?.resolveReplacements()
             setEditCommentFlag(true)
         } else {
             setEditCommentID(null)

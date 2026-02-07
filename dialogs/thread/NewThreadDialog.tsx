@@ -43,6 +43,7 @@ const NewThreadDialog: React.FunctionComponent = () => {
     }, [showNewThreadDialog])
 
     const newThread = async () => {
+        const threadContent = await textBoxRef.current!.resolveReplacements()
         const badTitle = functions.validation.validateTitle(threadTitle, i18n)
         if (badTitle) {
             textBoxRef.current?.showError(badTitle)

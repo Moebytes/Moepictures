@@ -99,7 +99,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
     }, [editMsgReplyFlag, editMsgReplyID, editMsgReplyContent, editMsgReplyR18, session])
 
     const editReplyDialog = async () => {
-        setEditMsgReplyContent(props.reply?.content)
+        setEditMsgReplyContent(functions.jsx.undoLinkReplacements(props.reply?.content))
         setEditMsgReplyID(props.reply?.replyID)
         setEditMsgReplyR18(props.reply?.r18)
     }

@@ -94,8 +94,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
         }
     }, [quoteText])
 
-    const post = async () => {
-        const text = textBoxRef.current?.getText() ?? ""
+    const post = async (text: string) => {
         const badComment = functions.validation.validateComment(text, i18n)
         if (badComment) {
             textBoxRef.current?.showError(badComment)

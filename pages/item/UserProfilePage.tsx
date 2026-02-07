@@ -222,7 +222,7 @@ const UserProfilePage: React.FunctionComponent = () => {
             navigate("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         } else {
-            setBio(session.bio)
+            setBio(functions.jsx.undoLinkReplacements(session.bio))
             if (init) {
                 setBlacklist(session.blacklist)
                 setInterval(Math.floor(Number(session.autosearchInterval || 3000) / 1000).toString())
@@ -385,6 +385,7 @@ const UserProfilePage: React.FunctionComponent = () => {
     }, [blacklist])
 
     const changeBio = async () => {
+        const bio = await textBoxRef.current!.resolveReplacements()
         const badBio = functions.validation.validateBio(bio, i18n)
         if (badBio) {
             textBoxRef.current?.showError(badBio)

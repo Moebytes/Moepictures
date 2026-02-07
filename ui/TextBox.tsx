@@ -1,6 +1,6 @@
-import React, {useState, useRef, forwardRef, useImperativeHandle} from "react"
+import React, {useState, useRef, forwardRef, useImperativeHandle, useEffect} from "react"
 import {useInteractionActions, useThemeSelector, useSessionSelector,
-useLayoutSelector,  useCacheSelector} from "../store"
+useLayoutSelector,  useCacheSelector, useSessionActions} from "../store"
 import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
 import lewdIcon from "../assets/icons/lewdgirl.png"
@@ -30,7 +30,7 @@ export interface TextBoxRef {
 
 interface Props {
     type: "comment" | "reply" | "message"
-    onPost: () => Promise<void>
+    onPost: (text: string) => Promise<void>
     r18Toggle?: boolean
     thread?: ThreadUser
     message?: MessageUser
@@ -40,6 +40,7 @@ interface Props {
 const TextBox = forwardRef<TextBoxRef, Props>((props, ref) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const {setEnableDrag} = useInteractionActions()
     const {mobile} = useLayoutSelector()
     const {emojis} = useCacheSelector()
@@ -48,6 +49,7 @@ const TextBox = forwardRef<TextBoxRef, Props>((props, ref) => {
     const [error, setError] = useState(false)
     const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
     const [previewMode, setPreviewMode] = useState(false)
+    const [previewText, setPreviewText] = useState("")
     const errorRef = useRef<HTMLSpanElement>(null)
     const emojiRef = useRef<HTMLButtonElement>(null)
     const textRef = useRef<HTMLTextAreaElement>(null)
@@ -77,6 +79,19 @@ const TextBox = forwardRef<TextBoxRef, Props>((props, ref) => {
     const getIcon = (icon: string) => {
         return functions.color.colorizeSVG(icon, "--titleButtons")
     }
+
+    const onPost = async () => {
+        const replaced = await functions.jsx.linkReplacements(text, session, setSessionFlag)
+        props.onPost(replaced)
+    }
+
+    useEffect(() => {
+        const updatePreviewText = async () => {
+            const replaced = await functions.jsx.linkReplacements(text, session, setSessionFlag)
+            setPreviewText(replaced)
+        }
+        updatePreviewText()
+    }, [previewMode])
 
     const getEmojiMarginRight = () => {
         if (typeof document === "undefined") return "0px"
@@ -173,13 +188,13 @@ const TextBox = forwardRef<TextBoxRef, Props>((props, ref) => {
                         <button className="textbox-textarea-button"><img src={getIcon(hexcolor)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "color")} style={{filter}}/></button>
                         <button className="textbox-textarea-button"><img src={getIcon(codeblock)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "code")} style={{filter}}/></button>
                     </div>
-                    {previewMode ? <div className="textbox-preview" style={{width: props.manualWidth && !mobile ? "70%" : ""}}>{functions.jsx.renderText(text, emojis, props.type, undefined, r18)}</div> : 
+                    {previewMode ? <div className="textbox-preview" style={{width: props.manualWidth && !mobile ? "70%" : ""}}>{functions.jsx.renderText(previewText, emojis, props.type, undefined, r18)}</div> : 
                     <div style={{marginTop: "0px"}} className="textbox-row-start" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <textarea ref={textRef} className="textbox-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)} onKeyDown={(event) => event.stopPropagation()} style={{width: props.manualWidth && !mobile ? "70%" : ""}}></textarea>
                     </div>}
                     {error ? <div className="textbox-validation-container"><span className="textbox-validation" ref={errorRef}></span></div> : null}
                     <div className="textbox-button-container-left">
-                    <button className="textbox-button" onClick={() => props.onPost()}>{getButtonText()}</button>
+                    <button className="textbox-button" onClick={onPost}>{getButtonText()}</button>
                     <button className="textbox-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
                         <img src={emojiSelect}/>
                     </button>
