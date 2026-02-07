@@ -67,9 +67,10 @@ export default class PostFunctions {
 
     public static generateSlug = (name: string) => {
         let slug = String(name).trim().toLowerCase().replace(/\s+/g, "-").replaceAll("/", "").replaceAll("\\", "")
-        if (slug.startsWith("#")) slug = slug.replaceAll("#", "")
-        if (slug.startsWith("?")) slug = slug.replaceAll("?", "")
-        if (slug.startsWith("&")) slug = slug.replaceAll("&", "")
+        slug = slug.replaceAll("#", "")
+        slug = slug.replaceAll("?", "")
+        slug = slug.replaceAll("&", "")
+        if (!slug) slug = "untitled"
         return slug
     }
 
