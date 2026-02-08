@@ -227,7 +227,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             setTimeout(() => {
                 reloadedPost = false
             }, 500)
-            return
+            // return
         }
         initItems()
     }, [searchFlag, imageType, ratingType, styleType, sortType, sortReverse, 
