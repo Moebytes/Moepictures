@@ -166,8 +166,11 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (postPage) setManagedPage(postPage)
         if (posts.length) setManagedItems(posts as PostSearch[])
-        if (search) setManagedQuery(search)
     }, [])
+
+    useEffect(() => {
+        if (search) setManagedQuery(search)
+    }, [search])
 
     useEffect(() => {
         setPosts(items)
@@ -181,7 +184,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
                     const elements = Array.from(document.querySelectorAll(".sortbar-text")) as HTMLElement[]
                     const img = document.querySelector(".image")
                     if (!img && !elements?.[0]) {
-                        initItems()
+                        initItems(search)
                     } else {
                         let counter = 0
                         for (let i = 0; i < elements.length; i++) {
@@ -218,7 +221,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (searchFlag) {
             setSearchQuery(search)
-            initItems()
+            initItems(search)
         }
     }, [search, searchFlag])
 
@@ -227,9 +230,9 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             setTimeout(() => {
                 reloadedPost = false
             }, 500)
-            // return
+            return
         }
-        initItems()
+        initItems(search)
     }, [searchFlag, imageType, ratingType, styleType, sortType, sortReverse, 
         pageMultiplier, showChildren, favSearch, loaded])
 

@@ -116,15 +116,17 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
     useEffect(() => {
         if (loadedRef.current) return
 
-        if (managedPage !== null) setPage(managedPage)
-        if (managedQuery !== null) setSearchQuery(managedQuery)
-
         if (managedItems !== null) {
             setItems(managedItems) 
             if (scroll) setVisible(managedItems.slice(0, pageAmount))
             loadedRef.current = true
         }
-    }, [managedItems, managedPage, managedQuery])
+    }, [managedItems])
+
+    useEffect(() => {
+        if (managedPage !== null) setPage(managedPage)
+        if (managedQuery !== null) setSearchQuery(managedQuery)
+    }, [managedPage, managedQuery])
 
     const updateItems = async (forceOffset?: number, queryOverride?: string) => {
         if (ended || updatingRef.current) return

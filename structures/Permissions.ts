@@ -57,12 +57,14 @@ export default class Permissions {
     }
 
     public static noEncryption = (session: ServerSession) => {
+        if (process.env.TESTING === "yes") return true
         if (session.apiKey) return true
         // Disable image encryption for now due to poor performance
         return true
     }
 
     public static noAPIEncryption = (session: ServerSession) => {
+        if (process.env.TESTING === "yes") return true
         if (session.apiKey) return true
         return false
     }
