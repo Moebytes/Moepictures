@@ -335,6 +335,10 @@ input[type="file"] {
     display: none;
 }
 
+.link {
+    color: var(--text-alt);
+}
+
 a {
     display: inline-flex;
     text-decoration: none;
@@ -342,6 +346,20 @@ a {
     &:visited {
         color: var(--text-alt);
     }
+}
+
+summary {
+    background-color: var(--titlebarBG);
+    color: var(--text);
+    font-weight: bold;
+    padding: 5px 10px;
+    &:hover {
+        filter: brightness(105%);
+    }
+}
+
+details {
+    background-color: var(--sidebarBG);
 }
 
 img {

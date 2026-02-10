@@ -198,12 +198,23 @@ export default class JSXFunctions {
 
     public static parseDetails = (text: string) => {
         let items = [] as {text: any, jsx: any}[]
-        const parts = text.split(/(\<\<[^><]+\>\>)/g)
+        
+        const parts = text.split(/(<<[\s\S]*?\|\|>>)/g)
+
         parts.forEach((part, index) => {
-            if (part.startsWith("<<") && part.endsWith(">>")) {
+            if (part.startsWith("<<") && part.endsWith("||>>")) {
                 const innerText = part.slice(2, -2)
-                const [summary, details] = innerText.split("|")
-                items.push({text: null, jsx: <details key={index}><summary>{summary}</summary>{details}</details>})
+
+                const firstDelim = innerText.indexOf("||")
+                const lastDelim = innerText.lastIndexOf("||")
+
+                const summary = innerText.slice(0, firstDelim).trim()
+                const details = innerText.slice(firstDelim + 2, lastDelim).trim()
+
+                items.push({text: null, jsx: <details key={index}>
+                    <summary>{summary}</summary>
+                    <div style={{whiteSpace: "pre-wrap"}}>{details}</div>
+                </details>})
             } else {
                 items.push({text: part, jsx: null})
             }
@@ -279,7 +290,7 @@ export default class JSXFunctions {
             return `${domain}/${lower}/${id}`
         })
 
-        parsed = parsed.replace(/\[(?!.*?\]\()([^\]\s]+)\]/g, (match, tag) => {
+        parsed = parsed.replace(/\[\[([^\]\s]+)\]\]/g, (match, tag) => {
             return `${domain}/tag/${tag}`
         })
 
@@ -304,7 +315,7 @@ export default class JSXFunctions {
         parsed = parsed.replace(userRegex, (match, username) => username)
 
         let tagRegex = new RegExp(`${escapedDomain}/tag/([^\\s/]+)`, "gi")
-        parsed = parsed.replace(tagRegex, (match, tag) => `[${tag}]`)
+        parsed = parsed.replace(tagRegex, (match, tag) => `[[${tag}]]`)
 
         return parsed
     }
@@ -335,7 +346,7 @@ export default class JSXFunctions {
                 const match = part.match(/^\[(.*?)\]\((.*?)\)$/)
                 if (match) {
                     const [_, name, link] = match
-                    items.push({text: null, jsx: <a style={{fontWeight: "bold"}} key={index} href={link} target="_blank" rel="noopener">{name}</a>})
+                    items.push({text: null, jsx: <a className="link" style={{fontWeight: "bold"}} key={index} href={link} target="_blank" rel="noopener">{name}</a>})
                 }
             } else if (part.match(/(https?:\/\/[^\s]+)/g)) {
                 let name = part
@@ -350,14 +361,14 @@ export default class JSXFunctions {
                 if (name.includes(`${domain}/message`)) name = `Message #${name.replace(domain, "").match(/\d+/)?.[0] || ""}`
                 if (name.includes(`${domain}/user`)) name = `${name.replace(domain, "").match(/(?<=\/user\/)(.+)/)?.[0] || ""}`
                 if (name.includes(`${domain}/tag`)) {
-                    name = `[${name.replace(domain, "").match(/(?<=\/tag\/)(.+)/)?.[0] || ""}]`
+                    name = `${name.replace(domain, "").match(/(?<=\/tag\/)(.+)/)?.[0] || ""}`
                     tagLink = true
                 }
 
                 if (functions.util.arrayIncludes(name, ["Post"])) {
-                    items.push({text: null, jsx: <a href={part} target="_blank" rel="noopener" onMouseEnter={(event) => mouseEnter(event, postID)} onMouseLeave={mouseLeave}>{name}</a>})
+                    items.push({text: null, jsx: <a className="link" href={part} target="_blank" rel="noopener" onMouseEnter={(event) => mouseEnter(event, postID)} onMouseLeave={mouseLeave}>{name}</a>})
                 } else if (functions.util.arrayIncludes(name, ["Thread", "Message"]) || tagLink) {
-                    items.push({text: null, jsx: <a href={part} target="_blank" rel="noopener">{name}</a>})
+                    items.push({text: null, jsx: <a className="link" href={part} target="_blank" rel="noopener">{name}</a>})
                 } else if (functions.file.isImage(part) || functions.file.isGIF(part)) {
                     items.push({text: null, jsx: <img key={index} className="comment-image" src={part} crossOrigin="anonymous"/>})
                 } else if (functions.file.isVideo(part)) {

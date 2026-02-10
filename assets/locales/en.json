@@ -1697,9 +1697,13 @@
                     "title": "Spoiler:",
                     "line1": "||Spoiler text||"
                 },
+                "link": {
+                    "title": "Link:",
+                    "line1": "[Name](link)"
+                },
                 "dropdown": {
                     "title": "Dropdown:",
-                    "line1": "<<Header text|Dropdown text>>"
+                    "line1": "<<Header text||Dropdown text||>>"
                 },
                 "color": {
                     "title": "Hex Color:",
@@ -1721,7 +1725,7 @@
                     "messageTitle": "Message Link:",
                     "messageLine": "Message #id",
                     "tagTitle": "Tag Link:",
-                    "tagLine": "[tag]"
+                    "tagLine": "[[tag]]"
                 },
                 "images": {
                     "header": "Posted image and video links are automatically displayed."

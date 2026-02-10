@@ -22,8 +22,10 @@ export default class RenderFunctions {
         const pieces = text.split(/\n/gm)
         let intermediate = [] as string[]
         let codeBlock = false
+        let detailsBlock = false
         for (let i = 0; i < pieces.length; i++) {
             let piece = pieces[i] + "\n"
+
             if (piece.includes("```")) {
                 codeBlock = !codeBlock
                 if (!codeBlock) {
@@ -31,7 +33,17 @@ export default class RenderFunctions {
                     piece = ""
                 }
             }
-            if (codeBlock || piece.startsWith(">>>") || piece.startsWith(">")) {
+
+            if (piece.includes("<<")) {
+                detailsBlock = true
+            }
+            if (piece.includes("||>>")) {
+                detailsBlock = false
+                intermediate.push(piece)
+                piece = ""
+            }
+
+            if (codeBlock || detailsBlock || piece.startsWith(">>>") || piece.startsWith(">")) {
                 if (codeBlock && !piece.includes("```")) piece += "\n"
                 intermediate.push(piece)
             } else {
@@ -83,7 +95,7 @@ export default class RenderFunctions {
             strikethrough: "~~~~",
             spoiler: "||||",
             link: "[]()",
-            details: "<<|>>",
+            details: "<<||||>>",
             color: "#ff17c1{}",
             code: "``````"
         }[type]
@@ -129,7 +141,7 @@ export default class RenderFunctions {
             updated = before + insert + after
             let shift = -2
             if (type === "link") shift = -3
-            if (type === "details") shift = -3
+            if (type === "details") shift = -6
             if (type === "color") shift = -1
             if (type === "code") shift = -3
             const cursor = start + insert.length + shift

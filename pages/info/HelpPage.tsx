@@ -706,6 +706,11 @@ const HelpPage: React.FunctionComponent = (props) => {
                     {i18n.help.commenting.moetext.spoiler.line1}<br/>
                     </span>
 
+                    {i18n.help.commenting.moetext.link.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.commenting.moetext.link.line1}<br/>
+                    </span>
+
                     {i18n.help.commenting.moetext.dropdown.title}
                     <span className="help-alt" style={{marginLeft: "10px"}}>
                     {i18n.help.commenting.moetext.dropdown.line1}<br/>
