@@ -31,7 +31,6 @@
     border: 1px solid var(--textBoxBorder);
     border-radius: 9px 9px 0px 0px;
     border-bottom: none;
-    margin-left: 10px;
 }
 
 .textbox-textarea-button {
@@ -54,7 +53,6 @@
 .textbox-preview {
     display: flex;
     flex-direction: column;
-    margin-left: 10px;
     background-color: var(--inputBG);
     border: 1px solid var(--textBoxBorder);
     border-radius: 0px 0px 9px 9px;
@@ -69,6 +67,7 @@
 
 .textbox-textarea {
     .form-textarea();
+    margin-left: 0px;
     border: 1px solid var(--textBoxBorder);
     border-radius: 0px 0px 9px 9px;
     font-size: 25px;
@@ -186,11 +185,6 @@
     }
 
     .textbox-textarea {
-        margin-left: 0px;
         margin-bottom: 10px;
-    }
-
-    .textbox-textarea-buttons {
-        margin-left: 0px;
     }
 }

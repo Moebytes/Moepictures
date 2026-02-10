@@ -37,7 +37,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     const getFilter2 = () => {
         let hue = siteHue - 180
         if (isAverage) hue += 20
-        return `hue-rotate(${hue}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+        return `hue-rotate(${hue}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 55}%)`
     }
 
     const getCuteness = async () => {
@@ -101,7 +101,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     }
 
     const fillColor = () => {
-        return theme.includes("light") ? "#ffc8ec" : "black"
+        return theme.includes("light") ? "#ffd5f0" : "black"
     }
 
     return (
