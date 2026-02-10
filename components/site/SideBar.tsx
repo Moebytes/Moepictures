@@ -29,7 +29,6 @@ import sourceEdit from "../../assets/svg/search.svg"
 import setAvatar from "../../assets/svg/setavatar.svg"
 import parent from "../../assets/svg/parent.svg"
 import group from "../../assets/svg/add-group.svg"
-import addNote from "../../assets/svg/note-toggle-on.svg"
 import snapshotIcon from "../../assets/svg/snapshot.svg"
 import splitIcon from "../../assets/svg/split.svg"
 import joinIcon from "../../assets/svg/join.svg"
@@ -930,13 +929,6 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             unverified: props.unverified, order: props.order || 1})
     }
 
-    const triggerAddNote = () => {
-        window.scrollTo(0, 0)
-        const newMode = !noteMode
-        setNoteMode(newMode)
-        if (newMode) setNoteDrawingEnabled(true)
-    }
-
     const triggerParent = () => {
         if (!props.post) return
         setChildPostObj({post: props.post, unverified: props.unverified})
@@ -1401,12 +1393,6 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             <span className="tag-hover" onClick={triggerGroup}>
                                 <img className="sidebar-icon" src={getIcon(group)} style={{filter}}/>
                                 <span className="side-info">{i18n.sidebar.addGroup}</span>
-                            </span>
-                        </div> : null}
-                        {!props.unverified ? <div className="sidebar-row">
-                            <span className="tag-hover" onClick={triggerAddNote}>
-                                <img className="sidebar-icon" src={getIcon(addNote)} style={{filter}}/>
-                                <span className="side-info">{i18n.sidebar.addNote}</span>
                             </span>
                         </div> : null}
                         {permissions.isMod(session) ? 

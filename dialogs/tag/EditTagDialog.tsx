@@ -1,5 +1,6 @@
 import React, {useEffect, useState, useRef} from "react"
-import {useThemeSelector, useInteractionActions, useTagDialogSelector, useTagDialogActions, useSessionSelector, useSessionActions} from "../../store"
+import {useThemeSelector, useInteractionActions, useTagDialogSelector, 
+useTagDialogActions, useSessionSelector, useSessionActions, useLayoutSelector} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import Draggable from "react-draggable"
@@ -13,6 +14,7 @@ import "../dialog.less"
 const EditTagDialog: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
+    const {mobile} = useLayoutSelector()
     const {editTagObj} = useTagDialogSelector()
     const {setEditTagObj, setEditTagFlag} = useTagDialogActions()
     const {session} = useSessionSelector()
@@ -234,7 +236,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
             <>
             <div className="dialog-row">
                 <span className="dialog-text">{i18n.tag.tag}: </span>
-                <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.key} onChange={(event) => setEditTagObj({...editTagObj, key: event.target.value})} style={{width: "max-content"}}/>
+                <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.key} onChange={(event) => setEditTagObj({...editTagObj, key: event.target.value})} style={{width: mobile ? "" : "max-content"}}/>
             </div>
             {tagSocialJSX()}
             <div className="dialog-row">

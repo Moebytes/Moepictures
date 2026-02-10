@@ -259,11 +259,11 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
                 } else if (sizeType === "small") {
                     setImageSize(150)
                 } else if (sizeType === "medium") {
-                    setImageSize(230)
+                    setImageSize(220)
                 } else if (sizeType === "large") {
-                    setImageSize(300)
+                    setImageSize(270)
                 } else if (sizeType === "massive") {
-                    setImageSize(450)
+                    setImageSize(400)
                 }
             } else {
                 if (sizeType === "tiny") {

@@ -141,7 +141,7 @@ const MiniTextBox = forwardRef<MiniTextBoxRef, Props>((props, ref) => {
 
     const getTextBox = () => {
         return (
-            <div className="minitextbox-container" style={{width: props.bio ? "50%" : ""}}>
+            <div className="minitextbox-container" style={{width: props.bio && !mobile ? "50%" : ""}}>
                 <div className="minitextbox-textarea-buttons" style={{marginLeft: props.bio ? "0px" : "10px"}}>
                     <button className="minitextbox-textarea-button"><img src={getIcon(highlight)} onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "highlight")} style={{filter}}/></button>
                     <button className="minitextbox-textarea-button"><img src={getIcon(bold)} onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "bold")} style={{filter}}/></button>

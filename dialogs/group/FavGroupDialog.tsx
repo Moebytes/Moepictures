@@ -109,7 +109,7 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
                             <span className="dialog-title">{i18n.dialogs.favgroup.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">{i18n.labels.favoriteGroup}: </span>
+                            <span className="dialog-text nowrap">{i18n.labels.favoriteGroup}: </span>
                             <input className="dialog-input-taller" type="text" spellCheck={false} value={name} onChange={(event) => setName(event.target.value)} style={{width: "50%"}}/>
                         </div>
                         <div className="dialog-row" style={{justifyContent: "center", paddingRight: "20px"}}>

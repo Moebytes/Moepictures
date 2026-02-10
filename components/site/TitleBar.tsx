@@ -58,7 +58,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--moeTextB")
+        return functions.color.colorizeSVG(icon, "--titleButtons")
     }
 
     const getLoginIcon = (icon: string) => {

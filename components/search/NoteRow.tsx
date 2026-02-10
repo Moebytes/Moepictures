@@ -78,7 +78,7 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="commentrow-options">
                 <div className="commentrow-options-container" onClick={showHistory}>
-                    <img className="commentrow-options-img" src={getIcon(noteHistory)}/>
+                    <img className="commentrow-options-img" src={getIcon(noteHistory)} style={{filter}}/>
                     <span className="commentrow-options-text">{i18n.sidebar.history}</span>
                 </div>
             </div>

@@ -813,7 +813,7 @@ const UserProfilePage: React.FunctionComponent = () => {
                     </div> : null}
                     <div className="user-column">
                         <span className="user-text" style={{fontSize: "22px", color: "var(--text-strong)"}}>Blacklist Tags</span>
-                        <textarea style={{height: "150px", width: "60%", fontSize: "20px", color: "var(--text-strong)"}} className="user-textarea" 
+                        <textarea style={{height: "150px", width: mobile ? "100%" : "60%", fontSize: "20px", color: "var(--text-strong)"}} className="user-textarea" 
                         spellCheck={false} value={blacklist} onChange={(event) => setBlacklist(event.target.value)}
                         onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                     </div>

@@ -26,7 +26,7 @@
     src: url("assets/fonts/TsunagiGothic.ttf") format("truetype");
 }
 
-@title-bar-height: 60px;
+@title-bar-height: 66px;
 @nav-bar-height: 30px;
 @sort-bar-height: 35px;
 @tag-banner-height: 35px;
@@ -229,10 +229,11 @@ html, body {
     position: relative;
     z-index: -1000;
     -webkit-touch-callout: none;
+    overflow-x: hidden;
 }
 
 body {
-    overflow-x: hidden;
+    position: relative;
 }
 
 .app {

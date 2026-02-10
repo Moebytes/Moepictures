@@ -112,11 +112,11 @@ const Comment: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="comment-options">
                     <div className="comment-options-container" onClick={editCommentDialog}>
-                        <img className="comment-options-img" src={getIcon(commentEdit)}/>
+                        <img className="comment-options-img" src={getIcon(commentEdit)} style={{filter}}/>
                         <span className="comment-options-text">{i18n.buttons.edit}</span>
                     </div>
                     <div className="comment-options-container" onClick={deleteCommentDialog}>
-                        <img className="comment-options-img" src={getIcon(commentDelete)}/>
+                        <img className="comment-options-img" src={getIcon(commentDelete)} style={{filter}}/>
                         <span className="comment-options-text">{i18n.buttons.delete}</span>
                     </div>
                 </div>
@@ -126,20 +126,20 @@ const Comment: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="comment-options">
                     <div className="comment-options-container" onClick={triggerQuote}>
-                        <img className="comment-options-img" src={getIcon(commentQuote)}/>
+                        <img className="comment-options-img" src={getIcon(commentQuote)} style={{filter}}/>
                         <span className="comment-options-text">{i18n.buttons.quote}</span>
                     </div>
                     {permissions.isMod(session) ? <>
                     <div className="comment-options-container" onClick={editCommentDialog}>
-                        <img className="comment-options-img" src={getIcon(commentEdit)}/>
+                        <img className="comment-options-img" src={getIcon(commentEdit)} style={{filter}}/>
                         <span className="comment-options-text">{i18n.buttons.edit}</span>
                     </div>
                     <div className="comment-options-container" onClick={deleteCommentDialog}>
-                        <img className="comment-options-img" src={getIcon(commentDelete)}/>
+                        <img className="comment-options-img" src={getIcon(commentDelete)} style={{filter}}/>
                         <span className="comment-options-text">{i18n.buttons.delete}</span>
                     </div></> : 
                     <div className="comment-options-container" onClick={reportCommentDialog}>
-                        <img className="comment-options-img" src={getIcon(commentReport)}/>
+                        <img className="comment-options-img" src={getIcon(commentReport)} style={{filter}}/>
                         <span className="comment-options-text">{i18n.buttons.report}</span>
                     </div>}
                 </div>

@@ -180,11 +180,11 @@ const Related: React.FunctionComponent<Props> = (props) => {
         } else if (sizeType === "small") {
             return mobile ? 150 : 180
         } else if (sizeType === "medium") {
-            return mobile ? 240 : 250
+            return mobile ? 220 : 250
         } else if (sizeType === "large") {
-            return mobile ? 380 : 400
+            return mobile ? 270 : 400
         } else if (sizeType === "massive") {
-            return mobile ? 450 : 500
+            return mobile ? 400 : 500
         }
     }
 

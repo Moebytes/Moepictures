@@ -125,11 +125,11 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="commentrow-options">
                     <div className="commentrow-options-container" onClick={editCommentDialog}>
-                        <img className="commentrow-options-img" src={getIcon(commentEdit)}/>
+                        <img className="commentrow-options-img" src={getIcon(commentEdit)} style={{filter}}/>
                         <span className="commentrow-options-text">{i18n.buttons.edit}</span>
                     </div>
                     <div className="commentrow-options-container" onClick={deleteCommentDialog}>
-                        <img className="commentrow-options-img" src={getIcon(commentDelete)}/>
+                        <img className="commentrow-options-img" src={getIcon(commentDelete)} style={{filter}}/>
                         <span className="commentrow-options-text">{i18n.buttons.delete}</span>
                     </div>
                 </div>
@@ -139,20 +139,20 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="commentrow-options">
                     <div className="commentrow-options-container" onClick={triggerQuote}>
-                        <img className="commentrow-options-img" src={getIcon(commentQuote)}/>
+                        <img className="commentrow-options-img" src={getIcon(commentQuote)} style={{filter}}/>
                         <span className="commentrow-options-text">{i18n.buttons.quote}</span>
                     </div>
                     {permissions.isMod(session) ? <>
                     <div className="commentrow-options-container" onClick={editCommentDialog}>
-                        <img className="commentrow-options-img" src={getIcon(commentEdit)}/>
+                        <img className="commentrow-options-img" src={getIcon(commentEdit)} style={{filter}}/>
                         <span className="commentrow-options-text">{i18n.buttons.edit}</span>
                     </div>
                     <div className="commentrow-options-container" onClick={deleteCommentDialog}>
-                        <img className="commentrow-options-img" src={getIcon(commentDelete)}/>
+                        <img className="commentrow-options-img" src={getIcon(commentDelete)} style={{filter}}/>
                         <span className="commentrow-options-text">{i18n.buttons.delete}</span>
                     </div></> : 
                     <div className="commentrow-options-container" onClick={reportCommentDialog}>
-                        <img className="commentrow-options-img" src={getIcon(commentReport)}/>
+                        <img className="commentrow-options-img" src={getIcon(commentReport)} style={{filter}}/>
                         <span className="commentrow-options-text">{i18n.buttons.report}</span>
                     </div>}
                 </div>

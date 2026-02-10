@@ -2,8 +2,7 @@ import React, {useEffect, useState} from "react"
 import {useNavigate, useLocation} from "react-router-dom"
 import {useThemeSelector, useSearchActions, useSearchSelector, 
 useFlagActions, useInteractionActions, useCacheActions, useCacheSelector, useActiveActions,
-useSessionSelector, useSessionActions, usePostDialogActions, useGroupDialogActions,
-usePostDialogSelector} from "../../store"
+useSessionSelector, useSessionActions, usePostDialogActions, useGroupDialogActions} from "../../store"
 import permissions from "../../structures/Permissions"
 import favicon from "../../assets/icons/favicon.png"
 
@@ -14,7 +13,6 @@ import sourceEdit from "../../assets/svg/search.svg"
 import setAvatar from "../../assets/svg/setavatar.svg"
 import parent from "../../assets/svg/parent.svg"
 import group from "../../assets/svg/add-group.svg"
-import addNote from "../../assets/svg/note-toggle-on.svg"
 import snapshotIcon from "../../assets/svg/snapshot.svg"
 import splitIcon from "../../assets/svg/split.svg"
 import joinIcon from "../../assets/svg/join.svg"
@@ -641,13 +639,6 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         return null
     }
 
-    const triggerAddNote = () => {
-        window.scrollTo(0, 0)
-        const newMode = !noteMode
-        setNoteMode(newMode)
-        if (newMode) setNoteDrawingEnabled(true)
-    }
-
     const triggerParent = () => {
         if (!props.post) return
         setChildPostObj({post: props.post, unverified: props.unverified})
@@ -950,6 +941,12 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                     <span className="side-info">{i18n.sidebar.getInfo}</span>
                                 </span>
                             </div>
+                            {!props.unverified && !functions.post.isR18(props.post.rating) ? <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={triggerSetAvatar}>
+                                    <img className="mobileinfo-icon" src={getIcon(setAvatar)} style={{filter}}/>
+                                    <span className="side-info">{i18n.sidebar.setAvatar}</span>
+                                </span>
+                            </div> : null}
                         </div>
                     </div></>
                 : null}
@@ -969,20 +966,6 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                     <span className="side-info">{i18n.sidebar.sourceEdit}</span>
                                 </span>
                             </div>
-                        </div>
-                        <div className="mobileinfo-sub-row">
-                            {!props.unverified && !functions.post.isR18(props.post.rating) ? <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={triggerSetAvatar}>
-                                    <img className="mobileinfo-icon" src={getIcon(setAvatar)} style={{filter}}/>
-                                    <span className="side-info">{i18n.sidebar.setAvatar}</span>
-                                </span>
-                            </div> : null}
-                            {!props.unverified ? <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={triggerAddNote}>
-                                    <img className="mobileinfo-icon" src={getIcon(addNote)} style={{filter}}/>
-                                    <span className="side-info">{i18n.sidebar.addNote}</span>
-                                </span>
-                            </div> : null}
                         </div>
                         <div className="mobileinfo-sub-row">
                             {!props.unverified ? <div className="mobileinfo-row">
@@ -1091,15 +1074,6 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                     <span className="side-info-red">{i18n.sidebar.history}</span>
                                 </span>
                             </div> : null}
-                        </div>
-                        <div className="mobileinfo-sub-row">
-                            {props.unverified && props.post.deleted && !(props.post as UnverifiedPost).appealed ?
-                            <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={appealPost}>
-                                    <img className="mobileinfo-icon" src={getRedIcon(appealIcon)}/>
-                                    <span className="side-info-red">{i18n.buttons.appeal}</span>
-                                </span>
-                            </div> : null}
                             {!(permissions.isMod(session) && props.unverified) || props.post.deleted ?
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={deletePost}>
@@ -1112,6 +1086,15 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag-hover" onClick={undeletePost}>
                                     <img className="mobileinfo-icon" src={getRedIcon(undeleteIcon)}/>
                                     <span className="side-info-red">{i18n.buttons.undelete}</span>
+                                </span>
+                            </div> : null}
+                        </div>
+                        <div className="mobileinfo-sub-row">
+                            {props.unverified && props.post.deleted && !(props.post as UnverifiedPost).appealed ?
+                            <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={appealPost}>
+                                    <img className="mobileinfo-icon" src={getRedIcon(appealIcon)}/>
+                                    <span className="side-info-red">{i18n.buttons.appeal}</span>
                                 </span>
                             </div> : null}
                         </div>

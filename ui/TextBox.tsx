@@ -203,7 +203,7 @@ const TextBox = forwardRef<TextBoxRef, Props>((props, ref) => {
                     <div className="textbox-replybox-row">
                         <img className="textbox-checkbox" src={r18 ? getIcon(radioButtonChecked) : getIcon(radioButton)} onClick={() => setR18((prev: boolean) => !prev)} style={{filter}}/>
                         <span className="textbox-replybox-text" style={{marginLeft: "10px"}}>R18</span>
-                        <img className="textbox-icon" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter}}/>
+                        {!mobile ? <img className="textbox-icon" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter}}/> : null}
                     </div> : null}
                     </div>
                 </div>
