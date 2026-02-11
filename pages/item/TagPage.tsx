@@ -188,7 +188,6 @@ const TagPage: React.FunctionComponent = () => {
         } else {
             navigate(`/post/${post.postID}/${post.slug}`)
         }
-        window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
         setPosts(tagPosts)
         setNavigationPosts(tagPosts)
     }

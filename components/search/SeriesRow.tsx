@@ -47,7 +47,6 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
         } else {
             navigate(`/post/${post.postID}/${post.slug}`)
         }
-        window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
         setPosts(props.series.posts)
         setNavigationPosts(props.series.posts)
     }

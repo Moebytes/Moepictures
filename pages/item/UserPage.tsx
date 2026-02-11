@@ -189,7 +189,6 @@ const UserPage: React.FunctionComponent = () => {
         } else {
             navigate(`/post/${post.postID}/${post.slug}`)
         }
-        window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
         setPosts(uploads)
         setNavigationPosts(uploads)
     }
@@ -202,7 +201,6 @@ const UserPage: React.FunctionComponent = () => {
         } else {
             navigate(`/post/${post.postID}/${post.slug}`)
         }
-        window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
         setPosts(favorites)
         setNavigationPosts(favorites)
     }
@@ -362,7 +360,6 @@ const UserPage: React.FunctionComponent = () => {
                 } else {
                     navigate(`/post/${post.postID}/${post.slug}`)
                 }
-                window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
                 setNavigationPosts(favgroup.posts)
                 setTimeout(() => {
                     setActiveFavgroup(favgroup)

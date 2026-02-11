@@ -425,11 +425,9 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
                     if (location.pathname.includes("/post/")) {
                         navigate(`/post/${props.id}/${props.post.slug}`, {replace: true})
                         setPostFlag(props.id)
-                        window.scrollTo(0, 0)
                     } else {
                         setPost(null)
                         navigate(`/post/${props.id}/${props.post.slug}`)
-                        window.scrollTo(0, 0)
                     }
                 }
             }

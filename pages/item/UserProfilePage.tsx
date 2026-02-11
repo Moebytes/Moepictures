@@ -414,7 +414,6 @@ const UserProfilePage: React.FunctionComponent = () => {
         } else {
             navigate(`/post/${post.postID}/${post.slug}`)
         }
-        window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
         setPosts(uploads)
         setNavigationPosts(uploads)
     }
@@ -427,7 +426,6 @@ const UserProfilePage: React.FunctionComponent = () => {
         } else {
             navigate(`/post/${post.postID}/${post.slug}`)
         }
-        window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
         setPosts(favorites)
         setNavigationPosts(favorites)
     }
@@ -440,7 +438,6 @@ const UserProfilePage: React.FunctionComponent = () => {
         } else {
             navigate(`/unverified/post/${post.postID}`)
         }
-        window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
     }
 
     const setDel = (img: string, index: number, newTab: boolean) => {
@@ -451,7 +448,6 @@ const UserProfilePage: React.FunctionComponent = () => {
         } else {
             navigate(`/unverified/post/${post.postID}`)
         }
-        window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
     }
 
     const deleteAccountDialog = () => {
@@ -599,7 +595,6 @@ const UserProfilePage: React.FunctionComponent = () => {
                 } else {
                     navigate(`/post/${post.postID}/${post.slug}`)
                 }
-                window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
                 setNavigationPosts(favgroup.posts)
                 setTimeout(() => {
                     setActiveFavgroup(favgroup)
