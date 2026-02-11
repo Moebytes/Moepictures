@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef, useReducer} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useCacheActions, useLayoutSelector, useSearchSelector, useSessionSelector, useThemeSelector,
 useSessionActions, useSearchActions, usePageSelector, usePageActions, useCacheSelector} from "../../store"

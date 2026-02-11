@@ -160,7 +160,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
         if (padded) {
             setItems(result)
         } else {
-            setItems(functions.util.removeDuplicates([...items, ...result]))
+            setItems((prev) => functions.util.removeDuplicates([...prev, ...result]))
             setVisible((prev) => [...prev, ...result])
         }
 
@@ -170,7 +170,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
 
     useEffect(() => {
         if (scroll) return
-        const start = (page - 1) * pageAmount
+        const start = page * pageAmount
         const end = start + pageAmount
         const pageSlice = items.slice(start, end)
 
@@ -178,6 +178,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
             updateItems(start)
         }
     }, [page, scroll])
+
 
     useEffect(() => {
         if (!scroll) return
