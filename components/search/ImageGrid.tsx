@@ -32,7 +32,7 @@ interface Props {
 
 let interval = null as any
 let reloadedPost = false
-let init = true
+let skipRender = false
 let limit = 100
 
 const ImageGrid: React.FunctionComponent<Props> = (props) => {
@@ -147,6 +147,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
             sort: functions.validation.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch, offset}, session, setSessionFlag)
         }
+        skipRender = true
         return result
     }
 
@@ -326,6 +327,10 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (scroll) return
         if (!visiblePromisesRef.current.length) return
+        if (skipRender) {
+            skipRender = false
+            return
+        }
         props.setImagesLoaded(false)
         const poll = async () => {
             const notFulfilled = () => {
@@ -400,7 +405,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="imagegrid" style={{marginTop: mobile ? "10px" : "0px"}} onMouseEnter={() => setEnableDrag(true)}>
-            <div className="image-container">
+            <div className="image-container" style={{visibility: props.imagesLoaded ? "visible" : "hidden"}}>
                 {generateImagesJSX()}
             </div>
         </div>

@@ -294,7 +294,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
                 <img className="related-icon" src={getIcon(squareSVG)} onClick={() => setSquare(!square)} style={{filter}}/>
                 <img className="related-icon" ref={sizeRef} src={getIcon(sizeSVG)} onClick={() => setSizeDropdown((prev) => !prev)} style={{filter}}/>
             </div>}
-            <div className="related-container" style={{width: "98%", justifyContent: related.length < 5 ? "flex-start" : "space-evenly"}}>
+            <div className="related-container" style={{visibility: allImagesLoaded ? "visible" : "hidden", width: "98%", justifyContent: related.length < 5 ? "flex-start" : "space-evenly"}}>
                 {generateImagesJSX()}
                 {/* <Carousel images={getImages()} set={click} noKey={true} marginLeft={marginLeft} height={200} unlimited={true}/> */}
             </div>

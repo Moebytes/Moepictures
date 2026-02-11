@@ -137,7 +137,8 @@ const TagBanner: React.FunctionComponent = (props) => {
             if (tag.type === "character") tag.image ? characterTagsImg.push(tag) : characterTags.push(tag)
             if (tag.type === "series") tag.image ? seriesTagsImg.push(tag) : seriesTags.push(tag)
         }
-        setBannerTags([...characterTagsImg, ...seriesTagsImg, ...characterTags, ...seriesTags])
+        let bannerTags = [...characterTagsImg, ...seriesTagsImg, ...characterTags, ...seriesTags]
+        if (bannerTags.length) setBannerTags(bannerTags)
     }
 
     useEffect(() => {
