@@ -400,7 +400,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="imagegrid" style={{marginTop: mobile ? "10px" : "0px"}} onMouseEnter={() => setEnableDrag(true)}>
-            <div className="image-container" style={{visibility: props.imagesLoaded ? "visible" : "hidden"}}>
+            <div className="image-container">
                 {generateImagesJSX()}
             </div>
         </div>
