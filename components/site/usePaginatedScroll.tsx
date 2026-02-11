@@ -170,7 +170,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
 
     useEffect(() => {
         if (scroll) return
-        const start = page * pageAmount
+        const start = (page - 1) * pageAmount
         const end = start + pageAmount
         const pageSlice = items.slice(start, end)
 
