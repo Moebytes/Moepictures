@@ -84,7 +84,8 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
             navigate("/posts")
             window.scrollTo(0, 0)
         } else {
-            navigate("/posts", {
+            let pageText = page > 1 ? `?page=${page}` : ""
+            navigate(`/posts${pageText}`, {
                 state: {restorePosts: posts, restoreScrollY: scrollY, restorePage: page}
             })
         }

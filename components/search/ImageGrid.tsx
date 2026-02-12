@@ -153,23 +153,23 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
 
     const {items, visibleItems, page, setPage, maxPage, setSearchQuery, initItems, restructureItems, totalCount,
         setManagedPage, setManagedQuery, setManagedItems} = usePaginatedScroll({loadInitial, updateOffset, 
-        pageAmount, limit, countKey: "postCount"})
+        pageAmount, limit, countKey: "postCount", locationState: location.state})
 
     useEffect(() => {
         const state = location.state
 
         if (state?.restorePosts) {
             setTimeout(() => {
-                restructureItems(state.restorePosts)
-                if (state?.restorePage) setPage(state.restorePage)
-                navigate(location.pathname, {replace: true, state: {}})
-            }, 3000)
+                const searchParams = new URLSearchParams(location.search)
+                let pathString = `${location.pathname}?${searchParams.toString()}`
+                navigate(pathString, {replace: true, state: {}})
+            }, 2000)
         }
 
         if (state?.restoreScrollY) {
             setTimeout(() => {
                 window.scrollTo(0, state.restoreScrollY)
-            }, 3000)
+            }, 2000)
         }
     }, [])
 
@@ -198,17 +198,13 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const onDOMLoaded = async () => {
+            const state = location.state
+            if (state?.restorePosts) return
+
             setTimeout(() => {
-                const elements = Array.from(document.querySelectorAll(".sortbar-text")) as HTMLElement[]
                 const img = document.querySelector(".image")
-                if (!img) {
-                    let counter = 0
-                    for (let i = 0; i < elements.length; i++) {
-                        if (elements[i]?.innerText?.toLowerCase() === "random") counter++
-                    }
-                    //counter >= 1 ? randomPosts(search) : initItems(search)
-                }
-            }, 2000)
+                if (!img) initItems(search)
+            }, 3000)
         }
         window.addEventListener("load", onDOMLoaded)
         return () => {
@@ -233,7 +229,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (searchFlag) {
             setSearchQuery(search)
-            initItems(search)
+            initItems(search, true)
         }
     }, [search, searchFlag])
 
@@ -247,7 +243,6 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             }, 500)
             return
         }
-
         initItems(search)
     }, [searchFlag, imageType, ratingType, styleType, sortType, sortReverse, 
         showChildren, favSearch, loaded])

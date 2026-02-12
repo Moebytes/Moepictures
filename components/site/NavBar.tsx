@@ -159,7 +159,8 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const postsClick = () => {
         setHideMobileNavbar(true)
         if (props.goBack) {
-            navigate("/posts", {
+            let pageText = page > 1 ? `?page=${page}` : ""
+            navigate(`/posts${pageText}`, {
                 state: {restorePosts: posts, restoreScrollY: scrollY, restorePage: page}
             })
         } else {

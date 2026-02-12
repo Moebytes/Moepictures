@@ -9,13 +9,14 @@ interface Params<T> {
     pageAmount: number
     limit?: number
     countKey?: string
+    locationState?: any
 }
 
 const usePaginatedScroll = <T,>(params: Params<T>) => {
     const {scroll} = useSearchSelector()
     const {setScroll} = useSearchActions()
     const {setMobileScrolling} = useInteractionActions()
-    let {loadInitial, updateOffset, pageAmount, limit, countKey} = params
+    let {loadInitial, updateOffset, pageAmount, limit, countKey, locationState} = params
     const [items, setItems] = useState([] as T[])
     const [visible, setVisible] = useState([] as T[])
     const [offset, setOffset] = useState(0)
@@ -35,6 +36,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
         if (typeof window === "undefined") return 1
         const pageParam = new URLSearchParams(location.search).get("page")
         return pageParam ? Number(pageParam) : 1
+
     }
     const [page, setPage] = useState(getQueryPage())
 
@@ -88,15 +90,15 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
         }
     }, [page, searchQuery])
 
-    const initItems = async (queryOverride?: string) => {
+    const initItems = async (queryOverride?: string, reset?: boolean) => {
         setEnded(false)
         setOffset(0)
         setSearchQuery(queryOverride ?? searchQuery)
         const data = await loadInitial(queryOverride ?? searchQuery)
-        loadedRef.current = true
         setItems(data)
-        setPage(page)
         if (scroll) setVisible(data.slice(0, pageAmount))
+        if (reset) setPage(1)
+        loadedRef.current = true
     }
 
     const restructureItems = async (items: T[]) => {
@@ -172,6 +174,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
 
     useEffect(() => {
         if (scroll) return
+        if (locationState?.restorePosts) return
         const start = (page - 1) * pageAmount
         const end = start + pageAmount
         const pageSlice = items.slice(start, end)
