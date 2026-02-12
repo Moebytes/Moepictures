@@ -35,8 +35,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     const {setEnableDrag, setScrollY, setMobileScrolling} = useInteractionActions()
     const {headerFlag} = useFlagSelector()
     const {setHeaderFlag} = useFlagActions()
-    const {visiblePosts} = useCacheSelector()
-    const {setVisiblePosts} = useCacheActions()
+    const {posts} = useCacheSelector()
     const {activeGroup, activeFavgroup, headerText} = useActiveSelector()
     const {setHeaderText} = useActiveActions()
     const navigate = useNavigate()
@@ -73,7 +72,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         setHideMobileNavbar(!hideMobileNavbar)
     }
 
-    const titleClick = (event: React.MouseEvent) => {
+    const titleClick = async (event: React.MouseEvent) => {
         if (mobile && (location.pathname === "/" || location.pathname === "/posts")) if (event.clientY < 180) return
         if (props.reset) {
             setSearch("")
@@ -86,11 +85,9 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
             window.scrollTo(0, 0)
             setScrollY(0)
         } else {
-            const saved = visiblePosts
-            const savedScrollY = scrollY
-            navigate("/posts")
-            setVisiblePosts(saved)
-            if (savedScrollY) window.scrollTo(0, savedScrollY)
+            navigate("/posts", {
+                state: {restorePosts: posts, restoreScrollY: scrollY}
+            })
         }
     }
 

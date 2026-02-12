@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react"
-import {useNavigate} from "react-router-dom"
+import {useNavigate, useLocation} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSearchActions, useSearchSelector, 
 useFlagActions, useInteractionActions, useCacheActions, useCacheSelector, useFlagSelector, useActiveActions,
 useMiscDialogActions, useSessionSelector, useSessionActions, usePageSelector, usePageActions, 
@@ -61,7 +61,25 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const [initData, setInitData] = useState({searchFlag, imageType, ratingType, styleType, sortType, sortReverse})
     const [removeSaveSearchFlag, setRemoveSaveSearchFlag] = useState(false)
     const visiblePromisesRef = useRef<TrackablePromise<void>[]>([])
+    const location = useLocation()
     const navigate = useNavigate()
+
+    useEffect(() => {
+        const state = location.state
+
+        if (state?.restorePosts) {
+            setTimeout(() => {
+                restructureItems(state.restorePosts)
+                navigate(location.pathname, {replace: true, state: {}})
+            }, 1000)
+        }
+
+        if (state?.restoreScrollY) {
+            setTimeout(() => {
+                window.scrollTo(0, state.restoreScrollY)
+            }, 1000)
+        }
+    }, [])
 
     const getPageAmount = () => {
         let loadAmount = 36
@@ -125,6 +143,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         setNoResults(false)
         const result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
         sort: functions.validation.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch}, session, setSessionFlag)
+        console.log({query, imageType, ratingType, styleType, sortType, showChildren})
         setHeaderFlag(true)
         setIsRandomSearch(false)
         if (!loaded) setLoaded(true)
@@ -151,7 +170,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         return result
     }
 
-    const {items, visibleItems, page, setPage, maxPage, setSearchQuery, initItems, restructureItems, totalCount, startIndex,
+    const {items, visibleItems, page, setPage, maxPage, setSearchQuery, initItems, restructureItems, totalCount,
         setManagedPage, setManagedQuery, setManagedItems} = usePaginatedScroll({loadInitial, updateOffset, 
         pageAmount, limit, countKey: "postCount"})
 
@@ -184,15 +203,12 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
                 if (!scrollY) {
                     const elements = Array.from(document.querySelectorAll(".sortbar-text")) as HTMLElement[]
                     const img = document.querySelector(".image")
-                    if (!img && !elements?.[0]) {
-                        initItems(search)
-                    } else {
+                    if (!img) {
                         let counter = 0
                         for (let i = 0; i < elements.length; i++) {
-                            if (elements[i]?.innerText?.toLowerCase() === "all") counter++
                             if (elements[i]?.innerText?.toLowerCase() === "random") counter++
                         }
-                        if (!img && counter >= 4) randomPosts()
+                        //counter >= 1 ? randomPosts(search) : initItems(search)
                     }
                 } else {
                     setScrollY(0)
@@ -227,15 +243,19 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     }, [search, searchFlag])
 
     useEffect(() => {
+        const state = location.state
+        if (state?.restorePosts) return
+
         if (reloadedPost) {
             setTimeout(() => {
                 reloadedPost = false
             }, 500)
             return
         }
+
         initItems(search)
     }, [searchFlag, imageType, ratingType, styleType, sortType, sortReverse, 
-        pageMultiplier, showChildren, favSearch, loaded])
+        showChildren, favSearch, loaded])
 
     useEffect(() => {
         if (reloadPostFlag) reloadedPost = true
@@ -322,7 +342,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             }
         }
         populateCache()
-    }, [items, sizeType, pageMultiplier, session, mobile])
+    }, [items, sizeType, session, mobile])
 
     useEffect(() => {
         if (scroll) return

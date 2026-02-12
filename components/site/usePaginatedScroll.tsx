@@ -1,4 +1,4 @@
-import {useEffect, useState, useRef, useMemo} from "react"
+import {useEffect, useState, useRef, useMemo, useCallback} from "react"
 import {useNavigate, useLocation} from "react-router-dom"
 import {useSearchSelector, useSearchActions, useInteractionActions} from "../../store"
 import functions from "../../functions/Functions"
@@ -130,9 +130,11 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
 
     const updateItems = async (forceOffset?: number, queryOverride?: string) => {
         if (ended || updatingRef.current) return
+
         updatingRef.current = true
 
-        const newOffset = forceOffset ?? offset + pageAmount
+        let currentOffset = scroll ? offset + pageAmount : (page - 1) * pageAmount
+        const newOffset = forceOffset ?? currentOffset
         let result = await updateOffset?.(newOffset, queryOverride ?? searchQuery) ?? null
         if (!result) result = items.slice(newOffset, newOffset + pageAmount)
 
@@ -177,8 +179,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
         if (pageSlice.length < pageAmount || pageSlice.some((i: any) => i?.fake)) {
             updateItems(start)
         }
-    }, [page, scroll])
-
+    }, [page, scroll, pageAmount])
 
     useEffect(() => {
         if (!scroll) return
@@ -224,6 +225,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
         setPage,
         maxPage,
         ended,
+        offset,
         searchQuery,
         setSearchQuery,
         toggleScroll,
