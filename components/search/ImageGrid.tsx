@@ -143,7 +143,6 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         setNoResults(false)
         const result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
         sort: functions.validation.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch}, session, setSessionFlag)
-        console.log({query, imageType, ratingType, styleType, sortType, showChildren})
         setHeaderFlag(true)
         setIsRandomSearch(false)
         if (!loaded) setLoaded(true)
