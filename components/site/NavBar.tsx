@@ -19,7 +19,7 @@ import MiniAudioPlayer from "./MiniAudioPlayer"
 import Slider from "react-slider"
 import {useThemeSelector, useThemeActions, useLayoutSelector, useSearchActions, useSearchSelector, 
 useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, usePlaybackSelector,
-usePlaybackActions} from "../../store"
+usePlaybackActions, useInteractionSelector, useCacheSelector, usePageSelector} from "../../store"
 import HSLDropdown from "../../ui/HSLDropdown"
 import "./styles/navbar.less"
 
@@ -37,7 +37,10 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const {setShowMiniPlayer} = usePlaybackActions()
     const {search} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
+    const {page} = usePageSelector()
+    const {scrollY} = useInteractionSelector()
     const {setEnableDrag} = useInteractionActions()
+    const {posts} = useCacheSelector()
     const {session, userImg, hasNotification} = useSessionSelector()
     const {setSessionFlag, setHasNotification} = useSessionActions()
     const [showMiniTitle, setShowMiniTitle] = useState(false)
@@ -154,8 +157,11 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const postsClick = () => {
+        setHideMobileNavbar(true)
         if (props.goBack) {
-            navigate("/posts")
+            navigate("/posts", {
+                state: {restorePosts: posts, restoreScrollY: scrollY, restorePage: page}
+            })
         } else {
             navigate("/posts")
             setSearchFlag(true)
@@ -267,7 +273,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                         {generateMobileUsernameJSX()}
                     </div> :
                     <span className="mobile-nav-text mobile-nav-login-text" onClick={() => {navigate("/login"); setHideMobileNavbar(true)}}>{i18n.navbar.login}</span>}
-                    <span className="mobile-nav-text" onClick={() => {navigate("/posts"); setHideMobileNavbar(true); setSearchFlag(true)}}>{i18n.sort.posts}</span>
+                    <span className="mobile-nav-text" onClick={() => postsClick()}>{i18n.sort.posts}</span>
                     <span className="mobile-nav-text" onClick={() => {navigate("/comments"); setHideMobileNavbar(true)}}>{i18n.navbar.comments}</span>
                     <span className="mobile-nav-text" onClick={() => {navigate("/notes"); setHideMobileNavbar(true)}}>{i18n.navbar.notes}</span>
                     <span className="mobile-nav-text" onClick={() => {navigate("/artists"); setHideMobileNavbar(true)}}>{i18n.navbar.artists}</span>

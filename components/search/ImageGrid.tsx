@@ -41,8 +41,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const {search, searchFlag, scroll, imageType, ratingType, styleType, sortType, sortReverse, sizeType, 
     pageMultiplier, autoSearch, showChildren, favSearch} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
-    const {scrollY} = useInteractionSelector()
-    const {setEnableDrag, setScrollY} = useInteractionActions()
+    const {setEnableDrag} = useInteractionActions()
     const {posts} = useCacheSelector()
     const {setPosts, setNavigationPosts, setVisiblePosts} = useCacheActions()
     const {setSidebarText, setActionBanner} = useActiveActions()
@@ -63,23 +62,6 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const visiblePromisesRef = useRef<TrackablePromise<void>[]>([])
     const location = useLocation()
     const navigate = useNavigate()
-
-    useEffect(() => {
-        const state = location.state
-
-        if (state?.restorePosts) {
-            setTimeout(() => {
-                restructureItems(state.restorePosts)
-                navigate(location.pathname, {replace: true, state: {}})
-            }, 1000)
-        }
-
-        if (state?.restoreScrollY) {
-            setTimeout(() => {
-                window.scrollTo(0, state.restoreScrollY)
-            }, 1000)
-        }
-    }, [])
 
     const getPageAmount = () => {
         let loadAmount = 36
@@ -173,6 +155,24 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         setManagedPage, setManagedQuery, setManagedItems} = usePaginatedScroll({loadInitial, updateOffset, 
         pageAmount, limit, countKey: "postCount"})
 
+    useEffect(() => {
+        const state = location.state
+
+        if (state?.restorePosts) {
+            setTimeout(() => {
+                restructureItems(state.restorePosts)
+                if (state?.restorePage) setPage(state.restorePage)
+                navigate(location.pathname, {replace: true, state: {}})
+            }, 3000)
+        }
+
+        if (state?.restoreScrollY) {
+            setTimeout(() => {
+                window.scrollTo(0, state.restoreScrollY)
+            }, 3000)
+        }
+    }, [])
+
     const randomPosts = async (query?: string) => {
         setRandomFlag(false)
         const result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
@@ -199,18 +199,14 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const onDOMLoaded = async () => {
             setTimeout(() => {
-                if (!scrollY) {
-                    const elements = Array.from(document.querySelectorAll(".sortbar-text")) as HTMLElement[]
-                    const img = document.querySelector(".image")
-                    if (!img) {
-                        let counter = 0
-                        for (let i = 0; i < elements.length; i++) {
-                            if (elements[i]?.innerText?.toLowerCase() === "random") counter++
-                        }
-                        //counter >= 1 ? randomPosts(search) : initItems(search)
+                const elements = Array.from(document.querySelectorAll(".sortbar-text")) as HTMLElement[]
+                const img = document.querySelector(".image")
+                if (!img) {
+                    let counter = 0
+                    for (let i = 0; i < elements.length; i++) {
+                        if (elements[i]?.innerText?.toLowerCase() === "random") counter++
                     }
-                } else {
-                    setScrollY(0)
+                    //counter >= 1 ? randomPosts(search) : initItems(search)
                 }
             }, 2000)
         }

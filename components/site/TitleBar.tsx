@@ -3,7 +3,7 @@ import {useNavigate, useLocation} from "react-router-dom"
 import favicon from "../../assets/icons/favicon.png"
 import {useThemeSelector, useSessionSelector, useLayoutSelector, useSearchActions, useSearchSelector, 
 useInteractionActions, useLayoutActions, useActiveSelector, useInteractionSelector, useCacheSelector, 
-useCacheActions, useFlagSelector, useActiveActions, useFlagActions, useFilterActions, useSessionActions} from "../../store"
+usePageSelector, useFlagSelector, useActiveActions, useFlagActions, useSessionActions} from "../../store"
 import functions from "../../functions/Functions"
 import hamburger from "../../assets/svg/hamburger.svg"
 import key from "../../assets/svg/key.svg"
@@ -26,13 +26,13 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile, relative, hideTitlebar, hideMobileNavbar} = useLayoutSelector()
     const {setHideMobileNavbar, setRelative, setHideTitlebar} = useLayoutActions()
-    const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate, setSplatter} = useFilterActions()
     const {search, ratingType, autoSearch} = useSearchSelector()
     const {setSearch, setSearchFlag, setImageType, setRatingType, setStyleType, setSortType} = useSearchActions()
+    const {page} = usePageSelector()
     const {scrollY, mobileScrolling} = useInteractionSelector()
     const {session, userImg} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const {setEnableDrag, setScrollY, setMobileScrolling} = useInteractionActions()
+    const {setEnableDrag, setMobileScrolling} = useInteractionActions()
     const {headerFlag} = useFlagSelector()
     const {setHeaderFlag} = useFlagActions()
     const {posts} = useCacheSelector()
@@ -83,10 +83,9 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
             setSearchFlag(true)
             navigate("/posts")
             window.scrollTo(0, 0)
-            setScrollY(0)
         } else {
             navigate("/posts", {
-                state: {restorePosts: posts, restoreScrollY: scrollY}
+                state: {restorePosts: posts, restoreScrollY: scrollY, restorePage: page}
             })
         }
     }
