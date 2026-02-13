@@ -135,7 +135,7 @@ const UserPage: React.FunctionComponent = () => {
     }
 
     const updateFavoriteTags = async () => {
-        const favoriteTags = await functions.http.get("/api/tagfavorites", {username}, session, setSessionFlag)
+        const favoriteTags = await functions.http.get("/api/tagfavorites", {username}, session, setSessionFlag, true)
         setFavoriteTags(favoriteTags)
     }
 
@@ -161,11 +161,7 @@ const UserPage: React.FunctionComponent = () => {
     }, [username, ratingType, session])
 
     useEffect(() => {
-        if (mobile) {
-            setRelative(true)
-        } else {
-            setRelative(false)
-        }
+        setRelative(mobile ? true : false)
     }, [mobile])
 
     useEffect(() => {
