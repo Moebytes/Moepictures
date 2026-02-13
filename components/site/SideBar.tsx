@@ -97,8 +97,8 @@ let maxHeight3 = 672
 const SideBar: React.FunctionComponent<Props> = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile, relative, hideNavbar, hideSidebar, hideSortbar, hideTitlebar} = useLayoutSelector()
-    const {search, noteMode, autoSearch, saveSearch, favSearch} = useSearchSelector()
-    const {setSearch, setSearchFlag, setNoteMode, setNoteDrawingEnabled, setAutoSearch, setSaveSearch, setFavSearch} = useSearchActions()
+    const {search, autoSearch, saveSearch, favSearch} = useSearchSelector()
+    const {setSearch, setSearchFlag, setAutoSearch, setSaveSearch, setFavSearch} = useSearchActions()
     const {posts, unverifiedPosts, tags} = useCacheSelector()
     const {setTags} = useCacheActions()
     const {mobileScrolling} = useInteractionSelector()

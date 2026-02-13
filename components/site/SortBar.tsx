@@ -17,6 +17,7 @@ import bulk from "../../assets/svg/bulk.svg"
 import all from "../../assets/svg/all.svg"
 import checkbox from "../../assets/svg/checkbox2.svg"
 import checkboxChecked from "../../assets/svg/checkbox2-checked.svg"
+import autoscrollSVG from "../../assets/svg/autoscroll.svg"
 import scrollSVG from "../../assets/svg/scroll.svg"
 import pagesSVG from "../../assets/svg/pages.svg"
 import squareSVG from "../../assets/svg/square.svg"
@@ -65,6 +66,8 @@ import Filters from "../../ui/Filters"
 import {PostSort} from "../../types/Types"
 import "./styles/sortbar.less"
 
+let interval = null as any
+
 const SortBar: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
@@ -76,8 +79,10 @@ const SortBar: React.FunctionComponent = (props) => {
     const {setActiveDropdown, setFilterDropActive} = useActiveActions()
     const {reverse} = usePlaybackSelector()
     const {setReverse, setSpeed} = usePlaybackActions()
-    const {scroll, square, imageType, ratingType, styleType, sizeType, sortType, sortReverse, selectionMode, pageMultiplier, selectionItems, showChildren} = useSearchSelector()
-    const {setScroll, setImageType, setRatingType, setStyleType, setSizeType, setSortType, setSortReverse, setSelectionMode, setPageMultiplier, setSquare, setSearchFlag, setShowChildren} = useSearchActions()
+    const {scroll, square, imageType, ratingType, styleType, sizeType, sortType, sortReverse, selectionMode, 
+    pageMultiplier, selectionItems, showChildren, autoScroll} = useSearchSelector()
+    const {setScroll, setImageType, setRatingType, setStyleType, setSizeType, setSortType, setSortReverse, 
+    setSelectionMode, setPageMultiplier, setSquare, setSearchFlag, setShowChildren, setAutoScroll} = useSearchActions()
     const {setDownloadFlag, setDownloadIDs, setPageFlag} = useFlagActions()
     const {showDownloadDialog} = useMiscDialogSelector()
     const {setPremiumRequired, setShowDownloadDialog} = useMiscDialogActions()
@@ -106,6 +111,10 @@ const SortBar: React.FunctionComponent = (props) => {
 
     const getIcon = (icon: string) => {
         return functions.color.colorizeSVG(icon, "--sortbarIcons")
+    }
+
+    const getPinkIcon = (icon: string) => {
+        return functions.color.colorizeSVG(icon, "#ff47d4")
     }
 
     const getRedIcon = (icon: string) => {
@@ -780,6 +789,24 @@ const SortBar: React.FunctionComponent = (props) => {
         }, 100)
     }
 
+    useEffect(() => {
+        window.clearInterval(interval)
+        const scrollLoop = async () => {
+            window.scrollBy(0, 15)
+        }
+        const stopScroll = () => {
+            setAutoScroll(false)
+        }
+        if (autoScroll) {
+            interval = window.setInterval(scrollLoop, 10)
+            setTimeout(() => window.addEventListener("click", stopScroll), 0)
+        }
+        return () => {
+            window.clearInterval(interval)
+            window.removeEventListener("click", stopScroll)
+        }
+    }, [autoScroll])
+
     const sidebarArrowIcon = () => {
         return hideSidebar ? getIcon(rightArrow) : getIcon(leftArrow)
     }
@@ -891,6 +918,11 @@ const SortBar: React.FunctionComponent = (props) => {
                     </div>
                     <div className="sortbar-item" ref={pageMultiplierRef} onClick={() => togglePageMultiplierDrop()}>
                         <span className="sortbar-text-alt" style={{filter}}>{pageMultiplier}x</span>
+                    </div>
+                    </> : null}
+                    {scroll ? <>
+                    <div className="sortbar-item" onClick={() => setAutoScroll(!autoScroll)}>
+                        <img className="sortbar-img" src={autoScroll ? getPinkIcon(autoscrollSVG) : getIcon(autoscrollSVG)} style={{filter}}/>
                     </div>
                     </> : null}
                     <div className="sortbar-item" onClick={() => toggleScroll()}>

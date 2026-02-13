@@ -27,6 +27,7 @@ const searchSlice = createSlice({
         selectionItems: Array.from(new Set<string>()),
         selectionPosts: Object.fromEntries(new Map<string, PostSearch>()),
         pageMultiplier: 1,
+        autoScroll: false,
         format: "jpg" as ImageFormat,
         autoSearch: false,
         saveSearch: false,
@@ -57,6 +58,7 @@ const searchSlice = createSlice({
         setSelectionItems: (state, action) => {state.selectionItems = Array.from(action.payload)},
         setSelectionPosts: (state, action) => {state.selectionPosts = Object.fromEntries(action.payload)},
         setPageMultiplier: (state, action) => {state.pageMultiplier = action.payload},
+        setAutoScroll: (state, action) => {state.autoScroll = action.payload},
         setFormat: (state, action) => {state.format = action.payload},
         setAutoSearch: (state, action) => {state.autoSearch = action.payload},
         setSaveSearch: (state, action) => {state.saveSearch = action.payload},
@@ -80,7 +82,7 @@ const {
     setSelectionItems, setSelectionPosts, setFormat, setAutoSearch, setSaveSearch,
     setNoteMode, setNoteDrawingEnabled, setImageExpand, setShowUpscaled, setFavSearch,
     setShowChildren, setReaderHorizontal, setReaderInvert, setReaderThumbnails, setReaderZoom,
-    setShowTranscript
+    setShowTranscript, setAutoScroll
 } = searchSlice.actions
 
 const selectSelectionItems = createSelector((state: StoreState) => state.search, (search) => new Set<string>(search.selectionItems))
@@ -103,6 +105,7 @@ export const useSearchSelector = () => {
         selectionItems: selector(selectSelectionItems),
         selectionPosts: selector(selectSelectionPosts),
         pageMultiplier: selector((state) => state.search.pageMultiplier),
+        autoScroll: selector((state) => state.search.autoScroll),
         format: selector((state) => state.search.format),
         autoSearch: selector((state) => state.search.autoSearch),
         saveSearch: selector((state) => state.search.saveSearch),
@@ -137,6 +140,7 @@ export const useSearchActions = () => {
         setSelectionItems: (state: Set<string>) => dispatch(setSelectionItems(state)),
         setSelectionPosts: (state: Map<string, PostSearch>) => dispatch(setSelectionPosts(state)),
         setPageMultiplier: (state: number) => dispatch(setPageMultiplier(state)),
+        setAutoScroll: (state: boolean) => dispatch(setAutoScroll(state)),
         setFormat: (state: ImageFormat) => dispatch(setFormat(state)),
         setAutoSearch: (state: boolean) => dispatch(setAutoSearch(state)),
         setSaveSearch: (state: boolean) => dispatch(setSaveSearch(state)),
