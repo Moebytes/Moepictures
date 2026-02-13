@@ -54,7 +54,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const timer = setTimeout(() => {
             setLocationState(null)
-        }, 2000)
+        }, 3000)
 
         return () => clearTimeout(timer)
     }, [])
