@@ -4,10 +4,16 @@ import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
 import {PostType, PostRating, PostStyle, PostSize, PostSort, PostSearch, ImageFormat} from "../types/Types"
 
+const getSearchQuery = () => {
+    if (typeof window === "undefined") return ""
+    const queryParam = new URLSearchParams(location.search).get("query")
+    return queryParam ?? ""
+}
+
 const searchSlice = createSlice({
     name: "search",
     initialState: {
-        search: "",
+        search: getSearchQuery(),
         searchFlag: false,
         imageType: "all" as PostType,
         ratingType: "all" as PostRating,

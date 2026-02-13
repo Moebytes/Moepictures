@@ -36,7 +36,6 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
         if (typeof window === "undefined") return 1
         const pageParam = new URLSearchParams(location.search).get("page")
         return pageParam ? Number(pageParam) : 1
-
     }
     const [page, setPage] = useState(getQueryPage())
 
@@ -97,7 +96,11 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
         const data = await loadInitial(queryOverride ?? searchQuery)
         setItems(data)
         if (scroll) setVisible(data.slice(0, pageAmount))
-        if (reset) setPage(1)
+        if (reset) {
+            setPage(1)
+        } else {
+            if (page !== 1) updateItems()
+        }
         loadedRef.current = true
     }
 
@@ -140,6 +143,8 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
         let result = await updateOffset?.(newOffset, queryOverride ?? searchQuery) ?? null
         if (!result) result = items.slice(newOffset, newOffset + pageAmount)
 
+        const totalCount = result.length ? (getTotalCount?.(result[0]) || result.length) : 0
+
         let padded = false
         if (!scroll) {
             if (newOffset === 0 && (items[newOffset] as any)?.fake) {
@@ -175,6 +180,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
     useEffect(() => {
         if (scroll) return
         if (locationState?.restorePosts) return
+
         const start = (page - 1) * pageAmount
         const end = start + pageAmount
         const pageSlice = items.slice(start, end)

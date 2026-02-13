@@ -2,26 +2,34 @@ import {createSlice} from "@reduxjs/toolkit"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
 
+const getQueryPage = () => {
+    if (typeof window === "undefined") return 1
+    const pageParam = new URLSearchParams(location.search).get("page")
+    return pageParam ? Number(pageParam) : 1
+}
+
+const initialPage = getQueryPage()
+
 const pageSlice = createSlice({
     name: "page",
     initialState: {
-        page: 1,
-        commentsPage: 1,
-        notesPage: 1,
-        artistsPage: 1,
-        charactersPage: 1,
-        seriesPage: 1,
-        tagsPage: 1,
-        forumPage: 1,
-        forumPostsPage: 1,
-        threadPage: 1,
-        mailPage: 1,
-        historyPage: 1,
-        modPage: 1,
-        groupsPage: 1,
-        messagePage: 1,
-        relatedPage: 1,
-        readerPage: 1
+        page: initialPage,
+        commentsPage: initialPage,
+        notesPage: initialPage,
+        artistsPage: initialPage,
+        charactersPage: initialPage,
+        seriesPage: initialPage,
+        tagsPage: initialPage,
+        forumPage: initialPage,
+        forumPostsPage: initialPage,
+        threadPage: initialPage,
+        mailPage: initialPage,
+        historyPage: initialPage,
+        modPage: initialPage,
+        groupsPage: initialPage,
+        messagePage: initialPage,
+        relatedPage: initialPage,
+        readerPage: initialPage
     },
     reducers: {
         setPage: (state, action) => {state.page = action.payload},

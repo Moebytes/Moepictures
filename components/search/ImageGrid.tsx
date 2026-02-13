@@ -1,9 +1,8 @@
-import React, {useEffect, useRef, useState} from "react"
+import React, {useEffect, useRef, useState, useMemo} from "react"
 import {useNavigate, useLocation} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSearchActions, useSearchSelector, 
 useFlagActions, useInteractionActions, useCacheActions, useCacheSelector, useFlagSelector, useActiveActions,
-useMiscDialogActions, useSessionSelector, useSessionActions, usePageSelector, usePageActions, 
-useInteractionSelector} from "../../store"
+useMiscDialogActions, useSessionSelector, useSessionActions, usePageSelector, usePageActions} from "../../store"
 import {TrackablePromise} from "../../structures/TrackablePromise"
 import GridImage from "../image/GridImage"
 import GridAnimation from "../image/GridAnimation"
@@ -57,7 +56,6 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const [isRandomSearch, setIsRandomSearch] = useState(false)
     const [postsRef, setPostsRef] = useState([] as React.RefObject<Ref | null>[])
     const [reupdateFlag, setReupdateFlag] = useState(false)
-    const [initData, setInitData] = useState({searchFlag, imageType, ratingType, styleType, sortType, sortReverse})
     const [removeSaveSearchFlag, setRemoveSaveSearchFlag] = useState(false)
     const visiblePromisesRef = useRef<TrackablePromise<void>[]>([])
     const location = useLocation()
@@ -70,7 +68,14 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         if (sizeType === "medium") loadAmount = 15
         if (sizeType === "large") loadAmount = 12
         if (sizeType === "massive") loadAmount = 6
-        return loadAmount * pageMultiplier
+
+        let multiplier = pageMultiplier
+        if (typeof window !== "undefined") {
+            // We need to access the multiplier early
+            let savedMultiplier = Number(localStorage.getItem("pageMultiplier"))
+            if (!Number.isNaN(savedMultiplier)) multiplier = savedMultiplier
+        }
+        return loadAmount * multiplier
     }
 
     const getLoadAmount = () => {
@@ -79,7 +84,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         return loadAmount * 5
     }
 
-    let pageAmount = scroll ? getLoadAmount() : getPageAmount()
+    const pageAmount = scroll ? getLoadAmount() : getPageAmount()
 
     const saveSearchSkip = () => {
         if (saveSearchFlag) {
@@ -244,8 +249,8 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             return
         }
         initItems(search)
-    }, [searchFlag, imageType, ratingType, styleType, sortType, sortReverse, 
-        showChildren, favSearch, loaded])
+    }, [imageType, ratingType, styleType, sortType, 
+        sortReverse, showChildren, favSearch, loaded])
 
     useEffect(() => {
         if (reloadPostFlag) reloadedPost = true

@@ -1,7 +1,7 @@
 import React, {useEffect} from "react"
 import {useThemeSelector, useThemeActions, useSearchSelector, useSearchActions, usePlaybackSelector, 
 usePlaybackActions, useFilterSelector, useFilterActions, useLayoutSelector, useLayoutActions,
-usePageSelector, usePageActions, useCacheSelector, useCacheActions, useSessionSelector, useSessionActions} from "./store"
+useCacheSelector, useCacheActions, useSessionSelector, useSessionActions} from "./store"
 import {Themes, ImageFormat, PostType, PostRating, PostStyle, PostSize, PostSort} from "./types/Types"
 import functions from "./functions/Functions"
 import localforage from "localforage"
@@ -117,7 +117,7 @@ const darkColorList = {
     "--audioFilterColor": "#ff4d97"
 }
 
-const LocalStorage: React.FunctionComponent = (props) => {
+const LocalStorage: React.FunctionComponent = () => {
     const {theme, language, siteHue, siteSaturation, siteLightness, particles, 
     particleAmount, particleSize, particleSpeed} = useThemeSelector()
     const {setTheme, setLanguage, setSiteHue, setSiteSaturation, setSiteLightness, 
@@ -134,10 +134,6 @@ const LocalStorage: React.FunctionComponent = (props) => {
     setLowpass, setHighpass, setReverb, setDelay, setPhaser, setBitcrush} = useFilterActions()
     const {hideSortbar, hideSidebar, hideTitlebar, hideNavbar} = useLayoutSelector()
     const {setHideSortbar, setHideSidebar, setHideTitlebar, setHideNavbar} = useLayoutActions()
-    const {page, historyPage, messagePage, threadPage, artistsPage, charactersPage, commentsPage, forumPage,
-    groupsPage, mailPage, modPage, notesPage, seriesPage, tagsPage, readerPage} = usePageSelector()
-    const {setPage, setHistoryPage, setMessagePage, setThreadPage, setArtistsPage, setCharactersPage, setCommentsPage,
-    setForumPage, setGroupsPage, setMailPage, setModPage, setNotesPage, setSeriesPage, setTagsPage, setReaderPage} = usePageActions()
     const {posts, navigationPosts, tags, bannerTags, post, tagCategories, tagGroupCategories, order, related, artists, characters, series} = useCacheSelector()
     const {setPosts, setNavigationPosts, setTags, setBannerTags, setPost, setTagCategories, setTagGroupCategories, setOrder, setRelated, setArtists, setCharacters, setSeries} = useCacheActions()
     const {disableZoom, showBigPlayer} = usePlaybackSelector()
@@ -237,21 +233,6 @@ const LocalStorage: React.FunctionComponent = (props) => {
         const savedSquare = localStorage.getItem("square")
         const savedMultiplier = localStorage.getItem("pageMultiplier")
         const savedShowChildren = localStorage.getItem("showChildren")
-        const savedPage = localStorage.getItem("page")
-        const savedHistoryPage = localStorage.getItem("historyPage")
-        const savedMessagePage = localStorage.getItem("messagePage")
-        const savedThreadPage = localStorage.getItem("threadPage")
-        const savedArtistsPage = localStorage.getItem("artistsPage")
-        const savedCharactersPage = localStorage.getItem("charactersPage")
-        const savedCommentsPage = localStorage.getItem("commentsPage")
-        const savedForumPage = localStorage.getItem("forumPage")
-        const savedGroupsPage = localStorage.getItem("groupsPage")
-        const savedMailPage = localStorage.getItem("mailPage")
-        const savedModPage = localStorage.getItem("modPage")
-        const savedNotesPage = localStorage.getItem("notesPage")
-        const savedSeriesPage = localStorage.getItem("seriesPage")
-        const savedTagsPage = localStorage.getItem("tagsPage")
-        const savedReaderPage = localStorage.getItem("readerPage")
         const savedHideTitlebar = localStorage.getItem("titlebar")
         const savedHideSidebar = localStorage.getItem("sidebar")
         const savedHideNavbar = localStorage.getItem("navbar")
@@ -308,21 +289,6 @@ const LocalStorage: React.FunctionComponent = (props) => {
         if (savedSquare) setSquare(savedSquare === "true")
         if (savedMultiplier) setPageMultiplier(Number(savedMultiplier))
         if (savedShowChildren) setShowChildren(savedShowChildren === "true")
-        if (savedMessagePage && Number(savedMessagePage) > 0) setMessagePage(Number(savedMessagePage))
-        if (savedHistoryPage && Number(savedHistoryPage) > 0) setHistoryPage(Number(savedHistoryPage))
-        if (savedThreadPage && Number(savedThreadPage) > 0) setThreadPage(Number(savedThreadPage))
-        if (savedPage && Number(savedPage) > 0) setPage(Number(savedPage))
-        if (savedArtistsPage && Number(savedArtistsPage) > 0) setArtistsPage(Number(savedArtistsPage))
-        if (savedCharactersPage && Number(savedCharactersPage) > 0) setCharactersPage(Number(savedCharactersPage))
-        if (savedCommentsPage && Number(savedCommentsPage) > 0) setCommentsPage(Number(savedCommentsPage))
-        if (savedForumPage && Number(savedForumPage) > 0) setForumPage(Number(savedForumPage))
-        if (savedGroupsPage && Number(savedGroupsPage) > 0) setGroupsPage(Number(savedGroupsPage))
-        if (savedMailPage && Number(savedMailPage) > 0) setMailPage(Number(savedMailPage))
-        if (savedModPage && Number(savedModPage) > 0) setModPage(Number(savedModPage))
-        if (savedNotesPage && Number(savedNotesPage) > 0) setNotesPage(Number(savedNotesPage))
-        if (savedSeriesPage && Number(savedSeriesPage) > 0) setSeriesPage(Number(savedSeriesPage))
-        if (savedTagsPage && Number(savedTagsPage) > 0) setTagsPage(Number(savedTagsPage))
-        if (savedReaderPage && Number(savedReaderPage) > 0) setReaderPage(Number(savedReaderPage))
         if (savedHideTitlebar) setHideTitlebar(savedHideTitlebar === "true")
         if (savedHideNavbar) setHideNavbar(savedHideNavbar === "true")
         if (savedHideSidebar) setHideSidebar(savedHideSidebar === "true")
@@ -439,25 +405,6 @@ const LocalStorage: React.FunctionComponent = (props) => {
         localforage.setItem("savedCharacters", JSON.stringify(characters))
         localforage.setItem("savedSeries", JSON.stringify(series))
     }, [artists, characters, series])
-
-    useEffect(() => {
-        localStorage.setItem("page", String(page || ""))
-        localStorage.setItem("historyPage", String(historyPage || ""))
-        localStorage.setItem("messagePage", String(messagePage || ""))
-        localStorage.setItem("threadPage", String(threadPage || ""))
-        localStorage.setItem("artistsPage", String(artistsPage || ""))
-        localStorage.setItem("charactersPage", String(charactersPage || ""))
-        localStorage.setItem("commentsPage", String(commentsPage || ""))
-        localStorage.setItem("forumPage", String(forumPage || ""))
-        localStorage.setItem("groupsPage", String(groupsPage || ""))
-        localStorage.setItem("mailPage", String(mailPage || ""))
-        localStorage.setItem("modPage", String(modPage || ""))
-        localStorage.setItem("notesPage", String(notesPage || ""))
-        localStorage.setItem("seriesPage", String(seriesPage || ""))
-        localStorage.setItem("tagsPage", String(tagsPage || ""))
-        localStorage.setItem("readerPage", String(readerPage || ""))
-    }, [historyPage, messagePage, threadPage, page, artistsPage, charactersPage, commentsPage, forumPage, 
-        groupsPage, mailPage, modPage, notesPage, seriesPage, tagsPage, readerPage])
 
     return null
 }

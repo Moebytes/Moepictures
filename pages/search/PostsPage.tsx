@@ -20,7 +20,7 @@ const PostsPage: React.FunctionComponent = (props) => {
     const {setMobileScrolling} = useInteractionActions()
     const {session} = useSessionSelector()
     const {mobile} = useLayoutSelector()
-    const [imagesLoaded, setImagesLoaded] = useState(false)
+    const [imagesLoaded, setImagesLoaded] = useState(true)
 
     useEffect(() => {
         setRelative(false)
