@@ -94,10 +94,11 @@ export default class DOMFunctions {
     }
 
     public static sidebarWidth = () => {
+        if (typeof window === "undefined") return 220
         const sidebar = document.querySelector(".sidebar")
         if (!sidebar) {
             const mobileSidebar = document.querySelector(".mobile-sidebar") as HTMLElement
-            return mobileSidebar ? 0 : 230
+            return mobileSidebar ? 0 : 220
         }
         return sidebar.clientWidth
     }

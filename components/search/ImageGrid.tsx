@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState, useMemo} from "react"
 import {useNavigate, useLocation} from "react-router-dom"
-import {useThemeSelector, useLayoutSelector, useSearchActions, useSearchSelector, 
+import {useThemeSelector, useLayoutSelector, useSearchActions, useSearchSelector,
 useFlagActions, useInteractionActions, useCacheActions, useCacheSelector, useFlagSelector, useActiveActions,
 useMiscDialogActions, useSessionSelector, useSessionActions, usePageSelector, usePageActions} from "../../store"
 import {TrackablePromise} from "../../structures/TrackablePromise"
@@ -36,7 +36,7 @@ let limit = 100
 
 const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
-    const {mobile} = useLayoutSelector()
+    const {mobile, hideSidebar} = useLayoutSelector()
     const {search, searchFlag, scroll, imageType, ratingType, styleType, sortType, sortReverse, sizeType, 
     pageMultiplier, autoSearch, showChildren, favSearch} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
@@ -419,7 +419,8 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     }
 
     return (
-        <div className="imagegrid" style={{marginTop: mobile ? "10px" : "0px"}} onMouseEnter={() => setEnableDrag(true)}>
+        <div className="imagegrid" onMouseEnter={() => setEnableDrag(true)}
+            style={{marginTop: mobile ? "10px" : "0px", maxWidth: hideSidebar ? "" : `calc(100vw - ${functions.dom.sidebarWidth()})`}} >
             <div className="image-container" style={{visibility: props.imagesLoaded ? "visible" : "hidden"}}>
                 {generateImagesJSX()}
             </div>
