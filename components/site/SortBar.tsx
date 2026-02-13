@@ -792,7 +792,7 @@ const SortBar: React.FunctionComponent = (props) => {
     useEffect(() => {
         window.clearInterval(interval)
         const scrollLoop = async () => {
-            window.scrollBy(0, 15)
+            window.scrollBy(0, 10)
         }
         const stopScroll = () => {
             setAutoScroll(false)
