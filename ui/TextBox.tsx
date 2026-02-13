@@ -156,26 +156,26 @@ const TextBox = forwardRef<TextBoxRef, Props>((props, ref) => {
 
     const getTextBox = () => {
         if (props.thread && props.thread.locked && !permissions.isMod(session)) return (
-            <div className="textbox-container" style={{justifyContent: "flex-start", marginLeft: props.manualWidth && !mobile ? "170px" : ""}}>
+            <div className="textbox-container" style={{justifyContent: "flex-start", marginLeft: props.manualWidth && !mobile ? "190px" : ""}}>
                 <span className="textbox-validation" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>{i18n.pages.thread.locked}</span>
             </div>
         )
 
         if (props.message && props.message.role === "system") return (
-            <div className="textbox-container" style={{justifyContent: "flex-start", marginLeft: props.manualWidth && !mobile ? "170px" : ""}}>
+            <div className="textbox-container" style={{justifyContent: "flex-start", marginLeft: props.manualWidth && !mobile ? "190px" : ""}}>
                 <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>{i18n.pages.message.system}</span>
             </div>
         )
 
         if (session.banned) return (
-            <div className="textbox-container" style={{marginLeft: props.manualWidth && !mobile ? "170px" : ""}}>
+            <div className="textbox-container" style={{marginLeft: props.manualWidth && !mobile ? "190px" : ""}}>
                 <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "2px" : "10px"}}>{getBanText()}</span>
             </div>
         )
 
         if (session.username) {
             return (
-                <div className="textbox-container" style={{marginLeft: props.manualWidth && !mobile ? "170px" : ""}}>
+                <div className="textbox-container" style={{marginLeft: props.manualWidth && !mobile ? "190px" : ""}}>
                     <div className="textbox-textarea-buttons" style={{width: props.manualWidth && !mobile ? "70%" : ""}}>
                         <button className="textbox-textarea-button"><img src={getIcon(highlight)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "highlight")} style={{filter}}/></button>
                         <button className="textbox-textarea-button"><img src={getIcon(bold)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "bold")} style={{filter}}/></button>
