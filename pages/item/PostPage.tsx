@@ -220,7 +220,7 @@ const PostPage: React.FunctionComponent = () => {
             setArtistPosts([])
             updateArtistPosts()
         }
-    }, [session, post, tagCategories])
+    }, [session, post, postID, tagCategories, mobile])
 
     useEffect(() => {
         const updateHistory = async () => {

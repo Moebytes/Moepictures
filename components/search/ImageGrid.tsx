@@ -248,7 +248,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             }, 500)
             return
         }
-        initItems(search)
+        initItems(search, true)
     }, [imageType, ratingType, styleType, sortType, 
         sortReverse, showChildren, favSearch, loaded])
 

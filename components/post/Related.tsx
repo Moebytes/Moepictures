@@ -16,7 +16,7 @@ import GridModel from "../image/GridModel"
 import GridLive2D from "../image/GridLive2D"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
-import {PostHistory, PostSearch, MiniTag, Tag} from "../../types/Types"
+import {PostHistory, PostSearch} from "../../types/Types"
 import "./styles/related.less"
 
 let relatedTimer = null as any
@@ -46,9 +46,18 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const [searchTerm, setSearchTerm] = useState(props.tag)
     const [sizeDropdown, setSizeDropdown] = useState(false)
     const [allImagesLoaded, setAllImagesLoaded] = useState(true)
+    const [locationState, setLocationState] = useState<any>({restorePosts: []})
     const sizeRef = useRef<HTMLImageElement>(null)
     const visiblePromisesRef = useRef<TrackablePromise<void>[]>([])
     const navigate = useNavigate()
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setLocationState(null)
+        }, 2000)
+
+        return () => clearTimeout(timer)
+    }, [])
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
@@ -107,8 +116,8 @@ const Related: React.FunctionComponent<Props> = (props) => {
         return result
     }
 
-    const {items, visibleItems, page, setPage, maxPage, initItems, setManagedPage, setManagedItems, 
-        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "postCount"})
+    const {items, visibleItems, page, setPage, maxPage, initItems, setManagedPage, setManagedItems, toggleScroll} 
+        = usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "postCount", locationState})
 
     useEffect(() => {
         clearTimeout(relatedTimer)
