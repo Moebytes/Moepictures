@@ -385,23 +385,23 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             let cached = img ? true : false
             if (!img) img = thumbnail
             if (post.type === "model") {
-                jsx.push(<GridModel key={post.postID} id={post.postID} img={img} model={original} post={post} ref={postsRef[i]} 
+                jsx.push(<GridModel id={post.postID} img={img} model={original} post={post} ref={postsRef[i]} 
                     reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else if (post.type === "live2d") {
-                jsx.push(<GridLive2D key={post.postID} id={post.postID} img={img} live2d={original} post={post} ref={postsRef[i]} 
+                jsx.push(<GridLive2D id={post.postID} img={img} live2d={original} post={post} ref={postsRef[i]} 
                     reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else if (post.type === "audio") {
-                jsx.push(<GridSong key={post.postID} id={post.postID} img={img} cached={cached} audio={original} post={post} 
+                jsx.push(<GridSong id={post.postID} img={img} cached={cached} audio={original} post={post} 
                     ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else if (post.type === "video") {
-                jsx.push(<GridVideo key={post.postID} id={post.postID} img={img} cached={cached} video={original} live={liveThumbnail} 
+                jsx.push(<GridVideo id={post.postID} img={img} cached={cached} video={original} live={liveThumbnail} 
                     post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else if (post.type === "animation") {
-                jsx.push(<GridAnimation key={post.postID} id={post.postID} img={img} cached={cached} anim={original} live={liveThumbnail} 
+                jsx.push(<GridAnimation id={post.postID} img={img} cached={cached} anim={original} live={liveThumbnail} 
                     post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             } else {
                 const comicPages = post.type === "comic" ? post.images.map((image) => functions.link.getImageLink(image, session.upscaledImages)) : null
-                jsx.push(<GridImage key={post.postID} id={post.postID} img={img} cached={cached} original={original} live={liveThumbnail} 
+                jsx.push(<GridImage id={post.postID} img={img} cached={cached} original={original} live={liveThumbnail} 
                     comicPages={comicPages} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             }
         }
