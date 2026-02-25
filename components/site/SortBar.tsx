@@ -546,8 +546,8 @@ const SortBar: React.FunctionComponent = (props) => {
 
     const getSortJSX = () => {
         const getSort = () => {
-            if (sortType === "bookmarks") return `${i18n.sort.bookmarks} ★`
-            if (sortType === "favorites") return `${i18n.sort.favorites} ✧`
+            if (sortType === "bookmarks") return `${i18n.sort.bookmarks}`
+            if (sortType === "favorites") return `${i18n.sort.favorites}`
             return i18n.sort[sortType]
         }
         return (
@@ -1108,11 +1108,11 @@ const SortBar: React.FunctionComponent = (props) => {
                     <span className="sortbar-dropdown-text">{i18n.sort.posted}</span>
                 </div>
                 {session.username ? <div className="sortbar-dropdown-row" onClick={() => changeSortType("bookmarks")}>
-                    <span className="sortbar-dropdown-text">{i18n.sort.bookmarks} ★</span>
+                    <span className="sortbar-dropdown-text">{i18n.sort.bookmarks}</span>
                 </div> : null}
                 {session.username ? <>
                 <div className="sortbar-dropdown-row" onClick={() => changeSortType("favorites")}>
-                    <span className="sortbar-dropdown-text">{i18n.sort.favorites} ✧</span>
+                    <span className="sortbar-dropdown-text">{i18n.sort.favorites}</span>
                 </div>
                 </> : null}
                 <div className="sortbar-dropdown-row" onClick={() => changeSortType("popularity")}>
