@@ -475,7 +475,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     {i18n.help.upscaling.line1}<br/><br/>
 
                     {i18n.help.upscaling.line2}<br/>
-                    <a className="help-link" onClick={() => openLink("https://github.com/Moebytes/Waifu2x-GUI/releases")}>{mobile ? "Waifu2x GUI" : "https://github.com/Moebytes/Waifu2x-GUI/releases"}</a><br/><br/>
+                    <a className="help-link" onClick={() => openLink("https://github.com/Moebytes/Waifu2x-Upscaler/releases")}>{mobile ? "Waifu2x Upscaler" : "https://github.com/Moebytes/Waifu2x-Upscaler/releases"}</a><br/><br/>
 
                     {i18n.help.upscaling.line3}<br/>
                 </span>
@@ -489,7 +489,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     {i18n.help.compressing.line1}<br/><br/>
 
                     {i18n.help.compressing.line2}<br/>
-                    <a className="help-link" onClick={() => openLink("https://github.com/Moebytes/Image-Compressor/releases")}>{mobile ? "Image Compressor" : "https://github.com/Moebytes/Image-Compressor/releases"}</a><br/><br/>
+                    <a className="help-link" onClick={() => openLink("https://github.com/Moebytes/Pixel-Compressor/releases")}>{mobile ? "Pixel Compressor" : "https://github.com/Moebytes/Pixel-Compressor/releases"}</a><br/><br/>
 
                     {i18n.help.compressing.recommendedFormats.header}<br/>
                     <span className="help-alt">
@@ -514,7 +514,7 @@ const HelpPage: React.FunctionComponent = (props) => {
 
                     {i18n.help.pixivDownloads.line2}<br/>
 
-                    <a className="help-link" onClick={() => openLink("https://github.com/Moebytes/Pixiv-Downloader/releases")}>{mobile ? "Pixiv Downloader" : "https://github.com/Moebytes/Pixiv-Downloader/releases"}</a><br/><br/>
+                    <a className="help-link" onClick={() => openLink("https://github.com/Moebytes/Pixiv-Fetcher/releases")}>{mobile ? "Pixiv Fetcher" : "https://github.com/Moebytes/Pixiv-Fetcher/releases"}</a><br/><br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={pixivDownloaderImg}/></div></>
             )
