@@ -1,3 +1,9 @@
+-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+-- Moepictures - A cute and moe anime image board ❤          -
+-- Copyright © 2026 Moebytes <moebytes.com>                  - 
+-- Licensed under CC BY-NC 4.0. See license.txt for details. - 
+-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
 CREATE TABLE IF NOT EXISTS "tag map tags" (
     "postID" bigint PRIMARY KEY REFERENCES posts ("postID") ON UPDATE CASCADE ON DELETE CASCADE,
     "tags" text[]

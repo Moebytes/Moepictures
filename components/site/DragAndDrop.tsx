@@ -1,3 +1,9 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Moepictures - A cute and moe anime image board ❤          *
+ * Copyright © 2026 Moebytes <moebytes.com>                  *
+ * Licensed under CC BY-NC 4.0. See license.txt for details. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useNavigate, useLocation} from "react-router-dom"
 import {useSessionSelector, useSessionActions, useCacheActions, useFlagActions} from "../../store"
