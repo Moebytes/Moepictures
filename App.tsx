@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Moepictures ~ A cute and modern anime image board! ♡      *
- * Copyright © 2026 Moebytes <moebytes.com>.                 *
+ * Moepictures - A cute and moe anime image board ❤          *
+ * Copyright © 2026 Moebytes <moebytes.com>                  *
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -369,5 +369,6 @@ const App: React.FunctionComponent = (props) => {
         </div>
     )
 }
+
 
 export default App
