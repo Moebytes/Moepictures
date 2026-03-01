@@ -1,13 +1,15 @@
-/*
- * Moepictures ~ A cute and modern anime image board!
- * Copyright © 2026 Moebytes <moebytes.com>
- * Licensed under CC BY-NC 4.0.
-*/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Moepictures ~ A cute and modern anime image board! ♡      *
+ * Copyright © 2026 Moebytes <moebytes.com>.                 *
+ * Licensed under CC BY-NC 4.0. See license.txt for details. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import React, {useEffect, useState} from "react"
 import {Routes, Route, Navigate, useNavigate, useLocation} from "react-router-dom"
-import {useThemeSelector, useLayoutSelector, useLayoutActions, useSessionSelector, useSessionActions, useInteractionSelector, useFlagSelector,
-useInteractionActions, useActiveSelector, useActiveActions, useCacheSelector, useCacheActions, useSearchSelector, useSearchActions} from "./store"
+import {useThemeSelector, useLayoutSelector, useLayoutActions, 
+useSessionSelector, useSessionActions, useInteractionSelector,
+useInteractionActions, useActiveSelector, useActiveActions, useCacheSelector, 
+useCacheActions, useSearchSelector} from "./store"
 import favicon from "./assets/icons/favicon.png"
 import permissions from "./structures/Permissions"
 import PostsPage from "./pages/search/PostsPage"
