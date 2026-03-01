@@ -73,15 +73,6 @@ const GridImage = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
         if (img) loadImage()
     }, [img, sizeType])
 
-    /** - Upscaling is slow
-    useEffect(() => {
-        const updateUpscaled = async () => {
-            const upscaled = await functions.shader.anime4kUpscale(img)
-            setUpscaled(upscaled)
-        }
-        if (img) updateUpscaled()
-    }, [img])*/
-
     const getImg = () => {
         return upscaled ? upscaled : img
     }
