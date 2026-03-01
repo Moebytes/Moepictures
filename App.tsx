@@ -1,3 +1,9 @@
+/*
+ * Moepictures ~ A cute and modern anime image board!
+ * Copyright © 2026 Moebytes <moebytes.com>
+ * Licensed under CC BY-NC 4.0.
+*/
+
 import React, {useEffect, useState} from "react"
 import {Routes, Route, Navigate, useNavigate, useLocation} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useLayoutActions, useSessionSelector, useSessionActions, useInteractionSelector, useFlagSelector,
@@ -86,11 +92,9 @@ const App: React.FunctionComponent = (props) => {
     const {setActiveDropdown, setActiveGroup, setActiveFavgroup, setActionBanner} = useActiveActions()
     const {session, sessionFlag} = useSessionSelector()
     const {setSession, setSessionFlag, setUserImg, setUserImgPost, setHasNotification} = useSessionActions()
-    const {postFlag, tagFlag, groupFlag, messageFlag, historyFlag, updateUserFlag} = useFlagSelector()
     const {posts} = useCacheSelector()
     const {setEmojis, setSortedTags} = useCacheActions()
     const {selectionMode} = useSearchSelector()
-    const {setRatingType} = useSearchActions()
     const navigate = useNavigate()
     const location = useLocation()
 
