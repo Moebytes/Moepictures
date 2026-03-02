@@ -138,6 +138,7 @@
     "three-stdlib": "^2.35.14",
     "tone": "^14.7.39",
     "tweetnacl": "^1.0.3",
+    "undici": "^7.22.0",
     "waifu2x": "^1.4.7",
     "wanakana": "^5.3.1",
     "webpxmux": "^0.0.2"

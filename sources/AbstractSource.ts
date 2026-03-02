@@ -5,6 +5,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import functions from "../functions/Functions"
+import {ProxyAgent, fetch} from "undici"
 
 export abstract class AbstractSource {
     public constructor(public url: string) {}
@@ -25,8 +26,18 @@ export abstract class AbstractSource {
 
     public abstract extractImages(url: string): Promise<Buffer[]>
 
+    public getProxy = async () => {
+        const proxies = await fetch("https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/http/data.txt")
+            .then((r) => r.text()).then((text) => text.split("\n").filter(Boolean))
+        return proxies[Math.floor(Math.random() * proxies.length)]
+    }
+
     public fetchBuffer = async (url: string) => {
-        return functions.http.getBuffer(url, this.headers).then((b) => Buffer.from(b))
+        const proxy = await this.getProxy()
+        const proxyAgent = new ProxyAgent(proxy)
+
+        const arrayBuffer = await fetch(url, {headers: this.headers, dispatcher: proxyAgent}).then((r) => r.arrayBuffer())
+        return Buffer.from(arrayBuffer)
     }
 
     public fetchJSON = async (url: string) => {
