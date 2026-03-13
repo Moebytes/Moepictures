@@ -1509,7 +1509,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             </div>
 
             <div className="sidebar-footer">
-                    <span className="sidebar-footer-text">©{new Date().getFullYear()} Moepictures</span>
+                    <span className="sidebar-footer-text">©{new Date().getFullYear()} Moebytes</span>
                     <Link to="/terms">
                         <img className="sidebar-footer-icon" src={getIcon(terms)} style={{filter}}/>
                     </Link>

@@ -14,6 +14,7 @@ import contact from "../../assets/svg/contact.svg"
 import backToTop from "../../assets/svg/back-to-top.svg"
 import english from "../../assets/svg/english.svg"
 import japanese from "../../assets/svg/japanese.svg"
+import logo from "../../assets/images/moebytes.png"
 import "./styles/footer.less"
 
 interface Props {
@@ -32,16 +33,6 @@ const Footer: React.FunctionComponent<Props> = (props) => {
 
     const goToTop = () => {
         window.scrollTo({top: 0, behavior: "smooth"})
-    }
-
-    const logoClick = () => {
-        setSearch("")
-        setImageType("all")
-        setRatingType("all")
-        setStyleType("all")
-        setSortType("date")
-        setSearchFlag(true)
-        window.scrollTo(0, 0)
     }
 
     const changeLanguage = () => {
@@ -79,18 +70,8 @@ const Footer: React.FunctionComponent<Props> = (props) => {
         {!props.noPadding ? <div style={{height: "100%", pointerEvents: "none"}}></div> : null}
         <div className="footer">
             <div className="footer-row">
-                <div className="footer-title-container" onClick={logoClick}>
-                        <span className="footer-title-a">M</span>
-                        <span className="footer-title-b">o</span>
-                        <span className="footer-title-a">e</span>
-                        <span className="footer-title-b">p</span>
-                        <span className="footer-title-a">i</span>
-                        <span className="footer-title-b">c</span>
-                        <span className="footer-title-a">t</span>
-                        <span className="footer-title-b">u</span>
-                        <span className="footer-title-a">r</span>
-                        <span className="footer-title-b">e</span>
-                        <span className="footer-title-a">s</span>
+                <div className="footer-title-container">
+                    <img className="footer-logo" src={logo} draggable={false}/>
                 </div>
                 {!mobile ? <div className="footer-text-container">
                     <span className="footer-text">- {i18n.footer.bottom} -</span>
