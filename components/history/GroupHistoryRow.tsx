@@ -51,11 +51,10 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const updatePost = async () => {
-        let targetID = props.groupHistory.addedPosts?.length ? props.groupHistory.addedPosts[0] : 
-        props.groupHistory.removedPosts?.length ? props.groupHistory.removedPosts[0] : props.groupHistory.posts[0].postID
+        let targetID = props.groupHistory.posts[0]?.postID ?? ""
+        if (!targetID) return
         const post = await functions.http.get("/api/post", {postID: targetID}, session, setSessionFlag, true)
-        if (!post) return
-        setGroupPost(post)
+        if (post) setGroupPost(post)
     }
 
     useEffect(() => {
