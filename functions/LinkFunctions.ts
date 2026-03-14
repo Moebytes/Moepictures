@@ -5,9 +5,11 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import functions from "./Functions"
-import {Session, Image} from "../types/Types"
+import {Session, Image, Post, PostHistory} from "../types/Types"
 
 export default class LinkFunctions {
+    private static postThumbnailCache: Map<string, string> = new Map()
+    
     public static getImagePath = (folder: string, postID: string, order: number, filename: string) => {
         return `${folder}/${postID}-${order}-${filename}`
     }
@@ -75,6 +77,23 @@ export default class LinkFunctions {
             return this.getRawImageLink(filename)
         }
         return `${window.location.protocol}//${window.location.host}/thumbnail/${filename}`
+    }
+
+    public static getPostThumbnail = async (partialPost: Post | PostHistory, index: number, sizeType: string, 
+        session: Session, mobile?: boolean) => {
+        const cacheKey = `${partialPost.postID}:${index}:${sizeType}:${mobile ? 1 : 0}`
+
+        if (this.postThumbnailCache.has(cacheKey)) {
+            return this.postThumbnailCache.get(cacheKey)!
+        }
+
+        let post = await functions.http.get("/api/post", {postID: partialPost.postID}, session)
+        if (!post) return ""
+        let image = post.images[index]
+        const thumb = this.getThumbnailLink(image, sizeType, session, mobile)
+
+        this.postThumbnailCache.set(cacheKey, thumb)
+        return thumb
     }
 
     public static getUnverifiedThumbnailLink = (image: Image, sizeType: string, session: Session, mobile?: boolean) => {

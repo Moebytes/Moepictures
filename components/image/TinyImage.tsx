@@ -46,10 +46,17 @@ const TinyImage: React.FunctionComponent<Props> = (props) => {
     const setImage = async () => {
         if (props.post) {
             const image = props.post.images[(props.order || 1) - 1]
-            const imageLink = typeof image === "string" ?
-            functions.link.getRawThumbnailLink(image, "medium", mobile) : functions.link.getThumbnailLink(image, "tiny", session, mobile)
+            let imageLink = ""
+            let liveLink = ""
+            if (typeof image === "string") {
+                imageLink = await functions.link.getPostThumbnail(props.post, 0, "medium", session, mobile)
+                liveLink = imageLink
+            } else {
+                imageLink = functions.link.getThumbnailLink(image, "tiny", session, mobile)
+                liveLink = functions.link.getThumbnailLink(image, "tiny", session, mobile, true)
+            }
+            
             setOriginal(imageLink)
-            const liveLink = typeof image === "string" ? imageLink : functions.link.getThumbnailLink(image, "tiny", session, mobile, true)
             setOriginalLive(liveLink)
             if (props.noEncryption) {
                 setStaticImg(imageLink)
@@ -84,11 +91,16 @@ const TinyImage: React.FunctionComponent<Props> = (props) => {
             let newImageIndex = index + 1 
             if (newImageIndex > props.post.images.length - 1) newImageIndex = 0
             const newImage = props.post.images[newImageIndex]
-            const imageLink = typeof newImage === "string" ?
-            functions.link.getRawThumbnailLink(newImage, "medium", mobile) :
-            functions.link.getThumbnailLink(newImage, "tiny", session, mobile)
-            const liveLink = typeof newImage === "string" ? imageLink : 
-            functions.link.getThumbnailLink(newImage, "tiny", session, mobile, true)
+            let imageLink = ""
+            let liveLink = ""
+            if (typeof newImage === "string") {
+                imageLink = await functions.link.getPostThumbnail(props.post, newImageIndex, "medium", session, mobile)
+                liveLink = imageLink
+            } else {
+                imageLink = functions.link.getThumbnailLink(newImage, "tiny", session, mobile)
+                imageLink = functions.link.getThumbnailLink(newImage, "tiny", session, mobile, true)
+            }
+            
             const thumb = await functions.crypto.decryptThumb(imageLink, session)
             const liveThumb = await functions.crypto.decryptThumb(liveLink, session)
             setImg(thumb)
