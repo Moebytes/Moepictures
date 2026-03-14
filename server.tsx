@@ -506,6 +506,7 @@ app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response,
   try {
     if (req.session.captchaNeeded) return void res.status(403).end()
 
+    const pixelHash = new URL(`${functions.config.getDomain()}${req.originalUrl}`).searchParams.get("hash") ?? ""
     const postID = path.basename(req.params.id, path.extname(req.params.id))
     let body = Buffer.from("")
 
@@ -522,6 +523,13 @@ app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response,
       }
       if (post && post.hidden) {
         if (!permissions.isMod(req.session)) return void res.status(404).end()
+      }
+      if (post) {
+        let matches = req.path.includes("history/post")
+        for (const image of post.images) {
+          if (image.pixelHash === pixelHash) matches = true
+        }
+        if (!matches) return res.status(404).end()
       }
       if (post) {
         const img = post.images[0]
@@ -581,7 +589,7 @@ app.get("/*", async (req: Request, res: Response) => {
           title = `${post.englishTitle || post.title} by ${post.artist}`
           description = post.englishCommentary || post.commentary || ""
           const img = post.images[0]
-          image = `${functions.config.getDomain()}/social-preview/${post.postID}${path.extname(img.filename)}`
+          image = `${functions.config.getDomain()}/social-preview/${post.postID}${path.extname(img.filename)}?hash=${img.pixelHash}`
           url = `${functions.config.getDomain()}/post/${post.postID}/${post.slug}`
         }
     }
