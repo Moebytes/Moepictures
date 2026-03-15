@@ -215,6 +215,7 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/segmentate", csrfProtection, contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             if (processingQueue.has(req.session.username)) return void res.status(429).send("Processing in progress")
             if (!req.body) return void res.status(400).send("Image data must be provided")
             processingQueue.add(req.session.username)
@@ -245,6 +246,7 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/lineart", csrfProtection, contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
             if (processingQueue.has(req.session.username)) return void res.status(429).send("Processing in progress")
             if (!req.body) return void res.status(400).send("Image data must be provided")
             processingQueue.add(req.session.username)

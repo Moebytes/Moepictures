@@ -710,7 +710,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
                                 onClick={() => showAdditionalIcons("share")}/> : null}
                             {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={getIcon(reverseSearchIcon)} style={{filter}} 
                                 onClick={() => showAdditionalIcons("reverse")}/> : null}
-                            {!props.noNotes && (props.post?.type === "image" || props.post?.type === "comic") ? <img draggable={false} className="post-image-top-button" 
+                            {permissions.isAdmin(session) && !props.noNotes && (props.post?.type === "image" || props.post?.type === "comic") ? <img draggable={false} className="post-image-top-button" 
                                 src={getIcon(wandIcon)} style={{filter}} onClick={() => showAdditionalIcons("special")}/> : null}
                             {!props.noNotes ? <img draggable={false} className="post-image-top-button" src={getIcon(waifu2xIcon)} style={{filter}} 
                                 onClick={() => toggleUpscale()}/> : null}
