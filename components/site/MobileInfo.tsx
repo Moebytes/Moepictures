@@ -541,6 +541,13 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             if (source.includes("artstation")) {
                 jsx.push(<img className="sidebar-social" src={artstation} onClick={() => window.open(source, "_blank")}/>)
             }
+            if (source.includes("youtube")) {
+                jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(source, "_blank")}/>)
+            }
+            if (source.includes("bandcamp")) {
+                jsx.push(<img className="sidebar-social" src={bandcamp} onClick={() => window.open(source, "_blank")}/>)
+            }
+            /*
             if (source.includes("danbooru")) {
                 jsx.push(<img className="sidebar-social" src={danbooru} onClick={() => window.open(source, "_blank")}/>)
             }
@@ -564,13 +571,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             }
             if (source.includes("animepictures")) {
                 jsx.push(<img className="sidebar-social" src={animepictures} onClick={() => window.open(source, "_blank")}/>)
-            }
-            if (source.includes("youtube")) {
-                jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(source, "_blank")}/>)
-            }
-            if (source.includes("bandcamp")) {
-                jsx.push(<img className="sidebar-social" src={bandcamp} onClick={() => window.open(source, "_blank")}/>)
-            }
+            }*/
         }
         return (
             <div className="mobileinfo-row">
@@ -603,6 +604,13 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             if (props.post.mirrors.artstation) {
                 jsx.push(<img className="sidebar-social" src={artstation} onClick={() => window.open(props.post?.mirrors?.artstation, "_blank")}/>)
             }
+            if (props.post.mirrors.youtube) {
+                jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(props.post?.mirrors?.youtube, "_blank")}/>)
+            }
+            if (props.post.mirrors.bandcamp) {
+                jsx.push(<img className="sidebar-social" src={bandcamp} onClick={() => window.open(props.post?.mirrors?.bandcamp, "_blank")}/>)
+            }
+            /*
             if (props.post.mirrors.danbooru) {
                 jsx.push(<img className="sidebar-social" src={danbooru} onClick={() => window.open(props.post?.mirrors?.danbooru, "_blank")}/>)
             }
@@ -626,13 +634,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             }
             if (props.post.mirrors.animepictures) {
                 jsx.push(<img className="sidebar-social" src={animepictures} onClick={() => window.open(props.post?.mirrors?.animepictures, "_blank")}/>)
-            }
-            if (props.post.mirrors.youtube) {
-                jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(props.post?.mirrors?.youtube, "_blank")}/>)
-            }
-            if (props.post.mirrors.bandcamp) {
-                jsx.push(<img className="sidebar-social" src={bandcamp} onClick={() => window.open(props.post?.mirrors?.bandcamp, "_blank")}/>)
-            }
+            }*/
         }
         if (jsx.length) {
             return (
