@@ -312,9 +312,10 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const getHash = async () => {
             if (!props.post) return
-            const currentImg = props.post.images[(props.order || 1) - 1]
+            let index = (props.order || 1) - 1
+            const currentImg = props.post.images[index]
             if (typeof currentImg === "string") {
-                const imgLink = functions.link.getRawThumbnailLink(currentImg, "massive")
+                const imgLink = await functions.link.getPostThumbnail(props.post, index, "massive", session)
                 const decrypted = await functions.crypto.decryptThumb(imgLink, session)
                 const arrayBuffer = await fetch(decrypted).then((r) => r.arrayBuffer())
                 const hash = await functions.http.post("/api/misc/imghash", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
@@ -453,14 +454,15 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         setSaveNoteID({post: props.post, unverified: props.unverified})
     }
 
-    const getCurrentLink = () => {
+    const getCurrentLink = async () => {
         if (!props.post) return props.img
-        const image = props.post.images[(props.order || 1) - 1]
-        const upscaledImage = props.post.upscaledImages?.[(props.order || 1) - 1] || image
+        let index = (props.order || 1) - 1
+        const image = props.post.images[index]
+        const upscaledImage = props.post.upscaledImages?.[index] || image
         let currentImage = session.upscaledImages ? upscaledImage : image
         let img = ""
         if (typeof currentImage === "string") {
-            img = functions.link.getRawImageLink(currentImage)
+            img = await functions.link.getPostImage(props.post, index, session, session.upscaledImages)
         } else {
             img = functions.link.getImageLink(currentImage, session.upscaledImages)
         }
@@ -468,7 +470,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     }
 
     const ocrPage = async () => {
-        const img = getCurrentLink()
+        const img = await getCurrentLink()
         const jpgURL = await functions.image.convertToFormat(img, "jpg")
         const arrayBuffer = await fetch(jpgURL).then((r) => r.arrayBuffer())
         const bytes = new Uint8Array(arrayBuffer)

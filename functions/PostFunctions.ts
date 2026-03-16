@@ -143,8 +143,8 @@ export default class PostFunctions {
                 const image = post.images[i]
                 const upscaledImage = post.upscaledImages?.[i] || image
     
-                let imgLink = typeof image === "string" ? functions.link.getRawImageLink(image) : functions.link.getImageLink(image)
-                let upscaledImgLink = typeof upscaledImage === "string" ? functions.link.getRawImageLink(upscaledImage) : functions.link.getImageLink(upscaledImage, true)
+                let imgLink = typeof image === "string" ? await functions.link.getPostImage(post, i, session, false) : functions.link.getImageLink(image)
+                let upscaledImgLink = typeof upscaledImage === "string" ? await functions.link.getPostImage(post, i, session, true) : functions.link.getImageLink(upscaledImage, true)
                 let altSource = typeof image === "string" ? "" : image.altSource
                 let directLink = typeof image === "string" ? "" : image.directLink
     

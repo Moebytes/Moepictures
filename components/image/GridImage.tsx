@@ -56,9 +56,8 @@ const GridImage = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
         if (props.post.images.length === 1) return
         let nextIndex = imgIndex + 1
         if (nextIndex >= props.post.images.length) nextIndex = 0
-        let images = props.post.images.map((i: Image | string) => typeof i === "string" ? 
-        functions.link.getRawThumbnailLink(i, sizeType) : functions.link.getThumbnailLink(i, sizeType, session))
-        let img = functions.util.appendURLParams(images[nextIndex], {upscaled: false})
+        let image = functions.link.getThumbnailLink(props.post.images[nextIndex], sizeType, session)
+        let img = functions.util.appendURLParams(image, {upscaled: false})
         const decryptedImg = await functions.crypto.decryptThumb(img, session, `${img}-${sizeType}`)
         setImg(decryptedImg)
         setImgIndex(nextIndex)

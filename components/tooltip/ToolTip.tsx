@@ -89,8 +89,8 @@ const ToolTip: React.FunctionComponent = (props) => {
                 setPost(post)
                 const image = post.images[0]
                 const imageLink = typeof image === "string" ?
-                functions.link.getRawThumbnailLink(image, "medium", mobile) : 
-                functions.link.getThumbnailLink(image, "tiny", session, mobile)
+                    await functions.link.getPostThumbnail(post, 0, "medium", session, mobile) : 
+                    functions.link.getThumbnailLink(image, "tiny", session, mobile)
                 let img = await functions.crypto.decryptThumb(imageLink, session, imageLink, mobile)
                 setImg(img)
             }

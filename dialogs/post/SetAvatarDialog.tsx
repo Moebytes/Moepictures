@@ -42,8 +42,8 @@ const SetAvatarDialog: React.FunctionComponent = (props) => {
         let images = [] as string[]
         for (let i = 0; i < avatarID.post.images.length; i++) {
             let image = avatarID.post.images[i]
-            let img = typeof image === "string" ? functions.link.getRawThumbnailLink(image, "massive")
-            : functions.link.getThumbnailLink(image, "massive", session)
+            let img = typeof image === "string" ? await functions.link.getPostThumbnail(avatarID.post, i, "massive", session)
+                : functions.link.getThumbnailLink(image, "massive", session)
             const decrypted = await functions.crypto.decryptThumb(img, session)
             images.push(decrypted)
         }

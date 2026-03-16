@@ -83,7 +83,7 @@ const GridVideo = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
         if (!mobile) {
             let frames = [] as ImageBitmap[]
             if (functions.file.isMP4(props.img)) {
-                const link = getCurrentLink(true)
+                const link = await getCurrentLink(true)
                 frames = await functions.video.extractMP4Frames(link)
                 if (!frames) return
             } else if (functions.file.isWebM(props.img)) {

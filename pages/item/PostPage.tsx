@@ -235,9 +235,9 @@ const PostPage: React.FunctionComponent = () => {
             if (!historyPost) return functions.dom.replaceLocation("/404")
             let images = [] as string[]
             if (session.upscaledImages && historyPost.upscaledImages?.length) {
-                images = historyPost.upscaledImages.map((i) => functions.link.getRawImageLink(i))
+                images = await Promise.all(historyPost.upscaledImages.map((_, i) => functions.link.getPostImage(historyPost, i, session, true)))
             } else {
-                images = historyPost.images.map((i) => functions.link.getRawImageLink(i))
+                images = await Promise.all(historyPost.images.map((_, i) => functions.link.getPostImage(historyPost, i, session, false)))
             }
             setImages(images)
             if (images[order-1]) {
@@ -303,15 +303,30 @@ const PostPage: React.FunctionComponent = () => {
     }, [postID, posts, order])
 
     useEffect(() => {
-        if (post) {
+        const updateImage = async () => {
+            if (!post) return
             let images = [] as string[]
             if (session.upscaledImages) {
                 let upscaledImages = post.upscaledImages || post.images
-                images = upscaledImages.map((i: Image | string) => typeof i === "string" ? 
-                functions.link.getRawImageLink(i) : functions.link.getImageLink(i, true))
+                for (let i = 0; i < upscaledImages.length; i++) {
+                    const img = upscaledImages[i]
+                    if (typeof img === "string") {
+                        const image = await functions.link.getPostImage(post, i, session, true)
+                        images.push(image)
+                    } else {
+                        images.push(functions.link.getImageLink(img, true))
+                    }
+                }
             } else {
-                images = post.images.map((i: Image | string) => typeof i === "string" ? 
-                functions.link.getRawImageLink(i) : functions.link.getImageLink(i))
+                for (let i = 0; i < post.images.length; i++) {
+                    const img = post.images[i]
+                    if (typeof img === "string") {
+                        const image = await functions.link.getPostImage(post, i, session, false)
+                        images.push(image)
+                    } else {
+                        images.push(functions.link.getImageLink(img))
+                    }
+                }
             }
             setImages(images)
             if (images[order-1]) {
@@ -321,6 +336,7 @@ const PostPage: React.FunctionComponent = () => {
                 setOrder(1)
             }
         }
+        updateImage()
     }, [post, order, session.upscaledImages])
 
     useEffect(() => {

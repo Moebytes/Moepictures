@@ -73,7 +73,7 @@ interface AddonProps {
     setGIFData: React.Dispatch<React.SetStateAction<GIFFrame[] | null>>
     backFrame: string
     setBackFrame: React.Dispatch<React.SetStateAction<string>>
-    getCurrentLink: (forceOriginal?: boolean | undefined) => string
+    getCurrentLink: (forceOriginal?: boolean | undefined) => Promise<string>
     getCurrentBuffer: (forceOriginal?: boolean | undefined) => Promise<ArrayBuffer>
 }
 
@@ -478,7 +478,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
             }
         }, [selectionMode])
 
-        const getCurrentLink = (forceOriginal?: boolean) => {
+        const getCurrentLink = async (forceOriginal?: boolean) => {
             if (!props.post) return getImg()!
             const showUpscaled = !forceOriginal && Boolean(session.upscaledImages)
             const image = props.post.images[0]
@@ -487,7 +487,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
 
             let img = ""
             if (typeof currentImage === "string") {
-                img = functions.link.getRawImageLink(currentImage)
+                img = await functions.link.getPostImage(props.post, 0, session, showUpscaled)
             } else {
                 img = functions.link.getImageLink(currentImage, showUpscaled)
             }
@@ -501,7 +501,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         const getCurrentBuffer = async (forceOriginal?: boolean) => {
             let encryptedBuffer = new ArrayBuffer(0) 
             if (!props.post) return fetch(getImg()!).then((r) => r.arrayBuffer())
-            const img = getCurrentLink(forceOriginal)
+            const img = await getCurrentLink(forceOriginal)
             if (forceOriginal) {
                 encryptedBuffer = await fetch(functions.util.appendURLParams(img, {upscaled: false}), {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
             } else {

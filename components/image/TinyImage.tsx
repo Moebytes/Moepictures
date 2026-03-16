@@ -98,7 +98,7 @@ const TinyImage: React.FunctionComponent<Props> = (props) => {
                 liveLink = imageLink
             } else {
                 imageLink = functions.link.getThumbnailLink(newImage, "tiny", session, mobile)
-                imageLink = functions.link.getThumbnailLink(newImage, "tiny", session, mobile, true)
+                liveLink = functions.link.getThumbnailLink(newImage, "tiny", session, mobile, true)
             }
             
             const thumb = await functions.crypto.decryptThumb(imageLink, session)

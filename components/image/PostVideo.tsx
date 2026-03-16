@@ -132,7 +132,7 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
             if (!videoRef.current) return
             let frames = [] as ImageBitmap[]
             if (functions.file.isMP4(props.video)) {
-                const link = getCurrentLink(!session.upscaledImages)
+                const link = await getCurrentLink(!session.upscaledImages)
                 frames = await functions.video.extractMP4Frames(link)
             } else if (functions.file.isWebM(props.video)) {
                 const arrayBuffer = await getCurrentBuffer(!session.upscaledImages)
@@ -404,7 +404,6 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
             filename = props.post.source.match(/\d+/g)?.[0] + path.extname(props.video!).replace(/\?.*$/, "")
         }
         const video = await renderVideo()
-        console.log(video)
         if (!video) return
         functions.dom.download(filename, video)
         window.URL.revokeObjectURL(video)

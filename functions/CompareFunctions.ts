@@ -22,11 +22,11 @@ export default class CompareFunctions {
             const revUpscaledImage = revertPost.upscaledImages?.[i] || revImage
             const currUpscaledImage = currentPost.upscaledImages?.[i] || currImage
             
-            let imgLink = typeof revImage === "string" ? functions.link.getRawImageLink(revImage) : functions.link.getImageLink(revImage)
-            let currentLink = typeof currImage === "string" ? functions.link.getRawImageLink(currImage) : functions.link.getImageLink(currImage)
+            let imgLink = typeof revImage === "string" ? await functions.link.getPostImage(revertPost, i, session, false) : functions.link.getImageLink(revImage)
+            let currentLink = typeof currImage === "string" ? await functions.link.getPostImage(currentPost, i, session, false) : functions.link.getImageLink(currImage)
 
-            let upscaledImgLink = typeof revUpscaledImage === "string" ? functions.link.getRawImageLink(revUpscaledImage) : functions.link.getImageLink(revUpscaledImage, true)
-            let currentUpscaledLink = typeof currUpscaledImage === "string" ? functions.link.getRawImageLink(currUpscaledImage) : functions.link.getImageLink(currUpscaledImage, true)
+            let upscaledImgLink = typeof revUpscaledImage === "string" ? await functions.link.getPostImage(revertPost, i, session, true) : functions.link.getImageLink(revUpscaledImage, true)
+            let currentUpscaledLink = typeof currUpscaledImage === "string" ? await functions.link.getPostImage(currentPost, i, session, true) : functions.link.getImageLink(currUpscaledImage, true)
 
             let imgBuffer = await functions.http.getBuffer(functions.util.appendURLParams(imgLink, {upscaled: false}), {"x-force-upscale": "false"})
             let currentBuffer = await functions.http.getBuffer(functions.util.appendURLParams(currentLink, {upscaled: false}), {"x-force-upscale": "false"})

@@ -93,7 +93,8 @@ const EditThumbnailDialog: React.FunctionComponent = (props) => {
     const autoGenerate = async () => {
         if (!editThumbnailID) return
         let image = editThumbnailID.post.images[order - 1]
-        const imageLink = typeof image === "string" ? functions.link.getRawImageLink(image) : functions.link.getImageLink(image)
+        const imageLink = typeof image === "string" ? await functions.link.getPostImage(editThumbnailID.post, order - 1, session, false) 
+            : functions.link.getImageLink(image)
         const decrypted = await functions.crypto.decryptItem(imageLink, session)
         const {thumbnail} = await functions.image.thumbnail(decrypted)
         images[order - 1] = thumbnail

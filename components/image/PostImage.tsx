@@ -110,7 +110,7 @@ const PostImage = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
 
     const toggleSegmentate = async () => {
         if (!segmentated) {
-            setSegmentateLink(getCurrentLink())
+            setSegmentateLink(await getCurrentLink())
         } else {
             setShowLineart(false)
             setShowSegmentate((prev: boolean) => !prev)
@@ -119,7 +119,7 @@ const PostImage = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
 
     const toggleLineart = async () => {
         if (!lineart) {
-            setLineartLink(getCurrentLink())
+            setLineartLink(await getCurrentLink())
         } else {
             setShowSegmentate(false)
             setShowLineart((prev: boolean) => !prev)

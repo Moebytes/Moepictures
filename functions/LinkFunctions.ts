@@ -8,6 +8,7 @@ import functions from "./Functions"
 import {Session, Image, Post, PostHistory} from "../types/Types"
 
 export default class LinkFunctions {
+    private static postImageCache: Map<string, string> = new Map()
     private static postThumbnailCache: Map<string, string> = new Map()
     
     public static getImagePath = (folder: string, postID: string, order: number, filename: string) => {
@@ -41,6 +42,24 @@ export default class LinkFunctions {
     public static getRawImageLink = (filename: string) => {
         if (!filename) return ""
         return `${window.location.protocol}//${window.location.host}/${filename}`
+    }
+
+    public static getPostImage = async (partialPost: Post | PostHistory, index: number, 
+        session: Session, upscaled?: boolean) => {
+        const cacheKey = `${partialPost.postID}:${index}`
+
+        if (this.postImageCache.has(cacheKey)) {
+            return this.postImageCache.get(cacheKey)!
+        }
+
+        let post = await functions.http.get("/api/post", {postID: partialPost.postID}, session, undefined, true)
+        if (!post) return ""
+        let image = post.images[index]
+        if (typeof image === "string" && new URL(image).searchParams.has("hash")) return image
+        const img = this.getImageLink(image, upscaled)
+
+        this.postImageCache.set(cacheKey, img)
+        return img
     }
 
     public static getUnverifiedImageLink = (image: Image, upscaled?: boolean) => {
@@ -87,9 +106,10 @@ export default class LinkFunctions {
             return this.postThumbnailCache.get(cacheKey)!
         }
 
-        let post = await functions.http.get("/api/post", {postID: partialPost.postID}, session)
+        let post = await functions.http.get("/api/post", {postID: partialPost.postID}, session, undefined, true)
         if (!post) return ""
         let image = post.images[index]
+        if (typeof image === "string" && new URL(image).searchParams.has("hash")) return image
         const thumb = this.getThumbnailLink(image, sizeType, session, mobile)
 
         this.postThumbnailCache.set(cacheKey, thumb)

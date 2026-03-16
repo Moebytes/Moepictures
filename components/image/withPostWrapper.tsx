@@ -100,7 +100,7 @@ interface AddonProps {
     setAudioTempLink: React.Dispatch<React.SetStateAction<string>>
     showSpeedDropdown: boolean
     setShowSpeedDropdown: React.Dispatch<React.SetStateAction<boolean>>
-    getCurrentLink: (forceOriginal?: boolean | undefined) => string
+    getCurrentLink: (forceOriginal?: boolean | undefined) => Promise<string>
     getCurrentBuffer: (forceOriginal?: boolean | undefined) => Promise<ArrayBuffer>
     toggleFullscreen: (exit?: boolean | undefined) => Promise<void>
     exitFullScreen: () => Promise<void>
@@ -525,16 +525,17 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
             if (mobile) setImageExpand(false)
         }, [mobile])
 
-        const getCurrentLink = (forceOriginal?: boolean) => {
+        const getCurrentLink = async (forceOriginal?: boolean) => {
             if (!props.post) return getImg()!
             const showUpscaled = !forceOriginal && Boolean(session.upscaledImages)
-            const image = props.post.images[(props.order || 1) - 1]
-            let upscaledImage = props.post.upscaledImages?.[(props.order || 1) - 1] || image
+            let index = (props.order || 1) - 1
+            const image = props.post.images[index]
+            let upscaledImage = props.post.upscaledImages?.[index] || image
             let currentImage = showUpscaled ? upscaledImage : image
 
             let img = ""
             if (typeof currentImage === "string") {
-                img = functions.link.getRawImageLink(currentImage)
+                img = await functions.link.getPostImage(props.post, index, session, showUpscaled)
             } else {
                 img = functions.link.getImageLink(currentImage, showUpscaled)
             }
@@ -548,7 +549,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
         const getCurrentBuffer = async (forceOriginal?: boolean) => {
             let encryptedBuffer = new ArrayBuffer(0) 
             if (!props.post) return fetch(getImg()!).then((r) => r.arrayBuffer())
-            const img = getCurrentLink(forceOriginal)
+            const img = await getCurrentLink(forceOriginal)
             if (forceOriginal) {
                 encryptedBuffer = await fetch(functions.util.appendURLParams(img, {upscaled: false}), {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
             } else {
@@ -558,7 +559,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
         }
 
         const generateTempLink = async (audio?: boolean, forceOriginal?: boolean) => {
-            const link = getCurrentLink(forceOriginal)
+            const link = await getCurrentLink(forceOriginal)
             let url = await functions.http.post("/storage", {link, songCover: !audio}, session, setSessionFlag)
             if (audio) {
                 setAudioTempLink(url)
