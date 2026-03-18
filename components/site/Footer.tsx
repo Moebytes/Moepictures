@@ -65,13 +65,34 @@ const Footer: React.FunctionComponent<Props> = (props) => {
         return functions.color.colorizeSVG(contact, "--sortbarIcons")
     }
 
+    const logoClick = () => {
+        setSearch("")
+        setImageType("all")
+        setRatingType("all")
+        setStyleType("all")
+        setSortType("date")
+        setSearchFlag(true)
+        window.scrollTo(0, 0)
+    }
+
     return (
         <>
         {!props.noPadding ? <div style={{height: "100%", pointerEvents: "none"}}></div> : null}
         <div className="footer">
             <div className="footer-row">
-                <div className="footer-title-container">
-                    <img className="footer-logo" src={logo} draggable={false}/>
+                <div className="footer-title-container" onClick={logoClick}>
+                    {/* <img className="footer-logo" src={logo} draggable={false}/> */}
+                    <span className="footer-title-a">M</span>
+                    <span className="footer-title-b">o</span>
+                    <span className="footer-title-a">e</span>
+                    <span className="footer-title-b">p</span>
+                    <span className="footer-title-a">i</span>
+                    <span className="footer-title-b">c</span>
+                    <span className="footer-title-a">t</span>
+                    <span className="footer-title-b">u</span>
+                    <span className="footer-title-a">r</span>
+                    <span className="footer-title-b">e</span>
+                    <span className="footer-title-a">s</span>
                 </div>
                 {!mobile ? <div className="footer-text-container">
                     <span className="footer-text">- {i18n.footer.bottom} -</span>
