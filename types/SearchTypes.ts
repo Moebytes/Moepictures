@@ -26,6 +26,7 @@ export type CommentSearchParams = {
     query?: string
     sort?: CommentSort
     offset?: number
+    limit?: number
 }
 
 export type CategorySearchParams = {

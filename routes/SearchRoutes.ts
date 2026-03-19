@@ -357,7 +357,7 @@ const SearchRoutes = (app: Express) => {
 
     app.get("/api/search/comments", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            let {query, sort, offset} = req.query as CommentSearchParams
+            let {query, sort, offset, limit} = req.query as CommentSearchParams
             if (!sort) sort = "random"
             if (!functions.validation.validCommentSort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
@@ -374,9 +374,9 @@ const SearchRoutes = (app: Express) => {
             }
             let result = [] as CommentSearch[]
             if (usernames.length) {
-                result = await sql.comment.searchCommentsByUsername(usernames, parsedSearch.trim(), sort, Number(offset))
+                result = await sql.comment.searchCommentsByUsername(usernames, parsedSearch.trim(), sort, offset, limit)
             } else {
-                result = await sql.comment.searchComments(parsedSearch.trim(), sort, Number(offset))
+                result = await sql.comment.searchComments(parsedSearch.trim(), sort, offset, limit)
             }
             for (let i = result.length - 1; i >= 0; i--) {
                 const comment = result[i]
@@ -402,7 +402,7 @@ const SearchRoutes = (app: Express) => {
 
     app.get("/api/search/notes", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            let {query, sort, offset} = req.query as CommentSearchParams
+            let {query, sort, offset, limit} = req.query as CommentSearchParams
             if (!sort) sort = "random"
             if (!functions.validation.validCommentSort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
@@ -419,9 +419,9 @@ const SearchRoutes = (app: Express) => {
             }
             let result = [] as NoteSearch[]
             if (usernames.length) {
-                result = await sql.note.searchNotesByUsername(usernames, parsedSearch.trim(), sort, Number(offset))
+                result = await sql.note.searchNotesByUsername(usernames, parsedSearch.trim(), sort, offset, limit)
             } else {
-                result = await sql.note.searchNotes(parsedSearch.trim(), sort, Number(offset))
+                result = await sql.note.searchNotes(parsedSearch.trim(), sort, offset, limit)
             }
             for (let i = result.length - 1; i >= 0; i--) {
                 const note = result[i]

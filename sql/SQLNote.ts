@@ -245,43 +245,36 @@ export default class SQLNote {
     public static allUnverifiedNotes = async (offset?: number) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                WITH post_json AS (
-                    SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images
-                    FROM "unverified posts"
-                    JOIN "unverified images" ON "unverified images"."postID" = "unverified posts"."postID"
-                    GROUP BY "unverified posts"."postID"
+                WITH base_notes AS (
+                    SELECT DISTINCT ON ("unverified notes"."postID", "unverified notes"."order")
+                        "unverified notes"."noteID", "unverified notes"."postID", "unverified notes"."order", 
+                        "unverified notes"."updatedDate", "unverified notes"."updater"
+                    FROM "unverified notes"
+                    ORDER BY "unverified notes"."postID", "unverified notes"."order", "unverified notes"."updatedDate" DESC
+                ),
+                post_json AS (
+                    SELECT posts.*, json_agg(DISTINCT images) AS images
+                    FROM posts
+                    LEFT JOIN images ON images."postID" = posts."postID"
+                    GROUP BY posts."postID"
                 ), 
                 note_json AS (
                     SELECT "unverified notes"."postID", "unverified notes"."order", 
                     jsonb_agg("unverified notes") AS data
                     FROM "unverified notes"
+                    JOIN base_notes ON base_notes."postID" = "unverified notes"."postID" AND base_notes."order" = "unverified notes"."order"
                     GROUP BY "unverified notes"."postID", "unverified notes"."order"
-                ),
-                ranked_notes AS (
-                    SELECT "unverified notes"."noteID", "unverified notes"."originalID", "unverified notes"."postID", "unverified notes"."updater", 
-                    "unverified notes"."updatedDate", "unverified notes"."order", "unverified notes"."reason", "unverified notes"."addedEntries", 
-                    "unverified notes"."removedEntries", note_json.data AS notes,
-                    to_jsonb((array_agg(post_json))[1]) AS post,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY note_json.data
-                        ORDER BY "unverified notes"."updatedDate" DESC
-                    ) AS "row"
-                    FROM "unverified notes"
-                    LEFT JOIN post_json ON post_json."postID" = "unverified notes"."postID"
-                    LEFT JOIN note_json ON note_json."postID" = "unverified notes"."postID" AND note_json."order" = "unverified notes"."order"
-                    GROUP BY "unverified notes"."noteID", "unverified notes"."originalID", "unverified notes"."postID", "unverified notes"."updater", 
-                    "unverified notes"."updatedDate", "unverified notes"."order", "unverified notes"."reason", "unverified notes"."addedEntries", 
-                    "unverified notes"."removedEntries", note_json.data
-                ),
-                result_notes AS (
-                    SELECT *,
-                    COUNT(*) OVER () AS "noteCount"
-                    FROM ranked_notes
-                    WHERE "row" = 1
                 )
-                SELECT *
-                FROM result_notes
-                ORDER BY result_notes."updatedDate" ASC
+                SELECT base_notes."noteID", base_notes."postID", base_notes."updater", base_notes."updatedDate",
+                base_notes."order", note_json.data AS notes,
+                users."image", users."imageHash", users."imagePost", 
+                users."role", users."banned", users."deleted",
+                to_jsonb(post_json) AS post,
+                COUNT(*) OVER () AS "noteCount"
+                FROM base_notes
+                JOIN users ON users."username" = base_notes."updater"
+                LEFT JOIN post_json ON post_json."postID" = base_notes."postID"
+                LEFT JOIN note_json ON note_json."postID" = base_notes."postID" AND note_json."order" = base_notes."order"
                 LIMIT 100 ${offset ? `OFFSET $1` : ""}
             `)
         }
@@ -294,44 +287,37 @@ export default class SQLNote {
     public static userUnverifiedNotes = async (username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                WITH post_json AS (
-                    SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images
-                    FROM "unverified posts"
-                    JOIN "unverified images" ON "unverified images"."postID" = "unverified posts"."postID"
-                    GROUP BY "unverified posts"."postID"
+                WITH base_notes AS (
+                    SELECT DISTINCT ON ("unverified notes"."postID", "unverified notes"."order")
+                        "unverified notes"."noteID", "unverified notes"."postID", "unverified notes"."order", 
+                        "unverified notes"."updatedDate", "unverified notes"."updater"
+                    FROM "unverified notes"
+                    WHERE "unverified notes"."updater" = ANY ($1)
+                    ORDER BY "unverified notes"."postID", "unverified notes"."order", "unverified notes"."updatedDate" DESC
+                ),
+                post_json AS (
+                    SELECT posts.*, json_agg(DISTINCT images) AS images
+                    FROM posts
+                    LEFT JOIN images ON images."postID" = posts."postID"
+                    GROUP BY posts."postID"
                 ), 
                 note_json AS (
                     SELECT "unverified notes"."postID", "unverified notes"."order", 
                     jsonb_agg("unverified notes") AS data
                     FROM "unverified notes"
+                    JOIN base_notes ON base_notes."postID" = "unverified notes"."postID" AND base_notes."order" = "unverified notes"."order"
                     GROUP BY "unverified notes"."postID", "unverified notes"."order"
-                ),
-                ranked_notes AS (
-                    SELECT "unverified notes"."noteID", "unverified notes"."originalID", "unverified notes"."postID", "unverified notes"."updater", 
-                    "unverified notes"."updatedDate", "unverified notes"."order", "unverified notes"."reason", "unverified notes"."addedEntries", 
-                    "unverified notes"."removedEntries", note_json.data AS notes,
-                    to_jsonb((array_agg(post_json))[1]) AS post,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY note_json.data
-                        ORDER BY "unverified notes"."updatedDate" DESC
-                    ) AS "row"
-                    FROM "unverified notes"
-                    LEFT JOIN post_json ON post_json."postID" = "unverified notes"."postID"
-                    LEFT JOIN note_json ON note_json."postID" = "unverified notes"."postID" AND note_json."order" = "unverified notes"."order"
-                    WHERE "unverified notes"."updater" = $1
-                    GROUP BY "unverified notes"."noteID", "unverified notes"."originalID", "unverified notes"."postID", "unverified notes"."updater", 
-                    "unverified notes"."updatedDate", "unverified notes"."order", "unverified notes"."reason", "unverified notes"."addedEntries", 
-                    "unverified notes"."removedEntries", note_json.data
-                ),
-                result_notes AS (
-                    SELECT *,
-                    COUNT(*) OVER () AS "noteCount"
-                    FROM ranked_notes
-                    WHERE "row" = 1
                 )
-                SELECT *
-                FROM result_notes
-                ORDER BY ranked_notes."updatedDate" ASC
+                SELECT base_notes."noteID", base_notes."postID", base_notes."updater", base_notes."updatedDate",
+                base_notes."order", note_json.data AS notes,
+                users."image", users."imageHash", users."imagePost", 
+                users."role", users."banned", users."deleted",
+                to_jsonb(post_json) AS post,
+                COUNT(*) OVER () AS "noteCount"
+                FROM base_notes
+                JOIN users ON users."username" = base_notes."updater"
+                LEFT JOIN post_json ON post_json."postID" = base_notes."postID"
+                LEFT JOIN note_json ON note_json."postID" = base_notes."postID" AND note_json."order" = base_notes."order"
             `),
             values: [username]
         }
@@ -340,20 +326,31 @@ export default class SQLNote {
     }
 
     /** Search notes. */
-    public static searchNotes = async (search: string, sort: string, offset?: number) => {
+    public static searchNotes = async (search: string, sort: string, offset?: number, limit?: number) => {
         let whereQuery = ""
         let i = 1
         if (search) {
             whereQuery = `WHERE notes.transcript ILIKE '%' || $${i} || '%' OR notes.translation ILIKE '%' || $${i} || '%'`
             i++
         }
+        let offsetValue = i
+        if (offset) {
+            i++
+        }
         let sortQuery = ""
         if (sort === "random") sortQuery = `ORDER BY random()`
-        if (sort === "date") sortQuery = `ORDER BY result_notes."updatedDate" DESC`
-        if (sort === "reverse date") sortQuery = `ORDER BY result_notes."updatedDate" ASC`
+        if (sort === "date") sortQuery = `ORDER BY base_notes."updatedDate" DESC`
+        if (sort === "reverse date") sortQuery = `ORDER BY base_notes."updatedDate" ASC`
         const query: QueryConfig = {
-            text: functions.multiTrim(/*sql*/`
-                WITH post_json AS (
+                text: functions.multiTrim(/*sql*/`
+                WITH base_notes AS (
+                    SELECT DISTINCT ON (notes."postID", notes."order")
+                        notes."noteID", notes."postID", notes."order", notes."updatedDate", notes."updater"
+                    FROM notes
+                    ${whereQuery}
+                    ORDER BY notes."postID", notes."order", notes."updatedDate" DESC
+                ),
+                post_json AS (
                     SELECT posts.*, json_agg(DISTINCT images) AS images
                     FROM posts
                     LEFT JOIN images ON images."postID" = posts."postID"
@@ -363,61 +360,57 @@ export default class SQLNote {
                     SELECT notes."postID", notes."order", 
                     jsonb_agg(notes) AS data
                     FROM notes
+                    JOIN base_notes ON base_notes."postID" = notes."postID" AND base_notes."order" = notes."order"
                     GROUP BY notes."postID", notes."order"
-                ),
-                ranked_notes AS (
-                    SELECT notes."noteID", notes."postID", notes."updater", notes."updatedDate",
-                    notes."order", note_json.data AS notes,
-                    users."image", users."imageHash", users."imagePost", 
-                    users."role", users."banned", users."deleted",
-                    to_jsonb((array_agg(post_json))[1]) AS post,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY note_json.data
-                        ORDER BY notes."updatedDate" DESC
-                    ) AS "row"
-                    FROM notes
-                    JOIN users ON users."username" = notes."updater"
-                    LEFT JOIN post_json ON post_json."postID" = notes."postID"
-                    LEFT JOIN note_json ON note_json."postID" = notes."postID" AND note_json."order" = notes."order"
-                    ${whereQuery}
-                    GROUP BY notes."noteID", notes."postID", notes."updater", notes."updatedDate", notes."order", note_json.data,
-                    users."image", users."imageHash", users."imagePost", 
-                    users."role", users."banned", users."deleted"
-                ),
-                result_notes AS (
-                    SELECT *,
-                    COUNT(*) OVER () AS "noteCount"
-                    FROM ranked_notes
-                    WHERE "row" = 1
                 )
-                SELECT *
-                FROM result_notes
+                SELECT base_notes."noteID", base_notes."postID", base_notes."updater", base_notes."updatedDate",
+                base_notes."order", note_json.data AS notes,
+                users."image", users."imageHash", users."imagePost", 
+                users."role", users."banned", users."deleted",
+                to_jsonb(post_json) AS post,
+                COUNT(*) OVER () AS "noteCount"
+                FROM base_notes
+                JOIN users ON users."username" = base_notes."updater"
+                LEFT JOIN post_json ON post_json."postID" = base_notes."postID"
+                LEFT JOIN note_json ON note_json."postID" = base_notes."postID" AND note_json."order" = base_notes."order"
                 ${sortQuery}
-                LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+                LIMIT ${limit ? `$${i}` : 100} ${offset ? `OFFSET $${offsetValue}` : ""}
             `),
             values: []
         }
         if (search) query.values?.push(search.toLowerCase())
         if (offset) query.values?.push(offset)
+        if (limit) query.values?.push(limit)
         const result = await SQLQuery.run(query)
         return result as Promise<NoteSearch[]>
     }
 
     /** Notes by usernames. */
-    public static searchNotesByUsername = async (usernames: string[], search: string, sort: string, offset?: number) => {
+    public static searchNotesByUsername = async (usernames: string[], search: string, sort: string, offset?: number, limit?: number) => {
         let i = 2
         let whereQuery = `WHERE notes."updater" = ANY ($1)`
         if (search) {
             whereQuery += `AND (notes.transcript ILIKE '%' || $${i} || '%' OR notes.translation ILIKE '%' || $${i} || '%')`
             i++
         }
+        let offsetValue = i
+        if (offset) {
+            i++
+        }
         let sortQuery = ""
         if (sort === "random") sortQuery = `ORDER BY random()`
-        if (sort === "date") sortQuery = `ORDER BY result_notes."updatedDate" DESC`
-        if (sort === "reverse date") sortQuery = `ORDER BY result_notes."updatedDate" ASC`
+        if (sort === "date") sortQuery = `ORDER BY notes."updatedDate" DESC`
+        if (sort === "reverse date") sortQuery = `ORDER BY notes."updatedDate" ASC`
         const query: QueryConfig = {
-            text: functions.multiTrim(/*sql*/`
-                WITH post_json AS (
+                text: functions.multiTrim(/*sql*/`
+                WITH base_notes AS (
+                    SELECT DISTINCT ON (notes."postID", notes."order")
+                        notes."noteID", notes."postID", notes."order", notes."updatedDate", notes."updater"
+                    FROM notes
+                    ${whereQuery}
+                    ORDER BY notes."postID", notes."order", notes."updatedDate" DESC
+                ),
+                post_json AS (
                     SELECT posts.*, json_agg(DISTINCT images) AS images
                     FROM posts
                     LEFT JOIN images ON images."postID" = posts."postID"
@@ -427,42 +420,27 @@ export default class SQLNote {
                     SELECT notes."postID", notes."order", 
                     jsonb_agg(notes) AS data
                     FROM notes
+                    JOIN base_notes ON base_notes."postID" = notes."postID" AND base_notes."order" = notes."order"
                     GROUP BY notes."postID", notes."order"
-                ),
-                ranked_notes AS (
-                    SELECT notes."noteID", notes."postID", notes."updater", notes."updatedDate",
-                    notes."order", note_json.data AS notes,
-                    users."image", users."imageHash", users."imagePost", 
-                    users."role", users."banned", users."deleted",
-                    to_jsonb((array_agg(post_json))[1]) AS post,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY note_json.data
-                        ORDER BY notes."updatedDate" DESC
-                    ) AS "row"
-                    FROM notes
-                    JOIN users ON users."username" = notes."updater"
-                    LEFT JOIN post_json ON post_json."postID" = notes."postID"
-                    LEFT JOIN note_json ON note_json."postID" = notes."postID" AND note_json."order" = notes."order"
-                    ${whereQuery}
-                    GROUP BY notes."noteID", notes."postID", notes."updater", notes."updatedDate", notes."order", note_json.data,
-                    users."image", users."imageHash", users."imagePost", 
-                    users."role", users."banned", users."deleted"
-                ),
-                result_notes AS (
-                    SELECT *,
-                    COUNT(*) OVER () AS "noteCount"
-                    FROM ranked_notes
-                    WHERE "row" = 1
                 )
-                SELECT *
-                FROM result_notes
+                SELECT base_notes."noteID", base_notes."postID", base_notes."updater", base_notes."updatedDate",
+                base_notes."order", note_json.data AS notes,
+                users."image", users."imageHash", users."imagePost", 
+                users."role", users."banned", users."deleted",
+                to_jsonb(post_json) AS post,
+                COUNT(*) OVER () AS "noteCount"
+                FROM base_notes
+                JOIN users ON users."username" = base_notes."updater"
+                LEFT JOIN post_json ON post_json."postID" = base_notes."postID"
+                LEFT JOIN note_json ON note_json."postID" = base_notes."postID" AND note_json."order" = base_notes."order"
                 ${sortQuery}
-                LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+                LIMIT ${limit ? `$${i}` : 100} ${offset ? `OFFSET $${offsetValue}` : ""}
             `),
             values: [usernames]
         }
         if (search) query.values?.push(search.toLowerCase())
         if (offset) query.values?.push(offset)
+        if (limit) query.values?.push(limit)
         const result = await SQLQuery.run(query)
         return result as Promise<NoteSearch[]>
     }

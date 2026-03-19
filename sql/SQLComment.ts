@@ -72,12 +72,16 @@ export default class SQLComment {
     }
 
     /** Search comments. */
-    public static searchComments = async (search: string, sort: string, offset?: number) => {
+    public static searchComments = async (search: string, sort: string, offset?: number, limit?: number) => {
         let whereQuery = ""
         let i = 1
         if (search) {
-        whereQuery = `WHERE lower(comments."comment") LIKE '%' || $${i} || '%'`
-        i++
+            whereQuery = `WHERE lower(comments."comment") LIKE '%' || $${i} || '%'`
+            i++
+        }
+        let offsetValue = i
+        if (offset) {
+            i++
         }
         let sortQuery = ""
         if (sort === "random") sortQuery = `ORDER BY random()`
@@ -103,22 +107,27 @@ export default class SQLComment {
                 GROUP BY comments."commentID", users."image", users."imageHash", users."imagePost", 
                 users."role", users."banned", users."deleted"
                 ${sortQuery}
-                LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+                LIMIT ${limit ? `$${i}` : 100} ${offset ? `OFFSET $${offsetValue}` : ""}
             `),
             values: []
         }
         if (search) query.values?.push(search.toLowerCase())
         if (offset) query.values?.push(offset)
+        if (limit) query.values?.push(limit)
         const result = await SQLQuery.run(query)
         return result as Promise<CommentSearch[]>
     }
 
     /** Comments by usernames. */
-    public static searchCommentsByUsername = async (usernames: string[], search: string, sort: string, offset?: number) => {
+    public static searchCommentsByUsername = async (usernames: string[], search: string, sort: string, offset?: number, limit?: number) => {
         let i = 2
         let whereQuery = `WHERE comments."username" = ANY ($1)`
         if (search) {
             whereQuery += `AND lower(comments."comment") LIKE '%' || $${i} || '%'`
+            i++
+        }
+        let offsetValue = i
+        if (offset) {
             i++
         }
         let sortQuery = ""
@@ -145,12 +154,13 @@ export default class SQLComment {
                 GROUP BY comments."commentID", users."image", users."imageHash", users."imagePost", 
                 users."role", users."banned", users."deleted"
                 ${sortQuery}
-                LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+                LIMIT ${limit ? `$${i}` : 100} ${offset ? `OFFSET $${offsetValue}` : ""}
             `),
             values: [usernames]
         }
         if (search) query.values?.push(search.toLowerCase())
         if (offset) query.values?.push(offset)
+        if (limit) query.values?.push(limit)
         const result = await SQLQuery.run(query)
         return result as Promise<CommentSearch[]>
     }
