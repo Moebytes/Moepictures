@@ -1,7 +1,7 @@
 {
     "title": "Moepictures: アニメアート画像掲示板",
-    "period": "。",
     "email": "moepictures.moe@gmail.com",
+    "period": "。",
     "navbar": {
         "login": "ログイン",
         "comments": "コメント",
@@ -14,7 +14,8 @@
         "terms": "条件",
         "contact": "コンタクト",
         "mail": "メール",
-        "modQueue": "改造キュー"
+        "modQueue": "改造キュー",
+        "profile": "プロフィール"
     },
     "sidebar": {
         "copyTags": "コピータグ",
@@ -157,7 +158,8 @@
         "commentary": "アーティストのコメント",
         "artistWorks": "アーティスト作品",
         "related": "関連",
-        "noComments": "コメントはありません。"
+        "noComments": "コメントはありません。",
+        "info": "情報"
     },
     "tag": {
         "all": "全て",
@@ -322,7 +324,9 @@
         "favoriteTags": "お気に入りタグ",
         "forumPosts": "フォーラム投稿",
         "deleted": "削除された",
-        "deletedAccount": "削除されたアカウント"
+        "deletedAccount": "削除されたアカウント",
+        "darkTheme": "ダークテーマ",
+        "visitWebsite": "Moepicsのウェブサイト！"
     },
     "roles": {
         "admin": "管理者",

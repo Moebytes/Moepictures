@@ -1,7 +1,7 @@
 {
     "title": "Moepictures: Cute Anime Girl Art",
-    "period": ".",
     "email": "moepictures.moe@gmail.com",
+    "period": ".",
     "navbar": {
         "login": "Login",
         "comments": "Comments",
@@ -12,9 +12,10 @@
         "forum": "Forum",
         "help": "Help",
         "terms": "Terms",
-        "contact": "Contact",
+        "contact": "Contact Us",
         "mail": "Mail",
-        "modQueue": "Mod Queue"
+        "modQueue": "Mod Queue",
+        "profile": "Profile"
     },
     "sidebar": {
         "copyTags": "Copy Tags",
@@ -157,7 +158,8 @@
         "commentary": "Artist Commentary",
         "artistWorks": "Artist Works",
         "related": "Related",
-        "noComments": "There are no comments."
+        "noComments": "There are no comments.",
+        "info": "Info"
     },
     "tag": {
         "all": "All",
@@ -321,7 +323,9 @@
         "favoriteTags": "Favorite Tags",
         "forumPosts": "Forum Posts",
         "deleted": "deleted",
-        "deletedAccount": "deleted account"
+        "deletedAccount": "deleted account",
+        "darkTheme": "Dark Theme",
+        "visitWebsite": "Visit our website!"
     },
     "roles": {
         "admin": "Admin",
