@@ -79,6 +79,6 @@ export type SearchGetEndpoint<T extends string> =
     never
 
 export type SearchPostEndpoint<T extends string> = 
-    T extends "/api/search/similar" ? {params: SimilarSearchParams, response: Post[]} :
+    T extends "/api/search/similar" ? {params: SimilarSearchParams, response: PostSearch[]} :
     // T extends "/api/search/parse-space-search" ? {params: {query?: string}, response: string} :
     never

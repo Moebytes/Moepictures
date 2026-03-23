@@ -7,7 +7,6 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import uploadPfpIcon from "../../assets/svg/uploadpfp.svg"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -236,55 +235,6 @@ const UserProfilePage: React.FunctionComponent = () => {
             }
         }
     }, [session, init])
-
-    const uploadPfp = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0]
-        if (!file) return
-        const fileReader = new FileReader()
-        await new Promise<void>((resolve) => {
-            fileReader.onloadend = async (f: ProgressEvent<FileReader>) => {
-                const bytes = new Uint8Array(f.target?.result as ArrayBuffer)
-                const result = functions.byte.bufferFileType(bytes)?.[0]
-                const jpg = result?.mime === "image/jpeg"
-                const png = result?.mime === "image/png"
-                const gif = result?.mime === "image/gif"
-                const webp = result?.mime === "image/webp"
-                const avif = result?.mime === "image/avif"
-                if (jpg || png || gif || webp || avif) {
-                    const MB = file.size / (1024*1024)
-                    const maxSize = functions.validation.maxTagFileSize({jpg, png, gif, webp, avif})
-                    if (MB <= maxSize) {
-                        const url = URL.createObjectURL(file)
-                        let croppedURL = ""
-                        if (gif) {
-                            const gifData = await functions.anim.extractGIFFrames(bytes.buffer)
-                            let frameArray = [] as ArrayBuffer[] 
-                            let delayArray = [] as number[]
-                            for (let i = 0; i < gifData.length; i++) {
-                                const canvas = gifData[i].frame as HTMLCanvasElement
-                                const cropped = await functions.image.crop(canvas.toDataURL(), 1, true)
-                                frameArray.push(cropped)
-                                delayArray.push(gifData[i].delay)
-                            }
-                            const firstURL = await functions.image.crop(gifData[0].frame.toDataURL(), 1, false)
-                            const {width, height} = await functions.image.imageDimensions(firstURL)
-                            const buffer = await functions.anim.encodeGIF(frameArray, delayArray, width, height)
-                            const blob = new Blob([new Uint8Array(buffer)])
-                            croppedURL = URL.createObjectURL(blob)
-                        } else {
-                            croppedURL = await functions.image.crop(url, 1, false)
-                        }
-                        const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
-                        await functions.http.post("/api/user/pfp", {bytes: Object.values(new Uint8Array(arrayBuffer))}, session, setSessionFlag)
-                        setUserImg("")
-                        setSessionFlag(true)
-                    }
-                }
-            }
-            fileReader.readAsArrayBuffer(file)
-        })
-        event.target.value = ""
-    }
 
     const favoritesPrivacy = async () => {
         await functions.http.post("/api/user/favoritesprivacy", null, session, setSessionFlag)
@@ -649,12 +599,6 @@ const UserProfilePage: React.FunctionComponent = () => {
                     <div className="user-top-container">
                         <img className="user-img" src={userImg} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: session.image ? "" : filter}}/>
                         {generateUsernameJSX()}
-                        {!mobile && permissions.isAdmin(session) && <>
-                        <label htmlFor="upload-pfp" className="uploadpfp-label">
-                            <img className="user-uploadimg" src={getIcon(uploadPfpIcon)} style={{filter}}/>
-                        </label>
-                        <input id="upload-pfp" type="file" onChange={(event) => uploadPfp(event)}/>
-                        </>}
                     </div>
                     {session.banned ? <span className="user-ban-text">{getBanText()}</span> : null}
                     {session.deleted ? <button className="user-deleted-button">{i18n.user.deletedAccount}</button> : null}

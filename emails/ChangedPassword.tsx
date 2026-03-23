@@ -42,7 +42,7 @@ const style = /*css*/`
         margin-top: 10px;
         margin-bottom: 10px;
         background-color: #ff619b;
-        border: 2px solid black;
+        border: 1px solid black;
         padding: 0px 10px !important;
         width: max-content;
     }
