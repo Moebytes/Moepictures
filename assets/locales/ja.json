@@ -232,6 +232,7 @@
         "over18": "私は18歳以上です",
         "promote": "プロモーション",
         "save": "保存",
+        "saved": "保存済み",
         "send": "送信",
         "unban": "禁止解除",
         "sendLink": "リンクを送る",
@@ -326,7 +327,8 @@
         "deleted": "削除された",
         "deletedAccount": "削除されたアカウント",
         "darkTheme": "ダークテーマ",
-        "visitWebsite": "Moepicsのウェブサイト！"
+        "visitWebsite": "Moepicsのウェブサイト！",
+        "appColor": "アプリのカラー"
     },
     "roles": {
         "admin": "管理者",
@@ -526,6 +528,14 @@
         "drawingTools": "描画ツール",
         "userProfile": "ユーザープロフィール",
         "imageCount": "画像数"
+    },
+    "contextMenu": {
+        "openExternal": "外部リンクを開く",
+        "saveImage": "画像を保存",
+        "share": "共有",
+        "saveLocation": "保存先を選択してください",
+        "photos": "写真",
+        "files": "ファイル"
     },
     "errors": {
         "$401":"401エラー",
