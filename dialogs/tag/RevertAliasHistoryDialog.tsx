@@ -8,7 +8,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useTagDialogSelector, useTagDialogActions, useSessionSelector} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
 
 const RevertAliasHistoryDialog: React.FunctionComponent = (props) => {
@@ -19,13 +19,16 @@ const RevertAliasHistoryDialog: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
+    const controls = useDragControls()
 
     useEffect(() => {
         if (revertAliasHistoryID) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
             document.title = getTitle() || ""
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [revertAliasHistoryID])
@@ -67,10 +70,10 @@ const RevertAliasHistoryDialog: React.FunctionComponent = (props) => {
         if (permissions.isMod(session)) {
             return (
                 <div className="dialog">
-                    <Draggable handle=".dialog-title-container">
-                    <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                    className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
-                            <div className="dialog-title-container">
+                            <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                                 <span className="dialog-title">{getTitle()}</span>
                             </div>
                             <div className="dialog-row">
@@ -81,8 +84,7 @@ const RevertAliasHistoryDialog: React.FunctionComponent = (props) => {
                                 <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                             </div>
                         </div>
-                    </div>
-                    </Draggable>
+                    </motion.div>
                 </div>
             )
         }

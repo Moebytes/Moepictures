@@ -8,7 +8,7 @@ import React, {useEffect, useState} from "react"
 import {useThemeSelector, useInteractionActions, useNoteDialogSelector, useNoteDialogActions,
 useLayoutSelector} from "../../store"
 import functions from "../../functions/Functions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import bold from "../../assets/svg/bold.svg"
 import italic from "../../assets/svg/italic.svg"
 import checkbox from "../../assets/svg/checkbox.svg"
@@ -28,6 +28,7 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
     const [posY, setPosY] = useState(0)
     const [tagX, setTagX] = useState(0)
     const [tagY, setTagY] = useState(0)
+    const controls = useDragControls()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
@@ -56,9 +57,11 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (editNoteID !== null) {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "none"
             setEnableDrag(false)
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [editNoteID])
@@ -187,10 +190,10 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
     if (editNoteID !== null) {
         return (
             <div className="edit-note-dialog">
-                <Draggable handle=".edit-note-dialog-title-container">
-                <div className="edit-note-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="edit-note-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="edit-note-container">
-                        <div className="edit-note-dialog-title-container">
+                        <div className="edit-note-dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="edit-note-dialog-title">{i18n.dialogs.editNote.title}</span>
                         </div>
                         {editNoteData.character ? characterNoteJSX() : noteJSX()}
@@ -205,8 +208,7 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.edit}</button>
                         </div>
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

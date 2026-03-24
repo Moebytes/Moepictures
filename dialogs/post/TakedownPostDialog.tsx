@@ -8,7 +8,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
 useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
 import takedownIcon from "../../assets/svg/takedown.svg"
 import restoreIcon from "../../assets/svg/restore.svg"
@@ -24,6 +24,7 @@ const TakedownPostDialog: React.FunctionComponent = (props) => {
     const {setPostFlag} = useFlagActions()
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
+    const controls = useDragControls()
 
     const getIcon = (icon: string) => {
         return functions.color.colorizeSVG(icon, "--sortbarIcons")
@@ -32,8 +33,10 @@ const TakedownPostDialog: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (takedownPostID) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [takedownPostID])
@@ -90,10 +93,10 @@ const TakedownPostDialog: React.FunctionComponent = (props) => {
         if (permissions.isMod(session)) {
             return (
                 <div className="dialog">
-                    <Draggable handle=".dialog-title-container">
-                    <div className="dialog-box" style={{width: "280px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                    className="dialog-box" style={{width: "280px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
-                            <div className="dialog-title-container">
+                            <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                                 <img draggable={false} className="dialog-icon" src={getTakedownIcon()}/>
                                 <span className="dialog-title">{getTitle()}</span>
                             </div>
@@ -105,8 +108,7 @@ const TakedownPostDialog: React.FunctionComponent = (props) => {
                                 <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                             </div>
                         </div>
-                    </div>
-                    </Draggable>
+                    </motion.div>
                 </div>
             )
         }

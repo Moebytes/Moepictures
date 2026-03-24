@@ -7,7 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useMiscDialogSelector, useMiscDialogActions, useSessionSelector, useSessionActions} from "../../store"
 import functions from "../../functions/Functions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import r18 from "../../assets/svg/lewd.svg"
 import "../dialog.less"
 
@@ -22,6 +22,7 @@ const R18Dialog: React.FunctionComponent = (props) => {
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
+    const controls = useDragControls()
 
     const getIcon = (icon: string) => {
         return functions.color.colorizeSVG(icon, "--r18Color")
@@ -30,8 +31,10 @@ const R18Dialog: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (r18Confirmation) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [r18Confirmation])
@@ -47,10 +50,10 @@ const R18Dialog: React.FunctionComponent = (props) => {
     if (r18Confirmation) {
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{width: "375px", height: "260px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" style={{width: "375px", height: "260px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <img className="dialog-title-img" src={getIcon(r18)} style={{marginLeft: "0px", marginRight: "10px"}}/>
                             <span className="dialog-title" style={{color: "var(--r18Color)"}}>{i18n.dialogs.r18.title}</span>
                         </div>
@@ -64,8 +67,7 @@ const R18Dialog: React.FunctionComponent = (props) => {
                             <button onClick={() => click("accept")} className="dialog-button" style={{backgroundColor: "#fa337d"}}>{i18n.buttons.over18}</button>
                         </div>
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

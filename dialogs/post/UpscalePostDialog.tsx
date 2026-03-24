@@ -9,7 +9,7 @@ import {useInteractionActions, useSessionSelector, useSessionActions,
 usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
 import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
 import radioButton from "../../assets/svg/radiobutton.svg"
 import radioButtonChecked from "../../assets/svg/radiobutton-checked.svg"
@@ -30,6 +30,7 @@ const UpscalePostDialog: React.FunctionComponent = (props) => {
     const [scaleFactor, setScaleFactor] = useState("4")
     const [compressJPG, setCompressJPG] = useState(true)
     const errorRef = useRef<HTMLSpanElement>(null)
+    const controls = useDragControls()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
@@ -40,8 +41,10 @@ const UpscalePostDialog: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (upscalePostID) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [upscalePostID])
@@ -67,10 +70,10 @@ const UpscalePostDialog: React.FunctionComponent = (props) => {
         if (permissions.isMod(session)) {
             return (
                 <div className="dialog">
-                    <Draggable handle=".dialog-title-container">
-                    <div className="dialog-box" style={{width: "320px", height: "220px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                    className="dialog-box" style={{width: "320px", height: "220px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
-                            <div className="dialog-title-container">
+                            <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                                 <span className="dialog-title">{i18n.dialogs.upscale.title}</span>
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center", paddingRight: "20px"}}>
@@ -94,8 +97,7 @@ const UpscalePostDialog: React.FunctionComponent = (props) => {
                                 <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.upscale}</button>
                             </div>
                         </div>
-                    </div>
-                    </Draggable>
+                    </motion.div>
                 </div>
             )
         }

@@ -4,6 +4,8 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+import "bootstrap/dist/css/bootstrap.min.css"
+import "react-image-crop/dist/ReactCrop.css"
 import {scan} from "react-scan"
 import {hydrateRoot} from "react-dom/client"
 import {BrowserRouter as Router} from "react-router-dom"

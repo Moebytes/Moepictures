@@ -10,7 +10,7 @@ useFlagActions} from "../../store"
 import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import checkbox from "../../assets/svg/checkbox.svg"
 import checkboxChecked from "../../assets/svg/checkbox-checked.svg"
 import "../dialog.less"
@@ -31,6 +31,7 @@ const BanDialog: React.FunctionComponent = (props) => {
     const [days, setDays] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
+    const controls = useDragControls()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
@@ -41,8 +42,10 @@ const BanDialog: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (banName) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [banName])
@@ -145,10 +148,10 @@ const BanDialog: React.FunctionComponent = (props) => {
     if (banName) {
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.dialogs.ban.title}</span>
                         </div>
                         <div className="dialog-row">
@@ -184,8 +187,7 @@ const BanDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.ban}</button>
                         </div>
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

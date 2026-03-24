@@ -7,7 +7,7 @@
 import React, {useEffect, useState} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, 
-useFlagSelector, useCacheActions, useGroupDialogActions, useSearchActions} from "../../store"
+useFlagSelector, useCacheActions, useGroupDialogActions, useSearchActions, useActiveSelector} from "../../store"
 import {useNavigate, useParams, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -24,7 +24,7 @@ import groupDelete from "../../assets/svg/delete.svg"
 import lockIcon from "../../assets/svg/lock.svg"
 import scrollIcon from "../../assets/svg/scroll.svg"
 import pageIcon from "../../assets/svg/pages.svg"
-import Reorder from "react-reorder"
+import {ReactSortable} from "react-sortablejs"
 import TinyImage from "../../components/image/TinyImage"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
@@ -37,7 +37,8 @@ const FavgroupPage: React.FunctionComponent = () => {
     const {i18n, siteHue, siteLightness, siteSaturation} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
-    const {setHeaderText, setSidebarText, setActiveFavgroup, setActiveDropdown} = useActiveActions()
+    const {reorderState} = useActiveSelector()
+    const {setHeaderText, setSidebarText, setActiveFavgroup, setActiveDropdown, setReorderState} = useActiveActions()
     const {groupFlag} = useFlagSelector()
     const {setGroupFlag} = useFlagActions()
     const {session} = useSessionSelector()
@@ -46,7 +47,6 @@ const FavgroupPage: React.FunctionComponent = () => {
     const {setAddFavgroupPostObj, setEditFavGroupObj, setDeleteFavGroupObj, setRemapFavGroupObj} = useGroupDialogActions()
     const {ratingType, scroll} = useSearchSelector()
     const {setSearch, setSearchFlag, setScroll} = useSearchActions()
-    const [reorderState, setReorderState] = useState(false)
     const [deleteMode, setDeleteMode] = useState(false)
     const {setNavigationPosts} = useCacheActions()
     const [favgroup, setFavgroup] = useState(null as Favgroup | null)
@@ -137,33 +137,30 @@ const FavgroupPage: React.FunctionComponent = () => {
         }
     }, [favgroup, ratingType, session])
 
-    const reorder = (event: React.MouseEvent, from: number, to: number) => {
+    const syncList = (newList: GroupItem[]) => {
+        setVisible(newList)
+
         const baseOffset = scroll ? 0 : (page - 1) * pageAmount
 
         setItems((prev) => {
-            const newState = [...prev]
-            const item = newState.splice(baseOffset + from, 1)[0]
-            newState.splice(baseOffset + to, 0, item)
-            return newState
-        })
-
-        setVisible((prev) => {
-            const newState = [...prev]
-            const item = newState.splice(baseOffset + from, 1)[0]
-            newState.splice(baseOffset + to, 0, item)
-            return newState
+            const updated = [...prev]
+            updated.splice(baseOffset, newList.length, ...newList)
+            return updated
         })
     }
 
     const favgroupImagesJSX = () => {
-        if (!favgroup) return
         let jsx = [] as React.ReactElement[]
+        if (!favgroup) return jsx
+
         for (let i = 0; i < visibleItems.length; i++) {
             const item = visibleItems[i]
             if (!item) continue
+
             const openPost = async (event: React.MouseEvent) => {
                 if (deleteMode) {
-                    await functions.http.delete("/api/favgroup/post/delete", {postID: item.post.postID, name: favgroup.name}, session, setSessionFlag)
+                    await functions.http.delete("/api/favgroup/post/delete", {postID: item.post.postID, name: favgroup.name}, 
+                        session, setSessionFlag)
                     return setGroupFlag(true)
                 }
                 if (reorderState) return
@@ -173,6 +170,7 @@ const FavgroupPage: React.FunctionComponent = () => {
                     setActiveFavgroup(favgroup)
                 }, 200)
             }
+
             jsx.push(
                 <li key={item.post.postID} style={{marginRight: "20px", marginTop: "10px"}}>
                     <TinyImage className="group-thumbnail-img-outlined" image={item.image} live={item.live} height={300}
@@ -180,13 +178,15 @@ const FavgroupPage: React.FunctionComponent = () => {
                 </li>
             )
         }
-        if (!scroll) {
-            jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
-        }
         return (
-            <Reorder onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}
-            reorderId="group-reorder-container" className="group-image-container" disabled={!reorderState || deleteMode}
-            component="ul" holdTime={50} onReorder={reorder}>{jsx}</Reorder>
+            <>
+            <ReactSortable tag="ul" list={visibleItems} setList={syncList} animation={50}
+            disabled={!reorderState || deleteMode} className="group-image-container"
+            ghostClass="list-ghost" chosenClass="list-chosen" dragClass="list-drag">
+                {jsx}
+            </ReactSortable>
+            {!scroll ? <PageControls page={page} maxPage={maxPage} setPage={setPage}/> : null}
+            </>
         )
     }
 

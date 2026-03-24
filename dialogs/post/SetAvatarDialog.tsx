@@ -9,7 +9,7 @@ import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionA
 usePostDialogSelector, usePostDialogActions, useActiveActions, useLayoutSelector} from "../../store"
 import functions from "../../functions/Functions"
 import Carousel from "../../components/site/Carousel"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
 import ReactCrop, {makeAspectCrop, centerCrop, PixelCrop, PercentCrop} from "react-image-crop"
 import {GIFFrame} from "../../types/Types"
@@ -36,6 +36,7 @@ const SetAvatarDialog: React.FunctionComponent = (props) => {
     const [isAnimated, setIsAnimated] = useState(false)
     const ref = useRef<HTMLImageElement>(null)
     const previewRef = useRef<HTMLCanvasElement>(null)
+    const controls = useDragControls()
 
     const loadImages = async () => {
         if (!avatarID) return
@@ -55,9 +56,11 @@ const SetAvatarDialog: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (avatarID) {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "none"
             loadImages()
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
             setImage("")
             setOrder(1)
@@ -211,11 +214,11 @@ const SetAvatarDialog: React.FunctionComponent = (props) => {
     if (avatarID) {
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{width: "max-content", marginTop: "-25px", paddingLeft: "20px", paddingRight: "20px"}} onMouseEnter={() => setEnableDrag(false)} 
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" style={{width: "max-content", marginTop: "-25px", paddingLeft: "20px", paddingRight: "20px"}} onMouseEnter={() => setEnableDrag(false)} 
                 onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.sidebar.setAvatar}</span>
                         </div>
                         {images.length > 1 ? <div className="dialog-row-start" style={{width: "500px"}}>
@@ -250,8 +253,7 @@ const SetAvatarDialog: React.FunctionComponent = (props) => {
                         </> : null}
                         </> : null}
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

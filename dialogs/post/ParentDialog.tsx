@@ -10,7 +10,7 @@ useSessionActions, useFlagActions} from "../../store"
 import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
 
 const ParentDialog: React.FunctionComponent = (props) => {
@@ -26,13 +26,16 @@ const ParentDialog: React.FunctionComponent = (props) => {
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
+    const controls = useDragControls()
 
     useEffect(() => {
         if (childPostObj) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
             setParentID(childPostObj.post.parentID || "")
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
             setParentID("")
         }
@@ -94,17 +97,16 @@ const ParentDialog: React.FunctionComponent = (props) => {
         if (session.banned) {
             return (
                 <div className="dialog">
-                    <Draggable handle=".dialog-title-container">
-                    <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <div className="dialog-title-container">
+                    <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                    className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                                 <span className="dialog-title">{i18n.sidebar.addParent}</span>
                             </div>
                             <span className="dialog-ban-text">{i18n.dialogs.parent.banText}</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
                                 <span className="dialog-ban-button-text">←{i18n.buttons.back}</span>
                             </button>
-                        </div>
-                    </Draggable>
+                        </motion.div>
                 </div>
             )
         }
@@ -112,10 +114,10 @@ const ParentDialog: React.FunctionComponent = (props) => {
         if (permissions.isContributor(session)) {
             return (
                 <div className="dialog">
-                    <Draggable handle=".dialog-title-container">
-                    <div className="dialog-box" style={{width: "300px", marginTop: "-150px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                    className="dialog-box" style={{width: "300px", marginTop: "-150px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
-                            <div className="dialog-title-container">
+                            <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                                 <span className="dialog-title">{i18n.sidebar.addParent}</span>
                             </div>
                             <div className="dialog-row">
@@ -128,18 +130,17 @@ const ParentDialog: React.FunctionComponent = (props) => {
                                 <button onClick={() => click("accept")} className="dialog-button">{i18n.sort.parent}</button>
                             </div>
                         </div>
-                    </div>
-                    </Draggable>
+                    </motion.div>
                 </div>
             )
         }
 
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{width: "300px", marginTop: "-150px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" style={{width: "300px", marginTop: "-150px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.dialogs.parent.request}</span>
                         </div>
                         {submitted ? <>
@@ -165,8 +166,7 @@ const ParentDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.submitRequest}</button>
                         </div> </>}
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

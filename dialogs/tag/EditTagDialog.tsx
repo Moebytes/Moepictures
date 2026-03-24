@@ -9,7 +9,7 @@ import {useThemeSelector, useInteractionActions, useTagDialogSelector,
 useTagDialogActions, useSessionSelector, useSessionActions, useLayoutSelector} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import lewdIcon from "../../assets/icons/lewdgirl.png"
 import uploadIcon from "../../assets/svg/upload-arrow.svg"
 import xButton from "../../assets/svg/x-button.svg"
@@ -28,6 +28,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
+    const controls = useDragControls()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
@@ -38,8 +39,10 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (editTagObj) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [editTagObj])
@@ -195,10 +198,10 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     if (editTagObj?.failed === "implication") {
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.dialogs.editTag.request}</span>
                         </div>
                         <div className="dialog-row">
@@ -208,8 +211,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => close()} className="dialog-button">{i18n.buttons.ok}</button>
                         </div>
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }
@@ -217,10 +219,10 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     if (editTagObj?.failed) {
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.dialogs.editTag.title}</span>
                         </div>
                         <div className="dialog-row">
@@ -230,8 +232,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.ok}</button>
                         </div>
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }
@@ -310,17 +311,16 @@ const EditTagDialog: React.FunctionComponent = (props) => {
         if (session.banned) {
             return (
                 <div className="dialog">
-                    <Draggable handle=".dialog-title-container">
-                    <div className="dialog-box" style={{marginTop: "-30px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <div className="dialog-title-container">
+                    <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                    className="dialog-box" style={{marginTop: "-30px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                                 <span className="dialog-title">{i18n.dialogs.editTag.title}</span>
                             </div>
                             <span className="dialog-ban-text">{i18n.pages.edit.banText}</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
                                 <span className="dialog-ban-button-text">←{i18n.buttons.back}</span>
                             </button>
-                        </div>
-                    </Draggable>
+                    </motion.div>
                 </div>
             )
         }
@@ -328,10 +328,10 @@ const EditTagDialog: React.FunctionComponent = (props) => {
         if (permissions.isContributor(session)) {
             return (
                 <div className="dialog">
-                    <Draggable handle=".dialog-title-container">
-                    <div className="dialog-box" style={{marginTop: "-30px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                    className="dialog-box" style={{marginTop: "-30px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
-                            <div className="dialog-title-container">
+                            <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                                 <span className="dialog-title">{i18n.dialogs.editTag.title}</span>
                             </div>
                             {mainJSX()}
@@ -341,18 +341,17 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                                 <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.edit}</button>
                             </div>
                         </div>
-                    </div>
-                    </Draggable>
+                    </motion.div>
                 </div>
             )
         }
 
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{marginTop: "-30px", height: submitted ? "125px" : "max-content"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" style={{marginTop: "-30px", height: submitted ? "125px" : "max-content"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.dialogs.editTag.request}</span>
                         </div>
                         {submitted ? <>
@@ -371,8 +370,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.submitRequest}</button>
                         </div> </>}
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

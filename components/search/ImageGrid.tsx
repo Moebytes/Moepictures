@@ -4,7 +4,7 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useRef, useState, useMemo} from "react"
+import React, {useEffect, useRef, useState, useEffectEvent} from "react"
 import {useNavigate, useLocation} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSearchActions, useSearchSelector,
 useFlagActions, useInteractionActions, useCacheActions, useCacheSelector, useFlagSelector, useActiveActions,
@@ -103,7 +103,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const loadInitial = async (query?: string) => {
+    const loadInitial = useEffectEvent(async (query?: string) => {
         if (searchFlag) setSearchFlag(false)
         saveSearchSkip()
         if (!query) query = search
@@ -142,9 +142,9 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         if (!result.length) setNoResults(true)
         if (!search) document.title = i18n.title
         return result
-    }
+    })
 
-    const updateOffset = async (offset: number, query?: string) => {
+    const updateOffset = useEffectEvent(async (offset: number, query?: string) => {
         if (noResults) return []
         let result = [] as PostSearch[]
         if (isRandomSearch) {
@@ -160,7 +160,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         }
         skipRender = true
         return result
-    }
+    })
 
     const {items, visibleItems, page, setPage, maxPage, setSearchQuery, initItems, restructureItems, totalCount,
         setManagedPage, setManagedQuery, setManagedItems} = usePaginatedScroll({loadInitial, updateOffset, 

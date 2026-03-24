@@ -8,7 +8,7 @@ import React, {useEffect, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useCommentDialogSelector, useCommentDialogActions} from "../../store"
 import emojiSelect from "../../assets/svg/emoji-select.svg"
 import MiniTextBox, {MiniTextBoxRef} from "../../ui/MiniTextBox"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
 
 const EditCommentDialog: React.FunctionComponent = (props) => {
@@ -20,12 +20,15 @@ const EditCommentDialog: React.FunctionComponent = (props) => {
     const dialogRef = useRef<HTMLDivElement>(null)
     const textRef = useRef<HTMLTextAreaElement>(null)
     const textBoxRef = useRef<MiniTextBoxRef>(null)
+    const controls = useDragControls()
 
     useEffect(() => {
         if (editCommentID) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [editCommentID])
@@ -42,10 +45,11 @@ const EditCommentDialog: React.FunctionComponent = (props) => {
     if (editCommentID) {
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" ref={dialogRef} style={{width: "400px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" ref={dialogRef} style={{width: "400px"}} 
+                onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.dialogs.editComment.title}</span>
                         </div>
                         <MiniTextBox ref={textBoxRef} type="comment" height={140} text={editCommentText} setText={setEditCommentText} textRef={textRef} emojiRef={emojiRef}/>
@@ -60,8 +64,7 @@ const EditCommentDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.edit}</button>
                         </div>
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

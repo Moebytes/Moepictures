@@ -8,7 +8,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useMiscDialogActions, 
 useMiscDialogSelector, useSessionSelector} from "../../store"
 import functions from "../../functions/Functions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
 
 const LineartDialog: React.FunctionComponent = (props) => {
@@ -20,13 +20,16 @@ const LineartDialog: React.FunctionComponent = (props) => {
     const [running, setRunning] = useState(false)
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
+    const controls = useDragControls()
 
     useEffect(() => {
         if (lineartLink) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
             setRunning(false)
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [lineartLink])
@@ -54,17 +57,16 @@ const LineartDialog: React.FunctionComponent = (props) => {
         if (session.banned) {
             return (
                 <div className="dialog">
-                    <Draggable handle=".dialog-title-container">
-                    <div className="dialog-box" style={{width: "260px", height: "170px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <div className="dialog-title-container">
+                    <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                    className="dialog-box" style={{width: "260px", height: "170px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                                 <span className="dialog-title">{i18n.dialogs.lineart.title}</span>
                             </div>
                             <span className="dialog-ban-text">{i18n.dialogs.ocr.banText}</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
                                 <span className="dialog-ban-button-text">←{i18n.buttons.back}</span>
                             </button>
-                        </div>
-                    </Draggable>
+                    </motion.div>
                 </div>
             )
         }
@@ -72,28 +74,27 @@ const LineartDialog: React.FunctionComponent = (props) => {
         if (running) {
             return (
                 <div className="dialog">
-                    <Draggable handle=".dialog-title-container">
-                    <div className="dialog-box" style={{width: "260px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                    className="dialog-box" style={{width: "260px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
-                            <div className="dialog-title-container">
+                            <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                                 <span className="dialog-title">{i18n.dialogs.lineart.title}</span>
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center", alignItems: "center", height: "100%"}}>
                                 <span className="dialog-text">{i18n.dialogs.lineart.running}</span>
                             </div>
                         </div>
-                    </div>
-                    </Draggable>
+                    </motion.div>
                 </div>
             )
         }
 
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{width: "260px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" style={{width: "260px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.dialogs.lineart.title}</span>
                         </div>
                         <div className="dialog-row">
@@ -104,8 +105,7 @@ const LineartDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.yes}</button>
                         </div>
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

@@ -9,7 +9,7 @@ import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionA
 usePostDialogSelector, usePostDialogActions, useActiveActions, useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
 
 const ImageSourceDialog: React.FunctionComponent = () => {
@@ -25,10 +25,12 @@ const ImageSourceDialog: React.FunctionComponent = () => {
     const [directLink, setDirectLink] = useState("")
     const [altSource, setAltSource] = useState("")
     const [reason, setReason] = useState("")
+    const controls = useDragControls()
 
     useEffect(() => {
         if (imgSourceID) {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "none"
             if (imgSourceID.uploadImage) {
                 setDirectLink(imgSourceID.uploadImage.directLink || "")
                 setAltSource(imgSourceID.uploadImage.altSource || "")
@@ -38,6 +40,7 @@ const ImageSourceDialog: React.FunctionComponent = () => {
             }
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
             setAltSource("")
             setDirectLink("")
@@ -118,17 +121,16 @@ const ImageSourceDialog: React.FunctionComponent = () => {
         if (session.banned) {
             return (
                 <div className="dialog">
-                    <Draggable handle=".dialog-title-container">
-                    <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <div className="dialog-title-container">
+                    <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                    className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                                 <span className="dialog-title">{i18n.dialogs.imageSource.title}</span>
                             </div>
                             <span className="dialog-ban-text">{i18n.pages.edit.banText}</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
                                 <span className="dialog-ban-button-text">←{i18n.buttons.back}</span>
                             </button>
-                        </div>
-                    </Draggable>
+                        </motion.div>
                 </div>
             )
         }
@@ -136,11 +138,11 @@ const ImageSourceDialog: React.FunctionComponent = () => {
         if (imgSourceID.unverified || permissions.isContributor(session)) {
             return (
                 <div className="dialog">
-                    <Draggable handle=".dialog-title-container">
-                    <div className="dialog-box" style={{width: "480px", marginTop: "-25px", paddingLeft: "20px", paddingRight: "20px"}} onMouseEnter={() => setEnableDrag(false)} 
+                    <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                    className="dialog-box" style={{width: "480px", marginTop: "-25px", paddingLeft: "20px", paddingRight: "20px"}} onMouseEnter={() => setEnableDrag(false)} 
                     onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
-                            <div className="dialog-title-container">
+                            <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                                 <span className="dialog-title">{i18n.dialogs.imageSource.title}</span>
                             </div>
                             {mainJSX()}
@@ -149,19 +151,18 @@ const ImageSourceDialog: React.FunctionComponent = () => {
                                 <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.set}</button>
                             </div>
                         </div>
-                    </div>
-                    </Draggable>
+                    </motion.div>
                 </div>
             )
         }
 
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{width: "480px", marginTop: "-25px", paddingLeft: "20px", paddingRight: "20px"}} onMouseEnter={() => setEnableDrag(false)} 
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" style={{width: "480px", marginTop: "-25px", paddingLeft: "20px", paddingRight: "20px"}} onMouseEnter={() => setEnableDrag(false)} 
                 onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.dialogs.imageSource.request}</span>
                         </div>
                         {submitted ? <>
@@ -180,8 +181,7 @@ const ImageSourceDialog: React.FunctionComponent = () => {
                         </div>
                         </>}
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

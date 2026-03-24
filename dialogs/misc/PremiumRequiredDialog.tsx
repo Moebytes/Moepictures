@@ -8,7 +8,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useMiscDialogSelector, useMiscDialogActions} from "../../store"
 import functions from "../../functions/Functions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import premiumStar from "../../assets/svg/premium-star.svg"
 import "../dialog.less"
 
@@ -20,6 +20,7 @@ const PremiumRequiredDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
+    const controls = useDragControls()
 
     const getPremiumIcon = (icon: string) => {
         return functions.color.colorizeSVG(icon, "--premiumColor")
@@ -28,8 +29,10 @@ const PremiumRequiredDialog: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (premiumRequired) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [premiumRequired])
@@ -51,10 +54,10 @@ const PremiumRequiredDialog: React.FunctionComponent = (props) => {
     if (premiumRequired) {
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{width: "355px", height: "220px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" style={{width: "355px", height: "220px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title" style={{color: "var(--premiumColor)"}}>{i18n.dialogs.premium.title}</span>
                             <img className="dialog-title-img" src={getPremiumIcon(premiumStar)}/>
                         </div>
@@ -66,8 +69,7 @@ const PremiumRequiredDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => click("accept")} className="dialog-button" style={{backgroundColor: "#ff3bd7"}}>{i18n.buttons.premiumPage}</button>
                         </div>
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

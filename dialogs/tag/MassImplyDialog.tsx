@@ -8,7 +8,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions,
 useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
 import "../dialog.less"
 
@@ -22,14 +22,17 @@ const MassImplyDialog: React.FunctionComponent = (props) => {
     const {setSessionFlag} = useSessionActions()
     const [wildcard, setWildcard] = useState("")
     const [implyTo, setImplyTo] = useState("")
+    const controls = useDragControls()
 
     useEffect(() => {
         if (massImplyDialog) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
             setWildcard("")
             setImplyTo("")
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [massImplyDialog])
@@ -55,10 +58,10 @@ const MassImplyDialog: React.FunctionComponent = (props) => {
         if (permissions.isAdmin(session)) {
             return (
                 <div className="dialog">
-                    <Draggable handle=".dialog-title-container">
-                    <div className="dialog-box" style={{width: "360px", height: "300px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                    className="dialog-box" style={{width: "360px", height: "300px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
-                            <div className="dialog-title-container">
+                            <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                                 <span className="dialog-title">{i18n.dialogs.massImply.title}</span>
                             </div>
                             <div className="dialog-row">
@@ -77,8 +80,7 @@ const MassImplyDialog: React.FunctionComponent = (props) => {
                                 <button style={{backgroundColor: "var(--buttonBG)"}} onClick={() => click("accept")} className="dialog-button">{i18n.dialogs.massImply.title}</button>
                             </div>
                         </div>
-                    </div>
-                    </Draggable>
+                    </motion.div>
                 </div>
             )
         }

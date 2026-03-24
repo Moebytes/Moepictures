@@ -8,7 +8,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 useTagDialogSelector, useTagDialogActions} from "../../store"
 import functions from "../../functions/Functions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
 import "../dialog.less"
 
@@ -21,14 +21,17 @@ const BlockedTagsDialog: React.FunctionComponent = (props) => {
     const {setSessionFlag} = useSessionActions()
     const [tagInput, setTagInput] = useState("")
     const [blockedTags, setBlockedTags] = useState([] as string[])
+    const controls = useDragControls()
 
     useEffect(() => {
         if (blockedTagsDialog) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
             updateBlockedTags()
             setTagInput("")
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [blockedTagsDialog])
@@ -75,10 +78,10 @@ const BlockedTagsDialog: React.FunctionComponent = (props) => {
         if (permissions.isAdmin(session)) {
             return (
                 <div className="dialog">
-                    <Draggable handle=".dialog-title-container">
-                    <div className="dialog-box" style={{width: "360px", height: "max-content"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                    className="dialog-box" style={{width: "360px", height: "max-content"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
-                            <div className="dialog-title-container">
+                            <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                                 <span className="dialog-title">{i18n.dialogs.blockedTags.title}</span>
                             </div>
                             <div className="dialog-center-row">
@@ -92,8 +95,7 @@ const BlockedTagsDialog: React.FunctionComponent = (props) => {
                                 <button onClick={() => setBlockedTagsDialog(false)} className="dialog-button">{i18n.buttons.back}</button>
                             </div>
                         </div>
-                    </div>
-                    </Draggable>
+                    </motion.div>
                 </div>
             )
         }

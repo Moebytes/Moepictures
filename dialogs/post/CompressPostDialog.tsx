@@ -9,7 +9,7 @@ import {useInteractionActions, useSessionSelector, useSessionActions,
 usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
 import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
 import radioButton from "../../assets/svg/radiobutton.svg"
 import radioButtonChecked from "../../assets/svg/radiobutton-checked.svg"
@@ -32,6 +32,7 @@ const CompressPostDialog: React.FunctionComponent = (props) => {
     const [maxUpscaledDimension, setMaxUpscaledDimension] = useState("8000")
     const [original, setOriginal] = useState(true)
     const [upscaled, setUpscaled] = useState(true)
+    const controls = useDragControls()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
@@ -42,9 +43,11 @@ const CompressPostDialog: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (compressPostID) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
             setFormat(compressPostID.post.type === "animation" ? "webp" : "jpg" as ImageFormat)
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [compressPostID])
@@ -70,10 +73,10 @@ const CompressPostDialog: React.FunctionComponent = (props) => {
         if (permissions.isMod(session)) {
             return (
                 <div className="dialog">
-                    <Draggable handle=".dialog-title-container">
-                    <div className="dialog-box" style={{width: "300px", height: "290px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                    className="dialog-box" style={{width: "300px", height: "290px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
-                            <div className="dialog-title-container">
+                            <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                                 <span className="dialog-title">{i18n.dialogs.compress.title}</span>
                             </div>
                             <div className="dialog-row">
@@ -113,8 +116,7 @@ const CompressPostDialog: React.FunctionComponent = (props) => {
                                 <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.compress}</button>
                             </div>
                         </div>
-                    </div>
-                    </Draggable>
+                    </motion.div>
                 </div>
             )
         }

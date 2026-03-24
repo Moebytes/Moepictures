@@ -8,7 +8,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
 useSearchSelector, useSearchActions, useLayoutSelector} from "../../store"
 import functions from "../../functions/Functions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
 import xIcon from "../../assets/svg/x-button.svg"
 
@@ -75,6 +75,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
     const seriesRef = useRef<HTMLInputElement>(null!)
     const metaRef = useRef<HTMLInputElement>(null!)
     const tagRef = useRef<HTMLDivElement>(null!)
+    const controls = useDragControls()
 
     const reset = () => {
         setArtists("")
@@ -101,8 +102,10 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (showBulkTagEditDialog) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
             reset()
         }
@@ -520,10 +523,10 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
     if (showBulkTagEditDialog) {
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.dialogs.bulkTagEdit.title}</span>
                         </div>
                         {mainJSX()}
@@ -533,8 +536,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.bulkEdit}</button>
                         </div>
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

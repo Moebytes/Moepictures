@@ -7,7 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useMiscDialogSelector, useMiscDialogActions, useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
 
 const PageDialog: React.FunctionComponent = (props) => {
@@ -17,13 +17,16 @@ const PageDialog: React.FunctionComponent = (props) => {
     const {setShowPageDialog} = useMiscDialogActions()
     const {setPageFlag} = useFlagActions()
     const [pageField, setPageField] = useState("")
+    const controls = useDragControls()
 
     useEffect(() => {
         if (showPageDialog) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
             setPageField("")
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [showPageDialog])
@@ -43,10 +46,10 @@ const PageDialog: React.FunctionComponent = (props) => {
     if (showPageDialog) {
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{width: "250px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" style={{width: "250px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.dialogs.page.title}</span>
                         </div>
                         <div className="dialog-row">
@@ -58,8 +61,7 @@ const PageDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.go}</button>
                         </div>
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

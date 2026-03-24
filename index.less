@@ -3,9 +3,6 @@
  * Copyright © 2026 Moebytes <moebytes.com>                  *
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
- 
-@import "node_modules/bootstrap/dist/css/bootstrap.min.css";
-@import "node_modules/react-image-crop/dist/ReactCrop.css";
 
 @font-face {
     font-family: "GenEi M Gothic v2";
@@ -583,6 +580,15 @@ img {
 	right: 100%;
 	width: 100%;
 	height: 2px;
+}
+
+.list-ghost {
+  opacity: 0;
+}
+
+.list-drag {
+  opacity: 1;
+  z-index: 1000;
 }
 
 #particles {

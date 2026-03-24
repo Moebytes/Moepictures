@@ -12,7 +12,7 @@ import permissions from "../../structures/Permissions"
 import historyIcon from "../../assets/svg/history-thin.svg"
 import uploadIcon from "../../assets/svg/upload-arrow.svg"
 import Carousel from "../../components/site/Carousel"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import {ThumbnailUpdate} from "../../types/PostTypes"
 import "../dialog.less"
 
@@ -28,6 +28,7 @@ const EditThumbnailDialog: React.FunctionComponent = (props) => {
     const [images, setImages] = useState([] as string[])
     const [thumbnail, setThumbnail] = useState("")
     const [order, setOrder] = useState(1)
+    const controls = useDragControls()
 
     const loadImages = async () => {
         if (!editThumbnailID) return
@@ -47,9 +48,11 @@ const EditThumbnailDialog: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (editThumbnailID) {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "none"
             loadImages()
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
             setThumbnail("")
             setOrder(1)
@@ -110,11 +113,11 @@ const EditThumbnailDialog: React.FunctionComponent = (props) => {
     if (editThumbnailID) {
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{width: "max-content", marginTop: "-25px", paddingLeft: "20px", paddingRight: "20px"}} onMouseEnter={() => setEnableDrag(false)} 
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" style={{width: "max-content", marginTop: "-25px", paddingLeft: "20px", paddingRight: "20px"}} onMouseEnter={() => setEnableDrag(false)} 
                 onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.sidebar.editThumbnail}</span>
                         </div>
                         <div className="dialog-row-start" style={{marginTop: "10px", width: "100%"}}>
@@ -140,8 +143,7 @@ const EditThumbnailDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.update}</button>
                         </div>
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

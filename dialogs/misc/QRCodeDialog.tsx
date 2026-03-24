@@ -8,7 +8,8 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useMiscDialogSelector, useMiscDialogActions} from "../../store"
 import functions from "../../functions/Functions"
-import Draggable from "react-draggable"
+
+import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
 
 const QRCodeDialog: React.FunctionComponent = (props) => {
@@ -18,12 +19,15 @@ const QRCodeDialog: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {qrcodeImage} = useMiscDialogSelector()
     const {setQRCodeImage} = useMiscDialogActions()
+    const controls = useDragControls()
 
     useEffect(() => {
         if (qrcodeImage) {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "none"
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [qrcodeImage])
@@ -35,11 +39,11 @@ const QRCodeDialog: React.FunctionComponent = (props) => {
     if (qrcodeImage) {
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{width: "250px"}} onMouseEnter={() => setEnableDrag(false)} 
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" style={{width: "250px"}} onMouseEnter={() => setEnableDrag(false)} 
                 onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.dialogs.qrcode.title}</span>
                         </div>
                         <div className="dialog-row" style={{justifyContent: "center"}}>
@@ -49,8 +53,7 @@ const QRCodeDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.ok}</button>
                         </div>
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

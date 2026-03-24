@@ -9,7 +9,7 @@ import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionA
 useTagDialogSelector, useTagDialogActions, useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import checkbox from "../../assets/svg/checkbox.svg"
 import checkboxChecked from "../../assets/svg/checkbox-checked.svg"
 import {TagType} from "../../types/Types"
@@ -28,6 +28,7 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
+    const controls = useDragControls()
 
     const getArtistIcon = (icon: string) => {
         return functions.color.colorizeSVG(icon, "--artistTagColor")
@@ -72,9 +73,11 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (categorizeTag) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
             setCategory(categorizeTag.type)
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [categorizeTag])
@@ -164,17 +167,16 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
         if (session.banned) {
             return (
                 <div className="dialog">
-                    <Draggable handle=".dialog-title-container">
-                    <div className="dialog-box" style={{marginTop: "-30px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <div className="dialog-title-container">
+                    <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                    className="dialog-box" style={{marginTop: "-30px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                                 <span className="dialog-title">{i18n.dialogs.categorizeTag.title}</span>
                             </div>
                             <span className="dialog-ban-text">{i18n.dialogs.categorizeTag.banText}</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
                                 <span className="dialog-ban-button-text">←{i18n.buttons.back}</span>
                             </button>
-                        </div>
-                    </Draggable>
+                    </motion.div>
                 </div>
             )
         }
@@ -182,11 +184,11 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
         if (permissions.isContributor(session)) {
             return (
                 <div className="dialog">
-                    <Draggable handle=".dialog-title-container">
-                    <div className="dialog-box" style={{width: "220px", height: "max-content", paddingLeft: "20px", paddingRight: "20px"}} 
+                    <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                    className="dialog-box" style={{width: "220px", height: "max-content", paddingLeft: "20px", paddingRight: "20px"}} 
                         onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
-                            <div className="dialog-title-container">
+                            <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                                 <span className="dialog-title">{i18n.dialogs.categorizeTag.title}</span>
                             </div>
                             {mainJSX()}
@@ -196,19 +198,18 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
                                 <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.categorize}</button>
                             </div>
                         </div>
-                    </div>
-                    </Draggable>
+                    </motion.div>
                 </div>
             )
         }
 
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{marginTop: "-30px", width: "270px", height: submitted ? "165px" : "max-content", paddingLeft: "20px", 
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" style={{marginTop: "-30px", width: "270px", height: submitted ? "165px" : "max-content", paddingLeft: "20px", 
                     paddingRight: "20px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.dialogs.categorizeTag.request}</span>
                         </div>
                         {submitted ? <>
@@ -231,8 +232,7 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.submitRequest}</button>
                         </div> </>}
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

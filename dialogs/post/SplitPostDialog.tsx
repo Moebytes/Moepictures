@@ -11,7 +11,7 @@ import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import checkbox from "../../assets/svg/checkbox.svg"
 import checkboxChecked from "../../assets/svg/checkbox-checked.svg"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
 
 const SplitPostDialog: React.FunctionComponent = (props) => {
@@ -24,6 +24,7 @@ const SplitPostDialog: React.FunctionComponent = (props) => {
     const {setSplitPostID} = usePostDialogActions()
     const [currentOnly, setCurrentOnly] = useState(false)
     const [mergeSubsequent, setMergeSubsequent] = useState(false)
+    const controls = useDragControls()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
@@ -34,8 +35,10 @@ const SplitPostDialog: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (splitPostID) {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "none"
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [splitPostID])
@@ -76,11 +79,11 @@ const SplitPostDialog: React.FunctionComponent = (props) => {
         if (splitPostID) {
             return (
                 <div className="dialog">
-                    <Draggable handle=".dialog-title-container">
-                    <div className="dialog-box" style={{width: "320px"}} onMouseEnter={() => setEnableDrag(false)} 
+                    <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                    className="dialog-box" style={{width: "320px"}} onMouseEnter={() => setEnableDrag(false)} 
                     onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
-                            <div className="dialog-title-container">
+                            <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                                 <span className="dialog-title">{i18n.dialogs.splitPost.title}</span>
                             </div>
                             <div className="dialog-row">
@@ -99,8 +102,7 @@ const SplitPostDialog: React.FunctionComponent = (props) => {
                                 <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.split}</button>
                             </div>
                         </div>
-                    </div>
-                    </Draggable>
+                    </motion.div>
                 </div>
             )
         }

@@ -37,6 +37,13 @@ export default defineConfig({
         pluginNodePolyfill(),
         pluginTypeCheck({enable: typecheck})
     ],
+    server: {
+        port: 8082,
+        middlewareMode: true
+    },
+    dev: {
+        writeToDisk: true
+    },
     source: {
         entry: {index: "./index.tsx"}
     },

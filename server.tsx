@@ -18,6 +18,8 @@ import rateLimit from "express-rate-limit"
 import {renderToString} from "react-dom/server"
 import {StaticRouter as Router} from "react-router-dom"
 import {Provider} from "react-redux"
+import {createRsbuild} from "@rsbuild/core"
+import rsbuildConfig from "./rsbuild.client.ts"
 import store from "./store"
 import permissions from "./structures/Permissions"
 import functions from "./functions/Functions"
@@ -191,7 +193,7 @@ let encrypted = [...originalEncrypted, ...originalEncrypted.map((folder) => `${f
 const lastModified = new Date().toUTCString()
 
 for (let i = 0; i < folders.length; i++) {
-  app.get(`/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
+  app.get(`/${folders[i]}/{*page}`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const referer = req.headers.referer || req.headers.referrer as string
       if (!serverFunctions.util.isAllowedReferer(referer)) return res.status(403).end()
@@ -266,7 +268,7 @@ for (let i = 0; i < folders.length; i++) {
     }
   })
 
-  app.get(`/thumbnail/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
+  app.get(`/thumbnail/${folders[i]}/{*page}`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const referer = req.headers.referer || req.headers.referrer as string
       if (!serverFunctions.util.isAllowedReferer(referer)) return res.status(403).end()
@@ -335,7 +337,7 @@ for (let i = 0; i < folders.length; i++) {
     }
   })
   
-  app.get(`/unverified/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
+  app.get(`/unverified/${folders[i]}/{*page}`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const referer = req.headers.referer || req.headers.referrer as string
       if (!serverFunctions.util.isAllowedReferer(referer)) return res.status(403).end()
@@ -384,7 +386,7 @@ for (let i = 0; i < folders.length; i++) {
     }
   })
 
-  app.get(`/thumbnail/unverified/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
+  app.get(`/thumbnail/unverified/${folders[i]}/{*page}`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const referer = req.headers.referer || req.headers.referrer as string
       if (!serverFunctions.util.isAllowedReferer(referer)) return res.status(403).end()
@@ -550,7 +552,7 @@ app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response,
   }
 })
 
-app.get("/*", async (req: Request, res: Response) => {
+app.get("/{*page}", async (req: Request, res: Response) => {
   try {
     if (/\.\w+$/.test(req.path) && process.env.TESTING !== "yes") {
       return res.status(404).json({message: "Path not found."})
@@ -777,8 +779,8 @@ const runDaily = async () => {
   await deleteQueuedUnverifiedPosts()
   await deleteQueuedUsers()
   await pruneEmptyTags()
-  await sql.user.pruneAnonSessions()
-  await sql.user.pruneExpiredSessions()
+  await sql.user.pruneAnonSessions().catch(() => null)
+  await sql.user.pruneExpiredSessions().catch(() => null)
 
 }
 
@@ -787,7 +789,21 @@ const run = async () => {
   runDaily()
   setInterval(runDaily, 24 * 60 * 60 * 1000)
   let port = process.env.PORT || 8082
-  app.listen(port, "0.0.0.0", () => console.log(`Started the web server! http://localhost:${port}`))
+
+  if (process.env.TESTING === "yes") {
+    const rsbuild = await createRsbuild({rsbuildConfig})
+    const rsbuildServer = await rsbuild.createDevServer()
+    app.use(rsbuildServer.middlewares)
+
+    app.listen(port, async () => {
+      console.log(`Started the dev server! http://localhost:${port}`)
+      await rsbuildServer.afterListen()
+    })
+  } else {
+    app.listen(port, "0.0.0.0", () => {
+      console.log(`Started the web server! http://localhost:${port}`)
+    })
+  }
 }
 
 run()

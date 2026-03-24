@@ -7,7 +7,7 @@
 import nodemailer from "nodemailer"
 import {Request, Response, NextFunction} from "express"
 import sql from "../sql/SQLQuery"
-import functions from "../functions/Functions"
+import {ipKeyGenerator} from "express-rate-limit"
 import encryption from "../structures/Encryption"
 import permissions from "../structures/Permissions"
 import {render} from "@react-email/components"
@@ -25,7 +25,7 @@ import {Attachment} from "../types/Types"
 const csrf = new CSRF()
 
 export const keyGenerator = (req: Request, res: Response) => {
-    return req.session.username || req.ip || ""
+    return req.session.username || ipKeyGenerator(req.ip ?? "")
 }
 
 export const handler = (req: Request, res: Response) => {

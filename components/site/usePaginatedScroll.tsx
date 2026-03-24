@@ -4,7 +4,7 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import {useEffect, useState, useRef, useMemo, useCallback} from "react"
+import {useEffect, useState, useRef, useMemo, useEffectEvent} from "react"
 import {useNavigate, useLocation} from "react-router-dom"
 import {useSearchSelector, useSearchActions, useInteractionActions} from "../../store"
 import functions from "../../functions/Functions"
@@ -139,7 +139,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
         if (managedQuery !== null) setSearchQuery(managedQuery)
     }, [managedPage, managedQuery])
 
-    const updateItems = async (forceOffset?: number, queryOverride?: string) => {
+    const updateItems = useEffectEvent(async (forceOffset?: number, queryOverride?: string) => {
         if (ended || updatingRef.current) return
 
         updatingRef.current = true
@@ -181,7 +181,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
 
         if (result.length < limit) setEnded(true)
         updatingRef.current = false
-    }
+    })
 
     useEffect(() => {
         if (scroll) return

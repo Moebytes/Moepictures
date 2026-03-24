@@ -8,7 +8,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSearchDialogSelector, useSearchDialogActions, useSessionSelector, 
 useSessionActions, useSearchSelector} from "../../store"
 import functions from "../../functions/Functions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
 import "../dialog.less"
@@ -31,6 +31,7 @@ const SaveSearchDialog: React.FunctionComponent = (props) => {
     const [tags, setTags] = useState("")
     const errorRef = useRef<HTMLSpanElement>(null!)
     const tagRef = useRef<HTMLDivElement>(null!)
+    const controls = useDragControls()
 
     useEffect(() => {
         const logPosition = (event: MouseEvent) => {
@@ -60,8 +61,10 @@ const SaveSearchDialog: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (saveSearchDialog) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
         initItems()
@@ -121,10 +124,10 @@ const SaveSearchDialog: React.FunctionComponent = (props) => {
     if (saveSearchDialog) {
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{marginTop: "-30px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" style={{marginTop: "-30px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.sidebar.saveSearch}</span>
                         </div>
                         <div className="dialog-row">
@@ -144,8 +147,7 @@ const SaveSearchDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.save}</button>
                         </div>
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

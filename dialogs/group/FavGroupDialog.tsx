@@ -13,7 +13,7 @@ import radioButton from "../../assets/svg/radiobutton.svg"
 import radioButtonChecked from "../../assets/svg/radiobutton-checked.svg"
 import deleteIcon from "../../assets/svg/delete.svg"
 import lockIcon from "../../assets/svg/lock.svg"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import {Favgroup} from "../../types/Types"
 import "../dialog.less"
 
@@ -30,6 +30,7 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
     const [favGroups, setFavGroups] = useState([] as Favgroup[])
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
+    const controls = useDragControls()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
@@ -63,9 +64,11 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (favGroupID) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
             updateFavGroups()
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [favGroupID])
@@ -108,10 +111,10 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
     if (favGroupID) {
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{width: "350px", marginTop: "-150px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" style={{width: "350px", marginTop: "-150px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.dialogs.favgroup.title}</span>
                         </div>
                         <div className="dialog-row">
@@ -132,8 +135,7 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.add}</button>
                         </div>
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

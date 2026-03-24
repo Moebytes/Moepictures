@@ -16,7 +16,7 @@ import MiniTextBox, {MiniTextBoxRef} from "../../ui/MiniTextBox"
 import lewdIcon from "../../assets/icons/lewdgirl.png"
 import radioButton from "../../assets/svg/radiobutton.svg"
 import radioButtonChecked from "../../assets/svg/radiobutton-checked.svg"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
 
 const SendMessageDialog: React.FunctionComponent = (props) => {
@@ -36,6 +36,7 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
     const textBoxRef = useRef<MiniTextBoxRef>(null)
     const navigate = useNavigate()
+    const controls = useDragControls()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
@@ -46,9 +47,11 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (dmTarget) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
             setRecipients(dmTarget)
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
             setRecipients("")
         }
@@ -104,10 +107,10 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
     if (dmTarget) {
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" ref={dialogRef} style={{width: "500px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" ref={dialogRef} style={{width: "500px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.labels.sendMessage}</span>
                         </div>
                         <div className="dialog-row">
@@ -139,8 +142,7 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.send}</button>
                         </div>
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

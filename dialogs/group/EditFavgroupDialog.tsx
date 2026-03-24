@@ -9,7 +9,7 @@ import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector,
 useSessionActions, useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import radioButton from "../../assets/svg/radiobutton.svg"
 import radioButtonChecked from "../../assets/svg/radiobutton-checked.svg"
 import "../dialog.less"
@@ -27,6 +27,7 @@ const EditFavgroupDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
+    const controls = useDragControls()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
@@ -37,10 +38,12 @@ const EditFavgroupDialog: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (editFavGroupObj) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
             setName(editFavGroupObj.name)
             setIsPrivate(editFavGroupObj.private)
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [editFavGroupObj])
@@ -72,10 +75,10 @@ const EditFavgroupDialog: React.FunctionComponent = (props) => {
     if (editFavGroupObj) {
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box"style={{width: "350px", marginTop: "-150px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box"style={{width: "350px", marginTop: "-150px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.dialogs.editFavgroup.title}</span>
                         </div>
                         <div className="dialog-row">
@@ -95,8 +98,7 @@ const EditFavgroupDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.edit}</button>
                         </div>
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

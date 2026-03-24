@@ -4,10 +4,10 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
+import React, {useEffect, useState} from "react"
 import {useNavigate, useLocation} from "react-router-dom"
-import {useSessionSelector, useSessionActions, useCacheActions, useFlagActions} from "../../store"
-import {HashLink as Link} from "react-router-hash-link"
+import {useSessionSelector, useSessionActions, useCacheActions, useFlagActions,
+useActiveSelector} from "../../store"
 import functions from "../../functions/Functions"
 import {Post, Note} from "../../types/Types"
 import "./styles/draganddrop.less"
@@ -18,6 +18,7 @@ let timeout = null as any
 const DragAndDrop: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
+    const {reorderState} = useActiveSelector()
     const {setUploadDropFiles, serializeFile} = useCacheActions()
     const {setImageSearchFlag, setPasteNoteFlag} = useFlagActions()
     const [visible, setVisible] = useState(false)
@@ -160,6 +161,8 @@ const DragAndDrop: React.FunctionComponent = (props) => {
         const files = event.dataTransfer.files
         uploadFiles(Array.from(files))
     }
+
+    if (reorderState) return null
 
     return (
         <div className="dragdrop" style={{display: visible ? "flex" : "none"}}>

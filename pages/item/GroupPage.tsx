@@ -8,7 +8,7 @@ import React, {useEffect, useState} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, 
 useFlagSelector, useCacheActions, useGroupDialogActions, useSearchActions,
-useGroupDialogSelector} from "../../store"
+useGroupDialogSelector, useActiveSelector} from "../../store"
 import {useNavigate, useParams, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -23,7 +23,7 @@ import groupAdd from "../../assets/svg/add.svg"
 import groupEdit from "../../assets/svg/edit.svg"
 import groupRemap from "../../assets/svg/remap.svg"
 import groupDelete from "../../assets/svg/delete.svg"
-import Reorder from "react-reorder"
+import {ReactSortable} from "react-sortablejs"
 import historyIcon from "../../assets/svg/history-thin.svg"
 import currentIcon from "../../assets/svg/current.svg"
 import scrollIcon from "../../assets/svg/scroll.svg"
@@ -40,7 +40,8 @@ const GroupPage: React.FunctionComponent = () => {
     const {siteHue, siteLightness, siteSaturation, i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
-    const {setHeaderText, setSidebarText, setActiveGroup, setActiveDropdown} = useActiveActions()
+    const {reorderState} = useActiveSelector()
+    const {setHeaderText, setSidebarText, setActiveGroup, setActiveDropdown, setReorderState} = useActiveActions()
     const {groupFlag} = useFlagSelector()
     const {setGroupFlag} = useFlagActions()
     const {session} = useSessionSelector()
@@ -52,10 +53,10 @@ const GroupPage: React.FunctionComponent = () => {
     const {setSearch, setSearchFlag, setScroll} = useSearchActions()
     const {revertGroupHistoryID, revertGroupHistoryFlag} = useGroupDialogSelector()
     const {setNavigationPosts} = useCacheActions()
-    const [reorderState, setReorderState] = useState(false)
     const [deleteMode, setDeleteMode] = useState(false)
     const [historyID, setHistoryID] = useState(null as string | null)
     const [group, setGroup] = useState(null as GroupPosts | null)
+    const [listItems, setListItems] = useState([] as {id: number, item: GroupItem, jsx: React.ReactElement}[])
     const navigate = useNavigate()
     const location = useLocation()
     const {group: slug} = useParams() as {group: string}
@@ -144,31 +145,27 @@ const GroupPage: React.FunctionComponent = () => {
             initItems()
         }
     }, [group, ratingType, session])
-    
-    const reorder = (event: React.MouseEvent, from: number, to: number) => {
+
+    const syncList = (newList: GroupItem[]) => {
+        setVisible(newList)
+
         const baseOffset = scroll ? 0 : (page - 1) * pageAmount
 
         setItems((prev) => {
-            const newState = [...prev]
-            const item = newState.splice(baseOffset + from, 1)[0]
-            newState.splice(baseOffset + to, 0, item)
-            return newState
-        })
-
-        setVisible((prev) => {
-            const newState = [...prev]
-            const item = newState.splice(baseOffset + from, 1)[0]
-            newState.splice(baseOffset + to, 0, item)
-            return newState
+            const updated = [...prev]
+            updated.splice(baseOffset, newList.length, ...newList)
+            return updated
         })
     }
 
     const groupImagesJSX = () => {
         let jsx = [] as React.ReactElement[]
         if (!group) return jsx
+
         for (let i = 0; i < visibleItems.length; i++) {
             const item = visibleItems[i]
             if (!item) continue
+
             const openPost = async (event: React.MouseEvent) => {
                 if (deleteMode) {
                     return setDeleteGroupPostObj({postID: item.post.postID, group})
@@ -180,19 +177,23 @@ const GroupPage: React.FunctionComponent = () => {
                     setActiveGroup(group)
                 }, 200)
             }
+
             jsx.push(
                 <li key={item.id} style={{marginRight: "20px", marginTop: "10px"}}>
-                    <GroupThumbnail image={item.image} live={item.live} onClick={openPost} style={{cursor: reorderState ? (deleteMode ? "crosshair" : "move") : "pointer"}}/>
+                    <GroupThumbnail image={item.image} live={item.live} onClick={openPost} 
+                    style={{cursor: reorderState ? (deleteMode ? "crosshair" : "move") : "pointer"}}/>
                 </li>
             )
         }
-        if (!scroll) {
-            jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
-        }
         return (
-            <Reorder onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}
-            reorderId="group-reorder-container" className="group-image-container" disabled={!reorderState || deleteMode}
-            component="ul" holdTime={50} onReorder={reorder}>{jsx}</Reorder>
+            <>
+            <ReactSortable tag="ul" list={visibleItems} setList={syncList} animation={50}
+            disabled={!reorderState || deleteMode} className="group-image-container"
+            ghostClass="list-ghost" chosenClass="list-chosen" dragClass="list-drag">
+                {jsx}
+            </ReactSortable>
+            {!scroll ? <PageControls page={page} maxPage={maxPage} setPage={setPage}/> : null}
+            </>
         )
     }
 

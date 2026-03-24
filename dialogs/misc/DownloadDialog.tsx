@@ -8,7 +8,7 @@ import React, {useEffect, useState} from "react"
 import {useThemeSelector, useInteractionActions, useMiscDialogSelector, useMiscDialogActions,
 useFlagSelector, useFlagActions, useCacheSelector, useSearchSelector} from "../../store"
 import functions from "../../functions/Functions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
 
 const DownloadDialog: React.FunctionComponent = (props) => {
@@ -22,6 +22,7 @@ const DownloadDialog: React.FunctionComponent = (props) => {
     const {setDownloadIDs, setDownloadFlag} = useFlagActions()
     const [offsetField, setOffsetField] = useState("")
     const [amountField, setAmountField] = useState("")
+    const controls = useDragControls()
 
     useEffect(() => {
         setTimeout(() => {
@@ -49,8 +50,10 @@ const DownloadDialog: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (showDownloadDialog) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [showDownloadDialog])
@@ -84,10 +87,10 @@ const DownloadDialog: React.FunctionComponent = (props) => {
     if (showDownloadDialog) {
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{width: "250px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" style={{width: "250px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.buttons.download}</span>
                         </div>
                         <div className="dialog-row">
@@ -103,8 +106,7 @@ const DownloadDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.download}</button>
                         </div>
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

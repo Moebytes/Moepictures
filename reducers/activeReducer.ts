@@ -23,7 +23,8 @@ const activeSlice = createSlice({
         helpTab: "help",
         modState: "posts",
         actionBanner: "",
-        newsBanner: null as Banner | null
+        newsBanner: null as Banner | null,
+        reorderState: false
     },
     reducers: {
         setActiveDropdown: (state, action) => {state.activeDropdown = action.payload},
@@ -37,14 +38,15 @@ const activeSlice = createSlice({
         setHelpTab: (state, action) => {state.helpTab = action.payload},
         setModState: (state, action) => {state.modState = action.payload},
         setActionBanner: (state, action) => {state.actionBanner = action.payload},
-        setNewsBanner: (state, action) => {state.newsBanner = action.payload}
+        setNewsBanner: (state, action) => {state.newsBanner = action.payload},
+        setReorderState: (state, action) => {state.reorderState = action.payload}
     }    
 })
 
 const {
     setActiveDropdown, setFilterDropActive, setActiveGroup, setActiveFavgroup,
     setHeaderText, setSidebarText, setQuoteText, setHelpTab, setModState,
-    setActionBanner, setNewsBanner, setShowMusicFilters
+    setActionBanner, setNewsBanner, setShowMusicFilters, setReorderState
 } = activeSlice.actions
 
 export const useActiveSelector = () => {
@@ -61,7 +63,8 @@ export const useActiveSelector = () => {
         helpTab: selector((state) => state.active.helpTab),
         modState: selector((state) => state.active.modState),
         actionBanner: selector((state) => state.active.actionBanner),
-        newsBanner: selector((state) => state.active.newsBanner)
+        newsBanner: selector((state) => state.active.newsBanner),
+        reorderState: selector((state) => state.active.reorderState)
     }
 }
 
@@ -79,7 +82,8 @@ export const useActiveActions = () => {
         setHelpTab: (state: string) => dispatch(setHelpTab(state)),
         setModState: (state: string) => dispatch(setModState(state)),
         setActionBanner: (state: string | null) => dispatch(setActionBanner(state)),
-        setNewsBanner: (state: Banner | null) => dispatch(setNewsBanner(state))
+        setNewsBanner: (state: Banner | null) => dispatch(setNewsBanner(state)),
+        setReorderState: (state: boolean) => dispatch(setReorderState(state))
     }
 }
 

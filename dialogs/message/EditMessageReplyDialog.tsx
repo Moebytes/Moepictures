@@ -8,7 +8,7 @@ import React, {useEffect, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useMessageDialogSelector, 
 useMessageDialogActions, useSessionSelector} from "../../store"
 import functions from "../../functions/Functions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import emojiSelect from "../../assets/svg/emoji-select.svg"
 import MiniTextBox, {MiniTextBoxRef} from "../../ui/MiniTextBox"
 import lewdIcon from "../../assets/icons/lewdgirl.png"
@@ -26,6 +26,7 @@ const EditMessageReplyDialog: React.FunctionComponent = () => {
     const dialogRef = useRef<HTMLDivElement>(null)
     const textRef = useRef<HTMLTextAreaElement>(null)
     const textBoxRef = useRef<MiniTextBoxRef>(null)
+    const controls = useDragControls()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
@@ -36,8 +37,10 @@ const EditMessageReplyDialog: React.FunctionComponent = () => {
     useEffect(() => {
         if (editMsgReplyID) {
             document.body.style.pointerEvents = "none"
+            document.body.style.userSelect = "none"
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [editMsgReplyID])
@@ -54,10 +57,10 @@ const EditMessageReplyDialog: React.FunctionComponent = () => {
     if (editMsgReplyID) {
         return (
             <div className="dialog">
-                <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" ref={dialogRef} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" ref={dialogRef} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
-                        <div className="dialog-title-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.dialogs.editMessageReply.title}</span>
                         </div>
                         <div className="dialog-row">
@@ -81,8 +84,7 @@ const EditMessageReplyDialog: React.FunctionComponent = () => {
                             <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.edit}</button>
                         </div>
                     </div>
-                </div>
-                </Draggable>
+                </motion.div>
             </div>
         )
     }

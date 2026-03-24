@@ -9,7 +9,7 @@ import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionA
 usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import Draggable from "react-draggable"
+import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
 
 const FlipPostDialog: React.FunctionComponent = (props) => {
@@ -20,12 +20,15 @@ const FlipPostDialog: React.FunctionComponent = (props) => {
     const {flipPostID} = usePostDialogSelector()
     const {setFlipPostID} = usePostDialogActions()
     const {setPostFlag} = useFlagActions()
+    const controls = useDragControls()
 
     useEffect(() => {
         if (flipPostID) {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "none"
         } else {
             document.body.style.pointerEvents = "all"
+            document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
     }, [flipPostID])
@@ -49,11 +52,11 @@ const FlipPostDialog: React.FunctionComponent = (props) => {
         if (flipPostID) {
             return (
                 <div className="dialog">
-                    <Draggable handle=".dialog-title-container">
-                    <div className="dialog-box" style={{width: "320px"}} onMouseEnter={() => setEnableDrag(false)} 
+                    <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                    className="dialog-box" style={{width: "320px"}} onMouseEnter={() => setEnableDrag(false)} 
                     onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
-                            <div className="dialog-title-container">
+                            <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                                 <span className="dialog-title">{i18n.dialogs.flipPost.title}</span>
                             </div>
                             <div className="dialog-row">
@@ -64,8 +67,7 @@ const FlipPostDialog: React.FunctionComponent = (props) => {
                                 <button onClick={() => click("accept")} className="dialog-button">{i18n.buttons.flip}</button>
                             </div>
                         </div>
-                    </div>
-                    </Draggable>
+                    </motion.div>
                 </div>
             )
         }
