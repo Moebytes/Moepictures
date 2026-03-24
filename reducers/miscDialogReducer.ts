@@ -13,7 +13,6 @@ const miscDialogSlice = createSlice({
     initialState: {
         showDownloadDialog: false,
         showPageDialog: false,
-        showAdDialog: false,
         showDeleteAccountDialog: false,
         banName: null as string | null,
         unbanName: null as string | null,
@@ -31,7 +30,6 @@ const miscDialogSlice = createSlice({
     reducers: {
         setShowDownloadDialog: (state, action) => {state.showDownloadDialog = action.payload},
         setShowPageDialog: (state, action) => {state.showPageDialog = action.payload},
-        setShowAdDialog: (state, action) => {state.showAdDialog = action.payload},
         setShowDeleteAccountDialog: (state, action) => {state.showDeleteAccountDialog = action.payload},
         setBanName: (state, action) => {state.banName = action.payload},
         setUnbanName: (state, action) => {state.unbanName = action.payload},
@@ -53,7 +51,7 @@ const {
     setBanName, setUnbanName, setPromoteName, setPremiumRequired,
     setR18Confirmation, setDisable2FADialog, setDisable2FAFlag,
     setQRCodeImage, setSegmentateLink, setLineartLink, setSegmentateFlag,
-    setLineartFlag, setShowAdDialog
+    setLineartFlag
 } = miscDialogSlice.actions
 
 export const useMiscDialogSelector = () => {
@@ -61,7 +59,6 @@ export const useMiscDialogSelector = () => {
     return {
         showDownloadDialog: selector((state) => state.miscDialog.showDownloadDialog),
         showPageDialog: selector((state) => state.miscDialog.showPageDialog),
-        showAdDialog: selector((state) => state.miscDialog.showAdDialog),
         showDeleteAccountDialog: selector((state) => state.miscDialog.showDeleteAccountDialog),
         banName: selector((state) => state.miscDialog.banName),
         unbanName: selector((state) => state.miscDialog.unbanName),
@@ -83,7 +80,6 @@ export const useMiscDialogActions = () => {
     return {
         setShowDownloadDialog: (state: boolean) => dispatch(setShowDownloadDialog(state)),
         setShowPageDialog: (state: boolean) => dispatch(setShowPageDialog(state)),
-        setShowAdDialog: (state: boolean) => dispatch(setShowAdDialog(state)),
         setShowDeleteAccountDialog: (state: boolean) => dispatch(setShowDeleteAccountDialog(state)),
         setBanName: (state: string | null) => dispatch(setBanName(state)),
         setUnbanName: (state: string | null) => dispatch(setUnbanName(state)),

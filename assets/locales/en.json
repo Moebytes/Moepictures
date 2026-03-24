@@ -1285,11 +1285,6 @@
             "title": "Set Image Source",
             "request": "Set Image Source Request",
             "reminder": "*Only set an alt source if it differs from the main source"
-        },
-        "ad": {
-            "pageTitle": "Allow ads",
-            "title": "Allow ads on our site",
-            "header": "Ads help fund our site. Support us by disabling your ad blocker."
         }
     },
     "help": {

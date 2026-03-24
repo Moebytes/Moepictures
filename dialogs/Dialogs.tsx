@@ -4,7 +4,7 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useState, useEffect, useRef} from "react"
+import React from "react"
 import DeleteCommentDialog from "./comment/DeleteCommentDialog"
 import EditCommentDialog from "./comment/EditCommentDialog"
 import ReportCommentDialog from "./comment/ReportCommentDialog"
@@ -30,7 +30,6 @@ import EditMessageReplyDialog from "./message/EditMessageReplyDialog"
 import ForwardMessageDialog from "./message/ForwardMessageDialog"
 import SendMessageDialog from "./message/SendMessageDialog"
 import SoftDeleteMessageDialog from "./message/SoftDeleteMessageDialog"
-import AdDialog from "./misc/AdDialog"
 import CaptchaDialog from "./misc/CaptchaDialog"
 import DownloadDialog from "./misc/DownloadDialog"
 import LineartDialog from "./misc/LineartDialog"
@@ -97,38 +96,8 @@ import EditSaveSearchDialog from "./user/EditSaveSearchDialog"
 import PromoteDialog from "./user/PromoteDialog"
 import SaveSearchDialog from "./user/SaveSearchDialog"
 import UnbanDialog from "./user/UnbanDialog"
-import {useMiscDialogSelector} from "../store"
 
 const Dialogs: React.FunctionComponent = () => {
-    const {showAdDialog} = useMiscDialogSelector()
-    const [adKey, setAdKey] = useState(null as string | null)
-    const adCounterRef = useRef(0)
-
-    useEffect(() => {
-        if (showAdDialog) {
-            adCounterRef.current += 1
-            setAdKey(`ad-dialog-${adCounterRef.current}`)
-        } else {
-            setAdKey(null)
-        }
-    }, [showAdDialog])
-
-    useEffect(() => {
-        if (!showAdDialog || !adKey) return
-
-        const observer = new MutationObserver(() => {
-            const adRoot = document.getElementById("ad-dialog")
-            if (!adRoot?.childElementCount) {
-                adCounterRef.current += 1
-                setAdKey(`ad-dialog-${adCounterRef.current}`)
-            }
-        })
-
-        observer.observe(document.body, {childList: true, subtree: true})
-
-        return () => observer.disconnect()
-    }, [showAdDialog, adKey])
-
     return (
         <>
         <DeleteCommentDialog/>
@@ -156,7 +125,6 @@ const Dialogs: React.FunctionComponent = () => {
         <ForwardMessageDialog/>
         <SendMessageDialog/>
         <SoftDeleteMessageDialog/>
-        {adKey ? <div id="ad-dialog"><AdDialog key={adKey}/></div> : null}
         <CaptchaDialog/>
         <DownloadDialog/>
         <LineartDialog/>

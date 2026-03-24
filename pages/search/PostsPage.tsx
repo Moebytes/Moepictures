@@ -14,7 +14,6 @@ import Footer from "../../components/site/Footer"
 import TagBanner from "../../components/banner/TagBanner"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useLayoutActions, 
 useActiveActions, useLayoutSelector} from "../../store"
-import AdBanner from "../../components/banner/AdBanner"
 
 let scrollTimer = null as any
 let lastPos = 0
@@ -97,7 +96,6 @@ const PostsPage: React.FunctionComponent = (props) => {
                 <SortBar/>
                 {tagBannerJSX()}
                 <ImageGrid imagesLoaded={imagesLoaded} setImagesLoaded={setImagesLoaded}/>
-                {imagesLoaded ? <AdBanner/> : null}
                 <Footer noPadding={true}/>
             </div>
         </div>

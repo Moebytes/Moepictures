@@ -36,7 +36,6 @@ import historyIcon from "../../assets/svg/history-thin.svg"
 import currentIcon from "../../assets/svg/current.svg"
 import Related from "../../components/post/Related"
 import {Tag, TagHistory, PostSearch, Alias, Implication} from "../../types/Types"
-import AdBanner from "../../components/banner/AdBanner"
 import "./styles/tagpage.less"
 
 let limit = 25
@@ -571,7 +570,6 @@ const TagPage: React.FunctionComponent = () => {
                     <Related tag={tag.tag} count={count}/>
                     {/* {postsJSX()} */}
                 </div> : null}
-                {tag ? <AdBanner item={tag}/> : null}
                 <Footer/>
             </div>
         </div>
