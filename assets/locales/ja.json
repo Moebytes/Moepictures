@@ -247,7 +247,8 @@
         "light": "ライト",
         "dark": "暗い",
         "set": "セット",
-        "remap": "再配置"
+        "remap": "再配置",
+        "apply": "応募する"
     },
     "history": {
         "post": "投稿履歴",
@@ -536,6 +537,11 @@
         "saveLocation": "保存先を選択してください",
         "photos": "写真",
         "files": "ファイル"
+    },
+    "options": {
+        "searchOptions": "検索オプション",
+        "showChildPosts": "子投稿を表示",
+        "sort": "並べ替え"
     },
     "errors": {
         "$401":"401エラー",
