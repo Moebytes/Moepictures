@@ -155,7 +155,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
                     if (requestID === latestRequestRef.current) {
                         resolve(result)
                     }
-                }, 1000)
+                }, 3000)
             })
         }
         return result
