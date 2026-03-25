@@ -63,6 +63,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const [postsRef, setPostsRef] = useState([] as React.RefObject<Ref | null>[])
     const [reupdateFlag, setReupdateFlag] = useState(false)
     const [removeSaveSearchFlag, setRemoveSaveSearchFlag] = useState(false)
+    const [firstLoad, setFirstLoad] = useState(false)
     const visiblePromisesRef = useRef<TrackablePromise<void>[]>([])
     const location = useLocation()
     const navigate = useNavigate()
@@ -133,7 +134,6 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
                 return []
             }
         }
-        setNoResults(false)
         const result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
         sort: functions.validation.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch}, session, setSessionFlag)
         setHeaderFlag(true)
@@ -247,6 +247,11 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const state = location.state
         if (state?.restorePosts) return
+
+        if (!firstLoad) {
+            randomPosts(search).then(() => setFirstLoad(true))
+            return
+        }
 
         if (reloadedPost) {
             setTimeout(() => {

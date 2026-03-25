@@ -4,7 +4,7 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useState, useRef} from "react"
+import React, {useEffect, useEffectEvent, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useCacheActions, useLayoutSelector, useSearchSelector, useSessionSelector, useThemeSelector,
 useSessionActions, useSearchActions, usePageSelector, usePageActions, useCacheSelector} from "../../store"
@@ -55,6 +55,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const [locationState, setLocationState] = useState<any>({restorePosts: []})
     const sizeRef = useRef<HTMLImageElement>(null)
     const visiblePromisesRef = useRef<TrackablePromise<void>[]>([])
+    const searchingRef = useRef(false)
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -102,16 +103,19 @@ const Related: React.FunctionComponent<Props> = (props) => {
         return result
     }
 
-    const loadInitial = async () => {
+    const loadInitial = useEffectEvent(async () => {
+        if (searchingRef.current) return []
         if (!props.count && (session.username && !session.showRelated)) return []
         if (!props.tag) return []
+        searchingRef.current = true
         let result = await searchPosts()
         result = result.filter((p) => p.postID !== props.post?.postID)
+        searchingRef.current = false
         delay = 0
         return result
-    }
+    })
     
-    const updateOffset = async (offset: number) => {
+    const updateOffset = useEffectEvent(async (offset: number) => {
         if (!props.count && (session.username && !session.showRelated)) return null
         if (props.post?.type === "model" || props.post?.type === "live2d") return []
 
@@ -120,7 +124,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
         sort: props.count ? "date" : "random", showChildren, limit, offset}, session, setSessionFlag)
 
         return result
-    }
+    })
 
     const {items, visibleItems, page, setPage, maxPage, initItems, setManagedPage, setManagedItems, toggleScroll} 
         = usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "postCount", locationState})
@@ -131,14 +135,14 @@ const Related: React.FunctionComponent<Props> = (props) => {
             if (init && items.length) {
                 return setInit(false)
             }
-            initItems()
+            if (props.post) initItems()
         }, delay)
     }, [props.post, session])
 
     useEffect(() => {
         clearTimeout(relatedTimer)
         relatedTimer = setTimeout(() => {
-            initItems()
+            if (props.tag) initItems()
         }, delay)
     }, [props.tag, session])
 
