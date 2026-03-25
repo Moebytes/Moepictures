@@ -203,7 +203,7 @@ const UserProfilePage: React.FunctionComponent = () => {
         updateFavorites()
         updateFavgroups()
         updateComments()
-        updateForumPosts()
+        //updateForumPosts()
         updateCounts()
         updateFavoriteTags()
         checkHiddenBanner()
@@ -751,11 +751,11 @@ const UserProfilePage: React.FunctionComponent = () => {
                         <span className="user-title" onClick={viewComments}>{i18n.navbar.comments} <span className="user-text-alt">{comments.length}</span></span>
                         <VerticalCarousel items={comments} type="comment"/>
                     </div> : null}
-                    {forumPosts.length ?
+                    {/*forumPosts.length ?
                     <div className="user-column">
                         <span className="user-title" onClick={viewForumPosts}>{i18n.user.forumPosts} <span className="user-text-alt">{forumPosts.length}</span></span>
                         <VerticalCarousel items={forumPosts} type="forumpost"/>
-                    </div> : null}
+                    </div> : null*/}
                     <div className="user-column">
                         <span className="user-text" style={{fontSize: "22px", color: "var(--text-strong)"}}>Blacklist Tags</span>
                         <textarea style={{height: "150px", width: mobile ? "100%" : "60%", fontSize: "20px", color: "var(--text-strong)"}} className="user-textarea" 

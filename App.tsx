@@ -334,7 +334,7 @@ const App: React.FunctionComponent = (props) => {
                 <Route path="/unverified/edit-post/:id" element={<UploadPage edit={true} unverified={true}/>}/>
                 <Route path="/help" element={<HelpPage/>}/>
                 {/*<Route path="/forum" element={<ForumPage/>}/>*/}
-                <Route path="/posts/:username" element={<ForumPostsPage/>}/>
+                {/* <Route path="/posts/:username" element={<ForumPostsPage/>}/> */}
                 <Route path="/thread/:id" element={<ThreadPage/>}/>
                 <Route path="/mail" element={<MailPage/>}/>
                 <Route path="/message/:id" element={<MessagePage/>}/>
