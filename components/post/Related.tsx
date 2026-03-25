@@ -38,8 +38,7 @@ interface Props {
 const Related: React.FunctionComponent<Props> = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
-    const {related} = useCacheSelector()
-    const {setNavigationPosts, setRelated} = useCacheActions()
+    const {setNavigationPosts} = useCacheActions()
     const {ratingType, square, showChildren, scroll, sizeType} = useSearchSelector()
     const {setSearch, setSearchFlag, setSquare, setSizeType} = useSearchActions()
     const {session} = useSessionSelector()
@@ -47,6 +46,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const {relatedPage} = usePageSelector()
     const {setRelatedPage} = usePageActions()
     const [init, setInit] = useState(true)
+    const [related, setRelated] = useState([] as PostSearch[])
     const [searchTerm, setSearchTerm] = useState(props.tag)
     const [sizeDropdown, setSizeDropdown] = useState(false)
     const [allImagesLoaded, setAllImagesLoaded] = useState(true)
@@ -125,7 +125,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
                     if (requestID === latestRequestRef.current) {
                         resolve(result)
                     }
-                }, 2000)
+                }, 1000)
             })
         }
         return result

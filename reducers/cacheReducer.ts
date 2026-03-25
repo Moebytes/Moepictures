@@ -59,7 +59,6 @@ const cacheSlice = createSlice({
         tagCategories: null as TagCategories | null,
         tagGroupCategories: [] as TagGroupCategory[],
         order: 1,
-        related: [] as PostSearch[],
         artists: [] as TagCategorySearch[],
         characters: [] as TagCategorySearch[],
         series: [] as TagCategorySearch[]
@@ -78,7 +77,6 @@ const cacheSlice = createSlice({
         setTagCategories: (state, action) => {state.tagCategories = action.payload},
         setTagGroupCategories: (state, action) => {state.tagGroupCategories = action.payload},
         setOrder: (state, action) => {state.order = action.payload},
-        setRelated: (state, action) => {state.related = action.payload},
         setArtists: (state, action) => {state.artists = action.payload},
         setCharacters: (state, action) => {state.characters = action.payload},
         setSeries: (state, action) => {state.series = action.payload}
@@ -87,7 +85,7 @@ const cacheSlice = createSlice({
 
 const {
     setEmojis, setPosts, setTags, setVisiblePosts, setUnverifiedPosts, setUploadDropFiles,
-    setBannerTags, setPost, setTagCategories, setOrder, setRelated, setArtists, setCharacters,
+    setBannerTags, setPost, setTagCategories, setOrder, setArtists, setCharacters,
     setSeries, setTagGroupCategories, setNavigationPosts, setSortedTags
 } = cacheSlice.actions
 
@@ -104,7 +102,6 @@ const selectPost = createSelector((state: StoreState) => state.cache, (cache) =>
 const selectTagCategories = createSelector((state: StoreState) => state.cache, (cache) => cache.tagCategories)
 const selectTagGroupCategories = createSelector((state: StoreState) => state.cache, (cache) => cache.tagGroupCategories)
 const selectOrder = createSelector((state: StoreState) => state.cache, (cache) => cache.order)
-const selectRelated = createSelector((state: StoreState) => state.cache, (cache) => cache.related)
 const selectArtists = createSelector((state: StoreState) => state.cache, (cache) => cache.artists)
 const selectCharacters = createSelector((state: StoreState) => state.cache, (cache) => cache.characters)
 const selectSeries = createSelector((state: StoreState) => state.cache, (cache) => cache.series)
@@ -130,7 +127,6 @@ export const useCacheSelector = () => {
         tagCategories: selector(selectTagCategories),
         tagGroupCategories: selector(selectTagGroupCategories),
         order: selector(selectOrder),
-        related: selector(selectRelated),
         artists: selector(selectArtists),
         characters: selector(selectCharacters),
         series: selector(selectSeries),
@@ -154,7 +150,6 @@ export const useCacheActions = () => {
         setTagCategories: (state: TagCategories | null) => dispatch(setTagCategories(state)),
         setTagGroupCategories: (state: TagGroupCategory[]) => dispatch(setTagGroupCategories(state)),
         setOrder: (state: number) => dispatch(setOrder(state)),
-        setRelated: (state: PostSearch[]) => dispatch(setRelated(state)),
         setArtists: (state: TagCategorySearch[]) => dispatch(setArtists(state)),
         setCharacters: (state: TagCategorySearch[]) => dispatch(setCharacters(state)),
         setSeries: (state: TagCategorySearch[]) => dispatch(setSeries(state)),

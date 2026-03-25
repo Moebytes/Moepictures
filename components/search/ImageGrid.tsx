@@ -65,6 +65,8 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const [removeSaveSearchFlag, setRemoveSaveSearchFlag] = useState(false)
     const [firstLoad, setFirstLoad] = useState(false)
     const visiblePromisesRef = useRef<TrackablePromise<void>[]>([])
+    const latestRequestRef = useRef(0)
+    const requestTimerRef = useRef<NodeJS.Timeout | null>(null)
     const location = useLocation()
     const navigate = useNavigate()
 
@@ -134,6 +136,8 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
                 return []
             }
         }
+        const requestID = ++latestRequestRef.current
+
         const result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
         sort: functions.validation.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch}, session, setSessionFlag)
         setHeaderFlag(true)
@@ -141,6 +145,19 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         if (!loaded) setLoaded(true)
         if (!result.length) setNoResults(true)
         if (!search) document.title = i18n.title
+
+        if (firstLoad === false) {
+            setFirstLoad(true)
+            if (requestTimerRef.current) clearTimeout(requestTimerRef.current)
+
+            return new Promise<PostSearch[]>((resolve) => {
+                requestTimerRef.current = setTimeout(() => {
+                    if (requestID === latestRequestRef.current) {
+                        resolve(result)
+                    }
+                }, 1000)
+            })
+        }
         return result
     })
 
@@ -181,6 +198,11 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             setTimeout(() => {
                 window.scrollTo(0, state.restoreScrollY)
             }, 2000)
+        }
+        return () => {
+            if (requestTimerRef.current) {
+                clearTimeout(requestTimerRef.current)
+            }
         }
     }, [])
 
@@ -244,20 +266,9 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         }
     }, [search, searchFlag])
 
-    const handleFirstLoad = async () => {
-        await randomPosts(search)
-        await functions.timeout(2000)
-        setFirstLoad(true)
-    }
-
     useEffect(() => {
         const state = location.state
         if (state?.restorePosts) return
-
-        if (!firstLoad) {
-            handleFirstLoad()
-            return
-        }
 
         if (reloadedPost) {
             setTimeout(() => {
