@@ -7,7 +7,8 @@
 import React, {useEffect} from "react"
 import {useThemeSelector, useThemeActions, useSearchSelector, useSearchActions, usePlaybackSelector, 
 usePlaybackActions, useFilterSelector, useFilterActions, useLayoutSelector, useLayoutActions,
-useCacheSelector, useCacheActions, useSessionSelector, useSessionActions} from "./store"
+useCacheSelector, useCacheActions, useSessionSelector, useSessionActions, useActiveSelector,
+useActiveActions} from "./store"
 import {Themes, ImageFormat, PostType, PostRating, PostStyle, PostSize, PostSort} from "./types/Types"
 import functions from "./functions/Functions"
 import localforage from "localforage"
@@ -146,6 +147,8 @@ const LocalStorage: React.FunctionComponent = () => {
     const {setDisableZoom, setShowBigPlayer} = usePlaybackActions()
     const {session, userImg} = useSessionSelector()
     const {setSession, setUserImg} = useSessionActions()
+    const {settingsLoaded} = useActiveSelector()
+    const {setSettingsLoaded} = useActiveActions()
 
     useEffect(() => {
         if (typeof window === "undefined") return
@@ -307,6 +310,8 @@ const LocalStorage: React.FunctionComponent = () => {
         if (savedReaderZoom && Number(savedReaderZoom) !== 100) setReaderZoom(Number(savedReaderZoom))
         if (savedReaderInvert) setReaderInvert(savedReaderInvert === "true")
         if (savedUserImg) setUserImg(savedUserImg)
+
+        setSettingsLoaded(true)
     }, [])
 
     useEffect(() => {
@@ -386,20 +391,18 @@ const LocalStorage: React.FunctionComponent = () => {
     }, [hideSidebar, hideTitlebar, hideNavbar, hideSortbar])
 
     useEffect(() => {
-        if (posts.length) localforage.setItem("savedPosts", JSON.stringify(posts))
         if (navigationPosts.length) localforage.setItem("savedNavigationPosts", JSON.stringify(navigationPosts))
         if (tags.length) localforage.setItem("savedTags", JSON.stringify(tags))
         if (bannerTags.length) localStorage.setItem("savedBannerTags", JSON.stringify(bannerTags))
         localStorage.setItem("savedSession", JSON.stringify(session))
-    }, [posts, navigationPosts, tags, bannerTags, session])
+    }, [navigationPosts, tags, bannerTags, session])
 
     useEffect(() => {
         localStorage.setItem("order", String(order))
         localStorage.setItem("savedPost", JSON.stringify(post))
         localStorage.setItem("savedTagCategories", JSON.stringify(tagCategories))
         localStorage.setItem("savedTagGroupCategories", JSON.stringify(tagGroupCategories))
-        localforage.setItem("savedRelated", JSON.stringify(related))
-    }, [order, tagCategories, tagGroupCategories, post, related])
+    }, [order, tagCategories, tagGroupCategories, post])
 
 
     useEffect(() => {

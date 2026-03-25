@@ -24,7 +24,8 @@ const activeSlice = createSlice({
         modState: "posts",
         actionBanner: "",
         newsBanner: null as Banner | null,
-        reorderState: false
+        reorderState: false,
+        settingsLoaded: false
     },
     reducers: {
         setActiveDropdown: (state, action) => {state.activeDropdown = action.payload},
@@ -39,14 +40,16 @@ const activeSlice = createSlice({
         setModState: (state, action) => {state.modState = action.payload},
         setActionBanner: (state, action) => {state.actionBanner = action.payload},
         setNewsBanner: (state, action) => {state.newsBanner = action.payload},
-        setReorderState: (state, action) => {state.reorderState = action.payload}
+        setReorderState: (state, action) => {state.reorderState = action.payload},
+        setSettingsLoaded: (state, action) => {state.settingsLoaded = action.payload}
     }    
 })
 
 const {
     setActiveDropdown, setFilterDropActive, setActiveGroup, setActiveFavgroup,
     setHeaderText, setSidebarText, setQuoteText, setHelpTab, setModState,
-    setActionBanner, setNewsBanner, setShowMusicFilters, setReorderState
+    setActionBanner, setNewsBanner, setShowMusicFilters, setReorderState,
+    setSettingsLoaded
 } = activeSlice.actions
 
 export const useActiveSelector = () => {
@@ -64,7 +67,8 @@ export const useActiveSelector = () => {
         modState: selector((state) => state.active.modState),
         actionBanner: selector((state) => state.active.actionBanner),
         newsBanner: selector((state) => state.active.newsBanner),
-        reorderState: selector((state) => state.active.reorderState)
+        reorderState: selector((state) => state.active.reorderState),
+        settingsLoaded: selector((state) => state.active.settingsLoaded)
     }
 }
 
@@ -83,7 +87,8 @@ export const useActiveActions = () => {
         setModState: (state: string) => dispatch(setModState(state)),
         setActionBanner: (state: string | null) => dispatch(setActionBanner(state)),
         setNewsBanner: (state: Banner | null) => dispatch(setNewsBanner(state)),
-        setReorderState: (state: boolean) => dispatch(setReorderState(state))
+        setReorderState: (state: boolean) => dispatch(setReorderState(state)),
+        setSettingsLoaded: (state: boolean) => dispatch(setSettingsLoaded(state))
     }
 }
 

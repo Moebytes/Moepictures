@@ -6,7 +6,7 @@
 
 import React, {useEffect, useRef, useState, useEffectEvent} from "react"
 import {useNavigate, useLocation} from "react-router-dom"
-import {useThemeSelector, useLayoutSelector, useSearchActions, useSearchSelector,
+import {useThemeSelector, useLayoutSelector, useSearchActions, useSearchSelector, useActiveSelector,
 useFlagActions, useInteractionActions, useCacheActions, useCacheSelector, useFlagSelector, useActiveActions,
 useMiscDialogActions, useSessionSelector, useSessionActions, usePageSelector, usePageActions} from "../../store"
 import {TrackablePromise} from "../../structures/TrackablePromise"
@@ -49,6 +49,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const {setEnableDrag} = useInteractionActions()
     const {posts} = useCacheSelector()
     const {setPosts, setNavigationPosts, setVisiblePosts} = useCacheActions()
+    const {settingsLoaded} = useActiveSelector()
     const {setSidebarText, setActionBanner} = useActiveActions()
     const {page: postPage} = usePageSelector()
     const {setPage: setPostPage} = usePageActions()
@@ -57,16 +58,12 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const {setPremiumRequired} = useMiscDialogActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
-    const [loaded, setLoaded] = useState(false)
     const [noResults, setNoResults] = useState(false)
     const [isRandomSearch, setIsRandomSearch] = useState(false)
     const [postsRef, setPostsRef] = useState([] as React.RefObject<Ref | null>[])
     const [reupdateFlag, setReupdateFlag] = useState(false)
     const [removeSaveSearchFlag, setRemoveSaveSearchFlag] = useState(false)
-    const [firstLoad, setFirstLoad] = useState(false)
     const visiblePromisesRef = useRef<TrackablePromise<void>[]>([])
-    const latestRequestRef = useRef(0)
-    const requestTimerRef = useRef<NodeJS.Timeout | null>(null)
     const location = useLocation()
     const navigate = useNavigate()
 
@@ -136,34 +133,21 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
                 return []
             }
         }
-        const requestID = ++latestRequestRef.current
-
         const result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
         sort: functions.validation.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch}, session, setSessionFlag)
         setHeaderFlag(true)
         setIsRandomSearch(false)
-        if (!loaded) setLoaded(true)
         if (!result.length) setNoResults(true)
         if (!search) document.title = i18n.title
 
-        if (firstLoad === false) {
-            setFirstLoad(true)
-            if (requestTimerRef.current) clearTimeout(requestTimerRef.current)
-
-            return new Promise<PostSearch[]>((resolve) => {
-                requestTimerRef.current = setTimeout(() => {
-                    if (requestID === latestRequestRef.current) {
-                        resolve(result)
-                    }
-                }, 3000)
-            })
-        }
         return result
     })
 
     const updateOffset = useEffectEvent(async (offset: number, query?: string) => {
+        if (!settingsLoaded) return []
         if (noResults) return []
         let result = [] as PostSearch[]
+
         if (isRandomSearch) {
             result = await functions.http.get("/api/search/posts", {type: imageType, rating: ratingType, style: styleType, 
             sort: "random", showChildren, limit, favoriteMode: favSearch, offset}, session, setSessionFlag)
@@ -198,11 +182,6 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             setTimeout(() => {
                 window.scrollTo(0, state.restoreScrollY)
             }, 2000)
-        }
-        return () => {
-            if (requestTimerRef.current) {
-                clearTimeout(requestTimerRef.current)
-            }
         }
     }, [])
 
@@ -267,6 +246,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     }, [search, searchFlag])
 
     useEffect(() => {
+        if (!settingsLoaded) return
         const state = location.state
         if (state?.restorePosts) return
 
@@ -277,8 +257,8 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             return
         }
         initItems(search, true)
-    }, [imageType, ratingType, styleType, sortType, 
-        sortReverse, showChildren, favSearch, loaded])
+    }, [settingsLoaded, imageType, ratingType, styleType, 
+        sortType, sortReverse, showChildren, favSearch])
 
     useEffect(() => {
         if (reloadPostFlag) reloadedPost = true
