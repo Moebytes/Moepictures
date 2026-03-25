@@ -245,7 +245,6 @@ const LocalStorage: React.FunctionComponent = () => {
         const savedOrder = localStorage.getItem("order")
         const savedBannerTags = localStorage.getItem("savedBannerTags")
         const savedSession = localStorage.getItem("savedSession")
-        const savedPost = localStorage.getItem("savedPost")
         const savedTagCategories = localStorage.getItem("savedTagCategories")
         const savedTagGroupCategories = localStorage.getItem("savedTagGroupCategories")
         const savedShowBigPlayer = localStorage.getItem("showBigPlayer")
@@ -300,7 +299,6 @@ const LocalStorage: React.FunctionComponent = () => {
         if (savedHideSortbar) setHideSortbar(savedHideSortbar === "true")
         if (savedBannerTags) setBannerTags(JSON.parse(savedBannerTags))
         if (savedSession) setSession(JSON.parse(savedSession))
-        if (savedPost) setPost(JSON.parse(savedPost))
         if (savedTagCategories) setTagCategories(JSON.parse(savedTagCategories))
         if (savedTagGroupCategories) setTagGroupCategories(JSON.parse(savedTagGroupCategories))
         if (savedOrder) setOrder(Number(savedOrder))
@@ -399,10 +397,9 @@ const LocalStorage: React.FunctionComponent = () => {
 
     useEffect(() => {
         localStorage.setItem("order", String(order))
-        localStorage.setItem("savedPost", JSON.stringify(post))
         localStorage.setItem("savedTagCategories", JSON.stringify(tagCategories))
         localStorage.setItem("savedTagGroupCategories", JSON.stringify(tagGroupCategories))
-    }, [order, tagCategories, tagGroupCategories, post])
+    }, [order, tagCategories, tagGroupCategories])
 
 
     useEffect(() => {
