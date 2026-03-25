@@ -152,6 +152,13 @@
     margin-top: 20px;
     overflow-x: hidden;
     overflow-y: auto;
+    scrollbar-color: transparent transparent;
+    &::-webkit-scrollbar-thumb {
+        background-color: transparent;
+    }
+    &::-webkit-scrollbar-track {
+        background-color: transparent;
+    }
 }
 
 @media screen and (max-width: 500px) {
