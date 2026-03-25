@@ -282,6 +282,19 @@ BEGIN
       WHERE tag = OLD.tag
   ));
 
+  UPDATE "tag map tags"
+  SET "tags" = COALESCE(
+        (SELECT array_agg(DISTINCT "tags"."tag")
+         FROM "tag map"
+         JOIN "tags" ON "tag map"."tagID" = "tags"."tagID"
+         WHERE "tag map"."postID" = "tag map tags"."postID"
+        ), '{}')
+  WHERE "postID" IN (
+        SELECT "postID"
+        FROM "tag map"
+        WHERE "tagID" = NEW."tagID"
+  );
+
   UPDATE "tag group tags"
   SET "tags" = COALESCE(
     ARRAY(
