@@ -140,8 +140,8 @@ const LocalStorage: React.FunctionComponent = () => {
     setLowpass, setHighpass, setReverb, setDelay, setPhaser, setBitcrush} = useFilterActions()
     const {hideSortbar, hideSidebar, hideTitlebar, hideNavbar} = useLayoutSelector()
     const {setHideSortbar, setHideSidebar, setHideTitlebar, setHideNavbar} = useLayoutActions()
-    const {posts, navigationPosts, tags, bannerTags, post, tagCategories, tagGroupCategories, order, related, artists, characters, series} = useCacheSelector()
-    const {setPosts, setNavigationPosts, setTags, setBannerTags, setPost, setTagCategories, setTagGroupCategories, setOrder, setRelated, setArtists, setCharacters, setSeries} = useCacheActions()
+    const {posts, navigationPosts, tags, bannerTags, post, tagCategories, tagGroupCategories, order, artists, characters, series} = useCacheSelector()
+    const {setNavigationPosts, setTags, setBannerTags, setPost, setTagCategories, setTagGroupCategories, setOrder, setArtists, setCharacters, setSeries} = useCacheActions()
     const {disableZoom, showBigPlayer} = usePlaybackSelector()
     const {setDisableZoom, setShowBigPlayer} = usePlaybackActions()
     const {session, userImg} = useSessionSelector()
@@ -180,17 +180,13 @@ const LocalStorage: React.FunctionComponent = () => {
     }
 
     const initAsync = async () => {
-        const savedPosts = await localforage.getItem("savedPosts") as string
         const savedNavigationPosts = await localforage.getItem("savedNavigationPosts") as string
         const savedTags = await localforage.getItem("savedTags") as string
-        const savedRelated = await localforage.getItem("savedRelated") as string
         const savedArtists = await localforage.getItem("savedArtists") as string
         const savedCharacters = await localforage.getItem("savedCharacters") as string
         const savedSeries = await localforage.getItem("savedSeries") as string
-        if (savedPosts) setPosts(JSON.parse(savedPosts))
         if (savedNavigationPosts) setNavigationPosts(JSON.parse(savedNavigationPosts))
         if (savedTags) setTags(JSON.parse(savedTags))
-        if (savedRelated) setRelated(JSON.parse(savedRelated))
         if (savedArtists) setArtists(JSON.parse(savedArtists))
         if (savedCharacters) setCharacters(JSON.parse(savedCharacters))
         if (savedSeries) setSeries(JSON.parse(savedSeries))
