@@ -582,27 +582,61 @@ export default class SQLSearch {
         if (sort === "reverse alphabetic") sortQuery = `ORDER BY tags.tag DESC`
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                    WITH post_json AS (
-                        SELECT posts.*, json_agg(DISTINCT images.*) AS images,
-                        ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
-                        FROM posts
-                        TABLESAMPLE SYSTEM(5)
-                        JOIN images ON images."postID" = posts."postID"
-                        LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
-                        WHERE NOT (posts.style = 'sketch' OR posts.style = 'lineart')
-                        GROUP BY posts."postID"
-                    )
-                    SELECT tags.*, json_agg(DISTINCT post_json.*) AS posts,
-                    COUNT(*) OVER() AS "tagCount",
-                    array_length("tag map posts"."posts", 1) AS "postCount",
-                    ROUND(AVG(DISTINCT post_json."cuteness")) AS "cuteness"
+                WITH sampled_posts AS (
+                    SELECT *
+                    FROM posts
+                    TABLESAMPLE SYSTEM (50)
+                    WHERE NOT (posts.style = 'sketch' OR posts.style = 'lineart')
+                ),
+                post_images AS (
+                    SELECT images."postID", json_agg(images.*) AS images
+                    FROM images
+                    GROUP BY images."postID"
+                ),
+                post_cuteness AS (
+                    SELECT cuteness."postID", ROUND(AVG(cuteness.cuteness)) AS cuteness
+                    FROM cuteness
+                    GROUP BY cuteness."postID"
+                ),
+                post_json AS (
+                    SELECT sampled_posts.*, 
+                    post_images.images,
+                    post_cuteness.cuteness
+                    FROM sampled_posts
+                    LEFT JOIN post_images ON post_images."postID" = sampled_posts."postID"
+                    LEFT JOIN post_cuteness ON post_cuteness."postID" = sampled_posts."postID"
+                ),
+                post_tags AS (
+                    SELECT tags."tagID", tags.tag, tags.type, tags.image, tags."imageHash",
+                    tags.website, tags.social, tags.twitter, tags.fandom, tags.wikipedia,
+                    unnest("tag map posts".posts) AS "postID",
+                    array_length("tag map posts".posts, 1) AS "postCount"
                     FROM tags
-                    JOIN "tag map posts" ON "tag map posts"."tag" = tags."tag"
-                    JOIN post_json ON post_json."postID" = ANY("tag map posts"."posts")
+                    JOIN "tag map posts" ON "tag map posts".tag = tags.tag
                     ${whereQuery}
-                    GROUP BY "tags"."tagID", "tag map posts"."posts"
-                    ${sortQuery}
-                    ${limit ? `LIMIT $${limitValue}` : "LIMIT 25"} ${offset ? `OFFSET $${i}` : ""}
+                )
+                SELECT * FROM (
+                    SELECT post_tags."tagID",
+                    post_tags.tag, post_tags.type,
+                    post_tags.image, post_tags."imageHash",
+                    post_tags.website, post_tags.social, 
+                    post_tags.twitter, post_tags.fandom, 
+                    post_tags.wikipedia,
+                    json_agg(post_json.*) AS posts,
+                    COUNT(*) OVER() AS "tagCount",
+                    MAX(post_tags."postCount") AS "postCount",
+                    ROUND(AVG(post_json.cuteness)) AS cuteness
+                    FROM post_tags
+                    JOIN post_json ON post_json."postID" = post_tags."postID"
+                    GROUP BY post_tags."tagID", 
+                    post_tags.tag, post_tags.type,
+                    post_tags.image, post_tags."imageHash",
+                    post_tags.website, post_tags.social, 
+                    post_tags.twitter, post_tags.fandom, 
+                    post_tags.wikipedia
+                ) AS result
+                ${sortQuery}
+                ${limit ? `LIMIT $${limitValue}` : "LIMIT 25"} ${offset ? `OFFSET $${i}` : ""}
             `)
         }
         if (offset) values.push(offset)
