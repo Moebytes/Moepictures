@@ -25,8 +25,6 @@ import PageControls from "../../components/site/PageControls"
 import {PostHistory, PostSearch} from "../../types/Types"
 import "./styles/related.less"
 
-let relatedTimer = null as any
-let delay = 2000
 let limit = 100
 let pageAmount = 15
 
@@ -55,7 +53,9 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const [locationState, setLocationState] = useState<any>({restorePosts: []})
     const sizeRef = useRef<HTMLImageElement>(null)
     const visiblePromisesRef = useRef<TrackablePromise<void>[]>([])
-    const searchingRef = useRef(false)
+    const [firstLoad, setFirstLoad] = useState(false)
+    const latestRequestRef = useRef(0)
+    const requestTimerRef = useRef<NodeJS.Timeout | null>(null)
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -63,7 +63,12 @@ const Related: React.FunctionComponent<Props> = (props) => {
             setLocationState(null)
         }, 3000)
 
-        return () => clearTimeout(timer)
+        return () => {
+            clearTimeout(timer)
+            if (requestTimerRef.current) {
+                clearTimeout(requestTimerRef.current)
+            }
+        }
     }, [])
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
@@ -104,14 +109,25 @@ const Related: React.FunctionComponent<Props> = (props) => {
     }
 
     const loadInitial = useEffectEvent(async () => {
-        if (searchingRef.current) return []
         if (!props.count && (session.username && !session.showRelated)) return []
         if (!props.tag) return []
-        searchingRef.current = true
+
+        const requestID = ++latestRequestRef.current
         let result = await searchPosts()
         result = result.filter((p) => p.postID !== props.post?.postID)
-        searchingRef.current = false
-        delay = 0
+        
+        if (firstLoad === false) {
+            setFirstLoad(true)
+            if (requestTimerRef.current) clearTimeout(requestTimerRef.current)
+
+            return new Promise<PostSearch[]>((resolve) => {
+                requestTimerRef.current = setTimeout(() => {
+                    if (requestID === latestRequestRef.current) {
+                        resolve(result)
+                    }
+                }, 2000)
+            })
+        }
         return result
     })
     
@@ -130,20 +146,14 @@ const Related: React.FunctionComponent<Props> = (props) => {
         = usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "postCount", locationState})
 
     useEffect(() => {
-        clearTimeout(relatedTimer)
-        relatedTimer = setTimeout(() => {
-            if (init && items.length) {
-                return setInit(false)
-            }
-            if (props.post) initItems()
-        }, delay)
+        if (init && items.length) {
+            return setInit(false)
+        }
+        if (props.post) initItems()
     }, [props.post, session])
 
     useEffect(() => {
-        clearTimeout(relatedTimer)
-        relatedTimer = setTimeout(() => {
-            if (props.tag) initItems()
-        }, delay)
+        if (props.tag) initItems()
     }, [props.tag, session])
 
     useEffect(() => {

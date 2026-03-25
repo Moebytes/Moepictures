@@ -244,12 +244,18 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         }
     }, [search, searchFlag])
 
+    const handleFirstLoad = async () => {
+        await randomPosts(search)
+        await functions.timeout(2000)
+        setFirstLoad(true)
+    }
+
     useEffect(() => {
         const state = location.state
         if (state?.restorePosts) return
 
         if (!firstLoad) {
-            randomPosts(search).then(() => setFirstLoad(true))
+            handleFirstLoad()
             return
         }
 
