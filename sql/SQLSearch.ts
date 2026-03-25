@@ -582,29 +582,15 @@ export default class SQLSearch {
         if (sort === "reverse alphabetic") sortQuery = `ORDER BY tags.tag DESC`
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                WITH sampled_posts AS (
-                    SELECT *
+                WITH post_json AS (
+                    SELECT posts.*, json_agg(DISTINCT images.*) AS images,
+                    ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
                     FROM posts
-                    TABLESAMPLE SYSTEM (5)
+                    TABLESAMPLE SYSTEM(5)
+                    JOIN images ON images."postID" = posts."postID"
+                    LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                     WHERE NOT (posts.style = 'sketch' OR posts.style = 'lineart')
-                ),
-                post_images AS (
-                    SELECT images."postID", json_agg(images.*) AS images
-                    FROM images
-                    GROUP BY images."postID"
-                ),
-                post_cuteness AS (
-                    SELECT cuteness."postID", ROUND(AVG(cuteness.cuteness)) AS cuteness
-                    FROM cuteness
-                    GROUP BY cuteness."postID"
-                ),
-                post_json AS (
-                    SELECT sampled_posts.*, 
-                    post_images.images,
-                    post_cuteness.cuteness
-                    FROM sampled_posts
-                    LEFT JOIN post_images ON post_images."postID" = sampled_posts."postID"
-                    LEFT JOIN post_cuteness ON post_cuteness."postID" = sampled_posts."postID"
+                    GROUP BY posts."postID"
                 ),
                 post_tags AS (
                     SELECT tags."tagID", tags.tag, tags.type, tags.image, tags."imageHash",
@@ -614,27 +600,47 @@ export default class SQLSearch {
                     FROM tags
                     JOIN "tag map posts" ON "tag map posts".tag = tags.tag
                     ${whereQuery}
-                )
-                SELECT * FROM (
+                ),
+                ranked_posts AS (
                     SELECT post_tags."tagID",
                     post_tags.tag, post_tags.type,
                     post_tags.image, post_tags."imageHash",
-                    post_tags.website, post_tags.social, 
-                    post_tags.twitter, post_tags.fandom, 
+                    post_tags.website, post_tags.social,
+                    post_tags.twitter, post_tags.fandom,
                     post_tags.wikipedia,
-                    json_agg(post_json.*) AS posts,
-                    COUNT(*) OVER() AS "tagCount",
-                    MAX(post_tags."postCount") AS "postCount",
-                    ROUND(AVG(post_json.cuteness)) AS cuteness
+                    post_tags."postCount",
+                    post_json."postID",
+                    post_json.rating,
+                    post_json.style,
+                    post_json.images,
+                    post_json.cuteness,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY post_tags."tagID"
+                        ORDER BY post_json."postID" DESC
+                    ) AS row_number
                     FROM post_tags
                     JOIN post_json ON post_json."postID" = post_tags."postID"
-                    GROUP BY post_tags."tagID", 
-                    post_tags.tag, post_tags.type,
-                    post_tags.image, post_tags."imageHash",
-                    post_tags.website, post_tags.social, 
-                    post_tags.twitter, post_tags.fandom, 
-                    post_tags.wikipedia
-                ) AS result
+                )
+                SELECT * FROM (
+                    SELECT ranked_posts."tagID",
+                    ranked_posts.tag, ranked_posts.type,
+                    ranked_posts.image, ranked_posts."imageHash",
+                    ranked_posts.website, ranked_posts.social,
+                    ranked_posts.twitter, ranked_posts.fandom,
+                    ranked_posts.wikipedia,
+                    json_agg(ranked_posts.*) AS posts,
+                    COUNT(*) OVER() AS "tagCount",
+                    MAX(ranked_posts."postCount") AS "postCount",
+                    ROUND(AVG(ranked_posts.cuteness)) AS cuteness
+                    FROM ranked_posts
+                    WHERE ranked_posts.row_number <= 100
+                    GROUP BY ranked_posts."tagID",
+                    ranked_posts.tag, ranked_posts.type,
+                    ranked_posts.image, ranked_posts."imageHash",
+                    ranked_posts.website, ranked_posts.social,
+                    ranked_posts.twitter, ranked_posts.fandom,
+                    ranked_posts.wikipedia
+                )
                 ${sortQuery}
                 ${limit ? `LIMIT $${limitValue}` : "LIMIT 25"} ${offset ? `OFFSET $${i}` : ""}
             `)
