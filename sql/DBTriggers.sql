@@ -14,13 +14,24 @@ RETURNS TRIGGER AS $$
 BEGIN
     IF EXISTS (SELECT 1 FROM "tag map tags" WHERE "postID" = NEW."postID") THEN
         UPDATE "tag map tags"
-        SET "tags" = (SELECT array_agg(DISTINCT "tag") FROM "tag map" WHERE "postID" = NEW."postID")
+        SET "tags" = COALESCE(
+            (SELECT array_agg(DISTINCT "tags"."tag")
+             FROM "tag map"
+             JOIN "tags" ON "tag map"."tagID" = "tags"."tagID"
+             WHERE "tag map"."postID" = NEW."postID"), '{}')
         WHERE "postID" = NEW."postID";
     ELSE
         INSERT INTO "tag map tags"("postID", "tags")
-        VALUES (NEW."postID", (SELECT array_agg(DISTINCT "tag") FROM "tag map" WHERE "postID" = NEW."postID"));
+        VALUES (
+          NEW."postID", 
+          COALESCE(
+            (SELECT array_agg(DISTINCT "tags"."tag")
+              FROM "tag map"
+              JOIN "tags" ON "tag map"."tagID" = "tags"."tagID"
+              WHERE "tag map"."postID" = NEW."postID"), '{}')
+        );
     END IF;
-    RETURN NULL;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -31,10 +42,14 @@ BEGIN
         DELETE FROM "tag map tags" WHERE "postID" = OLD."postID";
     ELSE
         UPDATE "tag map tags"
-        SET "tags" = (SELECT array_agg(DISTINCT "tag") FROM "tag map" WHERE "postID" = OLD."postID")
+        SET "tags" = COALESCE(
+            (SELECT array_agg(DISTINCT "tags"."tag")
+             FROM "tag map"
+             JOIN "tags" ON "tag map"."tagID" = "tags"."tagID"
+             WHERE "tag map"."postID" = OLD."postID"), '{}')
         WHERE "postID" = OLD."postID";
     END IF;
-    RETURN NULL;
+    RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -55,30 +70,65 @@ CREATE TABLE IF NOT EXISTS "tag map posts" (
 
 CREATE OR REPLACE FUNCTION tag_map_posts_insert()
 RETURNS TRIGGER AS $$
+DECLARE
+    tag_text text;
 BEGIN
-    IF EXISTS (SELECT 1 FROM "tag map posts" WHERE "tag" = NEW."tag") THEN
+    SELECT "tag" INTO tag_text
+    FROM "tags"
+    WHERE "tagID" = NEW."tagID";
+
+    IF tag_text IS NULL THEN
+        RETURN NEW;
+    END IF;
+
+    IF EXISTS (SELECT 1 FROM "tag map posts" WHERE "tag" = tag_text) THEN
         UPDATE "tag map posts"
-        SET "posts" = (SELECT array_agg(DISTINCT "postID") FROM "tag map" WHERE "tag" = NEW."tag")
-        WHERE "tag" = NEW."tag";
+        SET "posts" = COALESCE(
+            (SELECT array_agg(DISTINCT "tag map"."postID")
+             FROM "tag map"
+             WHERE "tag map"."tagID" = NEW."tagID"
+            ), '{}')
+        WHERE "tag" = tag_text;
     ELSE
         INSERT INTO "tag map posts"("tag", "posts")
-        VALUES (NEW."tag", (SELECT array_agg(DISTINCT "postID") FROM "tag map" WHERE "tag" = NEW."tag"));
+        VALUES (
+            tag_text,
+            COALESCE(
+                (SELECT array_agg(DISTINCT "tag map"."postID")
+                 FROM "tag map"
+                 WHERE "tag map"."tagID" = NEW."tagID"
+                ), '{}')
+        );
     END IF;
-    RETURN NULL;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION tag_map_posts_delete()
 RETURNS TRIGGER AS $$
+DECLARE
+    tag_text text;
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM "tag map" WHERE "tag" = OLD."tag") THEN
-        DELETE FROM "tag map posts" WHERE "tag" = OLD."tag";
+    SELECT "tag" INTO tag_text
+    FROM "tags"
+    WHERE "tagID" = OLD."tagID";
+
+    IF tag_text IS NULL THEN
+        RETURN OLD;
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM "tag map" WHERE "tagID" = OLD."tagID") THEN
+        DELETE FROM "tag map posts" WHERE "tag" = tag_text;
     ELSE
         UPDATE "tag map posts"
-        SET "posts" = (SELECT array_agg(DISTINCT "postID") FROM "tag map" WHERE "tag" = OLD."tag")
-        WHERE "tag" = OLD."tag";
+        SET "posts" = COALESCE(
+            (SELECT array_agg(DISTINCT "tag map"."postID")
+             FROM "tag map"
+             WHERE "tag map"."tagID" = OLD."tagID"
+            ), '{}')
+        WHERE "tag" = tag_text;
     END IF;
-    RETURN NULL;
+    RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -105,12 +155,14 @@ RETURNS TRIGGER AS $$
 BEGIN
     IF EXISTS (SELECT 1 FROM "tag group tags" WHERE "groupID" = NEW."groupID") THEN
         UPDATE "tag group tags"
-        SET "tags" = ARRAY(
-            SELECT DISTINCT "tag map"."tag"
-            FROM "tag group map"
-            JOIN "tag map" ON "tag map"."mapID" = "tag group map"."tagMapID"
-            WHERE "tag group map"."groupID" = NEW."groupID"
-        ),
+        SET "tags" = COALESCE(
+            ARRAY(
+                SELECT DISTINCT "tags"."tag"
+                FROM "tag group map"
+                JOIN "tag map" ON "tag map"."mapID" = "tag group map"."tagMapID"
+                JOIN "tags" ON "tag map"."tagID" = "tags"."tagID"
+                WHERE "tag group map"."groupID" = NEW."groupID"
+            ), '{}'),
         "postID" = (SELECT "postID" FROM "tag groups" WHERE "tag groups"."groupID" = NEW."groupID" LIMIT 1),
         "name" = (SELECT "name" FROM "tag groups" WHERE "tag groups"."groupID" = NEW."groupID" LIMIT 1)
         WHERE "groupID" = NEW."groupID";
@@ -119,14 +171,17 @@ BEGIN
         VALUES (NEW."groupID", 
         (SELECT "postID" FROM "tag groups" WHERE "tag groups"."groupID" = NEW."groupID" LIMIT 1),
         (SELECT "name" FROM "tag groups" WHERE "tag groups"."groupID" = NEW."groupID" LIMIT 1),
-        ARRAY(
-            SELECT DISTINCT "tag map"."tag"
-            FROM "tag group map"
-            JOIN "tag map" ON "tag map"."mapID" = "tag group map"."tagMapID"
-            WHERE "tag group map"."groupID" = NEW."groupID"
-        ));
+        COALESCE(
+            ARRAY(
+                SELECT DISTINCT "tags"."tag"
+                FROM "tag group map"
+                JOIN "tag map" ON "tag map"."mapID" = "tag group map"."tagMapID"
+                JOIN "tags" ON "tag map"."tagID" = "tags"."tagID"
+                WHERE "tag group map"."groupID" = NEW."groupID"
+            ), '{}')
+        );
     END IF;
-    RETURN NULL;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -137,17 +192,19 @@ BEGIN
         DELETE FROM "tag group tags" WHERE "groupID" = OLD."groupID";
     ELSE
         UPDATE "tag group tags"
-        SET "tags" = ARRAY(
-            SELECT DISTINCT "tag map"."tag"
-            FROM "tag group map"
-            JOIN "tag map" ON "tag map"."mapID" = "tag group map"."tagMapID"
-            WHERE "tag group map"."groupID" = OLD."groupID"
-        ),
+        SET "tags" = COALESCE(
+            ARRAY(
+                SELECT DISTINCT "tags"."tag"
+                FROM "tag group map"
+                JOIN "tag map" ON "tag map"."mapID" = "tag group map"."tagMapID"
+                JOIN "tags" ON "tag map"."tagID" = "tags"."tagID"
+                WHERE "tag group map"."groupID" = OLD."groupID"
+            ), '{}'),
         "postID" = (SELECT "postID" FROM "tag groups" WHERE "tag groups"."groupID" = OLD."groupID" LIMIT 1),
         "name" = (SELECT "name" FROM "tag groups" WHERE "tag groups"."groupID" = OLD."groupID" LIMIT 1)
         WHERE "groupID" = OLD."groupID";
     END IF;
-    RETURN NULL;
+    RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -226,17 +283,20 @@ BEGIN
   ));
 
   UPDATE "tag group tags"
-  SET "tags" = ARRAY(
-      SELECT DISTINCT "tag map"."tag"
-      FROM "tag group map"
-      JOIN "tag map" ON "tag map"."mapID" = "tag group map"."tagMapID"
-      WHERE "tag group map"."groupID" = "tag group tags"."groupID"
-  )
+  SET "tags" = COALESCE(
+    ARRAY(
+        SELECT DISTINCT "tags"."tag"
+        FROM "tag group map"
+        JOIN "tag map" ON "tag map"."mapID" = "tag group map"."tagMapID"
+        JOIN "tags" ON "tag map"."tagID" = "tags"."tagID"
+        WHERE "tag group map"."groupID" = "tag group tags"."groupID"
+    ), '{}')
   WHERE "groupID" IN (
-      SELECT "tag group map"."groupID" FROM "tag group map"
-      JOIN "tag map" ON "tag map"."mapID" = "tag group map"."tagMapID"
-      JOIN "tags" ON "tags"."tag" = "tag map"."tag"
-      WHERE "tags"."tag" = NEW.tag
+    SELECT "tag group map"."groupID"
+    FROM "tag group map"
+    JOIN "tag map" ON "tag map"."mapID" = "tag group map"."tagMapID"
+    JOIN "tags" ON "tag map"."tagID" = "tags"."tagID"
+    WHERE "tags"."tag" = NEW.tag
   );
 
   RETURN NEW;
@@ -309,17 +369,19 @@ BEGIN
   ));
 
   UPDATE "tag group tags"
-  SET "tags" = ARRAY(
-      SELECT DISTINCT "tag map"."tag"
-      FROM "tag group map"
-      JOIN "tag map" ON "tag map"."mapID" = "tag group map"."tagMapID"
-      WHERE "tag group map"."groupID" = "tag group tags"."groupID"
-  )
+  SET "tags" = COALESCE(
+    ARRAY(
+        SELECT DISTINCT "tags"."tag"
+        FROM "tag group map"
+        JOIN "tag map" ON "tag map"."mapID" = "tag group map"."tagMapID"
+        JOIN "tags" ON "tag map"."tagID" = "tags"."tagID"
+        WHERE "tag group map"."groupID" = "tag group tags"."groupID"
+    ), '{}')
   WHERE "groupID" IN (
       SELECT "tag group map"."groupID"
       FROM "tag group map"
       JOIN "tag map" ON "tag map"."mapID" = "tag group map"."tagMapID"
-      JOIN "tags" ON "tags"."tag" = "tag map"."tag"
+      JOIN "tags" ON "tag map"."tagID" = "tags"."tagID"
       WHERE "tags"."tag" = OLD.tag
   );
 

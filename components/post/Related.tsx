@@ -71,7 +71,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
         return functions.color.colorizeSVG(icon, "--titleButtons")
     }
 
-    let rating = props.post?.rating || (ratingType === functions.r18() ? ratingType : "all")
+    let rating = props.post?.rating || (functions.post.isR18(ratingType) ? ratingType : "all")
 
     const searchPosts = async () => {
         if (props.post?.type === "model" || props.post?.type === "live2d") {

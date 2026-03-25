@@ -144,16 +144,26 @@ export default class SQLTag {
     /** Insert a new tag map. */
     public static insertTagMap = async (postID: string, tags: string[]) => {
         if (!tags.length) return
+
+        const tagIDsQuery: QueryConfig = {
+            text: `SELECT "tagID" FROM "tags" WHERE "tag" = ANY($1)`,
+            values: [tags]
+        }
+        const tagRows = await SQLQuery.run(tagIDsQuery)
+        if (!tagRows.length) return
+
         let i = 2
         let valueArray = [] as any
-        for (let j = 0; j < tags.length; j++) {
+        const tagIDs: number[] = tagRows.map((row: any) => row.tagID)
+
+        for (let j = 0; j < tagIDs.length; j++) {
             valueArray.push(`($1, $${i})`)
             i++
         }
         let valueQuery = `VALUES ${valueArray.join(", ")}`
         const query: QueryConfig = {
-            text: /*sql*/`INSERT INTO "tag map" ("postID", "tag") ${valueQuery} ON CONFLICT ("postID", "tag") DO NOTHING`,
-            values: [postID, ...tags]
+            text: /*sql*/`INSERT INTO "tag map" ("postID", "tagID") ${valueQuery} ON CONFLICT ("postID", "tagID") DO NOTHING`,
+            values: [postID, ...tagIDs]
         }
         await SQLQuery.run(query)
     }
@@ -161,10 +171,20 @@ export default class SQLTag {
     /** Delete tag map. */
     public static deleteTagMap = async (postID: string, tags: string[]) => {
         if (!tags.length) return
-        const tagPlaceholders = tags.map((value, index) => `$${index + 2}`).join(", ")
+
+        const tagIdQuery: QueryConfig = {
+            text: `SELECT "tagID" FROM "tags" WHERE "tag" = ANY($1)`,
+            values: [tags]
+        }
+        const tagRows = await SQLQuery.run(tagIdQuery)
+        if (!tagRows.length) return
+
+        const tagIDs: number[] = tagRows.map((row: any) => row.tagID)
+        const tagPlaceholders = tagIDs.map((value, index) => `$${index + 2}`).join(", ")
+
         const query: QueryConfig = {
-            text: /*sql*/`DELETE FROM "tag map" WHERE "postID" = $1 AND "tag" IN (${tagPlaceholders})`,
-            values: [postID, ...tags]
+            text: /*sql*/`DELETE FROM "tag map" WHERE "postID" = $1 AND "tagID" IN (${tagPlaceholders})`,
+            values: [postID, ...tagIDs]
         }
         await SQLQuery.run(query)
     }
@@ -445,18 +465,34 @@ export default class SQLTag {
 
     /** Rename tag map. */
     public static renameTagMap = async (tag: string, newTag: string) => {
-        const deleteQuery: QueryConfig = {
-            text: functions.multiTrim(/*sql*/`
-                DELETE FROM "tag map" t1
-                USING "tag map" t2
-                WHERE t1."postID" = t2."postID" AND t1."tag" = $2 AND t2."tag" = $1
-            `),
-            values: [newTag, tag]
-        }
-        await SQLQuery.run(deleteQuery)
-
         const query: QueryConfig = {
-            text: /*sql*/`UPDATE "tag map" SET "tag" = $1 WHERE "tag" = $2`,
+            text: /*sql*/`
+                WITH new_tag AS (
+                    INSERT INTO "tags" ("tag")
+                    VALUES ($1)
+                    ON CONFLICT ("tag") DO NOTHING
+                    RETURNING "tagID"
+                ),
+                old_tag AS (
+                    SELECT "tagID" AS "oldTagID" FROM "tags" WHERE "tag" = $2
+                ),
+                resolved_tag AS (
+                    SELECT COALESCE(
+                        (SELECT "tagID" FROM new_tag),
+                        (SELECT "tagID" FROM "tags" WHERE "tag" = $1)
+                    ) AS "newTagID"
+                ),
+                deleted AS (
+                    DELETE FROM "tag map" t1
+                    USING "tag map" t2, old_tag, resolved_tag
+                    WHERE t1."postID" = t2."postID"
+                    AND t1."tagID" = resolved_tag."newTagID"
+                    AND t2."tagID" = old_tag."oldTagID"
+                )
+                UPDATE "tag map"
+                SET "tagID" = (SELECT "newTagID" FROM resolved_tag)
+                WHERE "tagID" = (SELECT "oldTagID" FROM old_tag)
+            `,
             values: [newTag, tag]
         }
         await SQLQuery.run(query)
@@ -686,10 +722,11 @@ export default class SQLTag {
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                 SELECT "tag groups".*,
-                json_agg(DISTINCT "tag map"."tag") AS tags
+                json_agg(DISTINCT "tags"."tag") AS tags
                 FROM "tag groups" 
                 LEFT JOIN "tag group map" ON "tag group map"."groupID" = "tag groups"."groupID"
                 LEFT JOIN "tag map" ON "tag map"."mapID" = "tag group map"."tagMapID"
+                LEFT JOIN "tags" ON "tag map"."tagID" = "tags"."tagID"
                 WHERE "tag groups"."postID" = $1 AND "tag groups"."name" = $2
                 GROUP BY "tag groups"."groupID"
             `),
@@ -701,20 +738,31 @@ export default class SQLTag {
 
     /** Insert tag group map */
     public static insertTagGroupMap = async (groupID: string, postID: string, tags: string[]) => {
-        const values = [groupID, postID] as string[]
+        const values = [] as string[]
         const valueArray = [] as string[]
         if (!tags.length) return
-    
-        tags.forEach((tag, index) => {
-            const offset = index + 3
-            values.push(tag)
-            valueArray.push(`($1, (SELECT "tag map"."mapID" FROM "tag map" WHERE "tag map"."postID" = $2 AND "tag map".tag = $${offset}))`)
+
+        const tagIDsQuery: QueryConfig = {
+            text: `SELECT "tag map"."mapID", "tags"."tag"
+                FROM "tag map"
+                JOIN "tags" ON "tag map"."tagID" = "tags"."tagID"
+                WHERE "tag map"."postID" = $1 AND "tags"."tag" = ANY($2)`,
+            values: [postID, tags]
+        }
+
+        const tagMapRows = await SQLQuery.run(tagIDsQuery)
+        if (!tagMapRows.length) return
+
+        tagMapRows.forEach((row: any, index: number) => {
+            values.push(groupID, row.mapID)
+            valueArray.push(`($${index * 2 + 1}, $${index * 2 + 2})`)
         })
     
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                 INSERT INTO "tag group map" ("groupID", "tagMapID")
                 VALUES ${valueArray.join(", ")}
+                ON CONFLICT DO NOTHING
             `),
             values
         }
@@ -723,22 +771,30 @@ export default class SQLTag {
 
     /** Delete tag group map */
     public static deleteTagGroupMap = async (groupID: string, postID: string, tags: string[]) => {
-        const values = [groupID, postID] as string[]
+        const values = [] as string[]
         const valueArray = [] as string[]
         if (!tags.length) return
 
-        tags.forEach((tag, index) => {
-            const offset = index + 3
-            values.push(tag)
-            valueArray.push(`((SELECT "tag map"."mapID" FROM "tag map" WHERE "tag map"."postID" = $2 AND "tag map".tag = $${offset}))`)
-        })
+        const tagIDsQuery: QueryConfig = {
+            text: `SELECT "tag map"."mapID", "tags"."tag"
+                FROM "tag map"
+                JOIN "tags" ON "tag map"."tagID" = "tags"."tagID"
+                WHERE "tag map"."postID" = $1 AND "tags"."tag" = ANY($2)`,
+            values: [postID, tags]
+        }
+
+        const tagMapRows = await SQLQuery.run(tagIDsQuery)
+        if (!tagMapRows.length) return
+
+        const mapIDs = tagMapRows.map((row: any) => row.mapID)
+        const placeholders = mapIDs.map((_: any, index: number) => `$${index + 2}`).join(", ")
 
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                 DELETE FROM "tag group map"
-                WHERE "groupID" = $1 AND "tagMapID" IN (${valueArray.join(", ")})
+                WHERE "groupID" = $1 AND "tagMapID" IN (${placeholders})
             `),
-            values
+            values: [groupID, ...mapIDs]
         }
         await SQLQuery.run(query)
     }

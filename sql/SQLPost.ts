@@ -525,13 +525,16 @@ export default class SQLPost {
                 SELECT "tag group tags"."name", "tag group tags"."postID", "tag group tags"."tags"
                 FROM "tag group tags"
             )
-            SELECT posts.*, json_agg(DISTINCT images.*) AS images, json_agg(DISTINCT "tag map".tag) AS tags,
+            SELECT posts.*, 
+            json_agg(DISTINCT images.*) AS images, 
+            json_agg(DISTINCT tags."tag") AS tags,
             COUNT(DISTINCT favorites."username") AS "favoriteCount",
             ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness",
             json_agg(DISTINCT tag_groups_json.*) AS "tagGroups"
             FROM posts
             JOIN images ON posts."postID" = images."postID"
             LEFT JOIN "tag map" ON posts."postID" = "tag map"."postID"
+            LEFT JOIN "tags" ON "tag map"."tagID" = tags."tagID"
             LEFT JOIN tag_groups_json ON posts."postID" = tag_groups_json."postID"
             LEFT JOIN "favorites" ON posts."postID" = "favorites"."postID"
             LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
