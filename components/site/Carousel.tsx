@@ -164,7 +164,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         setVisibleImages(functions.util.removeDuplicates(newVisibleImages))
         setVisibleIndex(currentIndex)
         updateRefs(newVisibleImages.length)
-    }, [props.images, props.appendImages, visibleIndex])
+    }, [props.images, props.appendImages])
 
     useEffect(() => {
         if (props.index !== undefined) {
@@ -182,7 +182,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
                 setScrollTimeout(false)
             }, 1000)
             if (visibleImages.length < images.length) {
-                let newVisibleImages = visibleImages
+                let newVisibleImages = [...visibleImages]
                 let currentIndex = visibleIndex
                 for (let i = 0; i < loadAmount; i++) {
                     if (!images[currentIndex]) break

@@ -585,7 +585,7 @@ export default class SQLSearch {
                 WITH sampled_posts AS (
                     SELECT *
                     FROM posts
-                    TABLESAMPLE SYSTEM (25)
+                    TABLESAMPLE SYSTEM (5)
                     WHERE NOT (posts.style = 'sketch' OR posts.style = 'lineart')
                 ),
                 post_images AS (

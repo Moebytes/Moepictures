@@ -98,7 +98,7 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
                 </span>
             </div>
             <div className="seriesrow-row">
-                <Carousel set={set} noKey={true} images={images} height={200} unlimited={true}/>
+                <Carousel set={set} noKey={true} images={images} height={200}/>
             </div>
         </div>
     )

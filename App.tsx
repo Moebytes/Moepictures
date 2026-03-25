@@ -101,6 +101,7 @@ const App: React.FunctionComponent = (props) => {
     const location = useLocation()
 
     const getSessionCookie = async () => {
+        await fetch("/")
         const cookie = await functions.http.get("/api/user/session", null, session, setSessionFlag)
         setSession(cookie)
         if (cookie.username && !permissions.isPremium(cookie)) {

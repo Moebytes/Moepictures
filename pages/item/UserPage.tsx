@@ -90,13 +90,11 @@ const UserPage: React.FunctionComponent = () => {
     }
 
     const updateUploadOffset = async () => {
-        const newUploads = uploads
-        let offset = newUploads.length
+        let offset = uploads.length
         let rating = functions.post.isR18(ratingType) ? functions.r18() : "all"
         const result = await functions.http.get("/api/user/uploads", {limit, rating, offset}, session, setSessionFlag)
-        newUploads.push(...result)
         const images = result.map((p) => functions.link.getThumbnailLink(p.images[0], "tiny", session, mobile))
-        setUploads(newUploads)
+        setUploads(prev => [...prev, ...result])
         setAppendUploadImages(images)
     }
 
@@ -109,13 +107,11 @@ const UserPage: React.FunctionComponent = () => {
     }
 
     const updateFavoriteOffset = async () => {
-        const newFavorites = favorites
-        let offset = newFavorites.length
+        let offset = favorites.length
         let rating = functions.post.isR18(ratingType) ? functions.r18() : "all"
         const result = await functions.http.get("/api/user/favorites", {limit, rating, offset}, session, setSessionFlag)
-        newFavorites.push(...result)
         const images = result.map((f) => functions.link.getThumbnailLink(f.images[0], "tiny", session, mobile))
-        setFavorites(newFavorites)
+        setFavorites(prev => [...prev, ...result])
         setAppendFavoriteImages(images)
     }
 
