@@ -14,8 +14,6 @@ A post can have multiple images, called variations. There are also child and gro
 
 ### Image Filters
 
-<img src="assets/images/imagefilters.png" height="500">
-
 You can add image filters such as brightness, contrast, hue, and pixelate. There are also audio filters such as highpass, 
 lowpass, and bitcrush.
 
