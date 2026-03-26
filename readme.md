@@ -1,16 +1,16 @@
 # Moepictures
 
-Moepictures is a website for cataloging cute anime art and has its own tagging system.
+Moepictures is a website for posting cute anime artworks.
 
 <img src="assets/images/readme.png">
 
-### Searching With Spaces
+### Search With Spaces
 
-Tags use the dash ("-") as the delimeter, and the search can guess what tags you are looking for even if you use spaces.
+Tags use the dash ("-") as the delimeter, but the search can guess what tags you are looking for even if you use spaces.
 
 ### Multiple Images Per Post
 
-A single "post" can contain multiple images, called variations. There are also child and group relations.
+A post can have multiple images, called variations. There are also child and group relationships.
 
 ### Image Filters
 
@@ -19,15 +19,11 @@ A single "post" can contain multiple images, called variations. There are also c
 You can add image filters such as brightness, contrast, hue, and pixelate. There are also audio filters such as highpass, 
 lowpass, and bitcrush.
 
-### Custom Players
-
-Most players are custom made and not the default. You can pause/reverse gifs and videos.
-
 ### Notes
 
 <img src="assets/images/notes.png" height="500">
 
-Since images might contain non-english text, adding notes for translations is supported. Apart from appearing in a bubble, 
+Since images might contain non-english text, adding notes for translations is supported! Apart from appearing in a bubble, 
 notes may also be overlayed on the image with some styling. Notes can also be used to "mark" a character in images with multiple characters.
 
 ### Tag Groups
