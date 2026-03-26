@@ -59,7 +59,7 @@ const NewTags: React.FunctionComponent<Props> = (props) => {
                     </div>
                     {newTags[i].image ?
                     <div className="new-tags-row">
-                        <img className="new-tags-img" src={functions.link.getUnverifiedTagLink(newTags[i].type, newTags[i].image)}/>
+                        <img className="new-tags-img" src={functions.link.getUnverifiedFolderLink(newTags[i].type, newTags[i].image)}/>
                     </div> : null}
                     <div className="new-tags-row">
                         <span className="new-tags-text">{i18n.labels.description}: {newTags[i].description || i18n.labels.none}</span>

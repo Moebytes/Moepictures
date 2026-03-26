@@ -74,7 +74,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
 
     const getCreatorPFP = () => {
         if (creatorData?.image) {
-            return functions.link.getTagLink("pfp", creatorData.image, creatorData.imageHash)
+            return functions.link.getFolderLink("pfp", creatorData.image, creatorData.imageHash)
         } else {
             return favicon
         }
@@ -82,7 +82,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
 
     const getUpdaterPFP = () => {
         if (updaterData?.image) {
-            return functions.link.getTagLink("pfp", updaterData.image, updaterData.imageHash)
+            return functions.link.getFolderLink("pfp", updaterData.image, updaterData.imageHash)
         } else {
             return favicon
         }

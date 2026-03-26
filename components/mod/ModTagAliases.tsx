@@ -89,7 +89,7 @@ const ModTagAliases: React.FunctionComponent = (props) => {
                     navigate(`/tag/${encodeURIComponent(request.tag)}`)
                 }
             }
-            const img = functions.link.getTagLink(request.type, request.image, request.imageHash)
+            const img = functions.link.getTagLink(request)
             jsx.push(
                 <div className="mod-post">
                     {img ?

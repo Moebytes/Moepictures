@@ -288,7 +288,7 @@ const TagPage: React.FunctionComponent = () => {
             tag: tag.tag,
             key: tag.tag,
             description: tag.description,
-            image: tag.image ? functions.link.getTagLink(tag.type, tag.image, tag.imageHash) : null,
+            image: tag.image ? functions.link.getTagLink(tag) : null,
             aliases: tag.aliases?.[0] ? tag.aliases.map((a: Alias | string | null) => 
             typeof a === "string" ? a as string : a?.alias || "") : [],
             implications: tag.implications?.[0] ? tag.implications.map((i: Implication | string | null) => 
@@ -459,7 +459,7 @@ const TagPage: React.FunctionComponent = () => {
         if (!tag.image) {
             image = ["delete"]
         } else {
-            const imageLink = functions.link.getTagLink(tag.type, tag.image, tag.imageHash)
+            const imageLink = functions.link.getTagLink(tag)
             const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
             const bytes = new Uint8Array(arrayBuffer)
             image = Object.values(bytes)
@@ -544,7 +544,7 @@ const TagPage: React.FunctionComponent = () => {
                             <div className="tag-row">
                                 {tag.image ?
                                 <div className="tag-img-container">
-                                    <img className="tag-img" src={functions.link.getTagLink(tag.type, tag.image, tag.imageHash)}/>
+                                    <img className="tag-img" src={functions.link.getTagLink(tag)}/>
                                 </div> : null}
                                 <span className={`tag-heading ${functions.tag.getTagColor(tag)}`}>{getTagName()}</span>
                                 {tagSocialJSX()}

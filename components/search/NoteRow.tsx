@@ -34,7 +34,7 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
 
     const getNotePFP = () => {
         if (props.note?.image) {
-            return functions.link.getTagLink("pfp", props.note.image, props.note.imageHash)
+            return functions.link.getFolderLink("pfp", props.note.image, props.note.imageHash)
         } else {
             return favicon
         }

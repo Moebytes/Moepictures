@@ -318,7 +318,7 @@ const ToolTip: React.FunctionComponent = (props) => {
         <div className="tooltip" style={getStyle()} onMouseEnter={() => setToolTipEnabled(true)} onMouseLeave={closeTooltip}>
             <div className="tooltip-row">
                 <div className="tooltip-artist-container">
-                    <img className="tooltip-img" src={functions.link.getTagLink(artist.type, artist.image, artist.imageHash)}/>
+                    <img className="tooltip-img" src={functions.link.getTagLink(artist)}/>
                     <span className={`tooltip-tag-clickable ${post?.hidden ? "strikethrough" : ""}`} style={{marginRight: "5px"}} onClick={searchArtist} onAuxClick={openArtist}>{artist.tag}</span>
                     <TagIcon className="tooltip-img-small" onClick={copyTags} onContextMenu={copyTags}/>
                 </div>

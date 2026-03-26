@@ -90,7 +90,7 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="seriesrow">
             <div className="seriesrow-row">
-                {props.series.image ? <img className="seriesrow-img" src={functions.link.getTagLink("series", props.series.image, props.series.imageHash)}/> : null}
+                {props.series.image ? <img className="seriesrow-img" src={functions.link.getTagLink(props.series)}/> : null}
                 <span className="seriesrow-text-hover">
                     <span className="seriesrow-text" onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{functions.util.toProperCase(props.series.tag.replaceAll("-", " "))}</span>
                     {seriesSocialJSX()}

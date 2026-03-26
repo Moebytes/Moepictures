@@ -46,7 +46,7 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
 
     const getUserPFP = () => {
         if (props.forumPost?.image) {
-            return functions.link.getTagLink("pfp", props.forumPost.image, props.forumPost.imageHash)
+            return functions.link.getFolderLink("pfp", props.forumPost.image, props.forumPost.imageHash)
         } else {
             return favicon
         }

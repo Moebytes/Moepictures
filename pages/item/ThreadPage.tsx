@@ -183,7 +183,7 @@ const ThreadPage: React.FunctionComponent = () => {
     const getCreatorPFP = () => {
         if (!thread) return
         if (thread.image) {
-            return functions.link.getTagLink("pfp", thread.image, thread.imageHash)
+            return functions.link.getFolderLink("pfp", thread.image, thread.imageHash)
         } else {
             return favicon
         }

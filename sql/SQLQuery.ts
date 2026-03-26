@@ -6,6 +6,7 @@
 
 import {Pool, QueryArrayConfig, QueryConfig, types} from "pg"
 import {pgDump} from "pg-dump-restore"
+import SSH2 from "ssh2-promise"
 import * as Redis from "redis"
 import functions from "../functions/Functions"
 import serverFunctions from "../server/ServerFunctions"
@@ -43,6 +44,26 @@ if (!process.env.PG_USER || !process.env.PG_HOST ||
   throw new Error("Database credentials PG_USER, PG_HOST, PG_DATABASE, PG_PASSWORD, and PG_PORT required.")
 }
 
+let localPort = process.env.PG_PORT
+
+if (!functions.config.useLocalDB()) {
+  let ssh = new SSH2({
+      host: process.env.SSH_HOST,
+      username: process.env.SSH_USER,
+      port: 22,
+      identity: process.env.SSH_KEY_PATH
+  } as any)
+
+  await ssh.connect()
+
+  let tunnel = await ssh.addTunnel({
+      remoteAddr: process.env.PG_HOST,
+      remotePort: Number(process.env.PG_PORT)
+  })
+
+  localPort = tunnel.localPort
+}
+
 const pgPool = functions.config.useLocalDB() ? new Pool({
   user: process.env.PG_LOCAL_USER,
   host: process.env.PG_LOCAL_HOST,
@@ -54,7 +75,7 @@ const pgPool = functions.config.useLocalDB() ? new Pool({
   host: process.env.PG_HOST,
   database: process.env.PG_DATABASE,
   password: process.env.PG_PASSWORD,
-  port: Number(process.env.PG_PORT)
+  port: Number(localPort)
 })
 
 const redis = Redis.createClient({

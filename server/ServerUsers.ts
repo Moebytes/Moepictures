@@ -61,7 +61,7 @@ export default class ServerUsers {
             await sql.token.deletePasswordToken(user.email!)
             await sql.token.deleteIPToken(user.email!)
             await sql.token.deleteAPIKey(user.email!)
-            if (user.image) await serverFunctions.files.deleteFile(functions.link.getTagLink("pfp", user.image, user.imageHash), false)
+            if (user.image) await serverFunctions.files.deleteFile(functions.link.getFolderLink("pfp", user.image, user.imageHash), false)
         } catch (e) {
             console.log(e)
         }

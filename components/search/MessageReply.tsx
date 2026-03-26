@@ -42,7 +42,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
 
     const getReplyPFP = () => {
         if (props.reply?.image) {
-            return functions.link.getTagLink("pfp", props.reply.image, props.reply.imageHash)
+            return functions.link.getFolderLink("pfp", props.reply.image, props.reply.imageHash)
         } else {
             return favicon
         }

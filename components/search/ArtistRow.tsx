@@ -96,7 +96,7 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="artistrow">
             <div className="artistrow-row">
-                {props.artist.image ? <img className="artistrow-img" src={functions.link.getTagLink("artist", props.artist.image, props.artist.imageHash)}/> : null}
+                {props.artist.image ? <img className="artistrow-img" src={functions.link.getTagLink(props.artist)}/> : null}
                 <span className="artistrow-text-hover">
                     <span className="artistrow-text" onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{functions.util.toProperCase(props.artist.tag.replaceAll("-", " "))}</span>
                     {artistSocialJSX()}

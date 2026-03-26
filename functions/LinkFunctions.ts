@@ -5,7 +5,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import functions from "./Functions"
-import {Session, Image, Post, PostHistory} from "../types/Types"
+import {Session, Image, Post, PostHistory, Tag, TagCount, MiniTag} from "../types/Types"
 
 export default class LinkFunctions {
     private static postImageCache: Map<string, string> = new Map()
@@ -34,6 +34,8 @@ export default class LinkFunctions {
 
     public static getImageLink = (image: Image, upscaled?: boolean) => {
         if (!image.filename && !image.upscaledFilename) return ""
+        if (upscaled && image.upscaledImageLink) return image.upscaledImageLink
+        if (image.imageLink) return image.imageLink
         let filename = upscaled ? image.upscaledFilename || image.filename : image.filename
         const link = `${window.location.protocol}//${window.location.host}/${image.type}/${image.postID}-${image.order}-${encodeURIComponent(filename)}`
         return functions.util.appendURLParams(link, {hash: image.pixelHash})
@@ -85,6 +87,7 @@ export default class LinkFunctions {
         if (image.type === "model" || image.type === "live2d") {
             if (session.liveModelPreview && !mobile) return this.getImageLink(image, false)
         }
+        if (image.thumbLink) return image.thumbLink
         const link = `${window.location.protocol}//${window.location.host}/thumbnail/${image.type}/${encodeURIComponent(filename)}`
         return functions.util.appendURLParams(link, {hash: image.pixelHash})
     }
@@ -148,7 +151,19 @@ export default class LinkFunctions {
         return `history/tag/${encodeURIComponent(tag)}/${key}/${filename}`
     }
 
-    public static getTagLink = (folder: string, filename: string | null, hash: string | null) => {
+     public static getTagLink = (tag: Tag | TagCount | MiniTag) => {
+        if (!tag.image) return ""
+        let dest = "tag"
+        if (tag.type === "artist") dest = "artist"
+        if (tag.type === "character") dest = "character"
+        if (tag.type === "series") dest = "series"
+        if (tag.imageLink) return tag.imageLink
+        if (tag.image.includes("history/")) return `${window.location.protocol}//${window.location.host}/${tag.image}`
+        const link = `${window.location.protocol}//${window.location.host}/${dest}/${encodeURIComponent(tag.image)}`
+        return tag.imageHash ? functions.util.appendURLParams(link, {hash: tag.imageHash}) : link
+    }
+
+    public static getFolderLink = (folder: string, filename: string | null, hash: string | null) => {
         if (!filename) return ""
         let dest = "tag"
         if (folder === "artist") dest = "artist"
@@ -160,7 +175,7 @@ export default class LinkFunctions {
         return hash ? functions.util.appendURLParams(link, {hash: hash}) : link
     }
 
-    public static getUnverifiedTagLink = (folder: string, filename: string | null) => {
+    public static getUnverifiedFolderLink = (folder: string, filename: string | null) => {
         if (!filename) return ""
         let dest = "tag"
         if (folder === "artist") dest = "artist"

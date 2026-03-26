@@ -10,6 +10,8 @@ import axios from "axios"
 import fs from "fs"
 import path from "path"
 import functions from "../functions/Functions"
+import {PostFull, PostSearch, Post, TagSearch, 
+TagCategorySearch, TagCount, MiniTag, Tag} from "../types/Types"
 
 let local = process.env.MOEPICTURES_LOCAL
 let localR18 = process.env.MOEPICTURES_LOCAL_R18
@@ -362,5 +364,42 @@ export default class ServerFiles {
         let bucket = process.env.MOEPICTURES_BACKUP_BUCKET!
         await s3.putObject({Bucket: bucket, Key: file, Body: content,
         Expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)})
+    }
+
+    public static appendImageLinks = <T extends PostSearch | PostFull | Post>(post: T) => {
+        if (functions.config.useLocalFiles()) return post
+
+        post.images = post.images.map((image) => {
+            let thumbLink = !image.thumbnail || functions.post.isR18(post.rating) ? null :
+                `${publicRemote}/thumbnail/${post.type}/${image.thumbnail}?hash=${image.pixelHash}`
+
+            let imageLink = !image.filename || functions.post.isR18(post.rating) ? null :
+                `${publicRemote}/${post.type}/${post.postID}-${image.order}-${image.filename}?hash=${image.pixelHash}`
+
+            let upscaledImageLink = !image.upscaledFilename || functions.post.isR18(post.rating) ? null :
+                `${publicRemote}/${post.type}-upscaled/${post.postID}-${image.order}-${image.upscaledFilename}?hash=${image.pixelHash}`
+
+            return {
+                ...image,
+                thumbLink,
+                imageLink,
+                upscaledImageLink 
+            }
+        })
+        return post
+    }
+
+    public static appendTagLinks = <T extends TagCategorySearch | TagSearch | TagCount | MiniTag | Tag>(tag: T) => {
+        if (functions.config.useLocalFiles()) return tag
+
+        let folder = "tag"
+        if (tag.type === "artist") folder = "artist"
+        if (tag.type === "character") folder = "character"
+        if (tag.type === "series") folder = "series"
+
+        tag.imageLink = !tag.image ? null : 
+            `${publicRemote}/${folder}/${tag.image}?hash=${tag.imageHash}`
+
+        return tag
     }
 }

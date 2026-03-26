@@ -135,18 +135,18 @@ const SearchRoutes = (app: Express) => {
             } else {
                 result = await sql.search.search(tags, type, rating, style, sort, offset, limit, withTags, showChildren, req.session.username, req.session)
             }
-            result = result.map((p) => {
-                if (p.images?.length > 1) {
-                    p.images = p.images.sort((a, b) => a.order - b.order)
+            result = result.map(serverFunctions.files.appendImageLinks).map((post) => {
+                if (post.images?.length > 1) {
+                    post.images = post.images.sort((a, b) => a.order - b.order)
                 }
-                return p 
+                return post
             })
-            result = result.filter((p) => !p.deleted)
+            result = result.filter((post) => !post.deleted)
             if (!permissions.isMod(req.session)) {
-                result = result.filter((p) => !p.hidden)
+                result = result.filter((post) => !post.hidden)
             }
             if (!req.session.showR18) {
-                result = result.filter((p) => !functions.post.isR18(p.rating))
+                result = result.filter((post) => !functions.post.isR18(post.rating))
             }
             for (let i = result.length - 1; i >= 0; i--) {
                 const post = result[i]
@@ -187,6 +187,7 @@ const SearchRoutes = (app: Express) => {
             if (!images.length && !useMD5) images = await sql.run(similarQuery) as Image[]
         
             let result = await sql.search.posts(Array.from(images.map((i) => i.postID)))
+            result = result.map(serverFunctions.files.appendImageLinks)
             if (req.session.captchaNeeded) result = functions.post.stripTags(result)
             res.status(200).json(result)
         } catch (e) {
@@ -212,9 +213,11 @@ const SearchRoutes = (app: Express) => {
                     await sql.setCache(`artists-${sort}-${limit}-${offset}`, result, 18000)
                 }
             }
-            
+
             for (let i = 0; i < result.length; i++) {
                 const artist = result[i]
+                artist.type = "artist"
+                artist.posts = artist.posts.map(serverFunctions.files.appendImageLinks)
                 if (req.session.captchaNeeded) artist.posts = functions.post.stripTags(artist.posts)
                 artist.posts = artist.posts.filter((p) => !p.deleted)
                 if (!permissions.isMod(req.session)) {
@@ -232,6 +235,7 @@ const SearchRoutes = (app: Express) => {
                     }
                 }
             }
+            result = result.map(serverFunctions.files.appendTagLinks)
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
@@ -259,6 +263,8 @@ const SearchRoutes = (app: Express) => {
 
             for (let i = 0; i < result.length; i++) {
                 const character = result[i]
+                character.type = "character"
+                character.posts = character.posts.map(serverFunctions.files.appendImageLinks)
                 if (req.session.captchaNeeded) character.posts = functions.post.stripTags(character.posts)
                 character.posts = character.posts.filter((p) => !p.deleted)
                 if (!permissions.isMod(req.session)) {
@@ -276,6 +282,7 @@ const SearchRoutes = (app: Express) => {
                     }
                 }
             }
+            result = result.map(serverFunctions.files.appendTagLinks)
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
@@ -303,6 +310,8 @@ const SearchRoutes = (app: Express) => {
 
             for (let i = 0; i < result.length; i++) {
                 const series = result[i]
+                series.type = "series"
+                series.posts = series.posts.map(serverFunctions.files.appendImageLinks)
                 if (req.session.captchaNeeded) series.posts = functions.post.stripTags(series.posts)
                 series.posts = series.posts.filter((p) => !p.deleted)
                 if (!permissions.isMod(req.session)) {
@@ -320,6 +329,7 @@ const SearchRoutes = (app: Express) => {
                     }
                 }
             }
+            result = result.map(serverFunctions.files.appendTagLinks)
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
@@ -342,6 +352,8 @@ const SearchRoutes = (app: Express) => {
             } else {
                 result = await sql.search.tagSearch(search, sort, type, limit, offset, req.session)
             }
+            result = result.map(serverFunctions.files.appendTagLinks)
+            
             if (!permissions.isMod(req.session)) {
                 result = result.filter((tag: any) => !tag.hidden)
             }
@@ -380,6 +392,7 @@ const SearchRoutes = (app: Express) => {
             }
             for (let i = result.length - 1; i >= 0; i--) {
                 const comment = result[i]
+                comment.post = serverFunctions.files.appendImageLinks(comment.post)
                 if (comment.post.deleted) result.splice(i, 1)
                 if (!permissions.isMod(req.session)) {
                     if (comment.post.hidden) result.splice(i, 1)
@@ -425,6 +438,7 @@ const SearchRoutes = (app: Express) => {
             }
             for (let i = result.length - 1; i >= 0; i--) {
                 const note = result[i]
+                note.post = serverFunctions.files.appendImageLinks(note.post)
                 if (note.post.deleted) result.splice(i, 1)
                 if (!permissions.isMod(req.session)) {
                     if (note.post.hidden) result.splice(i, 1)
@@ -453,6 +467,10 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validation.validGroupSort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
             let  result = await sql.search.groupSearch(search, sort, rating, limit, offset, req.session.username)
+            result = result.map((g) => {
+                g.posts = g.posts.map(serverFunctions.files.appendImageLinks)
+                return g
+            })
             if (!req.session.showR18) {
                 result = result.filter((g: any) => !functions.post.isR18(g.rating))
             }

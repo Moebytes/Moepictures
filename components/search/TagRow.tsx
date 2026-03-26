@@ -173,7 +173,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             tag: props.tag.tag,
             key: props.tag.tag,
             description: props.tag.description,
-            image: props.tag.image ? functions.link.getTagLink(props.tag.type, props.tag.image, props.tag.imageHash) : null,
+            image: props.tag.image ? functions.link.getTagLink(props.tag) : null,
             aliases: props.tag.aliases?.[0] ? props.tag.aliases.map((a) => a?.alias || "") : [],
             implications: props.tag.implications?.[0] ? props.tag.implications.map((i) => i?.implication || "s") : [],
             pixivTags: props.tag.pixivTags?.[0] ? props.tag.pixivTags : [],
@@ -257,7 +257,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         <div className="tagrow">
             {props.tag.image ?
             <div className="tagrow-img-container">
-                <img className="tagrow-img" src={functions.link.getTagLink(props.tag.type, props.tag.image, props.tag.imageHash)}/>
+                <img className="tagrow-img" src={functions.link.getTagLink(props.tag)}/>
             </div> : null}
             <div className="tagrow-content-container">
                 <div className="tagrow-container" style={{width: props.tag.image ? "16%" : "25%"}}>

@@ -201,7 +201,7 @@ const UserPage: React.FunctionComponent = () => {
 
     const getUserImg = () => {
         if (!user) return ""
-        return user.image ? functions.link.getTagLink("pfp", user.image, user.imageHash) : favicon
+        return user.image ? functions.link.getFolderLink("pfp", user.image, user.imageHash) : favicon
     }
 
     const userImgClick = (event: React.MouseEvent) => {

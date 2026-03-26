@@ -255,7 +255,7 @@ const TagToolTip: React.FunctionComponent = (props) => {
             <div className="tag-tooltip-row">
                 {tag.image ?
                 <div className="tag-tooltip-img-container">
-                    <img className="tag-tooltip-img" src={functions.link.getTagLink(tag.type, tag.image, tag.imageHash)}/>
+                    <img className="tag-tooltip-img" src={functions.link.getTagLink(tag)}/>
                 </div> : null}
                 <span className={`tag-tooltip-heading ${functions.tag.getTagColor(tag)}`} onClick={tagInfo} onAuxClick={tagInfo}>{getTagName()}</span>
                 {tagSocialJSX()}

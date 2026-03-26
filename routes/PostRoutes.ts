@@ -64,6 +64,7 @@ const PostRoutes = (app: Express) => {
                 const categories = await serverFunctions.tags.tagCategories(result.tags)
                 if (!permissions.canPrivate(req.session, categories.artists)) return void res.status(403).end()
             }
+            result = serverFunctions.files.appendImageLinks(result)
             if (result?.images.length > 1) {
                 result.images = result.images.sort((a: any, b: any) => a.order - b.order)
             }
@@ -82,6 +83,7 @@ const PostRoutes = (app: Express) => {
             if (!Array.isArray(postIDs)) postIDs = [postIDs]
             if (!postIDs?.length) return void res.status(200).json([])
             let result = await sql.search.posts(postIDs.slice(0, 100))
+            result = result.map(serverFunctions.files.appendImageLinks)
             if (!permissions.isMod(req.session)) {
                 result = result.filter((p: any) => !p.hidden)
             }
@@ -120,6 +122,7 @@ const PostRoutes = (app: Express) => {
                 if (!permissions.canPrivate(req.session, categories.artists)) return void res.status(403).end()
             }
             let result = await sql.post.postTags(postID)
+            result = result.map(serverFunctions.files.appendTagLinks)
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
@@ -335,6 +338,10 @@ const PostRoutes = (app: Express) => {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
             let result = await sql.post.childPosts(postID)
+            result = result.map((childPost) => {
+                childPost.post = serverFunctions.files.appendImageLinks(childPost.post)
+                return childPost
+            })
             if (!permissions.isMod(req.session)) {
                 result = result.filter((r) => !r.post.hidden)
             }
@@ -362,6 +369,7 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
             const parent = await sql.post.parent(postID)
             if (!parent) return void res.status(200).json()
+            parent.post = serverFunctions.files.appendImageLinks(parent.post)
             if (!permissions.isMod(req.session)) {
                 if (parent.post.hidden) return void res.status(403).end()
             }
@@ -1358,7 +1366,8 @@ const PostRoutes = (app: Express) => {
                 if (!image) continue
                 let buffer = functions.byte.base64ToBuffer(thumb.thumbnail)
                 const {thumbBuffer, thumbnailExt} = await serverFunctions.util.processThumbnail(buffer, thumb.thumbnailExt)
-                const thumbnailFilename = `${postID}-${thumb.order}.${thumbnailExt}`
+                let baseFile = path.basename(image.filename, path.extname(image.filename))
+                const thumbnailFilename = `${postID}-${thumb.order}-${baseFile}.${thumbnailExt}`
                 let thumbPath = functions.link.getThumbnailImagePath(image.type, thumbnailFilename)
                 if (unverified) {
                     if (image.thumbnail) {
@@ -1402,7 +1411,8 @@ const PostRoutes = (app: Express) => {
                 let ext = path.extname(image.filename).replace(".", "")
 
                 const {thumbBuffer, thumbnailExt} = await serverFunctions.util.processThumbnail(buffer, ext)
-                const thumbnailFilename = `${postID}-${image.order}.${thumbnailExt}`
+                let baseFile = path.basename(image.filename, path.extname(image.filename))
+                const thumbnailFilename = `${postID}-${image.order}-${baseFile}.${thumbnailExt}`
                 let thumbPath = functions.link.getThumbnailImagePath(image.type, thumbnailFilename)
                 if (image.thumbnail) {
                     const oldThumbnail = functions.link.getThumbnailImagePath(image.type, image.thumbnail)
@@ -1410,7 +1420,6 @@ const PostRoutes = (app: Express) => {
                 }
                 await serverFunctions.files.uploadFile(thumbPath, thumbBuffer, r18)
                 await sql.post.updateImage(image.imageID, "thumbnail", thumbnailFilename)
-                
             }
             res.status(200).send("Success")
         } catch (e) {

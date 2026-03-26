@@ -301,8 +301,7 @@ for (let i = 0; i < folders.length; i++) {
           if (!matches) return res.status(404).end()
         }
       }
-      const [id, order, name] = path.basename(key, path.extname(key)).split("-")
-      let thumbKey = `thumbnail/${folders[i]}/${id}-${order}${path.extname(key)}`
+      let thumbKey = `thumbnail/${key}`
       if (req.path.includes("history/post")) thumbKey = key
       let body = await serverFunctions.files.getFile(thumbKey, false, r18, pixelHash)
       if (!body.byteLength) body = await serverFunctions.files.getFile(key, false, r18, pixelHash)
@@ -401,8 +400,7 @@ for (let i = 0; i < folders.length; i++) {
       } else {
         if (!permissions.isMod(req.session)) return res.status(404).end()
       }
-      const [id, order, name] = path.basename(key, path.extname(key)).split("-")
-      let thumbKey = `thumbnail/${folders[i]}/${id}-${order}${path.extname(key)}`
+      let thumbKey = `thumbnail/${key}`
       if (req.path.includes("history/post")) thumbKey = key
       let body = await serverFunctions.files.getUnverifiedFile(thumbKey, false)
       if (!body.byteLength) body = await serverFunctions.files.getUnverifiedFile(key, false)

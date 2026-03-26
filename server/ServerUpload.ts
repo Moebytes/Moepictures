@@ -255,7 +255,8 @@ export default class ServerUpload {
                 } else {
                     ext = path.extname(original.thumbnail).replace(".", "")
                 }
-                thumbnailFilename = `${postID}-${order}.${ext}`
+                let baseFile = path.basename(filename, path.extname(filename))
+                thumbnailFilename = `${postID}-${order}-${baseFile}.${ext}`
             }
             imageFilenames.push(filename)
             upscaledImageFilenames.push(upscaledFilename)

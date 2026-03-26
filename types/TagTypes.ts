@@ -23,6 +23,7 @@ export interface MiniTag {
     fandom: string | null
     wikipedia: string | null
     count?: string
+    imageLink?: string | null
 }
 
 export interface TagCategories {
@@ -46,6 +47,7 @@ export interface TagCount {
     website: string | null
     fandom: string | null
     wikipedia: string | null
+    imageLink?: string | null
 }
 
 export interface Alias {
@@ -84,6 +86,7 @@ export interface Tag {
     pixivTags: string[] | null
     danbooruTag: string | null
     r18: boolean | null
+    imageLink?: string | null
 }
 
 export interface TagSearch extends Omit<Tag, "featuredPost"> {

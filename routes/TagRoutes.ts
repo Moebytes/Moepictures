@@ -59,6 +59,7 @@ const TagRoutes = (app: Express) => {
                     if (pixivTag) result = await sql.tag.tag(pixivTag.tag)
                 }
             }
+            if (result) result = serverFunctions.files.appendTagLinks(result)
             if (result?.hidden && !permissions.isMod(req.session)) {
                 result = undefined
             }
@@ -100,6 +101,7 @@ const TagRoutes = (app: Express) => {
                     await sql.setCache("tag-counts", result, 60)
                 }
             }
+            result = result.map(serverFunctions.files.appendTagLinks)
 
             if (!permissions.isMod(req.session)) {
                 result = result.filter((tag) => !tag.hidden)
@@ -120,6 +122,8 @@ const TagRoutes = (app: Express) => {
             if (typeof tags === "string") tags = [tags]
             if (!tags) tags = []
             let result = await sql.tag.tags(tags.filter(Boolean))
+            result = result.map(serverFunctions.files.appendTagLinks)
+            
             if (!permissions.isMod(req.session)) {
                 result = result.filter((tag) => !tag.hidden)
             }

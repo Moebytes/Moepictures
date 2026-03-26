@@ -83,7 +83,7 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="characterrow">
             <div className="characterrow-row">
-                {props.character.image ? <img className="characterrow-img" src={functions.link.getTagLink("character", props.character.image, props.character.imageHash)}/> : null}
+                {props.character.image ? <img className="characterrow-img" src={functions.link.getTagLink(props.character)}/> : null}
                 <span className="characterrow-text-hover">
                     <span className="characterrow-text" onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{functions.util.toProperCase(props.character.tag.replaceAll("-", " "))}</span>
                     {characterSocialJSX()}

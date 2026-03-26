@@ -45,7 +45,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
 
     const getCommentPFP = () => {
         if (props.comment?.image) {
-            return functions.link.getTagLink("pfp", props.comment.image, props.comment.imageHash)
+            return functions.link.getFolderLink("pfp", props.comment.image, props.comment.imageHash)
         } else {
             return favicon
         }

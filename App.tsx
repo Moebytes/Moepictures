@@ -152,7 +152,7 @@ const App: React.FunctionComponent = (props) => {
 
     const getImg = () => {
         if (session.username) {
-            return session.image ? functions.link.getTagLink("pfp", session.image, session.imageHash) : favicon
+            return session.image ? functions.link.getFolderLink("pfp", session.image, session.imageHash) : favicon
         } else {
             return ""
         }

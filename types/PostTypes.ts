@@ -54,6 +54,9 @@ export interface Image {
     pixelHash: string
     directLink: string
     altSource: string
+    thumbLink?: string | null
+    imageLink?: string | null
+    upscaledImageLink?: string | null
 }
 
 export interface Post {

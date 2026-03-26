@@ -252,7 +252,7 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
             artists[i].tag = tagCategories.artists[i].tag
             if (tagCategories.artists[i].image) {
                 try {
-                    const imageLink = functions.util.removeQueryParams(functions.link.getTagLink("artist", tagCategories.artists[i].image!, tagCategories.artists[i].imageHash))
+                    const imageLink = functions.util.removeQueryParams(functions.link.getTagLink(tagCategories.artists[i]))
                     artists[i].image = imageLink
                     const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer()).catch(() => null)
                     if (!arrayBuffer) throw "bad"
@@ -260,7 +260,7 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
                     artists[i].bytes = Object.values(new Uint8Array(arrayBuffer))
                 } catch {
                     if (props.unverified) {
-                        const imageLink = functions.link.getUnverifiedTagLink("artist", tagCategories.artists[i].image!)
+                        const imageLink = functions.link.getUnverifiedFolderLink("artist", tagCategories.artists[i].image!)
                         artists[i].image = imageLink
                         const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                         artists[i].ext = path.extname(imageLink).replace(".", "")
@@ -277,7 +277,7 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
             characters[i].tag = tagCategories.characters[i].tag
             if (tagCategories.characters[i].image) {
                 try {
-                    const imageLink = functions.util.removeQueryParams(functions.link.getTagLink("character", tagCategories.characters[i].image!, tagCategories.characters[i].imageHash))
+                    const imageLink = functions.util.removeQueryParams(functions.link.getTagLink(tagCategories.characters[i]))
                     characters[i].image = imageLink
                     const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer()).catch(() => null)
                     if (!arrayBuffer) throw "bad"
@@ -285,7 +285,7 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
                     characters[i].bytes = Object.values(new Uint8Array(arrayBuffer))
                 } catch {
                     if (props.unverified) {
-                        const imageLink = functions.link.getUnverifiedTagLink("character", tagCategories.characters[i].image!)
+                        const imageLink = functions.link.getUnverifiedFolderLink("character", tagCategories.characters[i].image!)
                         characters[i].image = imageLink
                         const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                         characters[i].ext = path.extname(imageLink).replace(".", "")
@@ -302,7 +302,7 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
             series[i].tag = tagCategories.series[i].tag
             if (tagCategories.series[i].image) {
                 try {
-                    const imageLink = functions.util.removeQueryParams(functions.link.getTagLink("series", tagCategories.series[i].image!, tagCategories.series[i].imageHash))
+                    const imageLink = functions.util.removeQueryParams(functions.link.getTagLink(tagCategories.series[i]))
                     series[i].image = imageLink
                     const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer()).catch(() => null)
                     if (!arrayBuffer) throw "bad"
@@ -310,7 +310,7 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
                     series[i].bytes = Object.values(new Uint8Array(arrayBuffer))
                 } catch {
                     if (props.unverified) {
-                        const imageLink = functions.link.getUnverifiedTagLink("series", tagCategories.series[i].image!)
+                        const imageLink = functions.link.getUnverifiedFolderLink("series", tagCategories.series[i].image!)
                         series[i].image = imageLink
                         const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                         series[i].ext = path.extname(imageLink).replace(".", "")
@@ -540,7 +540,7 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
         const tagDetail = await functions.http.get("/api/tag", {tag}, session, setSessionFlag).catch(() => null)
         if (!tagDetail) return
         if (tagDetail.image) {
-            const tagLink = functions.util.removeQueryParams(functions.link.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
+            const tagLink = functions.util.removeQueryParams(functions.link.getTagLink(tagDetail))
             const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
             const bytes = new Uint8Array(arrayBuffer)
             const ext = path.extname(tagLink).replace(".", "")
@@ -1131,7 +1131,7 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
                 characters[characters.length - 1].image = ""
                 const tagDetail = await functions.http.get("/api/tag", {tag: tagLookup.characters[i].tag!}, session, setSessionFlag).catch(() => null)
                 if (tagDetail?.image) {
-                    const tagLink = functions.util.removeQueryParams(functions.link.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
+                    const tagLink = functions.util.removeQueryParams(functions.link.getTagLink(tagDetail))
                     const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
                     const bytes = new Uint8Array(arrayBuffer)
                     const ext = path.extname(tagLink).replace(".", "")
@@ -1156,7 +1156,7 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
                 series[series.length - 1].image = ""
                 const tagDetail = await functions.http.get("/api/tag", {tag: tagLookup.series[i].tag!}, session, setSessionFlag).catch(() => null)
                 if (tagDetail?.image) {
-                    const tagLink = functions.util.removeQueryParams(functions.link.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
+                    const tagLink = functions.util.removeQueryParams(functions.link.getTagLink(tagDetail))
                     const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
                     const bytes = new Uint8Array(arrayBuffer)
                     const ext = path.extname(tagLink).replace(".", "")

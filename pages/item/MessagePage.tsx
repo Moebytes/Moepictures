@@ -203,7 +203,7 @@ const MessagePage: React.FunctionComponent = () => {
     const getCreatorPFP = () => {
         if (!message) return
         if (message.image) {
-            return functions.link.getTagLink("pfp", message.image, message.imageHash)
+            return functions.link.getFolderLink("pfp", message.image, message.imageHash)
         } else {
             return favicon
         }
