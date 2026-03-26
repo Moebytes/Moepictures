@@ -1179,7 +1179,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     </button>
                     
                     {session.username ? (autoSearch ? 
-                        <AutoSearchIcon className="autosearch-pink" onClick={toggleAutoSearch}/> :
+                        <AutoSearchIcon className="autosearch-pink rotate" onClick={toggleAutoSearch}/> :
                         <AutoSearchIcon className="autosearch" onClick={toggleAutoSearch}/>) : null}
                         
                     {!props.post && session.username ? (saveSearch ? 
