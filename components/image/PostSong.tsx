@@ -9,18 +9,18 @@ import {useNavigate} from "react-router-dom"
 import withPostWrapper, {PostWrapperProps, PostWrapperRef} from "./withPostWrapper"
 import {useSessionSelector, useFilterSelector, usePlaybackSelector, usePlaybackActions, useSearchSelector, useInteractionActions} from "../../store"
 import Slider from "react-slider"
-import reverseIcon from "../../assets/svg/reverse.svg"
-import speedIcon from "../../assets/svg/speed.svg"
-import clearIcon from "../../assets/svg/clear.svg"
-import playIcon from "../../assets/svg/play.svg"
-import pauseIcon from "../../assets/svg/pause.svg"
-import fullscreenIcon from "../../assets/svg/fullscreen.svg"
-import rewindIcon from "../../assets/svg/rewind.svg"
-import fastforwardIcon from "../../assets/svg/fastforward.svg"
-import preservePitchIcon from "../../assets/svg/pitch.svg"
-import volumeIcon from "../../assets/svg/volume.svg"
-import volumeLowIcon from "../../assets/svg/volume-low.svg"
-import volumeMuteIcon from "../../assets/svg/volume-mute.svg"
+import ReverseIcon from "../../assets/svg/reverse.svg"
+import SpeedIcon from "../../assets/svg/speed.svg"
+import ClearIcon from "../../assets/svg/clear.svg"
+import PlayIcon from "../../assets/svg/play.svg"
+import PauseIcon from "../../assets/svg/pause.svg"
+import FullscreenIcon from "../../assets/svg/fullscreen.svg"
+import RewindIcon from "../../assets/svg/rewind.svg"
+import FastforwardIcon from "../../assets/svg/fastforward.svg"
+import PreservePitchIcon from "../../assets/svg/pitch.svg"
+import VolumeIcon from "../../assets/svg/volume.svg"
+import VolumeLowIcon from "../../assets/svg/volume-low.svg"
+import VolumeMuteIcon from "../../assets/svg/volume-mute.svg"
 import path from "path"
 import functions from "../../functions/Functions"
 import "./styles/postsong.less"
@@ -49,10 +49,6 @@ const PostSong = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef)
     const {showSpeedDropdown, setShowSpeedDropdown} = props
     const {audioRef, lightnessRef, overlayRef, effectRef, pixelateRef, onLoaded} = props
     const navigate = useNavigate()
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "#e839ff")
-    }
 
     useImperativeHandle(parentRef, () => ({
         download: download
@@ -207,21 +203,6 @@ const PostSong = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef)
         }
     }, [showPitchDropdown, showSpeedDropdown])
 
-    const getAudioPlayIcon = () => {
-        if (audioPaused) return getIcon(playIcon)
-        return getIcon(pauseIcon)
-    }
-
-    const getAudioVolumeIcon = () => {
-        if (audioVolume > 0.5) {
-            return getIcon(volumeIcon)
-        } else if (audioVolume > 0) {
-            return getIcon(volumeLowIcon)
-        } else {
-            return getIcon(volumeMuteIcon)
-        }
-    }
-
     const download = async () => {
         let filename = path.basename(props.audio!).replace(/\?.*$/, "")
         functions.dom.download(filename, song)
@@ -251,23 +232,29 @@ const PostSong = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef)
             </div>
             <div className="audio-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <div className="audio-control-row-container">
-                    <img draggable={false} className="audio-control-img" src={getIcon(reverseIcon)} onClick={() => changeReverse()}/>
-                    <img draggable={false} className="audio-control-img" ref={audioSpeedRef} src={getIcon(speedIcon)} onClick={() => toggleDropdown("speed")}/>
-                    <img draggable={false} className="audio-control-img" ref={audioPitchRef} src={getIcon(preservePitchIcon)} onClick={() => toggleDropdown("pitch")}/>
+                    <ReverseIcon className="audio-control-img" onClick={() => changeReverse()}/>
+                    <SpeedIcon className="audio-control-img" ref={audioSpeedRef} onClick={() => toggleDropdown("speed")}/>
+                    <PreservePitchIcon className="audio-control-img" ref={audioPitchRef} onClick={() => toggleDropdown("pitch")}/>
                 </div> 
                 <div className="audio-control-row-container">
-                    <img draggable={false} className="audio-control-img" src={getIcon(rewindIcon)} onClick={() => setAudioRewindFlag(true)}/>
-                    <img draggable={false} className="audio-control-img" onClick={() => updatePlay()} src={getAudioPlayIcon()}/>
-                    <img draggable={false} className="audio-control-img" src={getIcon(fastforwardIcon)} onClick={() => setAudioFastForwardFlag(true)}/>
+                    <RewindIcon className="audio-control-img" onClick={() => setAudioRewindFlag(true)}/>
+                    {audioPaused ?
+                    <PlayIcon className="audio-control-img" onClick={() => updatePlay()}/> :
+                    <PauseIcon className="audio-control-img" onClick={() => updatePlay()}/>}
+                    <FastforwardIcon className="audio-control-img" onClick={() => setAudioFastForwardFlag(true)}/>
                 </div>    
                 <div className="audio-control-row-container">
-                    <img draggable={false} className="audio-control-img" src={getIcon(clearIcon)} onClick={() => setResetFlag(true)}/>
+                    <ClearIcon className="audio-control-img" onClick={() => setResetFlag(true)}/>
                 </div>  
                 <div className="audio-control-row-container">
-                    <img draggable={false} className="audio-control-img" src={getIcon(fullscreenIcon)} onClick={() => toggleFullscreen()}/>
+                    <FullscreenIcon className="audio-control-img" onClick={() => toggleFullscreen()}/>
                 </div> 
                 <div className="audio-control-row-container" onMouseEnter={() => setShowVolumeSlider(true)} onMouseLeave={() => setShowVolumeSlider(false)}>
-                    <img draggable={false} className="audio-control-img" ref={audioVolumeRef} src={getAudioVolumeIcon()} onClick={updateMute}/>
+                    {audioVolume > 0.5 ?
+                    <VolumeIcon className="audio-control-img" ref={audioVolumeRef} onClick={updateMute}/> :
+                    audioVolume > 0 ?
+                    <VolumeLowIcon className="audio-control-img" ref={audioVolumeRef} onClick={updateMute}/> :
+                    <VolumeMuteIcon className="audio-control-img" ref={audioVolumeRef} onClick={updateMute}/>}
                 </div> 
             </div>
             <div className={`audio-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), marginTop: "-230px"}}

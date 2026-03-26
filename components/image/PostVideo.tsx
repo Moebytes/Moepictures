@@ -11,18 +11,18 @@ import {useSessionSelector, useLayoutSelector, useFilterSelector, usePlaybackSel
 useSearchSelector, useInteractionActions} from "../../store"
 import {FFmpeg} from "@ffmpeg/ffmpeg"
 import Slider from "react-slider" 
-import reverseIcon from "../../assets/svg/reverse.svg"
-import speedIcon from "../../assets/svg/speed.svg"
-import clearIcon from "../../assets/svg/clear.svg"
-import playIcon from "../../assets/svg/play.svg"
-import pauseIcon from "../../assets/svg/pause.svg"
-import fullscreenIcon from "../../assets/svg/fullscreen.svg"
-import rewindIcon from "../../assets/svg/rewind.svg"
-import fastforwardIcon from "../../assets/svg/fastforward.svg"
-import preservePitchIcon from "../../assets/svg/pitch.svg"
-import volumeIcon from "../../assets/svg/volume.svg"
-import volumeLowIcon from "../../assets/svg/volume-low.svg"
-import volumeMuteIcon from "../../assets/svg/volume-mute.svg"
+import ReverseIcon from "../../assets/svg/reverse.svg"
+import SpeedIcon from "../../assets/svg/speed.svg"
+import ClearIcon from "../../assets/svg/clear.svg"
+import PlayIcon from "../../assets/svg/play.svg"
+import PauseIcon from "../../assets/svg/pause.svg"
+import FullscreenIcon from "../../assets/svg/fullscreen.svg"
+import RewindIcon from "../../assets/svg/rewind.svg"
+import FastforwardIcon from "../../assets/svg/fastforward.svg"
+import PreservePitchIcon from "../../assets/svg/pitch.svg"
+import VolumeIcon from "../../assets/svg/volume.svg"
+import VolumeLowIcon from "../../assets/svg/volume-low.svg"
+import VolumeMuteIcon from "../../assets/svg/volume-mute.svg"
 import path from "path"
 import mime from "mime-types"
 import functions from "../../functions/Functions"
@@ -62,14 +62,6 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
     const {videoRef, lightnessRef, overlayRef, effectRef, pixelateRef, backFrameRef, onLoaded} = props
     const ffmpegRef = useRef(new FFmpeg())
     const navigate = useNavigate()
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "#302dee")
-    }
-
-    const getBlueIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "#3b83ff")
-    }
 
     useImperativeHandle(parentRef, () => ({
         download: download
@@ -409,11 +401,6 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
         window.URL.revokeObjectURL(video)
     }
 
-    const getPreversePitchIcon = () => {
-        if (preservePitch) return getIcon(preservePitchIcon)
-        return getBlueIcon(preservePitchIcon)
-    }
-
     const getSpeedMarginRight = () => {
         const controlRect = videoControls.current?.getBoundingClientRect()
         const rect = videoSpeedRef.current?.getBoundingClientRect()
@@ -488,21 +475,6 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
         setSeekTo(newTime)
     }
 
-    const getVideoPlayIcon = () => {
-        if (paused) return getIcon(playIcon)
-        return getIcon(pauseIcon)
-    }
-
-    const getVideoVolumeIcon = () => {
-        if (volume > 0.5) {
-            return getIcon(volumeIcon)
-        } else if (volume > 0) {
-            return getIcon(volumeLowIcon)
-        } else {
-            return getIcon(volumeMuteIcon)
-        }
-    }
-
     const controlMouseEnter = () => {
         if (videoControls.current) videoControls.current.style.opacity = "1"
     }
@@ -529,23 +501,31 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
         </div> : null}
         <div className="video-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
             <div className="video-control-row-container">
-                <img draggable={false} className="video-control-img" onClick={() => changeReverse()} src={getIcon(reverseIcon)}/>
-                <img draggable={false} className="video-control-img" ref={videoSpeedRef} src={getIcon(speedIcon)} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
-                <img draggable={false} className="video-control-img" onClick={() => changePreservesPitch()} src={getPreversePitchIcon()}/>
+                <ReverseIcon className="video-control-img" onClick={() => changeReverse()}/>
+                <SpeedIcon className="video-control-img" ref={videoSpeedRef} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
+                {!preservePitch ?
+                <PreservePitchIcon className="video-control-img-blue" onClick={() => changePreservesPitch()}/> :
+                <PreservePitchIcon className="video-control-img" onClick={() => changePreservesPitch()}/>}
             </div> 
             <div className="video-ontrol-row-container">
-                <img draggable={false} className="video-control-img" src={getIcon(rewindIcon)} onClick={() => rewind()}/>
-                <img draggable={false} className="video-control-img" onClick={() => setPaused(!paused)} src={getVideoPlayIcon()}/>
-                <img draggable={false} className="video-control-img" src={getIcon(fastforwardIcon)} onClick={() => fastforward()}/>
+                <RewindIcon className="video-control-img" onClick={() => rewind()}/>
+                {paused ?
+                <PlayIcon className="video-control-img" onClick={() => setPaused(!paused)}/> :
+                <PauseIcon className="video-control-img" onClick={() => setPaused(!paused)}/>}
+                <FastforwardIcon className="video-control-img" onClick={() => fastforward()}/>
             </div>    
             <div className="video-control-row-container">
-                <img draggable={false} className="video-control-img" src={getIcon(clearIcon)} onClick={reset}/>
+                <ClearIcon className="video-control-img" onClick={() => reset()}/>
             </div>  
             <div className="video-control-row-container">
-                <img draggable={false} className="video-control-img" src={getIcon(fullscreenIcon)} onClick={() => toggleFullscreen()}/>
+                <FullscreenIcon className="video-control-img" onClick={() => toggleFullscreen()}/>
             </div> 
             <div className="video-control-row-container" onMouseEnter={() => setShowVolumeSlider(true)} onMouseLeave={() => setShowVolumeSlider(false)}>
-                <img draggable={false} className="video-control-img" ref={videoVolumeRef} src={getVideoVolumeIcon()} onClick={mute}/>
+                {volume > 0.5 ?
+                <VolumeIcon className="video-control-img" ref={videoVolumeRef} onClick={mute}/> :
+                volume > 0 ?
+                <VolumeLowIcon className="video-control-img" ref={videoVolumeRef} onClick={mute}/> :
+                <VolumeMuteIcon className="video-control-img" ref={videoVolumeRef} onClick={mute}/>}
             </div> 
         </div>
         <div className={`video-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), marginTop: "-240px"}}

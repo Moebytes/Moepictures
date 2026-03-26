@@ -11,11 +11,11 @@ import {useThemeSelector, useSessionSelector, useLayoutSelector, useSearchAction
 useInteractionActions, useLayoutActions, useActiveSelector, useInteractionSelector, useCacheSelector, 
 usePageSelector, useFlagSelector, useActiveActions, useFlagActions, useSessionActions} from "../../store"
 import functions from "../../functions/Functions"
-import hamburger from "../../assets/svg/hamburger.svg"
-import key from "../../assets/svg/key.svg"
-import logoutSVG from "../../assets/svg/logout.svg"
-import lockIcon from "../../assets/svg/lock.svg"
-import privateIcon from "../../assets/svg/private.svg"
+import HamburgerIcon from "../../assets/svg/hamburger.svg"
+import KeyIcon from "../../assets/svg/key.svg"
+import LogoutIcon from "../../assets/svg/logout.svg"
+import LockIcon from "../../assets/svg/lock.svg"
+import PrivateIcon from "../../assets/svg/private.svg"
 import {PostFull, PostHistory, UnverifiedPost, Themes} from "../../types/Types"
 import "./styles/titlebar.less"
 
@@ -61,18 +61,6 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     }, [headerFlag])
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--titleButtons")
-    }
-
-    const getLoginIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--loginText")
-    }
-
-    const getLockIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--lockColor")
-    }
 
     const toggleMobileNavbar = () => {
         setHideMobileNavbar(!hideMobileNavbar)
@@ -137,7 +125,6 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         }
         const colorClass = session.banned ? "banned" : colorMap[session.role] ?? ""
         const svgColor = session.banned ? "--banText" : svgMap[session.role] ?? "--userColor"
-        const logoutIcon = functions.color.colorizeSVG(logoutSVG, svgColor)
 
         return (
             <>
@@ -145,7 +132,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                 onClick={() => navigate("/profile")}>
                 {functions.util.toProperCase(session.username)}
             </span>
-            <img className="titlebar-logout-img" src={logoutIcon} onClick={logout}/>
+            <LogoutIcon className="titlebar-logout-img" style={{color: `var(${svgColor})`}} onClick={logout}/>
             </>
         )
     }
@@ -154,7 +141,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         <div className={`titlebar ${hideTitlebar ? "hide-titlebar" : ""} ${relative ? "titlebar-relative" : ""} ${mobileScrolling ? "hide-mobile-titlebar" : ""}`} onMouseEnter={() => setEnableDrag(false)}>
             {mobile ?
             <div className="titlebar-hamburger-container">
-                <img className="titlebar-hamburger" src={getIcon(hamburger)} onClick={toggleMobileNavbar} style={{filter}}/>
+                <HamburgerIcon className="titlebar-hamburger" onClick={toggleMobileNavbar}/>
             </div>
             : null}
             <div onClick={titleClick} className="titlebar-logo-container">
@@ -179,8 +166,9 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
             </div>
             {!mobile ? 
             <div className="titlebar-search-text-container">
-                {props.post?.private ? <img draggable={false} className="titlebar-search-icon" src={getIcon(privateIcon)}/> : null}
-                {props.post?.locked ? <img draggable={false} className="titlebar-search-icon" src={getLockIcon(lockIcon)}/> : null}
+                
+                {props.post?.private ? <PrivateIcon className="titlebar-search-icon"/> : null}
+                {props.post?.locked ? <LockIcon className="titlebar-search-icon-red"/> : null}
                 <span className={`titlebar-search-text ${props.post?.hidden ? "strikethrough" : ""}`}>
                     {props.unverified && !props.post?.deleted ? <span style={{color: "var(--pendingColor)", marginRight: "10px"}}>[{i18n.labels.pending}]</span> : null}
                     {props.post?.deleted ? <span style={{color: "var(--deletedColor)", marginRight: "10px"}}>[{i18n.time.deleted} {functions.date.timeUntil(props.post.deletionDate, i18n)}]</span> : null}
@@ -199,7 +187,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                 <img className="titlebar-user-img" src={userImg} style={{filter: session.image ? "" : filter}}/>
                 {generateUsernameJSX()}
                 </> : <>
-                <img draggable={false} className="titlebar-login-icon" src={getLoginIcon(key)}/>
+                <KeyIcon className="titlebar-login-icon"/>
                 <span className="titlebar-login-text" onClick={() => navigate("/login")}>{i18n.navbar.login}</span>
                 </>}
             </div> : null}

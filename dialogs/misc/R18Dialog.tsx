@@ -8,7 +8,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useMiscDialogSelector, useMiscDialogActions, useSessionSelector, useSessionActions} from "../../store"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
-import r18 from "../../assets/svg/lewd.svg"
+import R18Icon from "../../assets/svg/lewd.svg"
 import "../dialog.less"
 
 const R18Dialog: React.FunctionComponent = (props) => {
@@ -23,10 +23,6 @@ const R18Dialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--r18Color")
-    }
 
     useEffect(() => {
         if (r18Confirmation) {
@@ -54,7 +50,7 @@ const R18Dialog: React.FunctionComponent = (props) => {
                 className="dialog-box" style={{width: "375px", height: "260px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
-                            <img className="dialog-title-img" src={getIcon(r18)} style={{marginLeft: "0px", marginRight: "10px"}}/>
+                            <R18Icon className="dialog-title-img" style={{color: "var(--r18Color)", marginLeft: "0px", marginRight: "10px"}}/>
                             <span className="dialog-title" style={{color: "var(--r18Color)"}}>{i18n.dialogs.r18.title}</span>
                         </div>
                         <div className="dialog-row">

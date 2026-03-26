@@ -58,6 +58,12 @@
 .history-img {
     width: auto;
     height: 20px;
+    color: var(--sortbarIcons);
+}
+
+.history-img-red {
+    .history-img();
+    color: var(--lockColor);
 }
 
 .history-opt-text {
@@ -81,9 +87,20 @@
     cursor: pointer;
     width: auto;
     height: 30px;
+    color: var(--sortbarIcons);
     &:hover {
         filter: brightness(130%);
     }
+}
+
+.history-icon-pink {
+    .history-icon();
+    color: #ff54fc;
+}
+
+.history-icon-red {
+    .history-icon();
+    color: #f71e75;
 }
 
 .history-search-container {
@@ -120,13 +137,14 @@
     height: 30px;
     &:hover {
         color: white;
-        & > img {
-            filter: invert(1);
-        }
     }
-    & > img {
-        width: auto;
-        height: 25px;
+}
+
+.history-search-button-icon {
+    width: auto;
+    height: 25px;
+    &:hover {
+        filter: invert(1);
     }
 }
 

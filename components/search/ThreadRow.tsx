@@ -9,10 +9,10 @@ import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions} from "../../store"
 import functions from "../../functions/Functions"
 import favicon from "../../assets/icons/favicon.png"
-import unread from "../../assets/svg/unread.svg"
-import read from "../../assets/svg/read.svg"
-import sticky from "../../assets/svg/sticky.svg"
-import lock from "../../assets/svg/lock.svg"
+import UnreadIcon from "../../assets/svg/unread.svg"
+import ReadIcon from "../../assets/svg/read.svg"
+import StickyIcon from "../../assets/svg/sticky.svg"
+import LockIcon from "../../assets/svg/lock.svg"
 import {ThreadSearch, PrunedUser} from "../../types/Types"
 import "./styles/thread.less"
 
@@ -35,10 +35,6 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     const navigate = useNavigate()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
 
     const updateUpdater = async () => {
         if (!props.thread) return
@@ -128,11 +124,6 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
         props.onEdit?.()
     }
 
-    const getReadIcon = () => {
-        if (!readStatus()) return getIcon(unread)
-        return getIcon(read)
-    }
-
     const dateTextJSX = () => {
         if (!props.thread) return
         const targetDate = props.thread.updatedDate
@@ -167,9 +158,11 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             <div className="thread-content-container">
                 <div className="thread-container">
                     <div className="thread-row" style={{width: "100%"}}>
-                        {session.username ? <img draggable={false} className="thread-opt-icon" src={getReadIcon()} onClick={toggleRead} style={{filter}}/> : null}
-                        {props.thread?.sticky ? <img draggable={false} className="thread-icon" src={getIcon(sticky)} style={{marginTop: "4px"}}/> : null}
-                        {props.thread?.locked ? <img draggable={false} className="thread-icon" src={getIcon(lock)}/> : null}
+                        {session.username ? (!readStatus() ? 
+                        <UnreadIcon className="thread-opt-icon" onClick={toggleRead}/> :
+                        <ReadIcon className="thread-opt-icon" onClick={toggleRead}/>) : null}
+                        {props.thread?.sticky ? <StickyIcon className="thread-icon" style={{marginTop: "4px"}}/> : null}
+                        {props.thread?.locked ? <LockIcon className="thread-icon"/> : null}
                         <span className={`thread-title ${readStatus() ? "thread-read" : ""}`} onClick={threadPage} onAuxClick={threadPage}>
                             {props.thread?.r18 ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
                             {props.thread?.title || ""}

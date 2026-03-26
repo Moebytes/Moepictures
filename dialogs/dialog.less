@@ -119,6 +119,7 @@
     height: 20px;
     width: auto;
     margin-right: 10px;
+    color: var(--sortbarIcons);
 }
 
 .dialog-clickable-icon {
@@ -127,6 +128,7 @@
     width: auto;
     margin-left: 10px;
     cursor: pointer;
+    color: #f71e75;
     &:hover {
         filter: brightness(120%);
     }
@@ -360,6 +362,7 @@
     height: 20px;
     margin-left: 10px;
     cursor: pointer;
+    color: var(--sortbarIcons);
 }
 
 .dialog-emoji-button {
@@ -377,18 +380,19 @@
     font-family: "irohamaru mikami", sans-serif;
     background-color: var(--buttonBG);
     border: 1px solid black;
-    & > img {
-        height: 27px;
-        width: auto;
-        cursor: pointer;
-    }
     &:hover {
         filter: brightness(130%);
         cursor: pointer;
         border-color: white;
-        & > img {
-            filter: invert(1);
-        }
+    }
+}
+
+.dialog-emoji-button-icon {
+    height: 27px;
+    width: auto;
+    cursor: pointer;
+    &:hover {
+        filter: invert(1);
     }
 }
 

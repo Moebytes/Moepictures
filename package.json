@@ -65,6 +65,7 @@
     "@pixiv/three-vrm": "^3.5.1",
     "@react-email/components": "^1.0.10",
     "@reduxjs/toolkit": "^2.11.2",
+    "@svgr/webpack": "^8.1.0",
     "@the-convocation/twitter-scraper": "^0.22.1",
     "@tsparticles/all": "^3.9.1",
     "@tsparticles/preset-snow": "^3.2.0",

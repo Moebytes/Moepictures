@@ -17,6 +17,11 @@ const lightColorList = {
     "--selection": "#ffe0f4",
     "--background": "#FFFFFF",
 
+    "--titleButtons": "#FF44A1",
+    "--sidebarButtons": "#FF529A",
+    "--sortbarIcons": "#FF579D",
+    "--audioPlayerIcons": "#FF579D",
+
     "--titlebarBG": "#FFD6EB",
     "--moeTextA": "#FF5099",
     "--moeTextB": "#FF307F",
@@ -73,6 +78,11 @@ const lightColorList = {
 const darkColorList = {
     "--selection": "#fc69bc",
     "--background": "#10030C",
+
+    "--titleButtons": "#FF44A1",
+    "--sidebarButtons": "#FF529A",
+    "--sortbarIcons": "#FF579D",
+    "--audioPlayerIcons": "#FF579D",
 
     "--titlebarBG": "#1C0713",
     "--moeTextA": "#FF5099",

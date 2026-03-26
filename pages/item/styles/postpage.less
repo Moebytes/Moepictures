@@ -51,14 +51,15 @@
     &:hover {
         border: 1px solid #ffc9f6;
         color: #ffc8f6;
-        & > img {
-            filter: invert(1);
-        }
     }
-    & > img {
-        width: auto;
-        height: 20px;  
-        margin-right: 1px;
+}
+
+.history-button-icon {
+    width: auto;
+    height: 20px;  
+    margin-right: 1px;
+    &:hover {
+        filter: invert(1);
     }
 }
 
@@ -69,6 +70,10 @@
 .note-button {
     .history-button();
     background-color: var(--noteColor);
+}
+
+.note-button-icon {
+    .history-button-icon();
 }
 
 .post-item {

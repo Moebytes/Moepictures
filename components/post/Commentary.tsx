@@ -6,7 +6,7 @@
 
 import React, {useEffect, useState} from "react"
 import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionActions} from "../../store"
-import commentaryTranslate from "../../assets/svg/commentary.svg"
+import CommentaryTranslateIcon from "../../assets/svg/commentary.svg"
 import functions from "../../functions/Functions"
 import "./styles/commentary.less"
 
@@ -23,12 +23,6 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
     const [showTranslated, setShowTranslated] = useState(false)
     const [text, setText] = useState(props.text)
     const [translatedText, setTranslatedText] = useState("")
-
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--titleButtons")
-    }
 
     useEffect(() => {
         if (language === "ja") {
@@ -61,7 +55,7 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
         <div className="commentary">
             <div className="commentary-title-container">
                 <div className="commentary-title">{i18n.post.commentary}</div>
-                <img className="commentary-img" src={getIcon(commentaryTranslate)} style={{filter}} onClick={() => setShowTranslated((prev: boolean) => !prev)}/>
+                <CommentaryTranslateIcon className="commentary-img" onClick={() => setShowTranslated((prev: boolean) => !prev)}/>
             </div>
             <div className="commentary-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="commentary-text">

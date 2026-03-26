@@ -11,8 +11,8 @@ import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
-import checkbox from "../../assets/svg/checkbox.svg"
-import checkboxChecked from "../../assets/svg/checkbox-checked.svg"
+import CheckboxIcon from "../../assets/svg/checkbox.svg"
+import CheckboxCheckedIcon from "../../assets/svg/checkbox-checked.svg"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
 import {stripIndents} from "common-tags"
@@ -39,12 +39,6 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
     const [removeAllRequest, setRemoveAllRequest] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
-
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
 
     useEffect(() => {
         setHideNavbar(true)
@@ -215,11 +209,15 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
                         <textarea className="contact-textarea" style={{marginLeft: "0px", height: "100px"}} spellCheck={false} value={socialMediaLinks} onChange={(event) => setSocialMediaLinks(event.target.value)}></textarea>
                     </div>
                     <div className="contact-row-start">
-                        <img className="contact-checkbox" src={removeAllRequest ? getIcon(checkbox) : getIcon(checkboxChecked)} onClick={() => setRemoveAllRequest(false)} style={{filter}}/>
+                        {removeAllRequest ?
+                        <CheckboxIcon className="contact-checkbox" onClick={() => setRemoveAllRequest(false)}/> :
+                        <CheckboxCheckedIcon className="contact-checkbox" onClick={() => setRemoveAllRequest(false)}/>}
                         <span className="contact-link">{i18n.pages.copyrightRemoval.removeSpecified}</span>
                     </div>
                     <div className="contact-row-start">
-                        <img className="contact-checkbox" src={removeAllRequest ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setRemoveAllRequest(true)} style={{filter}}/>
+                        {removeAllRequest ?
+                        <CheckboxCheckedIcon className="contact-checkbox" onClick={() => setRemoveAllRequest(true)}/> :
+                        <CheckboxIcon className="contact-checkbox" onClick={() => setRemoveAllRequest(true)}/>}
                         <span className="contact-link">{i18n.pages.copyrightRemoval.removeAll}</span>
                     </div>
                     {getRemovalTypeJSX()}
@@ -244,7 +242,9 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
                         <textarea className="contact-textarea" style={{marginLeft: "0px", height: "100px"}} spellCheck={false} value={proofLinks} onChange={(event) => setProofLinks(event.target.value)}></textarea>
                     </div>
                     <div className="contact-row-start">
-                        <img className="contact-checkbox" src={attestOwnership ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setAttestOwnership((prev: boolean) => !prev)} style={{filter}}/>
+                        {attestOwnership ?
+                        <CheckboxCheckedIcon className="contact-checkbox" onClick={() => setAttestOwnership((prev: boolean) => !prev)}/> :
+                        <CheckboxIcon className="contact-checkbox" onClick={() => setAttestOwnership((prev: boolean) => !prev)}/>}
                         <span className="contact-link">
                         <span className="contact-link" style={{marginRight: "5px"}}>*</span>{i18n.pages.copyrightRemoval.verifyCopyright}</span>
                     </div>

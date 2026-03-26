@@ -18,18 +18,16 @@ import GroupHistoryRow from "../../components/history/GroupHistoryRow"
 import SearchHistoryRow from "../../components/history/SearchHistoryRow"
 import AliasHistoryRow from "../../components/history/AliasHistoryRow"
 import DeletedPostRow from "../../components/history/DeletedPostRow"
-import scrollIcon from "../../assets/svg/scroll.svg"
-import search from "../../assets/svg/search.svg"
-import pageIcon from "../../assets/svg/pages.svg"
-import searchHistoryDelete from "../../assets/svg/delete.svg"
+import ScrollIcon from "../../assets/svg/scroll.svg"
+import PagesIcon from "../../assets/svg/pages.svg"
+import SearchIcon from "../../assets/svg/search.svg"
+import DeleteIcon from "../../assets/svg/delete.svg"
+import PostIcon from "../../assets/svg/post.svg"
+import TagIcon from "../../assets/svg/tag-shaded.svg"
+import NoteIcon from "../../assets/svg/note.svg"
+import GroupIcon from "../../assets/svg/group.svg"
+import AliasIcon from "../../assets/svg/all.svg"
 import permissions from "../../structures/Permissions"
-import historyPost from "../../assets/svg/post.svg"
-import historySearch from "../../assets/svg/search.svg"
-import historyTag from "../../assets/svg/tag-shaded.svg"
-import historyNote from "../../assets/svg/note.svg"
-import historyGroup from "../../assets/svg/group.svg"
-import historyAlias from "../../assets/svg/all.svg"
-import historyDelete from "../../assets/svg/delete.svg"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
 useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
@@ -80,20 +78,7 @@ const HistoryPage: React.FunctionComponent = () => {
         }
     }, [])
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
     const getFilterSearch = functions.color.filter({theme, siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
-
-    const getRedIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "#f71e75")
-    }
-
-    const getPinkIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "#ff54fc")
-    }
 
     useEffect(() => {
         if (!session.cookie) return
@@ -317,11 +302,13 @@ const HistoryPage: React.FunctionComponent = () => {
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
                         <button className="history-search-button" style={{filter: getFilterSearch}} onClick={() => initItems()}>
-                            <img src={search}/>
+                            <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>
                     <div className="history-item" onClick={() => toggleScroll()}>
-                        <img className="history-img" src={scroll ? getIcon(scrollIcon) : getIcon(pageIcon)} style={{filter}}/>
+                        {scroll ? 
+                        <ScrollIcon className="history-img"/> :
+                        <PagesIcon className="history-img"/>}
                         <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                     </div>
                 </div></>
@@ -336,11 +323,13 @@ const HistoryPage: React.FunctionComponent = () => {
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
                         <button className="history-search-button" style={{filter: getFilterSearch}} onClick={() => initItems()}>
-                            <img src={search}/>
+                            <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>
                     <div className="history-item" onClick={() => toggleScroll()}>
-                        <img className="history-img" src={scroll ? getIcon(scrollIcon) : getIcon(pageIcon)} style={{filter}}/>
+                        {scroll ? 
+                        <ScrollIcon className="history-img"/> :
+                        <PagesIcon className="history-img"/>}
                         <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                     </div>
                 </div></>
@@ -355,11 +344,13 @@ const HistoryPage: React.FunctionComponent = () => {
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
                         <button className="history-search-button" style={{filter: getFilterSearch}} onClick={() => initItems()}>
-                            <img src={search}/>
+                            <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>
                     <div className="history-item" onClick={() => toggleScroll()}>
-                        <img className="history-img" src={scroll ? getIcon(scrollIcon) : getIcon(pageIcon)} style={{filter}}/>
+                        {scroll ? 
+                        <ScrollIcon className="history-img"/> :
+                        <PagesIcon className="history-img"/>}
                         <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                     </div>
                 </div></>
@@ -374,11 +365,13 @@ const HistoryPage: React.FunctionComponent = () => {
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
                         <button className="history-search-button" style={{filter: getFilterSearch}} onClick={() => initItems()}>
-                            <img src={search}/>
+                            <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>
                     <div className="history-item" onClick={() => toggleScroll()}>
-                        <img className="history-img" src={scroll ? getIcon(scrollIcon) : getIcon(pageIcon)} style={{filter}}/>
+                        {scroll ? 
+                        <ScrollIcon className="history-img"/> :
+                        <PagesIcon className="history-img"/>}
                         <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                     </div>
                 </div></>
@@ -393,11 +386,13 @@ const HistoryPage: React.FunctionComponent = () => {
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
                         <button className="history-search-button" style={{filter: getFilterSearch}} onClick={() => initItems()}>
-                            <img src={search}/>
+                            <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>
                     <div className="history-item" onClick={() => toggleScroll()}>
-                        <img className="history-img" src={scroll ? getIcon(scrollIcon) : getIcon(pageIcon)} style={{filter}}/>
+                        {scroll ? 
+                        <ScrollIcon className="history-img"/> :
+                        <PagesIcon className="history-img"/>}
                         <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                     </div>
                 </div></>
@@ -412,15 +407,17 @@ const HistoryPage: React.FunctionComponent = () => {
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
                         <button className="history-search-button" style={{filter: getFilterSearch}} onClick={() => initItems()}>
-                            <img src={search}/>
+                            <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>
                     <div className="history-item" onClick={() => toggleScroll()}>
-                        <img className="history-img" src={scroll ? getIcon(scrollIcon) : getIcon(pageIcon)} style={{filter}}/>
+                        {scroll ? 
+                        <ScrollIcon className="history-img"/> :
+                        <PagesIcon className="history-img"/>}
                         <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                     </div>
                     <div className="history-item" onClick={() => setShowDeleteAllHistoryDialog(!showDeleteAllHistoryDialog)}>
-                        <img className="history-img" src={getRedIcon(searchHistoryDelete)}/>
+                        <DeleteIcon className="history-img-red"/>
                         {!mobile ? <span className="history-opt-text">{i18n.buttons.deleteAll}</span> : null}
                     </div>
                 </div></>
@@ -435,15 +432,17 @@ const HistoryPage: React.FunctionComponent = () => {
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
                         <button className="history-search-button" style={{filter: getFilterSearch}} onClick={() => initItems()}>
-                            <img src={search}/>
+                            <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>
                     <div className="history-item" onClick={() => toggleScroll()}>
-                        <img className="history-img" src={scroll ? getIcon(scrollIcon) : getIcon(pageIcon)} style={{filter}}/>
+                        {scroll ? 
+                        <ScrollIcon className="history-img"/> :
+                        <PagesIcon className="history-img"/>}
                         <span className="history-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                     </div>
                     <div className="history-item" onClick={() => setPermaDeleteAllDialog(!permaDeleteAllDialog)}>
-                        <img className="history-img" src={getRedIcon(searchHistoryDelete)}/>
+                        <DeleteIcon className="history-img-red"/>
                         {!mobile ? <span className="history-opt-text">{i18n.buttons.deleteAll}</span> : null}
                     </div>
                 </div></>
@@ -474,13 +473,28 @@ const HistoryPage: React.FunctionComponent = () => {
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="history-page">
                     <div className="history-icons">
-                        <img className="history-icon" onClick={searchHistoryClick} src={historyTab === "search" ? getPinkIcon(historySearch) : getIcon(historySearch)} style={{filter: historyTab === "search" ? "" : filter}}/>
-                        <img className="history-icon" onClick={() => setHistoryTab("post")} src={historyTab === "post" ? getPinkIcon(historyPost) : getIcon(historyPost)} style={{filter: historyTab === "post" ? "" : filter}}/>
-                        <img className="history-icon" onClick={() => setHistoryTab("tag")} src={historyTab === "tag" ? getPinkIcon(historyTag) : getIcon(historyTag)} style={{filter: historyTab === "tag" ? "" : filter}}/>
-                        <img className="history-icon" onClick={() => setHistoryTab("group")} src={historyTab === "group" ? getPinkIcon(historyGroup) : getIcon(historyGroup)} style={{filter: historyTab === "group" ? "" : filter}}/>
-                        <img className="history-icon" onClick={() => setHistoryTab("note")} src={historyTab === "note" ? getPinkIcon(historyNote) : getIcon(historyNote)} style={{filter: historyTab === "note" ? "" : filter}}/>
-                        <img className="history-icon" onClick={() => setHistoryTab("alias")} src={historyTab === "alias" ? getPinkIcon(historyAlias) : getIcon(historyAlias)} style={{filter: historyTab === "alias" ? "" : filter}}/>
-                        {permissions.isAdmin(session) ? <img className="history-icon" onClick={() => setHistoryTab("delete")} src={historyTab === "delete" ? getPinkIcon(historyDelete) : getIcon(historyDelete)} style={{filter: historyTab === "delete" ? "" : filter}}/> : null}
+                        {historyTab === "search" ?
+                        <SearchIcon className="history-icon-pink" onClick={searchHistoryClick}/> :
+                        <SearchIcon className="history-icon" onClick={searchHistoryClick}/>}
+                        {historyTab === "post" ?
+                        <PostIcon className="history-icon-pink" onClick={() => setHistoryTab("post")}/> :
+                        <PostIcon className="history-icon" onClick={() => setHistoryTab("post")}/>}
+                        {historyTab === "tag" ?
+                        <TagIcon className="history-icon-pink" onClick={() => setHistoryTab("tag")}/> :
+                        <TagIcon className="history-icon" onClick={() => setHistoryTab("tag")}/>}
+                        {historyTab === "group" ?
+                        <GroupIcon className="history-icon-pink" onClick={() => setHistoryTab("group")}/> :
+                        <GroupIcon className="history-icon" onClick={() => setHistoryTab("group")}/>}
+                        {historyTab === "note" ?
+                        <NoteIcon className="history-icon-pink" onClick={() => setHistoryTab("note")}/> :
+                        <NoteIcon className="history-icon" onClick={() => setHistoryTab("note")}/>}
+                        {historyTab === "alias" ?
+                        <AliasIcon className="history-icon-pink" onClick={() => setHistoryTab("alias")}/> :
+                        <AliasIcon className="history-icon" onClick={() => setHistoryTab("alias")}/>}
+                        {permissions.isAdmin(session) ? (
+                        historyTab === "delete" ?
+                        <DeleteIcon className="history-icon-pink" onClick={() => setHistoryTab("delete")}/> :
+                        <DeleteIcon className="history-icon" onClick={() => setHistoryTab("delete")}/>) : null}
                     </div>
                     {generateHeaderJSX()}
                     <div className="history-container">

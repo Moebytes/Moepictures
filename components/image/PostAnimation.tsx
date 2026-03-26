@@ -9,12 +9,12 @@ import {useNavigate} from "react-router-dom"
 import withPostWrapper, {PostWrapperProps, PostWrapperRef} from "./withPostWrapper"
 import {useSessionSelector, useFilterSelector, usePlaybackSelector, usePlaybackActions, useSearchSelector, useInteractionActions} from "../../store"
 import Slider from "react-slider"
-import reverseIcon from "../../assets/svg/reverse.svg"
-import speedIcon from "../../assets/svg/speed.svg"
-import clearIcon from "../../assets/svg/clear.svg"
-import playIcon from "../../assets/svg/play.svg"
-import pauseIcon from "../../assets/svg/pause.svg"
-import fullscreenIcon from "../../assets/svg/fullscreen.svg"
+import ReverseIcon from "../../assets/svg/reverse.svg"
+import SpeedIcon from "../../assets/svg/speed.svg"
+import ClearIcon from "../../assets/svg/clear.svg"
+import PlayIcon from "../../assets/svg/play.svg"
+import PauseIcon from "../../assets/svg/pause.svg"
+import FullscreenIcon from "../../assets/svg/fullscreen.svg"
 import path from "path"
 import functions from "../../functions/Functions"
 
@@ -47,10 +47,6 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
     const {showSpeedDropdown, setShowSpeedDropdown} = props
     const {animationRef, imageRef, lightnessRef, overlayRef, effectRef, pixelateRef, onLoaded} = props
     const navigate = useNavigate()
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "#ee2d87")
-    }
 
     useImperativeHandle(parentRef, () => ({
         download: download
@@ -306,11 +302,6 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
         window.URL.revokeObjectURL(gif)
     }
 
-    const getPlayIcon = () => {
-        if (paused) return getIcon(playIcon)
-        return getIcon(pauseIcon)
-    }
-
     const getSpeedMarginRight = () => {
         const controlRect = gifControls.current?.getBoundingClientRect()
         const rect = gifSpeedRef.current?.getBoundingClientRect()
@@ -345,19 +336,21 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
             </div> : null}
             <div className="gif-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <div className="gif-control-row-container">
-                    <img draggable={false} className="gif-control-img" onClick={() => changeReverse()} src={getIcon(reverseIcon)}/>
-                    <img draggable={false} className="gif-control-img" ref={gifSpeedRef} src={getIcon(speedIcon)} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
+                    <ReverseIcon className="gif-control-img" onClick={() => changeReverse()}/>
+                    <SpeedIcon className="gif-control-img" ref={gifSpeedRef} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
                 </div> 
                 <div className="gif-control-row-container">
                     {/* <img className="control-img" src={gifRewindIcon}/> */}
-                    <img draggable={false} className="gif-control-img" onClick={() => setPaused(!paused)} src={getPlayIcon()}/>
+                    {paused ?
+                    <PlayIcon className="gif-control-img" onClick={() => setPaused(!paused)}/> :
+                    <PauseIcon className="gif-control-img" onClick={() => setPaused(!paused)}/>}
                     {/* <img className="control-img" src={gifFastforwardIcon}/> */}
                 </div>    
                 <div className="gif-control-row-container">
-                    <img draggable={false} className="gif-control-img" src={getIcon(clearIcon)} onClick={reset}/>
+                    <ClearIcon className="gif-control-img" onClick={() => reset()}/>
                 </div> 
                 <div className="gif-control-row-container">
-                    <img draggable={false} className="gif-control-img" src={getIcon(fullscreenIcon)} onClick={() => toggleFullscreen()}/>
+                    <FullscreenIcon className="gif-control-img" onClick={() => toggleFullscreen()}/>
                 </div> 
             </div>
             <div className={`gif-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), 

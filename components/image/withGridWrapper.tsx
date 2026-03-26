@@ -9,8 +9,8 @@ import {useNavigate, useLocation} from "react-router-dom"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, useCacheActions, useThemeSelector, 
 useSearchSelector, useSessionSelector, useFlagSelector, useFlagActions, useSearchActions} from "../../store"
 import functions from "../../functions/Functions"
-import privateIcon from "../../assets/svg/lock.svg"
-import musicNote from "../../assets/svg/music-note.svg"
+import PrivateIcon from "../../assets/svg/lock.svg"
+import MusicNoteIcon from "../../assets/svg/music-note.svg"
 import {PostSearch, GIFFrame} from "../../types/Types"
 import "./styles/gridimage.less"
 
@@ -530,9 +530,17 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         }
 
         const cornerIcon = () => {
-            if (props.post.private) return functions.color.colorizeSVG(privateIcon, "--audioPlayerIcons")
-            if (audioRef.current) return functions.color.colorizeSVG(musicNote, "--audioPlayerIcons")
-            return ""
+            if (props.post.private) return (
+                <PrivateIcon className="song-icon" style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s"}}
+                onClick={childRef.current?.songClick} onMouseDown={(event) => {event.stopPropagation()}} 
+                onMouseUp={(event) => {event.stopPropagation()}}/>
+            )
+            if (audioRef.current) return (
+                <MusicNoteIcon className="song-icon" style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s"}}
+                onClick={childRef.current?.songClick} onMouseDown={(event) => {event.stopPropagation()}} 
+                onMouseUp={(event) => {event.stopPropagation()}}/>
+            )
+            return null
         }
         
         const refWidth = getRef()?.clientWidth
@@ -541,9 +549,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
             <div style={{opacity: visible && refWidth ? "1" : "0", transition: "opacity 0.1s", borderRadius: `${props.borderRadius || 5}px`}} className="image-box" id={String(props.id)} ref={containerRef} 
             onClick={onClick} onAuxClick={onClick} onContextMenu={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
                 <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
-                    {cornerIcon() ? <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s"}} className="song-icon" src={cornerIcon()} 
-                    onClick={childRef.current?.songClick} onMouseDown={(event) => {event.stopPropagation()}} onMouseUp={(event) => {event.stopPropagation()}}/> : null}
-    
+                    {cornerIcon()}
                     <WrappedComponent 
                         {...props}
                         ref={childRef}

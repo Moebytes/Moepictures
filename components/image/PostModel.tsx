@@ -10,20 +10,20 @@ import withPostWrapper, {PostWrapperProps, PostWrapperRef} from "./withPostWrapp
 import {useSessionSelector, useLayoutSelector, usePlaybackSelector, usePlaybackActions, useSearchSelector, 
 useInteractionActions} from "../../store"
 import Slider from "react-slider"
-import reverseIcon from "../../assets/svg/reverse.svg"
-import speedIcon from "../../assets/svg/speed.svg"
-import clearIcon from "../../assets/svg/clear.svg"
-import playIcon from "../../assets/svg/play.svg"
-import pauseIcon from "../../assets/svg/pause.svg"
-import fullscreenIcon from "../../assets/svg/fullscreen.svg"
-import wireframeIcon from "../../assets/svg/wireframe.svg"
-import renderedIcon from "../../assets/svg/rendered.svg"
-import matcapIcon from "../../assets/svg/matcap.svg"
-import texturedIcon from "../../assets/svg/textured.svg"
-import shapeKeysIcon from "../../assets/svg/shape-keys.svg"
-import lightIcon from "../../assets/svg/lightbulb.svg"
-import ambientLightIcon from "../../assets/svg/ambient.svg"
-import directionalLightIcon from "../../assets/svg/directional.svg"
+import ReverseIcon from "../../assets/svg/reverse.svg"
+import SpeedIcon from "../../assets/svg/speed.svg"
+import ClearIcon from "../../assets/svg/clear.svg"
+import PlayIcon from "../../assets/svg/play.svg"
+import PauseIcon from "../../assets/svg/pause.svg"
+import FullscreenIcon from "../../assets/svg/fullscreen.svg"
+import WireframeIcon from "../../assets/svg/wireframe.svg"
+import RenderedIcon from "../../assets/svg/rendered.svg"
+import MatcapIcon from "../../assets/svg/matcap.svg"
+import TexturedIcon from "../../assets/svg/textured.svg"
+import ShapeKeysIcon from "../../assets/svg/shape-keys.svg"
+import LightIcon from "../../assets/svg/lightbulb.svg"
+import AmbientLightIcon from "../../assets/svg/ambient.svg"
+import DirectionalLightIcon from "../../assets/svg/directional.svg"
 import * as THREE from "three"
 import {OrbitControls, GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
 import {VRMLoaderPlugin} from "@pixiv/three-vrm"
@@ -73,10 +73,6 @@ const PostModel = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
     const {showSpeedDropdown, setShowSpeedDropdown} = props
     const {modelRef, rendererRef, fullscreenRef, lightnessRef, overlayRef, effectRef, pixelateRef, onLoaded} = props
     const navigate = useNavigate()
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "#2940ff")
-    }
 
     useImperativeHandle(parentRef, () => ({
         download: download
@@ -427,21 +423,6 @@ const PostModel = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
         if (modelControls.current) modelControls.current.style.opacity = "0"
     }
 
-    const getModelPlayIcon = () => {
-        if (paused) return getIcon(playIcon)
-        return getIcon(pauseIcon)
-    }
-
-    const getModelWireframeIcon = () => {
-        if (wireframe) return getIcon(renderedIcon)
-        return getIcon(wireframeIcon)
-    }
-
-    const getModelMatcapIcon = () => {
-        if (matcap) return getIcon(texturedIcon)
-        return getIcon(matcapIcon)
-    }
-
     const reset = () => {
         changeReverse(false)
         setSpeed(1)
@@ -540,23 +521,29 @@ const PostModel = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
             <div className="model-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 {animations ? <>
                 <div className="model-control-row-container">
-                    <img draggable={false} className="image-control-img" onClick={() => changeReverse()} src={getIcon(reverseIcon)}/>
-                    <img draggable={false} className="image-control-img" ref={modelSpeedRef} src={getIcon(speedIcon)} onClick={() => toggleDropdown("speed")}/>
+                    <ReverseIcon className="image-control-img-dark-blue" onClick={() => changeReverse()}/>
+                    <SpeedIcon className="image-control-img-dark-blue" ref={modelSpeedRef} onClick={() => toggleDropdown("speed")}/>
                 </div> 
                 <div className="model-control-row-container">
-                    <img draggable={false} className="image-control-img" src={getIcon(clearIcon)} onClick={reset}/>
+                    <ClearIcon className="image-control-img-dark-blue" onClick={() => reset()}/>
                     {/* <img className="control-img" src={modelRewindIcon}/> */}
-                    <img draggable={false} className="image-control-img" onClick={() => setPaused(!paused)} src={getModelPlayIcon()}/>
+                    {paused ?
+                    <PlayIcon className="image-control-img-dark-blue" onClick={() => setPaused(!paused)}/> :
+                    <PauseIcon className="image-control-img-dark-blue" onClick={() => setPaused(!paused)}/>}
                     {/* <img className="control-img" src={modelFastforwardIcon}/> */}
                 </div></> : null}
                 <div className="model-control-row-container">
-                    <img draggable={false} className="image-control-img" onClick={() => setWireframe((prev) => !prev)} src={getModelWireframeIcon()}/>
-                    <img draggable={false} className="image-control-img" onClick={() => setMatcap((prev) => !prev)} src={getModelMatcapIcon()}/>
-                    <img draggable={false} className="image-control-img" ref={modelMorphRef} src={getIcon(shapeKeysIcon)} onClick={() => toggleDropdown("morph")}/>
-                    <img draggable={false} className="image-control-img" ref={modelLightRef}  src={getIcon(lightIcon)} onClick={() => toggleDropdown("light")}/>
+                    {wireframe ? 
+                    <RenderedIcon className="image-control-img-dark-blue" onClick={() => setWireframe((prev) => !prev)}/> :
+                    <WireframeIcon className="image-control-img-dark-blue" onClick={() => setWireframe((prev) => !prev)}/>}
+                    {matcap ?
+                    <TexturedIcon className="image-control-img-dark-blue" onClick={() => setMatcap((prev) => !prev)}/> :
+                    <MatcapIcon className="image-control-img-dark-blue" onClick={() => setMatcap((prev) => !prev)}/>}
+                    <ShapeKeysIcon className="image-control-img-dark-blue" ref={modelMorphRef} onClick={() => toggleDropdown("morph")}/>
+                    <LightIcon className="image-control-img-dark-blue" ref={modelLightRef} onClick={() => toggleDropdown("light")}/>
                 </div> 
                 <div className="model-control-row-container">
-                    <img draggable={false} className="image-control-img" src={getIcon(fullscreenIcon)} onClick={() => toggleFullscreen()}/>
+                    <FullscreenIcon className="image-control-img-dark-blue" onClick={() => toggleFullscreen()}/>
                 </div> 
             </div>
             <div className={`model-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), marginTop: "-240px"}}
@@ -593,17 +580,17 @@ const PostModel = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
             <div className={`model-dropdown ${showLightDropdown ? "" : "hide-model-dropdown"}`}
             style={{marginRight: getLightMarginRight(), top: `-140px`}}>
                 <div className="model-dropdown-row model-row">
-                    <img draggable={false} className="model-dropdown-img" src={getIcon(ambientLightIcon)}/>
+                    <AmbientLightIcon className="model-dropdown-img"/>
                     <span className="model-dropdown-text">Ambient</span>
                     <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" onChange={(value) => setAmbient(value)} min={0.05} max={1} step={0.05} value={ambient}/>
                 </div>
                 <div className="model-dropdown-row model-row">
-                    <img draggable={false} className="model-dropdown-img" src={getIcon(directionalLightIcon)}/>
+                    <DirectionalLightIcon className="model-dropdown-img"/>
                     <span className="model-dropdown-text">Directional Front</span>
                     <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" onChange={(value) => setDirectionalFront(value)} min={0.05} max={1} step={0.05} value={directionalFront}/>
                 </div>
                 <div className="model-dropdown-row model-row">
-                    <img draggable={false} className="model-dropdown-img" src={getIcon(directionalLightIcon)}/>
+                    <DirectionalLightIcon className="model-dropdown-img"/>
                     <span className="model-dropdown-text">Directional Back</span>
                     <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" onChange={(value) => setDirectionalBack(value)} min={0.05} max={1} step={0.05} value={directionalBack}/>
                 </div>

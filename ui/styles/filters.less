@@ -45,6 +45,7 @@
 .filter-dropdown-img {
     width: auto;
     height: 20px;
+    color: var(--sortbarIcons);
 }
 
 .filter-slider {
@@ -103,17 +104,18 @@
     border-radius: 10px;
     margin-top: -5px;
     margin-bottom: 3px;
-    & > img {
-        height: 19px;
-        width: auto;
-        cursor: pointer;
-    }
     &:hover {
         border: 1px solid #ffc9f6;
         color: #ffc8f6;
-        & > img {
-            filter: invert(1);
-        }
+    }
+}
+
+.filter-button-icon {
+    height: 19px;
+    width: auto;
+    cursor: pointer;
+    &:hover {
+        filter: invert(1);
     }
 }
 
@@ -172,16 +174,17 @@
     transition: all 0.1s;
     margin-top: -5px;
     margin-bottom: 3px;
-    & > img {
-        height: 19px;
-        width: auto;
-        cursor: pointer;
-    }
     &:hover {
         border: 1px solid #ffc9f6;
         color: #ffc8f6;
-        & > img {
-            filter: invert(1);
-        }
+    }
+}
+
+.audio-filter-button-icon {
+    height: 19px;
+    width: auto;
+    cursor: pointer;
+    &:hover {
+        filter: invert(1);
     }
 }

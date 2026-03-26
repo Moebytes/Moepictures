@@ -10,19 +10,19 @@ useLayoutSelector,  useCacheSelector, useSessionActions} from "../store"
 import functions from "../functions/Functions"
 import permissions from "../structures/Permissions"
 import lewdIcon from "../assets/icons/lewdgirl.png"
-import radioButton from "../assets/svg/radiobutton.svg"
-import radioButtonChecked from "../assets/svg/radiobutton-checked.svg"
-import emojiSelect from "../assets/svg/emoji-select.svg"
-import highlight from "../assets/svg/highlight.svg"
-import bold from "../assets/svg/bold.svg"
-import italic from "../assets/svg/italic.svg"
-import underline from "../assets/svg/underline.svg"
-import strikethrough from "../assets/svg/strikethrough.svg"
-import spoiler from "../assets/svg/spoiler.svg"
-import link from "../assets/svg/link.svg"
-import details from "../assets/svg/details.svg"
-import hexcolor from "../assets/svg/hash.svg"
-import codeblock from "../assets/svg/codeblock.svg"
+import RadioButtonIcon from "../assets/svg/radiobutton.svg"
+import RadioButtonCheckedIcon from "../assets/svg/radiobutton-checked.svg"
+import EmojiSelectIcon from "../assets/svg/emoji-select.svg"
+import HighlightIcon from "../assets/svg/highlight.svg"
+import BoldIcon from "../assets/svg/bold.svg"
+import ItalicIcon from "../assets/svg/italic.svg"
+import UnderlineIcon from "../assets/svg/underline.svg"
+import StrikethroughIcon from "../assets/svg/strikethrough.svg"
+import SpoilerIcon from "../assets/svg/spoiler.svg"
+import LinkIcon from "../assets/svg/link.svg"
+import DetailsIcon from "../assets/svg/details.svg"
+import HexcolorIcon from "../assets/svg/hash.svg"
+import CodeblockIcon from "../assets/svg/codeblock.svg"
 import {ThreadUser, MessageUser} from "../types/Types"
 import "./styles/textbox.less"
 
@@ -81,10 +81,6 @@ const TextBox = forwardRef<TextBoxRef, Props>((props, ref) => {
     }))
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-    
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--titleButtons")
-    }
 
     const onPost = async () => {
         const replaced = await functions.jsx.linkReplacements(text, session, setSessionFlag)
@@ -183,16 +179,36 @@ const TextBox = forwardRef<TextBoxRef, Props>((props, ref) => {
             return (
                 <div className="textbox-container" style={{marginLeft: props.manualWidth && !mobile ? "190px" : ""}}>
                     <div className="textbox-textarea-buttons" style={{width: props.manualWidth && !mobile ? "70%" : ""}}>
-                        <button className="textbox-textarea-button"><img src={getIcon(highlight)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "highlight")} style={{filter}}/></button>
-                        <button className="textbox-textarea-button"><img src={getIcon(bold)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "bold")} style={{filter}}/></button>
-                        <button className="textbox-textarea-button"><img src={getIcon(italic)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "italic")} style={{filter}}/></button>
-                        <button className="textbox-textarea-button"><img src={getIcon(underline)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "underline")} style={{filter}}/></button>
-                        <button className="textbox-textarea-button"><img src={getIcon(strikethrough)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "strikethrough")} style={{filter}}/></button>
-                        <button className="textbox-textarea-button"><img src={getIcon(spoiler)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "spoiler")} style={{filter}}/></button>
-                        <button className="textbox-textarea-button"><img src={getIcon(link)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "link")} style={{filter}}/></button>
-                        <button className="textbox-textarea-button"><img src={getIcon(details)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "details")} style={{filter}}/></button>
-                        <button className="textbox-textarea-button"><img src={getIcon(hexcolor)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "color")} style={{filter}}/></button>
-                        <button className="textbox-textarea-button"><img src={getIcon(codeblock)} onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "code")} style={{filter}}/></button>
+                        <button className="textbox-textarea-button">
+                            <HighlightIcon className="textbox-icon" onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "highlight")}/>
+                        </button>
+                        <button className="textbox-textarea-button">
+                            <BoldIcon className="textbox-icon" onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "bold")}/>
+                        </button>
+                        <button className="textbox-textarea-button">
+                            <ItalicIcon className="textbox-icon" onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "italic")}/>
+                        </button>
+                        <button className="textbox-textarea-button">
+                            <UnderlineIcon className="textbox-icon" onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "underline")}/>
+                        </button>
+                        <button className="textbox-textarea-button">
+                            <StrikethroughIcon className="textbox-icon" onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "strikethrough")}/>
+                        </button>
+                        <button className="textbox-textarea-button">
+                            <SpoilerIcon className="textbox-icon" onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "spoiler")}/>
+                        </button>
+                        <button className="textbox-textarea-button">
+                            <LinkIcon className="textbox-icon" onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "link")}/>
+                        </button>
+                        <button className="textbox-textarea-button">
+                            <DetailsIcon className="textbox-icon" onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "details")}/>
+                        </button>
+                        <button className="textbox-textarea-button">
+                            <HexcolorIcon className="textbox-icon" onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "color")}/>
+                        </button>
+                        <button className="textbox-textarea-button">
+                            <CodeblockIcon className="textbox-icon" onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "code")}/>
+                        </button>
                     </div>
                     {previewMode ? <div className="textbox-preview" style={{width: props.manualWidth && !mobile ? "70%" : ""}}>{functions.jsx.renderText(previewText, emojis, props.type, undefined, r18)}</div> : 
                     <div style={{marginTop: "0px"}} className="textbox-row-start" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -202,12 +218,14 @@ const TextBox = forwardRef<TextBoxRef, Props>((props, ref) => {
                     <div className="textbox-button-container-left">
                     <button className="textbox-button" onClick={onPost}>{getButtonText()}</button>
                     <button className="textbox-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
-                        <img src={emojiSelect}/>
+                        <EmojiSelectIcon className="textbox-emoji-icon"/>
                     </button>
                     <button className={previewMode ? "textbox-edit-button" : "textbox-preview-button"} onClick={() => setPreviewMode((prev: boolean) => !prev)}>{previewMode ? i18n.buttons.unpreview : i18n.buttons.preview}</button>
                     {props.r18Toggle && session.showR18 ?
                     <div className="textbox-replybox-row">
-                        <img className="textbox-checkbox" src={r18 ? getIcon(radioButtonChecked) : getIcon(radioButton)} onClick={() => setR18((prev: boolean) => !prev)} style={{filter}}/>
+                        {r18 ? 
+                        <RadioButtonCheckedIcon className="textbox-checkbox" onClick={() => setR18((prev: boolean) => !prev)}/> :
+                        <RadioButtonIcon className="textbox-checkbox" onClick={() => setR18((prev: boolean) => !prev)}/>}
                         <span className="textbox-replybox-text" style={{marginLeft: "10px"}}>R18</span>
                         {!mobile ? <img className="textbox-icon" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter}}/> : null}
                     </div> : null}

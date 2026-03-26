@@ -7,7 +7,7 @@
 import React, {useEffect, useState} from "react"
 import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionActions} from "../../store"
 import functions from "../../functions/Functions"
-import cookie from "../../assets/svg/cookie.svg"
+import CookieIcon from "../../assets/svg/cookie.svg"
 import "./styles/cookiebanner.less"
 
 let cookieTimer = null as any
@@ -18,12 +18,6 @@ const CookieBanner: React.FunctionComponent = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {setEnableDrag} = useInteractionActions()
     const [showCookieBanner, setShowCookieBanner] = useState(false)
-
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--cookieColor")
-    }
 
     useEffect(() => {
         if (!session.cookie) return
@@ -46,7 +40,7 @@ const CookieBanner: React.FunctionComponent = (props) => {
     return (
         <div className={`cookie-banner ${showCookieBanner ? "show-cookie-banner" : ""}`}>
             <div className="cookie-icon-container">
-                <img className="cookie-icon" src={getIcon(cookie)} style={{filter}}/>
+                <CookieIcon className="cookie-icon"/>
                 <div className="cookie-text-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <span className="cookie-text">{i18n.dialogs.cookieBanner.text}</span>
                 </div>

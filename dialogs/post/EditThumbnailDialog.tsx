@@ -9,8 +9,8 @@ import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionA
 usePostDialogSelector, usePostDialogActions, useActiveActions} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import historyIcon from "../../assets/svg/history-thin.svg"
-import uploadIcon from "../../assets/svg/upload-arrow.svg"
+import HistoryIcon from "../../assets/svg/history-thin.svg"
+import UploadIcon from "../../assets/svg/upload-arrow.svg"
 import Carousel from "../../components/site/Carousel"
 import {motion, useDragControls} from "framer-motion"
 import {ThumbnailUpdate} from "../../types/PostTypes"
@@ -122,11 +122,11 @@ const EditThumbnailDialog: React.FunctionComponent = (props) => {
                         </div>
                         <div className="dialog-row-start" style={{marginTop: "10px", width: "100%"}}>
                             <button onClick={autoGenerate} style={{backgroundColor: "var(--buttonBG)", marginRight: "20px"}} className="dialog-button">
-                                <img className="dialog-button-img-small" src={historyIcon}/>
+                                <HistoryIcon className="dialog-button-img-small"/>
                                 <span className="dialog-button-text-small">{i18n.buttons.autogenerate}</span>
                             </button>
                             <label htmlFor="file-upload" style={{backgroundColor: "var(--buttonBG)"}} className="dialog-button">
-                                <img className="dialog-button-img-small" src={uploadIcon}/>
+                                <UploadIcon className="dialog-button-img-small"/>
                                 <span className="dialog-button-text-small">{i18n.buttons.upload}</span>
                             </label>
                             <input id="file-upload" type="file" onChange={(event) => uploadFile(event)}/>

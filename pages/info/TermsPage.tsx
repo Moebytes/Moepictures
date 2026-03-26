@@ -11,8 +11,8 @@ import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import permissions from "../../structures/Permissions"
 import functions from "../../functions/Functions"
-import tos from "../../assets/svg/terms.svg"
-import privacy from "../../assets/svg/privacy.svg"
+import TermsIcon from "../../assets/svg/terms.svg"
+import PrivacyIcon from "../../assets/svg/privacy.svg"
 import {useThemeSelector, useInteractionActions, useLayoutActions, 
 useActiveActions, useLayoutSelector} from "../../store"
 import "./styles/tospage.less"
@@ -24,12 +24,6 @@ const TermsPage: React.FunctionComponent = (props) => {
     const {setHeaderText, setSidebarText} = useActiveActions()
     const {mobile} = useLayoutSelector()
     const [onPrivacy, setOnPrivacy] = useState(false)
-
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
 
     useEffect(() => {
         setHideNavbar(true)
@@ -67,7 +61,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                 <div className="terms-container">
                     <div className="terms">
                         <div className="terms-title-container">
-                            <img className="terms-img" src={getIcon(tos)} style={{filter}}/>
+                            <TermsIcon className="terms-img"/>
                             <span className="terms-title">{i18n.terms.tos.title}</span>
                         </div>
                         <div className="terms-text">
@@ -138,7 +132,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="privacy" id="privacy" onMouseOver={() => setOnPrivacy(true)} onMouseLeave={() => setOnPrivacy(false)}>
                         <div className="privacy-title-container">
-                            <img className="privacy-img" src={getIcon(privacy)} style={{filter}}/>
+                            <PrivacyIcon className="privacy-img"/>
                             <span className="privacy-title">{i18n.terms.privacy.title}</span>
                         </div>
                         <div className="privacy-text">

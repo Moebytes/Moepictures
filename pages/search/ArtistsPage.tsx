@@ -10,11 +10,11 @@ import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
-import search from "../../assets/svg/search.svg"
-import sort from "../../assets/svg/sort.svg"
-import sortRev from "../../assets/svg/sort-reverse.svg"
-import scrollIcon from "../../assets/svg/scroll.svg"
-import pageIcon from "../../assets/svg/pages.svg"
+import SearchIcon from "../../assets/svg/search.svg"
+import SortIcon from "../../assets/svg/sort.svg"
+import SortReverseIcon from "../../assets/svg/sort-reverse.svg"
+import ScrollIcon from "../../assets/svg/scroll.svg"
+import PagesIcon from "../../assets/svg/pages.svg"
 import ArtistRow from "../../components/search/ArtistRow"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useLayoutSelector, usePageActions, useActiveSelector, 
@@ -50,12 +50,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         limit = mobile ? 5 : 25
     }, [mobile])
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
     const getFilterSearch = functions.color.filter({theme, siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
 
     useEffect(() => {
         setHideNavbar(true)
@@ -119,7 +114,9 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     const getSortJSX = () => {
         return (
             <div className="itemsort-item" ref={sortRef}>
-                <img className="itemsort-img" src={sortReverse ? getIcon(sortRev) : getIcon(sort)} style={{filter}} onClick={() => setSortReverse(!sortReverse)}/>
+                {sortReverse ?
+                <SortReverseIcon className="itemsort-img" onClick={() => setSortReverse(!sortReverse)}/> :
+                <SortIcon className="itemsort-img" onClick={() => setSortReverse(!sortReverse)}/>}
                 <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{i18n.sort[sortType]}</span>
             </div>
         )
@@ -152,12 +149,14 @@ const ArtistsPage: React.FunctionComponent = (props) => {
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
                             <button className="item-search-button" style={{filter: getFilterSearch}} onClick={() => initItems()}>
-                                <img src={search}/>
+                                <SearchIcon className="item-search-button-icon"/>
                             </button>
                         </div>
                         {getSortJSX()}
                         {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>
-                            <img className="itemsort-img" src={scroll ? getIcon(scrollIcon) : getIcon(pageIcon)} style={{filter}}/>
+                            {scroll ? 
+                            <ScrollIcon className="itemsort-img"/> :
+                            <PagesIcon className="itemsort-img"/>}
                             <span className="itemsort-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                         </div> : null}
                         <div className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 

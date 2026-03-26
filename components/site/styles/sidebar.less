@@ -105,13 +105,14 @@
     height: 30px;
     &:hover {
         color: white;
-        & > img {
-            filter: invert(1);
-        }
     }
-    & > img {
-        width: auto;
-        height: 25px;
+}
+
+.search-button-icon {
+    width: auto;
+    height: 25px;
+    &:hover {
+        filter: invert(1);
     }
 }
 
@@ -132,14 +133,15 @@
     &:hover {
         border: 1px solid white;
         color: white;
-        & > img {
-            filter: invert(1);
-        }
     }
-    & > img {
-        margin-left: 4px;
-        width: auto;
-        height: 27px;
+}
+
+.random-button-icon {
+    margin-left: 4px;
+    width: auto;
+    height: 27px;
+    &:hover {
+        filter: invert(1);
     }
 }
 
@@ -161,14 +163,15 @@
     &:hover {
         border: 1px solid white;
         color: white;
-        & > img {
-            filter: invert(1);
-        }
     }
-    & > img {
-        margin-right: 2px;
-        width: auto;
-        height: 20px;
+}
+
+.save-search-button-icon {
+    margin-right: 2px;
+    width: auto;
+    height: 20px;
+    &:hover {
+        filter: invert(1);
     }
 }
 
@@ -190,14 +193,15 @@
     &:hover {
         border: 1px solid white;
         color: white;
-        & > img {
-            filter: invert(1);
-        }
     }
-    & > img {
-        margin-right: 4px;
-        width: auto;
-        height: 20px;
+}
+
+.fav-search-button-icon {
+    margin-right: 4px;
+    width: auto;
+    height: 20px;
+    &:hover {
+        filter: invert(1);
     }
 }
 
@@ -217,14 +221,15 @@
     height: 40px;
     &:hover {
         color: white;
-        & > img {
-            filter: invert(1);
-        }
     }
-    & > img {
+}
+
+.search-mobile-button-icon {
         width: auto;
         height: 30px;
-    }
+        &:hover {
+            filter: invert(1);
+        }
 }
 
 .sidebar-subcontainer {
@@ -307,9 +312,25 @@
     cursor: pointer;
     margin-top: 3px;
     margin-right: 4px;
+    color: #fe019c;
     &:hover {
         filter: brightness(130%);
     }
+}
+
+.tag-info-mid-pink {
+    .tag-info();
+    color: var(--sidebarButtons);
+}
+
+.tag-info-pink {
+    .tag-info();
+    color: #ff75d8;
+}
+
+.tag-info-purple {
+    .tag-info();
+    color: #5e38f6;
 }
 
 .side-info {
@@ -373,6 +394,7 @@
     cursor: pointer;  
     width: auto;
     height: 18px;
+    color: var(--sortbarIcons);
     &:hover {
         filter: brightness(200%);
     }
@@ -428,6 +450,17 @@
     width: auto;
     height: 15px;
     margin-right: 5px;
+    color: var(--sortbarIcons);
+}
+
+.sidebar-icon-red {
+    .sidebar-icon();
+    color: #fd56a9;
+}
+
+.sidebar-icon-green {
+    .sidebar-icon();
+    color: #56fdaa;
 }
 
 .mobile-sidebar {
@@ -503,7 +536,18 @@
     width: auto;
     height: 22px;
     cursor: pointer;
+    color: var(--sidebarButtons);
     &:hover {
         filter: brightness(130%);
     }
+}
+
+.autosearch-pink {
+    .autosearch();
+    color: #ff75d8;
+}
+
+.autosearch-purple {
+    .autosearch();
+    color: #5e38f6;
 }

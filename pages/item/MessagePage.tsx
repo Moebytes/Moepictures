@@ -18,10 +18,10 @@ useActiveSelector, useSearchSelector, usePageSelector, useFlagSelector,
 useMessageDialogActions, useMessageDialogSelector, useCacheSelector} from "../../store"
 import permissions from "../../structures/Permissions"
 import favicon from "../../assets/icons/favicon.png"
-import editIcon from "../../assets/svg/edit.svg"
-import deleteIcon from "../../assets/svg/delete.svg"
-import quoteIcon from "../../assets/svg/quote.svg"
-import forwardIcon from "../../assets/svg/forward.svg"
+import EditIcon from "../../assets/svg/edit.svg"
+import DeleteIcon from "../../assets/svg/delete.svg"
+import QuoteIcon from "../../assets/svg/quote.svg"
+import ForwardIcon from "../../assets/svg/forward.svg"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import TextBox, {TextBoxRef} from "../../ui/TextBox"
 import PageControls from "../../components/site/PageControls"
@@ -59,10 +59,6 @@ const MessagePage: React.FunctionComponent = () => {
     const {id: messageID} = useParams() as {id: string}
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--titleButtons")
-    }
 
     useEffect(() => {
         const replyParam = new URLSearchParams(window.location.search).get("reply")
@@ -289,15 +285,15 @@ const MessagePage: React.FunctionComponent = () => {
         if (!message) return
         if (message.role !== "system" && session.username && !session.banned) {
             return (
-                <img draggable={false} className="thread-page-opt-icon" src={getIcon(quoteIcon)} onClick={triggerQuote} style={{filter}}/>
+                <QuoteIcon className="thread-page-opt-icon" onClick={triggerQuote}/>
             )
         }
         if (session.username === message.creator || permissions.isMod(session)) {
             return(
                 <>
-                <img draggable={false} className="thread-page-opt-icon" src={getIcon(forwardIcon)} onClick={forwardMessageDialog} style={{filter}}/>
-                <img draggable={false} className="thread-page-opt-icon" src={getIcon(editIcon)} onClick={editMessageDialog} style={{filter}}/>
-                <img draggable={false} className="thread-page-opt-icon" src={getIcon(deleteIcon)} onClick={deleteMessageDialog} style={{filter}}/>
+                <ForwardIcon className="thread-page-opt-icon" onClick={forwardMessageDialog}/>
+                <EditIcon className="thread-page-opt-icon" onClick={editMessageDialog}/>
+                <DeleteIcon className="thread-page-opt-icon" onClick={deleteMessageDialog}/>
                 </>
             )
         }

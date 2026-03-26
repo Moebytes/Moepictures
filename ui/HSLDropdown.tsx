@@ -7,8 +7,8 @@
 import React from "react"
 import Slider from "react-slider"
 import functions from "../functions/Functions"
-import lightSVG from "../assets/svg/light.svg"
-import darkSVG from "../assets/svg/dark.svg"
+import LightIcon from "../assets/svg/light.svg"
+import DarkIcon from "../assets/svg/dark.svg"
 import {useThemeSelector, useThemeActions, useLayoutSelector, useLayoutActions} from "../store"
 import {Themes} from "../types/Types"
 import "./styles/hsldropdown.less"
@@ -61,7 +61,9 @@ const HSLDropdown: React.FunctionComponent<Props> = (props) => {
             <div className="hsl-dropdown-row" style={{justifyContent: "space-evenly"}}>
                 <button className="hsl-dropdown-button" onClick={() => resetFilters()}>{i18n.filters.reset}</button>
                 <button className="hsl-dropdown-button" onClick={() => lightChange()}>
-                    <img src={theme.includes("light") ? darkSVG : lightSVG}/>
+                    {theme.includes("light") ? 
+                    <DarkIcon className="hsl-dropdown-button-icon"/> : 
+                    <LightIcon className="hsl-dropdown-button-icon"/>}
                 </button>
             </div>
         </div>

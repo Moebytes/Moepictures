@@ -12,33 +12,33 @@ useSessionSelector, useSessionActions, usePostDialogActions, useGroupDialogActio
 import permissions from "../../structures/Permissions"
 import favicon from "../../assets/icons/favicon.png"
 
-import hashIcon from "../../assets/svg/hash.svg"
-import infoIcon from "../../assets/svg/info.svg"
-import tagEdit from "../../assets/svg/tag.svg"
-import sourceEdit from "../../assets/svg/search.svg"
-import setAvatar from "../../assets/svg/setavatar.svg"
-import parent from "../../assets/svg/parent.svg"
-import group from "../../assets/svg/add-group.svg"
-import snapshotIcon from "../../assets/svg/snapshot.svg"
-import splitIcon from "../../assets/svg/split.svg"
-import joinIcon from "../../assets/svg/join.svg"
-import flipIcon from "../../assets/svg/flip.svg"
-import privateIcon from "../../assets/svg/private.svg"
-import unprivateIcon from "../../assets/svg/unprivate.svg"
-import takedown from "../../assets/svg/takedown.svg"
-import restore from "../../assets/svg/restore.svg"
-import edit from "../../assets/svg/edit.svg"
-import lockIcon from "../../assets/svg/lock.svg"
-import unlockIcon from "../../assets/svg/unlock.svg"
-import historyIcon from "../../assets/svg/history.svg"
-import deleteIcon from "../../assets/svg/delete.svg"
-import undeleteIcon from "../../assets/svg/undelete.svg"
-import rejectRed from "../../assets/svg/reject.svg"
-import approveGreen from "../../assets/svg/approve.svg"
-import tagIcon from "../../assets/svg/tags.svg"
-import compressIcon from "../../assets/svg/compress.svg"
-import upscaleIcon from "../../assets/svg/waifu2x.svg"
-import appealIcon from "../../assets/svg/appeal.svg"
+import HashIcon from "../../assets/svg/hash.svg"
+import InfoIcon from "../../assets/svg/info.svg"
+import TagEditIcon from "../../assets/svg/tag.svg"
+import SourceEditIcon from "../../assets/svg/search.svg"
+import SetAvatarIcon from "../../assets/svg/setavatar.svg"
+import ParentIcon from "../../assets/svg/parent.svg"
+import GroupIcon from "../../assets/svg/add-group.svg"
+import SnapshotIcon from "../../assets/svg/snapshot.svg"
+import SplitIcon from "../../assets/svg/split.svg"
+import JoinIcon from "../../assets/svg/join.svg"
+import FlipIcon from "../../assets/svg/flip.svg"
+import PrivateIcon from "../../assets/svg/private.svg"
+import UnprivateIcon from "../../assets/svg/unprivate.svg"
+import TakedownIcon from "../../assets/svg/takedown.svg"
+import RestoreIcon from "../../assets/svg/restore.svg"
+import EditIcon from "../../assets/svg/edit.svg"
+import LockIcon from "../../assets/svg/lock.svg"
+import UnlockIcon from "../../assets/svg/unlock.svg"
+import HistoryIcon from "../../assets/svg/history.svg"
+import DeleteIcon from "../../assets/svg/delete.svg"
+import UndeleteIcon from "../../assets/svg/undelete.svg"
+import RejectIcon from "../../assets/svg/reject.svg"
+import ApproveIcon from "../../assets/svg/approve.svg"
+import TagIcon from "../../assets/svg/tags.svg"
+import CompressIcon from "../../assets/svg/compress.svg"
+import UpscaleIcon from "../../assets/svg/waifu2x.svg"
+import AppealIcon from "../../assets/svg/appeal.svg"
 
 import website from "../../assets/icons/website.png"
 import pixiv from "../../assets/icons/pixiv.png"
@@ -98,20 +98,6 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const [approverData, setApproverData] = useState(null as PrunedUser | null)
     const navigate = useNavigate()
     const location = useLocation()
-
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
-
-    const getRedIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "#fd56a9")
-    }
-    
-    const getGreenIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "#56fdaa")
-    }
 
     const updateTags = async () => {
         const tags = await functions.tag.parseTags(posts, session, setSessionFlag)
@@ -713,7 +699,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                 <div className="mobileinfo-subcontainer-column">
                     <div className="mobileinfo-row">
                         <span className="tag-hover" onClick={copyTags} onContextMenu={copyTags}>
-                            <img className="mobileinfo-icon" src={getIcon(tagIcon)}/>
+                            <TagIcon className="mobileinfo-icon"/>
                             <span className="tag-red">{i18n.sidebar.copyTags}</span>
                         </span>
                     </div>
@@ -734,7 +720,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                 <div className="mobileinfo-subcontainer-column">
                     <div className="mobileinfo-row">
                         <span className="tag-hover" onClick={toggleCaptcha}>
-                            <img className="mobileinfo-icon" src={getIcon(tagIcon)}/>
+                            <TagIcon className="mobileinfo-icon"/>
                             <span className="tag-red">{i18n.sidebar.unlockPost}</span>
                         </span>
                     </div>
@@ -939,19 +925,19 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={() => copyHash()} onAuxClick={() => copyHash()} onContextMenu={(event) => {event.preventDefault(); setTimeout(() => copyHash(true), 100)}}>
-                                    <img className="mobileinfo-icon" src={getIcon(hashIcon)} style={{filter}}/>
+                                    <HashIcon className="mobileinfo-icon"/>
                                     <span className="side-info">{i18n.sidebar.copyHash}</span>
                                 </span>
                             </div>
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={getPostInfo}>
-                                    <img className="mobileinfo-icon" src={getIcon(infoIcon)} style={{filter}}/>
+                                    <InfoIcon className="mobileinfo-icon"/>
                                     <span className="side-info">{i18n.sidebar.getInfo}</span>
                                 </span>
                             </div>
                             {!props.unverified && !functions.post.isR18(props.post.rating) ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerSetAvatar}>
-                                    <img className="mobileinfo-icon" src={getIcon(setAvatar)} style={{filter}}/>
+                                    <SetAvatarIcon className="mobileinfo-icon"/>
                                     <span className="side-info">{i18n.sidebar.setAvatar}</span>
                                 </span>
                             </div> : null}
@@ -964,13 +950,13 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerTagEdit}>
-                                    <img className="mobileinfo-icon" src={getIcon(tagEdit)} style={{filter}}/>
+                                    <TagEditIcon className="mobileinfo-icon"/>
                                     <span className="side-info">{i18n.sidebar.tagEdit}</span>
                                 </span>
                             </div>
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerSourceEdit}>
-                                    <img className="mobileinfo-icon" src={getIcon(sourceEdit)} style={{filter}}/>
+                                    <SourceEditIcon className="mobileinfo-icon"/>
                                     <span className="side-info">{i18n.sidebar.sourceEdit}</span>
                                 </span>
                             </div>
@@ -978,13 +964,13 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <div className="mobileinfo-sub-row">
                             {!props.unverified ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerParent}>
-                                    <img className="sidebar-icon" src={getIcon(parent)} style={{filter}}/>
+                                    <ParentIcon className="mobileinfo-icon"/>
                                     <span className="side-info">{i18n.sidebar.addParent}</span>
                                 </span>
                             </div> : null}
                             {!props.unverified ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerGroup}>
-                                    <img className="sidebar-icon" src={getIcon(group)} style={{filter}}/>
+                                    <GroupIcon className="mobileinfo-icon"/>
                                     <span className="side-info">{i18n.sidebar.addGroup}</span>
                                 </span>
                             </div> : null}
@@ -992,13 +978,13 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <div className="mobileinfo-sub-row">
                             {!props.unverified && permissions.isAdmin(session) ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerSplit}>
-                                    <img className="mobileinfo-icon" src={getIcon(splitIcon)} style={{filter}}/>
+                                    <SplitIcon className="mobileinfo-icon"/>
                                     <span className="side-info">{i18n.sidebar.splitVariations}</span>
                                 </span>
                             </div> : null}
                             {!props.unverified && permissions.isAdmin(session) ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerJoin}>
-                                    <img className="mobileinfo-icon" src={getIcon(joinIcon)} style={{filter}}/>
+                                    <JoinIcon className="mobileinfo-icon"/>
                                     <span className="side-info">{i18n.sidebar.joinChildPosts}</span>
                                 </span>
                             </div> : null}
@@ -1006,14 +992,14 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <div className="mobileinfo-sub-row">
                             {!props.unverified && props.post.parentID && permissions.isAdmin(session) ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerFlip}>
-                                    <img className="mobileinfo-icon" src={getIcon(flipIcon)} style={{filter}}/>
+                                    <FlipIcon className="mobileinfo-icon"/>
                                     <span className="side-info">{i18n.sidebar.flipParent}</span>
                                 </span>
                             </div> : null}
                             {permissions.isMod(session) ? 
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={editThumbnail}>
-                                    <img className="mobileinfo-icon" src={getIcon(snapshotIcon)} style={{filter}}/>
+                                    <SnapshotIcon className="mobileinfo-icon"/>
                                     <span className="side-info">{i18n.sidebar.editThumbnail}</span>
                                 </span>
                             </div> : null}
@@ -1021,13 +1007,17 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <div className="mobileinfo-sub-row">
                             {!props.unverified && permissions.canPrivate(session, props.artists) ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={privatePost}>
-                                    <img className="mobileinfo-icon" src={getIcon(props.post.private ? unprivateIcon : privateIcon)} style={{filter}}/>
+                                    {props.post.private ?
+                                    <UnprivateIcon className="mobileinfo-icon"/> :
+                                    <PrivateIcon className="mobileinfo-icon"/>}
                                     <span className="side-info">{props.post.private ? i18n.sidebar.unprivate : i18n.sort.private}</span>
                                 </span>
                             </div> : null}
                             {!props.unverified && permissions.isMod(session) ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerTakedown}>
-                                    <img className="mobileinfo-icon" src={getIcon(props.post.hidden ? restore : takedown)} style={{filter}}/>
+                                    {props.post.hidden ?
+                                    <RestoreIcon className="mobileinfo-icon"/> :
+                                    <TakedownIcon className="mobileinfo-icon"/>}
                                     <span className="side-info">{props.post.hidden ? i18n.sidebar.restore : i18n.sidebar.takedown}</span>
                                 </span>
                             </div> : null}
@@ -1036,13 +1026,13 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             {props.unverified ? <>
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={compressingDialog}>
-                                    <img className="sidebar-icon" src={getIcon(compressIcon)}/>
+                                    <CompressIcon className="mobileinfo-icon"/>
                                     <span className="side-info">{i18n.buttons.compress}</span>
                                 </span>
                             </div>
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={upscalingDialog}>
-                                    <img className="sidebar-icon" src={getIcon(upscaleIcon)}/>
+                                    <UpscaleIcon className="mobileinfo-icon"/>
                                     <span className="side-info">{i18n.buttons.upscale}</span>
                                 </span>
                             </div></> : null}
@@ -1051,13 +1041,13 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             {props.unverified ? <>
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={approvePost}>
-                                    <img className="mobileinfo-icon" src={getGreenIcon(approveGreen)}/>
+                                    <ApproveIcon className="mobileinfo-icon-green"/>
                                     <span className="side-info-green">{i18n.buttons.approve}</span>
                                 </span>
                             </div>
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={rejectPost}>
-                                    <img className="mobileinfo-icon" src={getRedIcon(rejectRed)}/>
+                                    <RejectIcon className="mobileinfo-icon-red"/>
                                     <span className="side-info-red">{i18n.buttons.reject}</span>
                                 </span>
                             </div>
@@ -1066,33 +1056,35 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={editPost}>
-                                    <img className="mobileinfo-icon" src={getRedIcon(edit)}/>
+                                    <EditIcon className="mobileinfo-icon-red"/>
                                     <span className="side-info-red">{i18n.buttons.edit}</span>
                                 </span>
                             </div>
                             {!props.unverified && permissions.isMod(session) ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={lockPost}>
-                                    <img className="mobileinfo-icon" src={getRedIcon(props.post.locked ? unlockIcon : lockIcon)}/>
+                                    {props.post.locked ?
+                                    <UnlockIcon className="mobileinfo-icon-red"/> :
+                                    <LockIcon className="mobileinfo-icon-red"/>}
                                     <span className="side-info-red">{props.post.locked ? i18n.sidebar.unlock : i18n.sidebar.lock}</span>
                                 </span>
                             </div> : null}
                             {!props.unverified ? <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={postHistory}>
-                                    <img className="mobileinfo-icon" src={getRedIcon(historyIcon)}/>
+                                    <HistoryIcon className="mobileinfo-icon-red"/>
                                     <span className="side-info-red">{i18n.sidebar.history}</span>
                                 </span>
                             </div> : null}
                             {!(permissions.isMod(session) && props.unverified) || props.post.deleted ?
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={deletePost}>
-                                    <img className="mobileinfo-icon" src={getRedIcon(deleteIcon)}/>
+                                    <DeleteIcon className="mobileinfo-icon-red"/>
                                     <span className="side-info-red">{i18n.buttons.delete}</span>
                                 </span>
                             </div> : null}
                             {permissions.isMod(session) && props.post.deleted ?
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={undeletePost}>
-                                    <img className="mobileinfo-icon" src={getRedIcon(undeleteIcon)}/>
+                                    <UndeleteIcon className="mobileinfo-icon-red"/>
                                     <span className="side-info-red">{i18n.buttons.undelete}</span>
                                 </span>
                             </div> : null}
@@ -1101,7 +1093,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             {props.unverified && props.post.deleted && !(props.post as UnverifiedPost).appealed ?
                             <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={appealPost}>
-                                    <img className="mobileinfo-icon" src={getRedIcon(appealIcon)}/>
+                                    <AppealIcon className="mobileinfo-icon-red"/>
                                     <span className="side-info-red">{i18n.buttons.appeal}</span>
                                 </span>
                             </div> : null}

@@ -10,10 +10,10 @@ import {useCacheActions, useLayoutSelector, useSearchSelector, useSessionSelecto
 useSessionActions, useSearchActions, usePageSelector, usePageActions, useCacheSelector} from "../../store"
 import {TrackablePromise} from "../../structures/TrackablePromise"
 import functions from "../../functions/Functions"
-import scrollSVG from "../../assets/svg/scroll.svg"
-import pagesSVG from "../../assets/svg/pages.svg"
-import squareSVG from "../../assets/svg/square.svg"
-import sizeSVG from "../../assets/svg/size.svg"
+import ScrollIcon from "../../assets/svg/scroll.svg"
+import PagesIcon from "../../assets/svg/pages.svg"
+import SquareIcon from "../../assets/svg/square.svg"
+import SizeIcon from "../../assets/svg/size.svg"
 import GridImage from "../image/GridImage"
 import GridAnimation from "../image/GridAnimation"
 import GridVideo from "../image/GridVideo"
@@ -64,12 +64,6 @@ const Related: React.FunctionComponent<Props> = (props) => {
 
         return () => clearTimeout(timer)
     }, [])
-
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--titleButtons")
-    }
 
     let rating = props.post?.rating || (functions.post.isR18(ratingType) ? ratingType : "all")
 
@@ -299,15 +293,19 @@ const Related: React.FunctionComponent<Props> = (props) => {
             <div style={{display: "flex", alignItems: "center", marginBottom: "20px"}}>
                 <span className="tag-label" onClick={searchTag} onAuxClick={searchTag}>{i18n.sort.posts}
                 </span><span className="tag-label-alt">{props.count}</span>
-                <img className="related-icon" src={getIcon(scroll ? scrollSVG : pagesSVG)} onClick={toggleScroll} style={{filter}}/>
-                <img className="related-icon" src={getIcon(squareSVG)} onClick={() => setSquare(!square)} style={{filter}}/>
-                <img className="related-icon" ref={sizeRef} src={getIcon(sizeSVG)} onClick={() => setSizeDropdown((prev) => !prev)} style={{filter}}/>
+                {scroll ? 
+                <ScrollIcon className="related-icon" onClick={toggleScroll}/> :
+                <PagesIcon className="related-icon" onClick={toggleScroll}/>}
+                <SquareIcon className="related-icon" onClick={() => setSquare(!square)}/>
+                <SizeIcon className="related-icon" ref={sizeRef} onClick={() => setSizeDropdown((prev) => !prev)}/>
             </div> :
             <div style={{display: "flex", alignItems: "center", marginBottom: "20px"}}>
                 <span className="related-title">{i18n.post.related}</span>
-                <img className="related-icon" src={getIcon(scroll ? scrollSVG : pagesSVG)} onClick={toggleScroll} style={{filter}}/>
-                <img className="related-icon" src={getIcon(squareSVG)} onClick={() => setSquare(!square)} style={{filter}}/>
-                <img className="related-icon" ref={sizeRef} src={getIcon(sizeSVG)} onClick={() => setSizeDropdown((prev) => !prev)} style={{filter}}/>
+                {scroll ? 
+                <ScrollIcon className="related-icon" onClick={toggleScroll}/> :
+                <PagesIcon className="related-icon" onClick={toggleScroll}/>}
+                <SquareIcon className="related-icon" onClick={() => setSquare(!square)}/>
+                <SizeIcon className="related-icon" ref={sizeRef} onClick={() => setSizeDropdown((prev) => !prev)}/>
             </div>}
             <div className="related-container" style={{visibility: allImagesLoaded ? "visible" : "hidden", width: "98%", justifyContent: related.length < 5 ? "flex-start" : "space-evenly"}}>
                 {generateImagesJSX()}

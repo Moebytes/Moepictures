@@ -12,7 +12,6 @@ import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useLayoutSelector} from "../../store"
-import premiumStar from "../../assets/svg/premium-star.svg"
 import premiumImg from "../../assets/images/premiumupgrade.png"
 import upscaledImg from "../../assets/images/upscaled.png"
 import bookmarksImg from "../../assets/images/bookmarks.png"
@@ -31,7 +30,8 @@ import changeUsername from "../../assets/images/premium-change-username.png"
 import noAds from "../../assets/images/premium-no-ads.png"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import bitcoin from "../../assets/svg/bitcoin.svg"
+import PremiumStarIcon from "../../assets/svg/premium-star.svg"
+import BitcoinIcon from "../../assets/svg/bitcoin.svg"
 import "./styles/premiumpage.less"
 
 const PaymentButton: React.FunctionComponent = (props) => {
@@ -57,7 +57,7 @@ const PaymentButton: React.FunctionComponent = (props) => {
 
     return (
         <button className="premium-button" onClick={openPaymentLink}>
-            <img src={bitcoin}/>
+            <BitcoinIcon className="premium-button-icon"/>
             <span>{i18n.premium.purchase.payWithCrypto}</span>
         </button>
     )
@@ -72,10 +72,6 @@ const PremiumPage: React.FunctionComponent = (props) => {
     const {mobile} = useLayoutSelector()
     const [premiumFeature, setPremiumFeature] = useState("premium")
     const navigate = useNavigate()
-
-    const getPremiumIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--premiumColor")
-    }
 
     useEffect(() => {
         if (!session.cookie) return
@@ -137,7 +133,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
             return (
                 <><div className="premium-row">
                     <span className="premium-heading">{i18n.premium.premium.title}</span>
-                    <img className="premium-star" src={getPremiumIcon(premiumStar)}/>
+                    <PremiumStarIcon className="premium-star"/>
                 </div>
                 <span className="premium-text">
                     {i18n.premium.premium.line1}<br/><br/>

@@ -14,7 +14,7 @@ import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
-import premiumStar from "../../assets/svg/premium-star.svg"
+import PremiumStarIcon from "../../assets/svg/premium-star.svg"
 import "./styles/sitepage.less"
 
 const PremiumSuccessPage: React.FunctionComponent = (props) => {
@@ -27,10 +27,6 @@ const PremiumSuccessPage: React.FunctionComponent = (props) => {
     const {setSession, setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
     const navigate = useNavigate()
-
-    const getPremiumIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--premiumColor")
-    }
 
     const getSessionCookie = async () => {
         const cookie = await functions.http.get("/api/user/session", null, session, setSessionFlag)
@@ -76,7 +72,7 @@ const PremiumSuccessPage: React.FunctionComponent = (props) => {
                 <div className="sitepage">
                     {permissions.isPremium(session) ? <><div className="premium-row">
                         <span className="premium-heading">{i18n.pages.premiumSuccess.title}</span>
-                        <img className="premium-star" src={getPremiumIcon(premiumStar)}/>
+                        <PremiumStarIcon className="premium-star"/>
                     </div>
                     <div className="sitepage-row">
                         <span className="sitepage-text" style={{color: "var(--premiumColor)"}}>

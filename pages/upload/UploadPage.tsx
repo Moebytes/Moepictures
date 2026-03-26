@@ -13,36 +13,36 @@ import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
 
-import uploadIcon from "../../assets/svg/upload-arrow.svg"
-import downloadIcon from "../../assets/svg/download-arrow.svg"
-import xIcon from "../../assets/svg/x-button.svg"
-import rightIcon from "../../assets/svg/right-thick.svg"
-import leftIcon from "../../assets/svg/left-thick.svg"
-import linkIcon from "../../assets/svg/link.svg"
-import upscaleIcon from "../../assets/svg/upscale.svg"
-import originalIcon from "../../assets/svg/original.svg"
+import UploadIcon from "../../assets/svg/upload-arrow.svg"
+import DownloadIcon from "../../assets/svg/download-arrow.svg"
+import XIcon from "../../assets/svg/x-button.svg"
+import RightIcon from "../../assets/svg/right-thick.svg"
+import LeftIcon from "../../assets/svg/left-thick.svg"
+import LinkIcon from "../../assets/svg/link.svg"
+import UpscaleIcon from "../../assets/svg/upscale.svg"
+import OriginalIcon from "../../assets/svg/original.svg"
 
-import image from "../../assets/svg/image.svg"
-import animation from "../../assets/svg/animation.svg"
-import video from "../../assets/svg/video.svg"
-import comic from "../../assets/svg/comic.svg"
-import live2d from "../../assets/svg/live2d.svg"
-import model from "../../assets/svg/model.svg"
-import audio from "../../assets/svg/music.svg"
+import ImageIcon from "../../assets/svg/image.svg"
+import AnimationIcon from "../../assets/svg/animation.svg"
+import VideoIcon from "../../assets/svg/video.svg"
+import ComicIcon from "../../assets/svg/comic.svg"
+import Live2dIcon from "../../assets/svg/live2d.svg"
+import ModelIcon from "../../assets/svg/model.svg"
+import AudioIcon from "../../assets/svg/music.svg"
 
-import cute from "../../assets/svg/cute.svg"
-import sexy from "../../assets/svg/sexy.svg"
-import erotic from "../../assets/svg/erotic.svg"
-import lewd from "../../assets/svg/lewd.svg"
+import CuteIcon from "../../assets/svg/cute.svg"
+import SexyIcon from "../../assets/svg/sexy.svg"
+import EroticIcon from "../../assets/svg/erotic.svg"
+import LewdIcon from "../../assets/svg/lewd.svg"
 
-import $2d from "../../assets/svg/2d.svg"
-import $3d from "../../assets/svg/3d.svg"
-import pixel from "../../assets/svg/pixel.svg"
-import chibi from "../../assets/svg/chibi.svg"
-import daki from "../../assets/svg/daki.svg"
-import sketch from "../../assets/svg/sketch.svg"
-import lineart from "../../assets/svg/lineart.svg"
-import promo from "../../assets/svg/promo.svg"
+import $2dIcon from "../../assets/svg/2d.svg"
+import $3dIcon from "../../assets/svg/3d.svg"
+import PixelIcon from "../../assets/svg/pixel.svg"
+import ChibiIcon from "../../assets/svg/chibi.svg"
+import DakiIcon from "../../assets/svg/daki.svg"
+import SketchIcon from "../../assets/svg/sketch.svg"
+import LineartIcon from "../../assets/svg/lineart.svg"
+import PromoIcon from "../../assets/svg/promo.svg"
 
 import Carousel from "../../components/site/Carousel"
 import PostImage from "../../components/image/PostImage"
@@ -159,10 +159,6 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
     const rawTagRef = useRef<HTMLTextAreaElement>(null!)
     const navigate = useNavigate()
     const {id: postID, slug} = useParams() as {id: string, slug: string}
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--titleButtons")
-    }
 
     useEffect(() => {
         if (!session.cookie) return
@@ -630,12 +626,12 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
                 <div className="upload-container-row">
                     <span className="upload-text margin-right">{i18n.pages.upload.artistImage}: </span>
                     <label htmlFor={`artist-upload-${i}`} className="upload-button">
-                            <img className="upload-button-img-small" src={uploadIcon}/>
+                            <UploadIcon className="upload-button-img-small"/>
                             <span className="upload-button-text-small">{i18n.buttons.upload}</span>
                     </label>
                     <input id={`artist-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "artist", i)}/>
                     {artists[i].image ? 
-                    <img className="upload-x-button" src={getIcon(xIcon)} onClick={() => deleteImage()}/>
+                    <XIcon className="upload-x-button" onClick={() => deleteImage()}/>
                     : null}
                 </div>
                 {artists[i].image ?
@@ -713,12 +709,12 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
                 <div className="upload-container-row">
                     <span className="upload-text margin-right">{i18n.pages.upload.characterImage}: </span>
                     <label htmlFor={`character-upload-${i}`} className="upload-button">
-                            <img className="upload-button-img-small" src={uploadIcon}/>
+                            <UploadIcon className="upload-button-img-small"/>
                             <span className="upload-button-text-small">{i18n.buttons.upload}</span>
                     </label>
                     <input id={`character-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "character", i)}/>
                     {characters[i].image ? 
-                    <img className="upload-x-button" src={getIcon(xIcon)} onClick={() => deleteImage()}/>
+                    <XIcon className="upload-x-button" onClick={() => deleteImage()}/>
                     : null}
                 </div>
                 {characters[i].image ?
@@ -796,12 +792,12 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
                 <div className="upload-container-row">
                     <span className="upload-text margin-right">{i18n.pages.upload.seriesImage}: </span>
                     <label htmlFor={`series-upload-${i}`} className="upload-button">
-                            <img className="upload-button-img-small" src={uploadIcon}/>
+                            <UploadIcon className="upload-button-img-small"/>
                             <span className="upload-button-text-small">{i18n.buttons.upload}</span>
                     </label>
                     <input id={`series-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "series", i)}/>
                     {series[i].image ? 
-                    <img className="upload-x-button" src={getIcon(xIcon)} onClick={() => deleteImage()}/>
+                    <XIcon className="upload-x-button" onClick={() => deleteImage()}/>
                     : null}
                 </div>
                 {series[i].image ?
@@ -1252,12 +1248,12 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
                 <div className="upload-container-row">
                     <span className="upload-text margin-right">{i18n.pages.upload.optionalTagImage}: </span>
                     <label htmlFor={`tag-upload-${i}`} className="upload-button">
-                            <img className="upload-button-img-small" src={uploadIcon}/>
+                            <UploadIcon className="upload-button-img-small"/>
                             <span className="upload-button-text-small">{i18n.buttons.upload}</span>
                     </label>
                     <input id={`tag-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "tag", i)}/>
                     {newTags[i].image ? 
-                    <img className="upload-x-button" src={getIcon(xIcon)} onClick={() => deleteImage()}/>
+                    <XIcon className="upload-x-button" onClick={() => deleteImage()}/>
                     : null}
                 </div>
                 {newTags[i].image ?
@@ -1344,15 +1340,15 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="upload-row">
                     <button className={`upload-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
-                        <img className="upload-button-img" src={$3d}/>
+                        <$3dIcon className="upload-button-img"/>
                         <span className="upload-button-text">{i18n.sortbar.style["3d"]}</span>
                     </button>
                     <button className={`upload-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
-                        <img className="upload-button-img" src={chibi}/>
+                        <ChibiIcon className="upload-button-img"/>
                         <span className="upload-button-text">{i18n.sortbar.style.chibi}</span>
                     </button>
                     <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
-                        <img className="upload-button-img" src={pixel}/>
+                        <PixelIcon className="upload-button-img"/>
                         <span className="upload-button-text">{i18n.sortbar.style.pixel}</span>
                     </button>
                 </div>
@@ -1361,15 +1357,15 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="upload-row">
                     <button className={`upload-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
-                        <img className="upload-button-img" src={$2d}/>
+                        <$2dIcon className="upload-button-img"/>
                         <span className="upload-button-text">{i18n.sortbar.style["2d"]}</span>
                     </button>
                     <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
-                        <img className="upload-button-img" src={pixel}/>
+                        <PixelIcon className="upload-button-img"/>
                         <span className="upload-button-text">{i18n.sortbar.style.pixel}</span>
                     </button>
                     <button className={`upload-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
-                        <img className="upload-button-img" src={sketch}/>
+                        <SketchIcon className="upload-button-img"/>
                         <span className="upload-button-text">{i18n.sortbar.style.sketch}</span>
                     </button>
                 </div>
@@ -1380,43 +1376,43 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
                     <>
                     <div className="upload-row">
                         <button className={`upload-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
-                            <img className="upload-button-img" src={$2d}/>
+                            <$2dIcon className="upload-button-img"/>
                             <span className="upload-button-text">{i18n.sortbar.style["2d"]}</span>
                         </button>
                         {type !== "live2d" ? <button className={`upload-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
-                            <img className="upload-button-img" src={$3d}/>
+                            <$3dIcon className="upload-button-img"/>
                             <span className="upload-button-text">{i18n.sortbar.style["3d"]}</span>
                         </button> : null}
                         <button className={`upload-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
-                            <img className="upload-button-img" src={chibi}/>
+                            <ChibiIcon className="upload-button-img"/>
                             <span className="upload-button-text">{i18n.sortbar.style.chibi}</span>
                         </button>
                         <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
-                            <img className="upload-button-img" src={pixel}/>
+                            <PixelIcon className="upload-button-img"/>
                             <span className="upload-button-text">{i18n.sortbar.style.pixel}</span>
                         </button>
                     </div>
                     <div className="upload-row">
                         {type !== "comic" ?
                         <button className={`upload-button ${style === "daki" ? "button-selected" : ""}`} onClick={() => setStyle("daki")}>
-                            <img className="upload-button-img" src={daki}/>
+                            <DakiIcon className="upload-button-img"/>
                             <span className="upload-button-text">{i18n.sortbar.style.daki}</span>
                         </button> : null}
                         {type !== "live2d" ?
                         <button className={`upload-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
-                            <img className="upload-button-img" src={promo}/>
+                            <PromoIcon className="upload-button-img"/>
                             <span className="upload-button-text">{i18n.sortbar.style.promo}</span>
                         </button> : null}
                         {type !== "live2d" ?
                         <button className={`upload-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
-                            <img className="upload-button-img" src={sketch}/>
+                            <SketchIcon className="upload-button-img"/>
                             <span className="upload-button-text">{i18n.sortbar.style.sketch}</span>
                         </button> : null}
                     </div>
                     <div className="upload-row">
                         {type !== "live2d" ?
                         <button className={`upload-button ${style === "lineart" ? "button-selected" : ""}`} onClick={() => setStyle("lineart")}>
-                            <img className="upload-button-img" src={lineart}/>
+                            <LineartIcon className="upload-button-img"/>
                             <span className="upload-button-text">{i18n.sortbar.style.lineart}</span>
                         </button> : null}
                     </div>
@@ -1426,39 +1422,39 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
                 return (
                     <div className="upload-row">
                         <button className={`upload-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
-                            <img className="upload-button-img" src={$2d}/>
+                            <$2dIcon className="upload-button-img"/>
                             <span className="upload-button-text">{i18n.sortbar.style["2d"]}</span>
                         </button>
                         {type !== "live2d" ? <button className={`upload-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
-                            <img className="upload-button-img" src={$3d}/>
+                            <$3dIcon className="upload-button-img"/>
                             <span className="upload-button-text">{i18n.sortbar.style["3d"]}</span>
                         </button> : null}
                         <button className={`upload-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
-                            <img className="upload-button-img" src={chibi}/>
+                            <ChibiIcon className="upload-button-img"/>
                             <span className="upload-button-text">{i18n.sortbar.style.chibi}</span>
                         </button>
                         <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
-                            <img className="upload-button-img" src={pixel}/>
+                            <PixelIcon className="upload-button-img"/>
                             <span className="upload-button-text">{i18n.sortbar.style.pixel}</span>
                         </button>
                         {type !== "comic" ?
                         <button className={`upload-button ${style === "daki" ? "button-selected" : ""}`} onClick={() => setStyle("daki")}>
-                            <img className="upload-button-img" src={daki}/>
+                            <DakiIcon className="upload-button-img"/>
                             <span className="upload-button-text">{i18n.sortbar.style.daki}</span>
                         </button> : null}
                         {type !== "live2d" ?
                         <button className={`upload-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
-                            <img className="upload-button-img" src={promo}/>
+                            <PromoIcon className="upload-button-img"/>
                             <span className="upload-button-text">{i18n.sortbar.style.promo}</span>
                         </button> : null}
                         {type !== "live2d" ?
                         <button className={`upload-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
-                            <img className="upload-button-img" src={sketch}/>
+                            <SketchIcon className="upload-button-img"/>
                             <span className="upload-button-text">{i18n.sortbar.style.sketch}</span>
                         </button> : null}
                         {type !== "live2d" ?
                         <button className={`upload-button ${style === "lineart" ? "button-selected" : ""}`} onClick={() => setStyle("lineart")}>
-                            <img className="upload-button-img" src={lineart}/>
+                            <LineartIcon className="upload-button-img"/>
                             <span className="upload-button-text">{i18n.sortbar.style.lineart}</span>
                         </button> : null}
                     </div>
@@ -1551,7 +1547,9 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
             <div className="upload">
                 <div className="upload-container-row" style={{alignItems: "center"}}>
                     <span className="upload-heading">{props.edit ? i18n.pages.edit.title : i18n.buttons.upload}</span>
-                    {!props.edit ? <img className="upload-heading-icon" src={hideGuidelines ? getIcon(downloadIcon) : getIcon(uploadIcon)} onClick={() => setHideGuidelines((prev) => !prev)}/> : null}
+                    {!props.edit ? (hideGuidelines ?
+                        <DownloadIcon className="upload-heading-icon" onClick={() => setHideGuidelines((prev) => !prev)}/> :
+                        <UploadIcon className="upload-heading-icon" onClick={() => setHideGuidelines((prev) => !prev)}/>) : null}
                 </div>
                 {submitted ?
                 <div className="upload-container">
@@ -1606,61 +1604,65 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
                 {mobile ? <>
                 <div className="upload-row">
                     <label htmlFor="file-upload" className="upload-button">
-                        <img className="upload-button-img" src={uploadIcon}/>
+                        <UploadIcon className="upload-button-img"/>
                         <span className="upload-button-text">{i18n.labels.selectFiles}</span>
                     </label>
                     <input id="file-upload" type="file" multiple onChange={(event) => upload(event)}/>
                     <button className="upload-button" onClick={() => setShowLinksInput((prev) => !prev)}>
-                            <img className="upload-button-img" src={linkIcon}/>
-                            <span className="upload-button-text">{i18n.labels.enterLinks}</span>
+                        <LinkIcon className="upload-button-img"/>
+                        <span className="upload-button-text">{i18n.labels.enterLinks}</span>
                     </button>
                 </div>
                 <div className="upload-row">
                     <button className="upload-button" onClick={() => changeUpscaled()}>
-                            <img className="upload-button-img" src={showUpscaled ? upscaleIcon : originalIcon}/>
-                            <span className="upload-button-text">{showUpscaled ? i18n.labels.upscaled : i18n.labels.original}</span>
+                        {showUpscaled ?
+                        <UpscaleIcon className="upload-button-img"/> :
+                        <OriginalIcon className="upload-button-img"/>}
+                        <span className="upload-button-text">{showUpscaled ? i18n.labels.upscaled : i18n.labels.original}</span>
                     </button>
                     {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={left}>
-                        <img className="upload-button-img" src={leftIcon}/>
+                        <LeftIcon className="upload-button-img"/>
                     </button> : null}
                     {currentImg ? 
                     <button className="upload-button" onClick={clear}>
-                        <img className="upload-button-img" src={xIcon}/>
+                        <XIcon className="upload-button-img"/>
                     </button>
                     : null}
                     {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={right}>
-                        <img className="upload-button-img" src={rightIcon}/>
+                        <RightIcon className="upload-button-img"/>
                     </button> : null}
                 </div> </>
                 :
                 <div className="upload-row">
                     <label htmlFor="file-upload" className="upload-button">
-                        <img className="upload-button-img" src={uploadIcon}/>
+                        <UploadIcon className="upload-button-img"/>
                         <span className="upload-button-text">{i18n.labels.selectFiles}</span>
                     </label>
                     <input id="file-upload" type="file" multiple onChange={(event) => upload(event)}/>
                     <button className="upload-button" onClick={() => setShowLinksInput((prev) => !prev)}>
-                            <img className="upload-button-img" src={linkIcon}/>
-                            <span className="upload-button-text">{i18n.labels.enterLinks}</span>
+                        <LinkIcon className="upload-button-img"/>
+                        <span className="upload-button-text">{i18n.labels.enterLinks}</span>
                     </button>
                     <button className="upload-button" onClick={() => changeUpscaled()}>
-                            <img className="upload-button-img" src={showUpscaled ? upscaleIcon : originalIcon}/>
+                        {showUpscaled ?
+                        <UpscaleIcon className="upload-button-img"/> :
+                        <OriginalIcon className="upload-button-img"/>}
                             <span className="upload-button-text">{showUpscaled ? i18n.labels.upscaled : i18n.labels.original}</span>
                     </button>
                     {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={left}>
-                        <img className="upload-button-img" src={leftIcon}/>
+                        <LeftIcon className="upload-button-img"/>
                     </button> : null}
                     {currentImg ? 
                     <button className="upload-button" onClick={clear}>
-                        <img className="upload-button-img" src={xIcon}/>
+                        <XIcon className="upload-button-img"/>
                     </button>
                     : null}
                     {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={right}>
-                        <img className="upload-button-img" src={rightIcon}/>
+                        <RightIcon className="upload-button-img"/>
                     </button> : null}
                 </div>}
                 {showLinksInput ?
@@ -1683,110 +1685,110 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
             {mobile ? <>
             <div className="upload-row">
                 <button className={`upload-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
-                    <img className="upload-button-img" src={image}/>
+                    <ImageIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.type.image}</span>
                 </button>
                 <button className={`upload-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
-                    <img className="upload-button-img" src={animation}/>
+                    <AnimationIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.type.animation}</span>
                 </button>
             </div>
             <div className="upload-row">
                 <button className={`upload-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
-                    <img className="upload-button-img" src={video}/>
+                    <VideoIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.type.video}</span>
                 </button>
                 <button className={`upload-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
-                    <img className="upload-button-img" src={comic}/>
+                    <ComicIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.type.comic}</span>
                 </button>
             </div>
             <div className="upload-row">
                 <button className={`upload-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
-                    <img className="upload-button-img" src={audio}/>
+                    <AudioIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.type.audio}</span>
                 </button>
                 <button className={`upload-button ${type === "live2d" ? "button-selected" : ""}`} onClick={() => setType("live2d")}>
-                    <img className="upload-button-img" src={live2d}/>
+                    <Live2dIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.type.live2d}</span>
                 </button>
             </div> 
             <div className="upload-row">
                 <button className={`upload-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
-                    <img className="upload-button-img" src={model}/>
+                    <ModelIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.type.model}</span>
                 </button>
             </div> </>
             :
             <div className="upload-row">
                 <button className={`upload-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
-                    <img className="upload-button-img" src={image}/>
+                    <ImageIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.type.image}</span>
                 </button>
                 <button className={`upload-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
-                    <img className="upload-button-img" src={animation}/>
+                    <AnimationIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.type.animation}</span>
                 </button>
                 <button className={`upload-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
-                    <img className="upload-button-img" src={video}/>
+                    <VideoIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.type.video}</span>
                 </button>
                 <button className={`upload-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
-                    <img className="upload-button-img" src={comic}/>
+                    <ComicIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.type.comic}</span>
                 </button>
                 <button className={`upload-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
-                    <img className="upload-button-img" src={audio}/>
+                    <AudioIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.type.audio}</span>
                 </button>
                 <button className={`upload-button ${type === "live2d" ? "button-selected" : ""}`} onClick={() => setType("live2d")}>
-                    <img className="upload-button-img" src={live2d}/>
+                    <Live2dIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.type.live2d}</span>
                 </button>
                 <button className={`upload-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
-                    <img className="upload-button-img" src={model}/>
+                    <ModelIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.type.model}</span>
                 </button>
             </div>}
             {mobile ? <>
             <div className="upload-row">
                 <button className={`upload-button ${rating === "cute" ? "button-selected" : ""}`} onClick={() => setRating("cute")}>
-                    <img className="upload-button-img" src={cute}/>
+                    <CuteIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.rating.cute}</span>
                 </button>
                 <button className={`upload-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
-                    <img className="upload-button-img" src={sexy}/>
+                    <SexyIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.rating.sexy}</span>
                 </button>
                 <button className={`upload-button ${rating === "erotic" ? "button-selected" : ""}`} onClick={() => setRating("erotic")}>
-                    <img className="upload-button-img" src={erotic}/>
+                    <EroticIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.rating.erotic}</span>
                 </button>
             </div>
             <div className="upload-row">
                 {session.showR18 ?
                 <button className={`upload-button ${rating === "lewd" ? "button-selected" : ""}`} onClick={() => setRating("lewd")}>
-                    <img className="upload-button-img" src={lewd}/>
+                    <LewdIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.rating.lewd}</span>
                 </button> : null}
             </div> </>
             :
             <div className="upload-row">
                 <button className={`upload-button ${rating === "cute" ? "button-selected" : ""}`} onClick={() => setRating("cute")}>
-                    <img className="upload-button-img" src={cute}/>
+                    <CuteIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.rating.cute}</span>
                 </button>
                 <button className={`upload-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
-                    <img className="upload-button-img" src={sexy}/>
+                    <SexyIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.rating.sexy}</span>
                 </button>
                 <button className={`upload-button ${rating === "erotic" ? "button-selected" : ""}`} onClick={() => setRating("erotic")}>
-                    <img className="upload-button-img" src={erotic}/>
+                    <EroticIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.rating.erotic}</span>
                 </button>
                 {session.showR18 ?
                 <button className={`upload-button ${rating === "lewd" ? "button-selected" : ""}`} onClick={() => setRating("lewd")}>
-                    <img className="upload-button-img" src={lewd}/>
+                    <LewdIcon className="upload-button-img"/>
                     <span className="upload-button-text">{i18n.sortbar.rating.lewd}</span>
                 </button> : null}
             </div>}

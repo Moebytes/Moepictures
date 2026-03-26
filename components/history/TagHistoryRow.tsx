@@ -9,8 +9,8 @@ import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions,
 useFilterSelector, useInteractionActions} from "../../store"
 import functions from "../../functions/Functions"
-import tagHistoryRevert from "../../assets/svg/revert.svg"
-import tagHistoryDelete from "../../assets/svg/delete.svg"
+import RevertIcon from "../../assets/svg/revert.svg"
+import DeleteIcon from "../../assets/svg/delete.svg"
 import permissions from "../../structures/Permissions"
 import website from "../../assets/icons/website.png"
 import fandom from "../../assets/icons/fandom.png"
@@ -46,14 +46,6 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     const tag = props.tagHistory.tag
     let hasChanges = functions.compare.hasHistoryChanges(props.tagHistory)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
-
-    const getRedIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "#f71e75")
-    }
 
     const updateImage = () => {
         if (!props.tagHistory.image) return
@@ -134,12 +126,12 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="historyrow-options">
                     <div className="historyrow-options-container" onClick={revertTagHistoryDialog}>
-                        <img className="historyrow-options-img" src={getIcon(tagHistoryRevert)}/>
+                        <RevertIcon className="historyrow-options-img"/>
                         <span className="historyrow-options-text">{i18n.buttons.revert}</span>
                     </div>
                     {permissions.isAdmin(session) ?
                     <div className="historyrow-options-container" onClick={deleteTagHistoryDialog}>
-                        <img className="historyrow-options-img" src={getRedIcon(tagHistoryDelete)}/>
+                        <DeleteIcon className="historyrow-options-img-red"/>
                         <span className="historyrow-options-text">{i18n.buttons.delete}</span>
                     </div> : null}
                 </div>
@@ -148,7 +140,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="historyrow-options">
                     <div className="historyrow-options-container" onClick={revertTagHistoryDialog}>
-                        <img className="historyrow-options-img" src={getIcon(tagHistoryRevert)}/>
+                        <RevertIcon className="historyrow-options-img"/>
                         <span className="historyrow-options-text">{i18n.buttons.revert}</span>
                     </div>
                 </div>

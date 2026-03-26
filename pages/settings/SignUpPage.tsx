@@ -11,8 +11,8 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import show from "../../assets/svg/show.svg"
-import hide from "../../assets/svg/hide.svg"
+import ShowIcon from "../../assets/svg/show.svg"
+import HideIcon from "../../assets/svg/hide.svg"
 import functions from "../../functions/Functions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useLayoutSelector} from "../../store"
@@ -40,10 +40,6 @@ const SignUpPage: React.FunctionComponent = (props) => {
     const navigate = useNavigate()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--titleButtons")
-    }
 
     const getCaptchaColor = () => {
         if (theme.includes("light")) return "#ffffff"
@@ -88,14 +84,6 @@ const SignUpPage: React.FunctionComponent = (props) => {
             navigate("/profile")
         }
     }, [session])
-
-    const getEye = () => {
-        return showPassword ? getIcon(hide) : getIcon(show)
-    }
-
-    const getEye2 = () => {
-        return showPassword2 ? getIcon(hide) : getIcon(show)
-    }
 
     const submit = async () => {
         if (password.trim() !== confirmPassword.trim()) {
@@ -192,14 +180,18 @@ const SignUpPage: React.FunctionComponent = (props) => {
                     <div className="sitepage-row">
                         <span className="sitepage-text-wide">{i18n.labels.password}:</span>
                         <div className="sitepage-pass">
-                            <img className="sitepage-pass-show" src={getEye()} style={{filter}} onClick={() => setShowPassword((prev) => !prev)}/>
+                            {showPassword ?
+                            <HideIcon className="sitepage-pass-show" onClick={() => setShowPassword((prev) => !prev)}/> :
+                            <ShowIcon className="sitepage-pass-show" onClick={() => setShowPassword((prev) => !prev)}/>}
                             <input className="sitepage-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={password} onChange={(event) => setPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                         </div>
                     </div>
                     <div className="sitepage-row">
                         <span className="sitepage-text-wide">{i18n.labels.confirmPassword}:</span>
                         <div className="sitepage-pass">
-                            <img className="sitepage-pass-show" src={getEye2()} style={{filter}} onClick={() => setShowPassword2((prev) => !prev)}/>
+                            {showPassword2 ?
+                            <HideIcon className="sitepage-pass-show" onClick={() => setShowPassword2((prev) => !prev)}/> :
+                            <ShowIcon className="sitepage-pass-show" onClick={() => setShowPassword2((prev) => !prev)}/>}
                             <input className="sitepage-pass-input" type={showPassword2 ? "text" : "password"} spellCheck={false} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                         </div>
                     </div>

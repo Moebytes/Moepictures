@@ -58,6 +58,7 @@
     width: auto;
     height: 18px;
     cursor: pointer;
+    color: var(--premiumColor);
     &:hover {
         filter: brightness(150%);
     }
@@ -84,9 +85,20 @@
     width: auto;
     margin-right: 14px;
     cursor: pointer;
+    color: var(--titleButtons);
     &:hover {
         filter: brightness(150%);
     }
+}
+
+.nav-color-blue {
+    .nav-color();
+    color: #23fbff;
+}
+
+.nav-color-pink {
+    .nav-color();
+    color: #ff75fa;
 }
 
 .nav-search-container {
@@ -105,6 +117,7 @@
     width: auto;
     height: 20px;
     z-index: 1600;
+    color: var(--titleButtons);
 }
 
 .nav-search {
@@ -210,6 +223,7 @@
     width: 20px;
     height: auto;
     cursor: pointer;
+    color: var(--premiumColor);
     &:hover {
         filter: brightness(150%);
     }
@@ -260,9 +274,20 @@
     width: auto;
     margin-right: 14px;
     cursor: pointer;
+    color: var(--titleButtons);
     &:hover {
         filter: brightness(150%);
     }
+}
+
+.mobile-nav-color-blue {
+    .mobile-nav-color();
+    color: #23fbff;
+}
+
+.mobile-nav-color-pink {
+    .mobile-nav-color();
+    color: #ff75fa;
 }
 
 .title-dropdown {
@@ -365,16 +390,18 @@
     &:hover {
         border: 1px solid #c9daff;
         color: #c8d7ff;
-        & > img {
-            filter: invert(1);
-        }
     }
-    & > img {
-        height: 19px;
-        width: auto;
-        cursor: pointer;
-        margin-bottom: 2px;
+}
+
+.title-dropdown-button-icon {
+    height: 19px;
+    width: auto;
+    cursor: pointer;
+    margin-bottom: 2px;
+    &:hover {
+        filter: invert(1);
     }
+
 }
 
 @media screen and (max-width: 1200px) {

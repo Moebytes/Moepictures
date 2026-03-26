@@ -11,10 +11,10 @@ import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
-import radioButton from "../../assets/svg/radiobutton.svg"
-import radioButtonChecked from "../../assets/svg/radiobutton-checked.svg"
-import checkbox from "../../assets/svg/checkbox.svg"
-import checkboxChecked from "../../assets/svg/checkbox-checked.svg"
+import RadioButtonIcon from "../../assets/svg/radiobutton.svg"
+import RadioButtonCheckedIcon from "../../assets/svg/radiobutton-checked.svg"
+import CheckboxIcon from "../../assets/svg/checkbox.svg"
+import CheckboxCheckedIcon from "../../assets/svg/checkbox-checked.svg"
 import {ImageFormat} from "../../types/Types"
 import "../dialog.less"
 
@@ -35,10 +35,6 @@ const CompressPostDialog: React.FunctionComponent = (props) => {
     const controls = useDragControls()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
 
     useEffect(() => {
         if (compressPostID) {
@@ -85,16 +81,26 @@ const CompressPostDialog: React.FunctionComponent = (props) => {
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center", paddingRight: "20px"}}>
                                 {compressPostID.post.type === "image" || compressPostID.post.type === "comic" ? <>
-                                <img className="dialog-checkbox" src={format === "jpg" ? getIcon(radioButtonChecked) : getIcon(radioButton)} onClick={() => setFormat("jpg")} style={{marginRight: "10px", filter}}/>
+                                {format === "jpg" ? 
+                                <CheckboxCheckedIcon className="dialog-checkbox" onClick={() => setFormat("jpg")} style={{marginRight: "10px"}}/> :
+                                <CheckboxIcon className="dialog-checkbox" onClick={() => setFormat("jpg")} style={{marginRight: "10px"}}/>}
                                 <span className="dialog-text">jpg</span>
-                                <img className="dialog-checkbox" src={format === "png" ? getIcon(radioButtonChecked) : getIcon(radioButton)} onClick={() => setFormat("png")} style={{marginRight: "10px", filter}}/>
+                                {format === "png" ? 
+                                <CheckboxCheckedIcon className="dialog-checkbox" onClick={() => setFormat("png")} style={{marginRight: "10px"}}/> :
+                                <CheckboxIcon className="dialog-checkbox" onClick={() => setFormat("png")} style={{marginRight: "10px"}}/>}
                                 <span className="dialog-text">png</span></> : null}
                                 {compressPostID.post.type === "animation" ? <>
-                                <img className="dialog-checkbox" src={format === "gif" ? getIcon(radioButtonChecked) : getIcon(radioButton)} onClick={() => setFormat("gif")} style={{marginRight: "10px", filter}}/>
+                                {format === "gif" ? 
+                                <CheckboxCheckedIcon className="dialog-checkbox" onClick={() => setFormat("gif")} style={{marginRight: "10px"}}/> :
+                                <CheckboxIcon className="dialog-checkbox" onClick={() => setFormat("gif")} style={{marginRight: "10px"}}/>}
                                 <span className="dialog-text">gif</span></> : null}
-                                <img className="dialog-checkbox" src={format === "webp" ? getIcon(radioButtonChecked) : getIcon(radioButton)} onClick={() => setFormat("webp")} style={{marginRight: "10px", filter}}/>
+                                {format === "webp" ? 
+                                <CheckboxCheckedIcon className="dialog-checkbox" onClick={() => setFormat("webp")} style={{marginRight: "10px"}}/> :
+                                <CheckboxIcon className="dialog-checkbox" onClick={() => setFormat("webp")} style={{marginRight: "10px"}}/>}
                                 <span className="dialog-text">webp</span>
-                                <img className="dialog-checkbox" src={format === "avif" ? getIcon(radioButtonChecked) : getIcon(radioButton)} onClick={() => setFormat("avif")} style={{marginRight: "10px", filter}}/>
+                                {format === "avif" ? 
+                                <CheckboxCheckedIcon className="dialog-checkbox" onClick={() => setFormat("avif")} style={{marginRight: "10px"}}/> :
+                                <CheckboxIcon className="dialog-checkbox" onClick={() => setFormat("avif")} style={{marginRight: "10px"}}/>}
                                 <span className="dialog-text">avif</span>
                             </div>
                             <div className="dialog-row">
@@ -107,9 +113,13 @@ const CompressPostDialog: React.FunctionComponent = (props) => {
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center"}}>
                                 <span className="dialog-text">{i18n.labels.original}</span>
-                                <img className="dialog-checkbox" src={original ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setOriginal((prev: boolean) => !prev)} style={{marginRight: "10px", filter}}/>
+                                {original ?
+                                <CheckboxCheckedIcon className="dialog-checkbox" onClick={() => setOriginal((prev: boolean) => !prev)} style={{marginRight: "10px"}}/> :
+                                <CheckboxIcon className="dialog-checkbox" onClick={() => setOriginal((prev: boolean) => !prev)} style={{marginRight: "10px"}}/>}
                                 <span className="dialog-text">{i18n.labels.upscaled}</span>
-                                <img className="dialog-checkbox" src={upscaled ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setUpscaled((prev: boolean) => !prev)} style={{filter}}/>
+                                {upscaled ?
+                                <CheckboxCheckedIcon className="dialog-checkbox" onClick={() => setUpscaled((prev: boolean) => !prev)}/> :
+                                <CheckboxIcon className="dialog-checkbox" onClick={() => setUpscaled((prev: boolean) => !prev)}/>}
                             </div>
                             <div className="dialog-row">
                                 <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>

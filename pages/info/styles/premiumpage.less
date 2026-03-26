@@ -73,6 +73,7 @@
     width: auto;
     margin-left: 20px;
     margin-top: -8px;
+    color: var(--premiumColor);
 }
 
 .premium-text {
@@ -130,13 +131,14 @@
     &:hover {
         border: 1px solid #ffc9f6;
         color: #ffc8f6;
-        & > img {
-            filter: invert(1);
-        }
     }
-    & > img {
-        width: auto;
-        height: 32px;
+}
+
+.premium-button-icon {
+    width: auto;
+    height: 32px;
+    &:hover {
+        filter: invert(1);
     }
 }
 

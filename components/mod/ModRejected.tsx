@@ -8,8 +8,8 @@ import React, {useEffect, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, usePageActions,
 useSearchSelector, usePageSelector, useActiveSelector} from "../../store"
-import restore from "../../assets/svg/revert.svg"
-import reject from "../../assets/svg/reject.svg"
+import RestoreIcon from "../../assets/svg/revert.svg"
+import RejectIcon from "../../assets/svg/reject.svg"
 import functions from "../../functions/Functions"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
@@ -35,12 +35,6 @@ const ModRejected: React.FunctionComponent = (props) => {
     const [updateVisiblePostFlag, setUpdateVisiblePostFlag] = useState(false)
     const [imagesRef, setImagesRef] = useState([] as React.RefObject<HTMLCanvasElement | null>[])
     const navigate = useNavigate()
-
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
 
     const loadInitial = async () => {
         const posts = await functions.http.get("/api/post/deleted/unverified", null, session, setSessionFlag, true)
@@ -179,11 +173,11 @@ const ModRejected: React.FunctionComponent = (props) => {
                     </div>
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => restorePost(post.postID)}>
-                            <img className="mod-post-options-img" src={getIcon(restore)} style={{filter}}/>
+                            <RestoreIcon className="mod-post-options-img"/>
                             <span className="mod-post-options-text">{i18n.sidebar.restore}</span>
                         </div>
                         <div className="mod-post-options-container" onClick={() => rejectPost(post.postID)}>
-                            <img className="mod-post-options-img" src={getIcon(reject)} style={{filter}}/>
+                            <RejectIcon className="mod-post-options-img"/>
                             <span className="mod-post-options-text">{i18n.buttons.delete}</span>
                         </div>
                     </div>

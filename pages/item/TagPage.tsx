@@ -16,13 +16,15 @@ import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 
-import tagHeart from "../../assets/svg/heart.svg"
-import tagHistory from "../../assets/svg/history.svg"
-import tagCategorize from "../../assets/svg/category.svg"
-import tagEdit from "../../assets/svg/edit.svg"
-import tagDelete from "../../assets/svg/delete.svg"
-import takedown from "../../assets/svg/takedown.svg"
-import restore from "../../assets/svg/restore.svg"
+import HeartIcon from "../../assets/svg/heart.svg"
+import HistoryIcon from "../../assets/svg/history.svg"
+import CategorizeIcon from "../../assets/svg/category.svg"
+import EditIcon from "../../assets/svg/edit.svg"
+import DeleteIcon from "../../assets/svg/delete.svg"
+import TakedownIcon from "../../assets/svg/takedown.svg"
+import RestoreIcon from "../../assets/svg/restore.svg"
+import HistoryThinIcon from "../../assets/svg/history-thin.svg"
+import CurrentIcon from "../../assets/svg/current.svg"
 
 import website from "../../assets/icons/website.png"
 import fandom from "../../assets/icons/fandom.png"
@@ -32,8 +34,6 @@ import soundcloud from "../../assets/icons/soundcloud.png"
 import sketchfab from "../../assets/icons/sketchfab.png"
 import twitter from "../../assets/icons/twitter.png"
 import Carousel from "../../components/site/Carousel"
-import historyIcon from "../../assets/svg/history-thin.svg"
-import currentIcon from "../../assets/svg/current.svg"
 import Related from "../../components/post/Related"
 import {Tag, TagHistory, PostSearch, Alias, Implication} from "../../types/Types"
 import "./styles/tagpage.less"
@@ -70,16 +70,6 @@ const TagPage: React.FunctionComponent = () => {
     let {tag: tagName} = useParams() as {tag: string}
 
     tagName = decodeURIComponent(tagName)
-
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--titleButtons")
-    }
-
-    const getPinkIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "#ff73f6")
-    }
 
     useEffect(() => {
         setHideNavbar(true)
@@ -353,14 +343,19 @@ const TagPage: React.FunctionComponent = () => {
         let jsx = [] as React.ReactElement[]
         if (!tag) return jsx
         if (session.username) {
-            jsx.push(<img className="tag-social" src={favorited ? getPinkIcon(tagHeart) : getIcon(tagHeart)} onClick={() => favoriteTag()} style={{filter}}/>)
-            jsx.push(<img className="tag-social" src={getIcon(tagHistory)} onClick={() => showTagHistory()} style={{filter}}/>)
-            jsx.push(<img className="tag-social" src={getIcon(tagCategorize)} onClick={() => showTagCategorizeDialog()} style={{filter}}/>)
-            jsx.push(<img className="tag-social" src={getIcon(tagEdit)} onClick={() => showTagEditDialog()} style={{filter}}/>)
-            jsx.push(<img className="tag-social" src={getIcon(tagDelete)} onClick={() => showTagDeleteDialog()} style={{filter}}/>)
+            jsx.push(favorited ? 
+                <HeartIcon className="tag-social-pink" onClick={() => favoriteTag()}/> :
+                <HeartIcon className="tag-social" onClick={() => favoriteTag()}/>)
+            
+            jsx.push(<HistoryIcon className="tag-social" onClick={() => showTagHistory()}/>)
+            jsx.push(<CategorizeIcon className="tag-social" onClick={() => showTagCategorizeDialog()}/>)
+            jsx.push(<EditIcon className="tag-social" onClick={() => showTagEditDialog()}/>)
+            jsx.push(<DeleteIcon className="tag-social" onClick={() => showTagDeleteDialog()}/>)
         }
         if (permissions.isMod(session)) {
-            jsx.push(<img className="tag-social" src={tag.banned ? getIcon(restore) : getIcon(takedown)} onClick={() => setTakedownTag(tag)} style={{filter}}/>)
+            jsx.push(tag.banned ?
+                <RestoreIcon className="tag-social" onClick={() => setTakedownTag(tag)}/> :
+                <TakedownIcon className="tag-social" onClick={() => setTakedownTag(tag)}/>)
         }
         return jsx
     }
@@ -505,14 +500,14 @@ const TagPage: React.FunctionComponent = () => {
         return (
             <div className="history-button-container">
                 <button className="history-button" onClick={() => navigate(`/tag/history/${tagName}`)}>
-                    <img src={historyIcon}/>
+                    <HistoryThinIcon className="history-button-icon"/>
                     <span>History</span>
                 </button>
                 {session.username ? <button className="history-button" onClick={revertTagHistoryDialog}>
                     <span>⌫Revert</span>
                 </button> : null}
                 <button className="history-button" onClick={() => currentHistory()}>
-                    <img src={currentIcon}/>
+                    <CurrentIcon className="history-button-icon"/>
                     <span>Current</span>
                 </button>
             </div>

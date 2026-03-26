@@ -10,8 +10,8 @@ useTagDialogSelector, useTagDialogActions, useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {motion, useDragControls} from "framer-motion"
-import checkbox from "../../assets/svg/checkbox.svg"
-import checkboxChecked from "../../assets/svg/checkbox-checked.svg"
+import CheckboxIcon from "../../assets/svg/checkbox.svg"
+import CheckboxCheckedIcon from "../../assets/svg/checkbox-checked.svg"
 import {TagType} from "../../types/Types"
 import "../dialog.less"
 
@@ -29,46 +29,6 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
-
-    const getArtistIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--artistTagColor")
-    }
-
-    const getCharacterIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--characterTagColor")
-    }
-
-    const getSeriesIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--seriesTagColor")
-    }
-
-    const getMetaIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--metaTagColor")
-    }
-
-    const getAppearanceIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--appearanceTagColor")
-    }
-
-    const getOutfitIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--outfitTagColor")
-    }
-
-    const getAccessoryIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--accessoryTagColor")
-    }
-
-    const getActionIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--actionTagColor")
-    }
-
-    const getSceneryIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sceneryTagColor")
-    }
-
-    const getTagIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--tagColor")
-    }
 
     useEffect(() => {
         if (categorizeTag) {
@@ -121,43 +81,63 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
             <>
             <div className="dialog-row">
                 <span className="dialog-text artist-tag-color">{i18n.tag.artist}:</span>
-                <img className="dialog-checkbox" src={category === "artist" ? getArtistIcon(checkboxChecked) : getArtistIcon(checkbox)} onClick={() => setCategory("artist")}/>
+                {category === "artist" ?
+                <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--artistTagColor)"}} onClick={() => setCategory("artist")}/> :
+                <CheckboxIcon className="dialog-checkbox" style={{color: "var(--artistTagColor)"}} onClick={() => setCategory("artist")}/>}
             </div>
             <div className="dialog-row">
                 <span className="dialog-text character-tag-color">{i18n.tag.character}:</span>
-                <img className="dialog-checkbox" src={category === "character" ? getCharacterIcon(checkboxChecked) : getCharacterIcon(checkbox)} onClick={() => setCategory("character")}/>
+                {category === "character" ?
+                <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--characterTagColor)"}} onClick={() => setCategory("character")}/> :
+                <CheckboxIcon className="dialog-checkbox" style={{color: "var(--characterTagColor)"}} onClick={() => setCategory("character")}/>}
             </div>
             <div className="dialog-row">
                 <span className="dialog-text series-tag-color">{i18n.tag.series}:</span>
-                <img className="dialog-checkbox" src={category === "series" ? getSeriesIcon(checkboxChecked) : getSeriesIcon(checkbox)} onClick={() => setCategory("series")}/>
+                {category === "series" ?
+                <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--seriesTagColor)"}} onClick={() => setCategory("series")}/> :
+                <CheckboxIcon className="dialog-checkbox" style={{color: "var(--seriesTagColor)"}} onClick={() => setCategory("series")}/>}
             </div>
             <div className="dialog-row">
                 <span className="dialog-text meta-tag-color">{i18n.tag.meta}:</span>
-                <img className="dialog-checkbox" src={category === "meta" ? getMetaIcon(checkboxChecked) : getMetaIcon(checkbox)} onClick={() => setCategory("meta")}/>
+                {category === "meta" ?
+                <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--metaTagColor)"}} onClick={() => setCategory("meta")}/> :
+                <CheckboxIcon className="dialog-checkbox" style={{color: "var(--metaTagColor)"}} onClick={() => setCategory("meta")}/>}
             </div>
             <div className="dialog-row">
                 <span className="dialog-text appearance-tag-color">{i18n.tag.appearance}:</span>
-                <img className="dialog-checkbox" src={category === "appearance" ? getAppearanceIcon(checkboxChecked) : getAppearanceIcon(checkbox)} onClick={() => setCategory("appearance")}/>
+                {category === "appearance" ?
+                <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--appearanceTagColor)"}} onClick={() => setCategory("appearance")}/> :
+                <CheckboxIcon className="dialog-checkbox" style={{color: "var(--appearanceTagColor)"}} onClick={() => setCategory("appearance")}/>}
             </div>
             <div className="dialog-row">
                 <span className="dialog-text outfit-tag-color">{i18n.tag.outfit}:</span>
-                <img className="dialog-checkbox" src={category === "outfit" ? getOutfitIcon(checkboxChecked) : getOutfitIcon(checkbox)} onClick={() => setCategory("outfit")}/>
+                {category === "outfit" ?
+                <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--outfitTagColor)"}} onClick={() => setCategory("outfit")}/> :
+                <CheckboxIcon className="dialog-checkbox" style={{color: "var(--outfitTagColor)"}} onClick={() => setCategory("outfit")}/>}
             </div>
             <div className="dialog-row">
                 <span className="dialog-text accessory-tag-color">{i18n.tag.accessory}:</span>
-                <img className="dialog-checkbox" src={category === "accessory" ? getAccessoryIcon(checkboxChecked) : getAccessoryIcon(checkbox)} onClick={() => setCategory("accessory")}/>
+                {category === "accessory" ?
+                <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--accessoryTagColor)"}} onClick={() => setCategory("accessory")}/> :
+                <CheckboxIcon className="dialog-checkbox" style={{color: "var(--accessoryTagColor)"}} onClick={() => setCategory("accessory")}/>}
             </div>
             <div className="dialog-row">
                 <span className="dialog-text action-tag-color">{i18n.tag.action}:</span>
-                <img className="dialog-checkbox" src={category === "action" ? getActionIcon(checkboxChecked) : getActionIcon(checkbox)} onClick={() => setCategory("action")}/>
+                {category === "action" ?
+                <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--actionTagColor)"}} onClick={() => setCategory("action")}/> :
+                <CheckboxIcon className="dialog-checkbox" style={{color: "var(--actionTagColor)"}} onClick={() => setCategory("action")}/>}
             </div>
             <div className="dialog-row">
                 <span className="dialog-text scenery-tag-color">{i18n.tag.scenery}:</span>
-                <img className="dialog-checkbox" src={category === "scenery" ? getSceneryIcon(checkboxChecked) : getSceneryIcon(checkbox)} onClick={() => setCategory("scenery")}/>
+                {category === "scenery" ?
+                <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--sceneryTagColor)"}} onClick={() => setCategory("scenery")}/> :
+                <CheckboxIcon className="dialog-checkbox" style={{color: "var(--sceneryTagColor)"}} onClick={() => setCategory("scenery")}/>}
             </div>
             <div className="dialog-row">
                 <span className="dialog-text tag-color">{i18n.tag.tag}:</span>
-                <img className="dialog-checkbox" src={category === "tag" ? getTagIcon(checkboxChecked) : getTagIcon(checkbox)} onClick={() => setCategory("tag")}/>
+                {category === "tag" ?
+                <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--tagColor)"}} onClick={() => setCategory("tag")}/> :
+                <CheckboxIcon className="dialog-checkbox" style={{color: "var(--tagColor)"}} onClick={() => setCategory("tag")}/>}
             </div>
             </>
         )

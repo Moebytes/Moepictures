@@ -36,13 +36,15 @@
     background: transparent;
     padding: 8px 10px;
     cursor: pointer;
-    & > img {
-        width: auto;
-        height: 15px;
-    }
     &:hover {
         filter: brightness(150%);
     }
+}
+
+.minitextbox-icon {
+    width: auto;
+    height: 15px;
+    color: var(--titleButtons);
 }
 
 .minitextbox-preview {
@@ -118,9 +120,10 @@
 @media screen and (max-width: 500px) {
     .minitextbox-textarea-button {
         padding: 8px 8px;
-        & > img {
-            width: auto;
-            height: 15px;
-        }
+    }
+
+    .minitextbox-textarea-button-icon {
+        width: auto;
+        height: 15px;
     }
 }

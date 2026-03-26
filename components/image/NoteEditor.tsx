@@ -12,17 +12,17 @@ useSessionActions, useActiveActions, useFlagActions, useNoteDialogSelector,
 useNoteDialogActions, useInteractionSelector, useFlagSelector} from "../../store"
 import functions from "../../functions/Functions"
 import {ShapeEditor, DrawLayer, wrapShape} from "react-shape-editor"
-import noteHistory from "../../assets/svg/history.svg"
-import noteOCR from "../../assets/svg/ocr.svg"
-import noteSave from "../../assets/svg/save.svg"
-import noteClear from "../../assets/svg/clear-all.svg"
-import noteCopy from "../../assets/svg/copy-notes.svg"
-import notePaste from "../../assets/svg/paste-notes.svg"
-import translationEN from "../../assets/svg/english.svg"
-import translationJA from "../../assets/svg/japanese.svg"
-import noteEdit from "../../assets/svg/edit-note.svg"
-import noteView from "../../assets/svg/view-note.svg"
-import noteToggleOff from "../../assets/svg/note-toggle-off.svg"
+import NoteHistoryIcon from "../../assets/svg/history.svg"
+import NoteOCRIcon from "../../assets/svg/ocr.svg"
+import NoteSaveIcon from "../../assets/svg/save.svg"
+import NoteClearIcon from "../../assets/svg/clear-all.svg"
+import NoteCopyIcon from "../../assets/svg/copy-notes.svg"
+import NotePasteIcon from "../../assets/svg/paste-notes.svg"
+import TranslationENIcon from "../../assets/svg/english.svg"
+import TranslationJAIcon from "../../assets/svg/japanese.svg"
+import NoteEditIcon from "../../assets/svg/edit-note.svg"
+import NoteViewIcon from "../../assets/svg/view-note.svg"
+import NoteToggleOffIcon from "../../assets/svg/note-toggle-off.svg"
 import {PostFull, PostHistory, UnverifiedPost, Note, BubbleData} from "../../types/Types"
 import "./styles/noteeditor.less"
 
@@ -253,12 +253,6 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const [bubbleWidth, setBubbleWidth] = useState(bubbleData.width)
     const bubbleRef = useRef<HTMLDivElement>(null)
     const navigate = useNavigate()
-
-    let filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--titleButtons")
-    }
 
     const updateNotes = async () => {
         if (!props.post) return
@@ -577,15 +571,19 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         <div className="note-editor" style={{display: noteMode ? "flex" : "none", marginTop: props.reader ? "0px" : "20px", marginBottom: props.reader ? "0px" : "20px"}}>
             <div className="note-editor-filters" ref={filtersRef} onMouseDown={() => {if (enableDrag) setEnableDrag(false)}}>
                 <div className={`note-editor-buttons ${buttonHover ? "show-note-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
-                    {!props.unverified ? <img draggable={false} className="note-editor-button" src={getIcon(noteHistory)} style={{filter}} onClick={() => showHistory()}/> : null}
-                    <img draggable={false} className="note-editor-button" src={getIcon(noteOCR)} style={{filter}} onClick={() => ocrDialog()}/>
-                    <img draggable={false} className="note-editor-button" src={getIcon(noteSave)} style={{filter}} onClick={() => saveTextDialog()}/>
-                    <img draggable={false} className="note-editor-button" src={getIcon(noteClear)} style={{filter}} onClick={() => clearNotes()}/>
-                    <img draggable={false} className="note-editor-button" src={getIcon(noteCopy)} style={{filter}} onClick={() => copyNotes()}/>
-                    <img draggable={false} className="note-editor-button" src={getIcon(notePaste)} style={{filter}} onClick={() => pasteNotes()}/>
-                    <img draggable={false} className="note-editor-button" src={showTranscript ? getIcon(translationJA) : getIcon(translationEN)} style={{filter, height: "22px"}} onClick={() => setShowTranscript(!showTranscript)}/>
-                    <img draggable={false} className="note-editor-button" src={noteDrawingEnabled ? getIcon(noteEdit) : getIcon(noteView)} style={{filter}} onClick={() => setNoteDrawingEnabled(!noteDrawingEnabled)}/>
-                    <img draggable={false} className="note-editor-button" src={getIcon(noteToggleOff)} style={{filter}} onClick={() => setNoteMode(false)}/>
+                    {!props.unverified ? <NoteHistoryIcon className="note-editor-button" onClick={() => showHistory()}/> : null}
+                    <NoteOCRIcon className="note-editor-button" onClick={() => ocrDialog()}/>
+                    <NoteSaveIcon className="note-editor-button" onClick={() => saveTextDialog()}/>
+                    <NoteClearIcon className="note-editor-button" onClick={() => clearNotes()}/>
+                    <NoteCopyIcon className="note-editor-button" onClick={() => copyNotes()}/>
+                    <NotePasteIcon className="note-editor-button" onClick={() => pasteNotes()}/>
+                    {showTranscript ?
+                    <TranslationJAIcon className="note-editor-button" style={{height: "22px"}} onClick={() => setShowTranscript(!showTranscript)}/> :
+                    <TranslationENIcon className="note-editor-button" style={{height: "22px"}} onClick={() => setShowTranscript(!showTranscript)}/>}
+                    {noteDrawingEnabled ?
+                    <NoteEditIcon className="note-editor-button" onClick={() => setNoteDrawingEnabled(!noteDrawingEnabled)}/> :
+                    <NoteViewIcon className="note-editor-button" onClick={() => setNoteDrawingEnabled(!noteDrawingEnabled)}/>}
+                    <NoteToggleOffIcon className="note-editor-button" onClick={() => setNoteMode(false)}/>
                 </div>
                 {bubbleJSX()}
                 <ShapeEditor vectorWidth={targetWidth} vectorHeight={targetHeight} scale={scale} style={{pointerEvents: noteDrawingEnabled ? "all" : "none"}}>

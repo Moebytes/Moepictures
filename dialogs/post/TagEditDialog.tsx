@@ -11,27 +11,27 @@ import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
 
-import image from "../../assets/svg/image.svg"
-import animation from "../../assets/svg/animation.svg"
-import video from "../../assets/svg/video.svg"
-import comic from "../../assets/svg/comic.svg"
-import live2d from "../../assets/svg/live2d.svg"
-import model from "../../assets/svg/model.svg"
-import audio from "../../assets/svg/music.svg"
+import ImageIcon from "../../assets/svg/image.svg"
+import AnimationIcon from "../../assets/svg/animation.svg"
+import VideoIcon from "../../assets/svg/video.svg"
+import ComicIcon from "../../assets/svg/comic.svg"
+import Live2dIcon from "../../assets/svg/live2d.svg"
+import ModelIcon from "../../assets/svg/model.svg"
+import AudioIcon from "../../assets/svg/music.svg"
 
-import cute from "../../assets/svg/cute.svg"
-import sexy from "../../assets/svg/sexy.svg"
-import erotic from "../../assets/svg/erotic.svg"
-import lewd from "../../assets/svg/lewd.svg"
+import CuteIcon from "../../assets/svg/cute.svg"
+import SexyIcon from "../../assets/svg/sexy.svg"
+import EroticIcon from "../../assets/svg/erotic.svg"
+import LewdIcon from "../../assets/svg/lewd.svg"
 
-import $2d from "../../assets/svg/2d.svg"
-import $3d from "../../assets/svg/3d.svg"
-import pixel from "../../assets/svg/pixel.svg"
-import chibi from "../../assets/svg/chibi.svg"
-import daki from "../../assets/svg/daki.svg"
-import sketch from "../../assets/svg/sketch.svg"
-import lineart from "../../assets/svg/lineart.svg"
-import promo from "../../assets/svg/promo.svg"
+import $2dIcon from "../../assets/svg/2d.svg"
+import $3dIcon from "../../assets/svg/3d.svg"
+import PixelIcon from "../../assets/svg/pixel.svg"
+import ChibiIcon from "../../assets/svg/chibi.svg"
+import DakiIcon from "../../assets/svg/daki.svg"
+import SketchIcon from "../../assets/svg/sketch.svg"
+import LineartIcon from "../../assets/svg/lineart.svg"
+import PromoIcon from "../../assets/svg/promo.svg"
 
 import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
@@ -365,15 +365,15 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             return (
                 <div className="dialog-row">
                     <button className={`quickedit-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
-                        <img className="quickedit-button-img" src={$3d}/>
+                        <$3dIcon className="quickedit-button-img"/>
                         <span className="quickedit-button-text">{i18n.sortbar.style["3d"]}</span>
                     </button>
                     <button className={`quickedit-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
-                        <img className="quickedit-button-img" src={chibi}/>
+                        <ChibiIcon className="quickedit-button-img"/>
                         <span className="quickedit-button-text">{i18n.sortbar.style.chibi}</span>
                     </button>
                     <button className={`quickedit-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
-                        <img className="quickedit-button-img" src={pixel}/>
+                        <PixelIcon className="quickedit-button-img"/>
                         <span className="quickedit-button-text">{i18n.sortbar.style.pixel}</span>
                     </button>
                 </div>
@@ -382,15 +382,15 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             return (
                 <div className="dialog-row">
                     <button className={`quickedit-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
-                        <img className="quickedit-button-img" src={$2d}/>
+                        <$2dIcon className="quickedit-button-img"/>
                         <span className="quickedit-button-text">{i18n.sortbar.style["2d"]}</span>
                     </button>
                     <button className={`quickedit-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
-                        <img className="quickedit-button-img" src={pixel}/>
+                        <PixelIcon className="quickedit-button-img"/>
                         <span className="quickedit-button-text">{i18n.sortbar.style.pixel}</span>
                     </button>
                     <button className={`quickedit-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
-                        <img className="quickedit-button-img" src={sketch}/>
+                        <SketchIcon className="quickedit-button-img"/>
                         <span className="quickedit-button-text">{i18n.sortbar.style.sketch}</span>
                     </button>
                 </div>
@@ -400,41 +400,41 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 <>
                 <div className="dialog-row">
                     <button className={`quickedit-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
-                        <img className="quickedit-button-img" src={$2d}/>
+                        <$2dIcon className="quickedit-button-img"/>
                         <span className="quickedit-button-text">{i18n.sortbar.style["2d"]}</span>
                     </button>
                     {type !== "live2d" ? <button className={`quickedit-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
-                        <img className="quickedit-button-img" src={$3d}/>
+                        <$3dIcon className="quickedit-button-img"/>
                         <span className="quickedit-button-text">{i18n.sortbar.style["3d"]}</span>
                     </button> : null}
                     <button className={`quickedit-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
-                        <img className="quickedit-button-img" src={chibi}/>
+                        <ChibiIcon className="quickedit-button-img"/>
                         <span className="quickedit-button-text">{i18n.sortbar.style.chibi}</span>
                     </button>
                     <button className={`quickedit-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
-                        <img className="quickedit-button-img" src={pixel}/>
+                        <PixelIcon className="quickedit-button-img"/>
                         <span className="quickedit-button-text">{i18n.sortbar.style.pixel}</span>
                     </button>
                 </div>
                 <div className="dialog-row">
                     {type !== "comic" ? 
                     <button className={`quickedit-button ${style === "daki" ? "button-selected" : ""}`} onClick={() => setStyle("daki")}>
-                        <img className="quickedit-button-img" src={daki}/>
+                        <DakiIcon className="quickedit-button-img"/>
                         <span className="quickedit-button-text">{i18n.sortbar.style.daki}</span>
                     </button> : null}
                     {type !== "live2d" ? 
                     <button className={`quickedit-button ${style === "promo" ? "button-selected" : ""}`} onClick={() => setStyle("promo")}>
-                        <img className="quickedit-button-img" src={promo}/>
+                        <PromoIcon className="quickedit-button-img"/>
                         <span className="quickedit-button-text">{i18n.sortbar.style.promo}</span>
                     </button> : null}
                     {type !== "live2d" ? 
                     <button className={`quickedit-button ${style === "sketch" ? "button-selected" : ""}`} onClick={() => setStyle("sketch")}>
-                        <img className="quickedit-button-img" src={sketch}/>
+                        <SketchIcon className="quickedit-button-img"/>
                         <span className="quickedit-button-text">{i18n.sortbar.style.sketch}</span>
                     </button> : null}
                     {type !== "live2d" ? 
                     <button className={`quickedit-button ${style === "lineart" ? "button-selected" : ""}`} onClick={() => setStyle("lineart")}>
-                        <img className="quickedit-button-img" src={lineart}/>
+                        <LineartIcon className="quickedit-button-img"/>
                         <span className="quickedit-button-text">{i18n.sortbar.style.lineart}</span>
                     </button>
                     : null}
@@ -464,52 +464,52 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             </div>
             <div className="dialog-row">
                 <button className={`quickedit-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
-                    <img className="quickedit-button-img" src={image}/>
+                    <ImageIcon className="quickedit-button-img"/>
                     <span className="quickedit-button-text">{i18n.sortbar.type.image}</span>
                 </button>
                 <button className={`quickedit-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
-                    <img className="quickedit-button-img" src={animation}/>
+                    <AnimationIcon className="quickedit-button-img"/>
                     <span className="quickedit-button-text">{i18n.sortbar.type.animation}</span>
                 </button>
                 <button className={`quickedit-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
-                    <img className="quickedit-button-img" src={video}/>
+                    <VideoIcon className="quickedit-button-img"/>
                     <span className="quickedit-button-text">{i18n.sortbar.type.video}</span>
                 </button>
                 <button className={`quickedit-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
-                    <img className="quickedit-button-img" src={comic}/>
+                    <ComicIcon className="quickedit-button-img"/>
                     <span className="quickedit-button-text">{i18n.sortbar.type.comic}</span>
                 </button>
             </div>
             <div className="dialog-row">
                 <button className={`quickedit-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
-                    <img className="quickedit-button-img" src={audio}/>
+                    <AudioIcon className="quickedit-button-img"/>
                     <span className="quickedit-button-text">{i18n.sortbar.type.audio}</span>
                 </button>
                 <button className={`quickedit-button ${type === "live2d" ? "button-selected" : ""}`} onClick={() => setType("live2d")}>
-                    <img className="quickedit-button-img" src={live2d}/>
+                    <Live2dIcon className="quickedit-button-img"/>
                     <span className="quickedit-button-text">{i18n.sortbar.type.live2d}</span>
                 </button>
                 <button className={`quickedit-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
-                    <img className="quickedit-button-img" src={model}/>
+                    <ModelIcon className="quickedit-button-img"/>
                     <span className="quickedit-button-text">{i18n.sortbar.type.model}</span>
                 </button>
             </div>
             <div className="dialog-row">
                 <button className={`quickedit-button ${rating === "cute" ? "button-selected" : ""}`} onClick={() => setRating("cute")}>
-                    <img className="quickedit-button-img" src={cute}/>
+                    <CuteIcon className="quickedit-button-img"/>
                     <span className="quickedit-button-text">{i18n.sortbar.rating.cute}</span>
                 </button>
                 <button className={`quickedit-button ${rating === "sexy" ? "button-selected" : ""}`} onClick={() => setRating("sexy")}>
-                    <img className="quickedit-button-img" src={sexy}/>
+                    <SexyIcon className="quickedit-button-img"/>
                     <span className="quickedit-button-text">{i18n.sortbar.rating.sexy}</span>
                 </button>
                 <button className={`quickedit-button ${rating === "erotic" ? "button-selected" : ""}`} onClick={() => setRating("erotic")}>
-                    <img className="quickedit-button-img" src={erotic}/>
+                    <EroticIcon className="quickedit-button-img"/>
                     <span className="quickedit-button-text">{i18n.sortbar.rating.erotic}</span>
                 </button>
                 {session.showR18 ?
                 <button className={`quickedit-button ${rating === "lewd" ? "button-selected" : ""}`} onClick={() => setRating("lewd")}>
-                    <img className="quickedit-button-img" src={lewd}/>
+                    <LewdIcon className="quickedit-button-img"/>
                     <span className="quickedit-button-text">{i18n.sortbar.rating.lewd}</span>
                 </button> : null}
             </div>

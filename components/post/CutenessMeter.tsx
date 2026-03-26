@@ -13,7 +13,7 @@ import cuteness2 from "../../assets/images/cuteness2.png"
 import cuteness3 from "../../assets/images/cuteness3.png"
 import cuteness4 from "../../assets/images/cuteness4.png"
 import cuteness5 from "../../assets/images/cuteness5.png"
-import deleteStar from "../../assets/svg/deletestar.svg"
+import DeleteStarIcon from "../../assets/svg/deletestar.svg"
 import {PostSearch, PostHistory} from "../../types/Types"
 import "./styles/cutenessmeter.less"
 
@@ -33,12 +33,6 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     const [isAverage, setIsAverage] = useState(false)
     // const sliderRef = useRef<Slider>(null)
     // useEffect(() => sliderRef.current ? sliderRef.current.resize() : null)
-
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
 
     const getFilter2 = () => {
         let hue = siteHue - 180
@@ -114,7 +108,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
         <div className="cuteness-meter">
             <div className="cuteness-title-container">
                 <div className="cuteness-title">{i18n.sort.cuteness}</div>
-                <img className="cuteness-img" src={getIcon(deleteStar)} style={{filter}} onClick={deleteRating}/>
+                <DeleteStarIcon className="cuteness-img" onClick={deleteRating}/>
             </div>
             <div className="cuteness-slider-container" style={{filter: getFilter2()}}>
                 <Rating style={{paddingRight: "10px"}} onClick={setCutenessValue} initialValue={Number(getCutenessValue())} allowFraction={true} fullFraction={true} 

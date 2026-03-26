@@ -19,8 +19,18 @@ export default defineConfig({
             config.module.rules = config.module.rules || []
 
             config.module.rules.push({
-                test: /\.svg$/i,
-                type: "asset/inline",
+                test: /\.svg$/,
+                type: "javascript/auto",
+                use: [{
+                    loader: "@svgr/webpack", 
+                    options: {
+                        svgoConfig: {
+                            plugins: [
+                                {name: "preset-default", params: {overrides: {removeViewBox: false}}}
+                            ]
+                        }
+                    }
+                }]
             })
 
             if (obfuscator) {

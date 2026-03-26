@@ -9,10 +9,10 @@ import {useThemeSelector, useInteractionActions, useNoteDialogSelector, useNoteD
 useLayoutSelector} from "../../store"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
-import bold from "../../assets/svg/bold.svg"
-import italic from "../../assets/svg/italic.svg"
-import checkbox from "../../assets/svg/checkbox.svg"
-import checkboxChecked from "../../assets/svg/checkbox-checked.svg"
+import BoldIcon from "../../assets/svg/bold.svg"
+import ItalicIcon from "../../assets/svg/italic.svg"
+import CheckboxIcon from "../../assets/svg/checkbox.svg"
+import CheckboxCheckedIcon from "../../assets/svg/checkbox-checked.svg"
 import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import {defaultNoteData} from "../../reducers/noteDialogReducer"
 import "./styles/editnotedialog.less"
@@ -31,14 +31,6 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
     const controls = useDragControls()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
-
-    const getPinkIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "#ff7aeb")
-    }
 
     useEffect(() => {
         const logPosition = (event: MouseEvent) => {
@@ -142,8 +134,13 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
             </div>
             <div className="edit-note-dialog-row-start">
                 <span className="edit-note-dialog-text">{i18n.labels.fontStyle}:</span>
-                <img className="edit-note-checkbox" src={editNoteData.bold ? getPinkIcon(bold) : getIcon(bold)} onClick={() => setEditNoteData({...editNoteData, bold: !editNoteData.bold})} style={{filter}}/>
-                <img className="edit-note-checkbox" src={editNoteData.italic ? getPinkIcon(italic) : getIcon(italic)} onClick={() => setEditNoteData({...editNoteData, italic: !editNoteData.italic})} style={{marginLeft: "5px", filter}}/>
+                {editNoteData.bold ? 
+                <BoldIcon className="edit-note-checkbox-pink" onClick={() => setEditNoteData({...editNoteData, bold: !editNoteData.bold})}/> : 
+                <BoldIcon className="edit-note-checkbox" onClick={() => setEditNoteData({...editNoteData, bold: !editNoteData.bold})}/>}
+
+                {editNoteData.italic ? 
+                <ItalicIcon className="edit-note-checkbox-pink" onClick={() => setEditNoteData({...editNoteData, italic: !editNoteData.italic})} style={{marginLeft: "5px"}}/> : 
+                <ItalicIcon className="edit-note-checkbox" onClick={() => setEditNoteData({...editNoteData, italic: !editNoteData.italic})} style={{marginLeft: "5px"}}/>}
             </div>
             <div className="edit-note-dialog-row-start">
                 <span className="edit-note-dialog-text">{i18n.labels.fontSize}:</span>
@@ -151,10 +148,15 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
             </div>
             <div className="edit-note-dialog-row-start">
                 <span className="edit-note-dialog-text">{i18n.labels.overlay}?</span>
-                <img className="edit-note-checkbox" src={editNoteData.overlay ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setEditNoteData({...editNoteData, overlay: !editNoteData.overlay})} style={{filter}}/>
+                {editNoteData.overlay ?
+                <CheckboxCheckedIcon className="edit-note-checkbox" onClick={() => setEditNoteData({...editNoteData, overlay: !editNoteData.overlay})}/> :
+                <CheckboxIcon className="edit-note-checkbox" onClick={() => setEditNoteData({...editNoteData, overlay: !editNoteData.overlay})}/>}
+
                 {editNoteData.overlay ? <>
                 <span style={{marginLeft: "10px"}} className="edit-note-dialog-text">Break Word?</span>
-                <img className="edit-note-checkbox" src={editNoteData.breakWord ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setEditNoteData({...editNoteData, breakWord: !editNoteData.breakWord})} style={{filter}}/>
+                {editNoteData.breakWord ? 
+                <CheckboxCheckedIcon className="edit-note-checkbox" onClick={() => setEditNoteData({...editNoteData, breakWord: !editNoteData.breakWord})}/> :
+                <CheckboxIcon className="edit-note-checkbox" onClick={() => setEditNoteData({...editNoteData, breakWord: !editNoteData.breakWord})}/>}
                 </> : null}
             </div>
             {editNoteData.overlay ? <>
@@ -200,7 +202,9 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
                         {!editNoteData.overlay ?
                         <div className="edit-note-dialog-row-start">
                             <span className="edit-note-dialog-text">{i18n.tag.character}?</span>
-                            <img className="edit-note-checkbox" src={editNoteData.character ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setEditNoteData({...editNoteData, character: !editNoteData.character})} style={{filter}}/>
+                            {editNoteData.character ?
+                            <CheckboxCheckedIcon className="edit-note-checkbox" onClick={() => setEditNoteData({...editNoteData, character: !editNoteData.character})}/> :
+                            <CheckboxIcon className="edit-note-checkbox" onClick={() => setEditNoteData({...editNoteData, character: !editNoteData.character})}/>}
                         </div> : null}
                         <div className="edit-note-dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>

@@ -11,10 +11,10 @@ import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
-import radioButton from "../../assets/svg/radiobutton.svg"
-import radioButtonChecked from "../../assets/svg/radiobutton-checked.svg"
-import checkbox from "../../assets/svg/checkbox.svg"
-import checkboxChecked from "../../assets/svg/checkbox-checked.svg"
+import RadioButtonIcon from "../../assets/svg/radiobutton.svg"
+import RadioButtonCheckedIcon from "../../assets/svg/radiobutton-checked.svg"
+import CheckboxIcon from "../../assets/svg/checkbox.svg"
+import CheckboxCheckedIcon from "../../assets/svg/checkbox-checked.svg"
 import {Upscaler} from "../../types/Types"
 import "../dialog.less"
 
@@ -33,10 +33,6 @@ const UpscalePostDialog: React.FunctionComponent = (props) => {
     const controls = useDragControls()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
 
     useEffect(() => {
         if (upscalePostID) {
@@ -77,11 +73,17 @@ const UpscalePostDialog: React.FunctionComponent = (props) => {
                                 <span className="dialog-title">{i18n.dialogs.upscale.title}</span>
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center", paddingRight: "20px"}}>
-                                <img className="dialog-checkbox" src={upscaler === "waifu2x" ? getIcon(radioButtonChecked) : getIcon(radioButton)} onClick={() => setUpscaler("waifu2x")} style={{marginRight: "10px", filter}}/>
+                                {upscaler === "waifu2x" ?
+                                <RadioButtonCheckedIcon className="dialog-checkbox" onClick={() => setUpscaler("waifu2x")} style={{marginRight: "10px"}}/> :
+                                <RadioButtonIcon className="dialog-checkbox" onClick={() => setUpscaler("waifu2x")} style={{marginRight: "10px"}}/>}
                                 <span className="dialog-text">waifu2x</span>
-                                <img className="dialog-checkbox" src={upscaler === "real-esrgan" ? getIcon(radioButtonChecked) : getIcon(radioButton)} onClick={() => setUpscaler("real-esrgan")} style={{marginRight: "10px", filter}}/>
+                                {upscaler === "real-esrgan" ?
+                                <RadioButtonCheckedIcon className="dialog-checkbox" onClick={() => setUpscaler("real-esrgan")} style={{marginRight: "10px"}}/> :
+                                <RadioButtonIcon className="dialog-checkbox" onClick={() => setUpscaler("real-esrgan")} style={{marginRight: "10px"}}/>}
                                 <span className="dialog-text">esrgan</span>
-                                <img className="dialog-checkbox" src={upscaler === "real-cugan" ? getIcon(radioButtonChecked) : getIcon(radioButton)} onClick={() => setUpscaler("real-cugan")} style={{marginRight: "10px", filter}}/>
+                                {upscaler === "real-cugan" ?
+                                <RadioButtonCheckedIcon className="dialog-checkbox" onClick={() => setUpscaler("real-cugan")} style={{marginRight: "10px"}}/> :
+                                <RadioButtonIcon className="dialog-checkbox" onClick={() => setUpscaler("real-cugan")} style={{marginRight: "10px"}}/>}
                                 <span className="dialog-text">cugan</span>
                             </div>
                             <div className="dialog-row">
@@ -90,7 +92,9 @@ const UpscalePostDialog: React.FunctionComponent = (props) => {
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center"}}>
                                 <span className="dialog-text">{i18n.labels.compressTo} {upscalePostID.post.type === "animation" ? "WebP" : "JPG"}</span>
-                                <img className="dialog-checkbox" src={compressJPG ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setCompressJPG((prev: boolean) => !prev)} style={{marginRight: "10px", filter}}/>
+                                {compressJPG ?
+                                <CheckboxCheckedIcon className="dialog-checkbox" onClick={() => setCompressJPG((prev: boolean) => !prev)} style={{marginRight: "10px"}}/> :
+                                <CheckboxIcon className="dialog-checkbox" onClick={() => setCompressJPG((prev: boolean) => !prev)} style={{marginRight: "10px"}}/>}
                             </div>
                             <div className="dialog-row">
                                 <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>

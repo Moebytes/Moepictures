@@ -10,8 +10,8 @@ useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
-import takedownIcon from "../../assets/svg/takedown.svg"
-import restoreIcon from "../../assets/svg/restore.svg"
+import TakedownIcon from "../../assets/svg/takedown.svg"
+import RestoreIcon from "../../assets/svg/restore.svg"
 import "../dialog.less"
 
 const TakedownPostDialog: React.FunctionComponent = (props) => {
@@ -25,10 +25,6 @@ const TakedownPostDialog: React.FunctionComponent = (props) => {
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const controls = useDragControls()
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
 
     useEffect(() => {
         if (takedownPostID) {
@@ -83,9 +79,9 @@ const TakedownPostDialog: React.FunctionComponent = (props) => {
 
     const getTakedownIcon = () => {
         if (takedownPostID?.post.hidden) {
-            return getIcon(restoreIcon)
+            return <RestoreIcon className="dialog-icon"/>
         } else {
-            return getIcon(takedownIcon)
+            return <TakedownIcon className="dialog-icon"/>
         }
     }
 
@@ -97,7 +93,7 @@ const TakedownPostDialog: React.FunctionComponent = (props) => {
                     className="dialog-box" style={{width: "280px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
-                                <img draggable={false} className="dialog-icon" src={getTakedownIcon()}/>
+                                {getTakedownIcon()}
                                 <span className="dialog-title">{getTitle()}</span>
                             </div>
                             <div className="dialog-row">

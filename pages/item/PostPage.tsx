@@ -28,8 +28,8 @@ import Children from "../../components/post/Children"
 import ArtistWorks from "../../components/post/ArtistWorks"
 import Related from "../../components/post/Related"
 import MobileInfo from "../../components/site/MobileInfo"
-import historyIcon from "../../assets/svg/history-thin.svg"
-import currentIcon from "../../assets/svg/current.svg"
+import HistoryIcon from "../../assets/svg/history-thin.svg"
+import CurrentIcon from "../../assets/svg/current.svg"
 import {useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
 useLayoutSelector, useSearchSelector, useFlagSelector, useCacheActions, usePostDialogActions, 
 useNoteDialogSelector, useNoteDialogActions, useActiveSelector, usePostDialogSelector,
@@ -564,14 +564,14 @@ const PostPage: React.FunctionComponent = () => {
             return (
                 <div className="note-button-container">
                     <button className="note-button" onClick={() => navigate(`/note/history/${postID}/${slug}/${order}`)}>
-                        <img src={historyIcon}/>
+                        <HistoryIcon className="note-button-icon"/>
                         <span>History</span>
                     </button>
                     {session.username ? <button className="note-button" onClick={revertNoteHistoryDialog}>
                         <span>⌫Revert</span>
                     </button> : null}
                     <button className="note-button" onClick={currentHistory}>
-                        <img src={currentIcon}/>
+                        <CurrentIcon className="note-button-icon"/>
                         <span>Current</span>
                     </button>
                 </div>
@@ -580,14 +580,14 @@ const PostPage: React.FunctionComponent = () => {
         return (
             <div className="history-button-container">
                 <button className="history-button" onClick={() => navigate(`/post/history/${postID}/${slug}`)}>
-                    <img src={historyIcon}/>
+                    <HistoryIcon className="history-button-icon"/>
                     <span>History</span>
                 </button>
                 {session.username ? <button className="history-button" onClick={revertPostHistoryDialog}>
                     <span>⌫Revert</span>
                 </button> : null}
                 <button className="history-button" onClick={currentHistory}>
-                    <img src={currentIcon}/>
+                    <CurrentIcon className="history-button-icon"/>
                     <span>Current</span>
                 </button>
             </div>

@@ -9,11 +9,11 @@ import {useNavigate} from "react-router-dom"
 import withPostWrapper, {PostWrapperProps, PostWrapperRef} from "./withPostWrapper"
 import {useSessionSelector, useFilterSelector, usePlaybackSelector, usePlaybackActions, useSearchSelector, useInteractionActions,
 useMiscDialogActions, useMiscDialogSelector} from "../../store"
-import zoomInIcon from "../../assets/svg/zoom-in.svg"
-import zoomOutIcon from "../../assets/svg/zoom-out.svg"
-import zoomOffIcon from "../../assets/svg/zoom-off.svg"
-import fullscreenIcon from "../../assets/svg/fullscreen.svg"
-import readerIcon from "../../assets/svg/reader.svg"
+import ZoomInIcon from "../../assets/svg/zoom-in.svg"
+import ZoomOutIcon from "../../assets/svg/zoom-out.svg"
+import ZoomOffIcon from "../../assets/svg/zoom-off.svg"
+import FullscreenIcon from "../../assets/svg/fullscreen.svg"
+import ReaderIcon from "../../assets/svg/reader.svg"
 import {TransformWrapper, TransformComponent, ReactZoomPanPinchRef} from "react-zoom-pan-pinch"
 import functions from "../../functions/Functions"
 
@@ -40,14 +40,6 @@ const PostImage = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
     const {tempLink, setTempLink, getCurrentLink} = props
     const {imageRef, lightnessRef, overlayRef, effectRef, pixelateRef, onLoaded} = props
     const navigate = useNavigate()
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "#3b8cff")
-    }
-
-    const getPurpleIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "#4e3bff")
-    }
 
     useImperativeHandle(parentRef, () => ({
         download: async () => {
@@ -84,11 +76,6 @@ const PostImage = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
             decryptImage()
         }, 200)
     }, [props.img, session])
-
-    const getZoomOffIcon = () => {
-        if (disableZoom) return getPurpleIcon(zoomOffIcon)
-        return getIcon(zoomOffIcon)
-    }
 
     const zoomIn = () => {
         if (disableZoom || !zoomRef.current) return
@@ -157,11 +144,13 @@ const PostImage = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
         <div className="image-controls" ref={imageControls} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
             <div className="image-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <div className="image-control-row-container">
-                    <img draggable={false} className="image-control-img" onClick={() => setDisableZoom(!disableZoom)} src={getZoomOffIcon()}/>
-                    <img draggable={false} className="image-control-img" onClick={zoomOut} src={getIcon(zoomOutIcon)}/>
-                    <img draggable={false} className="image-control-img" onClick={zoomIn} src={getIcon(zoomInIcon)}/>
-                    <img draggable={false} className="image-control-img" onClick={() => toggleFullscreen()} src={getIcon(fullscreenIcon)}/>
-                    <img draggable={false} className="image-control-img" onClick={() => navigate(`/post/${props.post?.postID}/${props.post?.slug}/reader`)} src={getIcon(readerIcon)}/>
+                    {disableZoom ?
+                    <ZoomOffIcon className="image-control-img-purple" onClick={() => setDisableZoom(!disableZoom)}/> :
+                    <ZoomOffIcon className="image-control-img" onClick={() => setDisableZoom(!disableZoom)}/>}
+                    <ZoomOutIcon className="image-control-img" onClick={zoomOut}/>
+                    <ZoomInIcon className="image-control-img" onClick={zoomIn}/>
+                    <FullscreenIcon className="image-control-img" onClick={zoomIn}/>
+                    <ReaderIcon className="image-control-img" onClick={() => navigate(`/post/${props.post?.postID}/${props.post?.slug}/reader`)}/>
                 </div> 
             </div>
         </div>

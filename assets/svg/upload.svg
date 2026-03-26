@@ -6,6 +6,6 @@
     </clipPath>
   </defs>
   <g clip-path="url(#b)">
-    <path d="M8.22,17.46h7.55v-7.28h5.03L12,1.68,3.19,10.18h5.03v7.28ZM3.19,19.89h17.62v2.43H3.19v-2.43Z" fill="black"/>
+    <path d="M8.22,17.46h7.55v-7.28h5.03L12,1.68,3.19,10.18h5.03v7.28ZM3.19,19.89h17.62v2.43H3.19v-2.43Z" fill="currentColor"/>
   </g>
 </svg>

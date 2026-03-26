@@ -9,8 +9,8 @@ import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, usePageActions,
 useSearchSelector, usePageSelector, useActiveSelector, useCacheSelector} from "../../store"
 import favicon from "../../assets/icons/favicon.png"
-import approve from "../../assets/svg/approve.svg"
-import reject from "../../assets/svg/reject.svg"
+import ApproveIcon from "../../assets/svg/approve.svg"
+import RejectIcon from "../../assets/svg/reject.svg"
 import functions from "../../functions/Functions"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
@@ -33,12 +33,6 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
     const [hover, setHover] = useState(false)
     const [asset, setAsset] = useState(null as UserComment | ThreadUser | ThreadReply | null)
     const navigate = useNavigate()
-
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
 
     const updateAsset = async () => {
         if (props.request.type === "comment") {
@@ -144,11 +138,11 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
             </div>
             <div className="mod-post-options">
                 <div className="mod-post-options-container" onClick={() => rejectRequest(username, id)}>
-                    <img className="mod-post-options-img" src={getIcon(reject)} style={{filter}}/>
+                    <RejectIcon className="mod-post-options-img"/>
                     <span className="mod-post-options-text">{i18n.buttons.reject}</span>
                 </div>
                 <div className="mod-post-options-container" onClick={() => approveRequest(username, id)}>
-                    <img className="mod-post-options-img" src={getIcon(approve)} style={{filter}}/>
+                    <ApproveIcon className="mod-post-options-img"/>
                     <span className="mod-post-options-text">{i18n.buttons.approve}</span>
                 </div>
             </div>

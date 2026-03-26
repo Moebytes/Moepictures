@@ -11,8 +11,8 @@ import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import show from "../../assets/svg/show.svg"
-import hide from "../../assets/svg/hide.svg"
+import ShowIcon from "../../assets/svg/show.svg"
+import HideIcon from "../../assets/svg/hide.svg"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useActiveSelector,
 useFlagSelector} from "../../store"
@@ -40,10 +40,6 @@ const LoginPage: React.FunctionComponent = (props) => {
     const navigate = useNavigate()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--titleButtons")
-    }
 
     const getCaptchaColor = () => {
         if (theme.includes("light")) return "#ffffff"
@@ -88,10 +84,6 @@ const LoginPage: React.FunctionComponent = (props) => {
             navigate("/profile")
         }
     }, [session])
-
-    const getEye = () => {
-        return showPassword ? getIcon(hide) : getIcon(show)
-    }
 
     const login = async () => {
         if (!captchaResponse) {
@@ -148,7 +140,9 @@ const LoginPage: React.FunctionComponent = (props) => {
                     <div className="sitepage-row">
                         <span className="sitepage-text">{i18n.labels.password}:</span>
                         <div className="sitepage-pass">
-                            <img className="sitepage-pass-show" src={getEye()} style={{filter}} onClick={() => setShowPassword((prev) => !prev)}/>
+                            {showPassword ?
+                            <HideIcon className="sitepage-pass-show" onClick={() => setShowPassword((prev) => !prev)}/> :
+                            <ShowIcon className="sitepage-pass-show" onClick={() => setShowPassword((prev) => !prev)}/>}
                             <input className="sitepage-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={password} onChange={(event) => setPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null}/>
                         </div>
                     </div>

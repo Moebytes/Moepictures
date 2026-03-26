@@ -11,10 +11,10 @@ useThreadDialogSelector, useThreadDialogActions, useCacheSelector} from "../../s
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import favicon from "../../assets/icons/favicon.png"
-import quoteOptIcon from "../../assets/svg/quote.svg"
-import reportOptIcon from "../../assets/svg/report.svg"
-import editOptIcon from "../../assets/svg/edit.svg"
-import deleteOptIcon from "../../assets/svg/delete.svg"
+import QuoteIcon from "../../assets/svg/quote.svg"
+import ReportIcon from "../../assets/svg/report.svg"
+import EditIcon from "../../assets/svg/edit.svg"
+import DeleteIcon from "../../assets/svg/delete.svg"
 import {ForumPostSearch} from "../../types/Types"
 import "./styles/commentrow.less"
 
@@ -41,10 +41,6 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
     const navigate = useNavigate()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
 
     const defaultIcon = props.forumPost?.image ? false : true
 
@@ -182,11 +178,11 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="commentrow-options">
                     <div className="commentrow-options-container" onClick={editForumPostDialog}>
-                        <img className="commentrow-options-img" src={getIcon(editOptIcon)}/>
+                        <EditIcon className="commentrow-options-img"/>
                         <span className="commentrow-options-text" style={{color: "var(--text)"}}>{i18n.buttons.edit}</span>
                     </div>
                     <div className="commentrow-options-container" onClick={deleteForumPostDialog}>
-                        <img className="commentrow-options-img" src={getIcon(deleteOptIcon)}/>
+                        <DeleteIcon className="commentrow-options-img"/>
                         <span className="commentrow-options-text" style={{color: "var(--text)"}}>{i18n.buttons.delete}</span>
                     </div>
                 </div>
@@ -196,20 +192,20 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="commentrow-options">
                     <div className="commentrow-options-container" onClick={triggerQuote}>
-                        <img className="commentrow-options-img" src={getIcon(quoteOptIcon)}/>
+                        <QuoteIcon className="commentrow-options-img"/>
                         <span className="commentrow-options-text" style={{color: "var(--text)"}}>{i18n.buttons.quote}</span>
                     </div>
                     {permissions.isMod(session) ? <>
                     <div className="commentrow-options-container" onClick={editForumPostDialog}>
-                        <img className="commentrow-options-img" src={getIcon(editOptIcon)}/>
+                        <EditIcon className="commentrow-options-img"/>
                         <span className="commentrow-options-text" style={{color: "var(--text)"}}>{i18n.buttons.edit}</span>
                     </div>
                     <div className="commentrow-options-container" onClick={deleteForumPostDialog}>
-                        <img className="commentrow-options-img" src={getIcon(deleteOptIcon)}/>
+                        <DeleteIcon className="commentrow-options-img"/>
                         <span className="commentrow-options-text" style={{color: "var(--text)"}}>{i18n.buttons.delete}</span>
                     </div></> : 
                     <div className="commentrow-options-container" onClick={reportForumPostDialog}>
-                        <img className="commentrow-options-img" src={getIcon(reportOptIcon)}/>
+                        <ReportIcon className="commentrow-options-img"/>
                         <span className="commentrow-options-text" style={{color: "var(--text)"}}>{i18n.buttons.report}</span>
                     </div>}
                 </div>

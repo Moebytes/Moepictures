@@ -6,23 +6,23 @@
 
 import React from "react"
 import Slider from "react-slider"
-import filterImage from "../assets/svg/filter-image.svg"
-import filterMusic from "../assets/svg/filter-music.svg"
-import brightnessIcon from "../assets/svg/brightness.svg"
-import contrastIcon from "../assets/svg/contrast.svg"
-import hueIcon from "../assets/svg/hue.svg"
-import saturationIcon from "../assets/svg/saturation.svg"
-import lightnessIcon from "../assets/svg/lightness.svg"
-import blurIcon from "../assets/svg/blur.svg"
-import sharpenIcon from "../assets/svg/sharpen.svg"
-import pixelateIcon from "../assets/svg/pixelate.svg"
-import splatterIcon from "../assets/svg/splatter.svg"
-import lowpassIcon from "../assets/svg/lowpass.svg"
-import highpassIcon from "../assets/svg/highpass.svg"
-import reverbIcon from "../assets/svg/reverb.svg"
-import delayIcon from "../assets/svg/delay.svg"
-import phaserIcon from "../assets/svg/phaser.svg"
-import bitcrushIcon from "../assets/svg/bitcrush.svg"
+import ImageIcon from "../assets/svg/filter-image.svg"
+import MusicIcon from "../assets/svg/filter-music.svg"
+import BrightnessIcon from "../assets/svg/brightness.svg"
+import ContrastIcon from "../assets/svg/contrast.svg"
+import HueIcon from "../assets/svg/hue.svg"
+import SaturationIcon from "../assets/svg/saturation.svg"
+import LightnessIcon from "../assets/svg/lightness.svg"
+import BlurIcon from "../assets/svg/blur.svg"
+import SharpenIcon from "../assets/svg/sharpen.svg"
+import PixelateIcon from "../assets/svg/pixelate.svg"
+import SplatterIcon from "../assets/svg/splatter.svg"
+import LowpassIcon from "../assets/svg/lowpass.svg"
+import HighpassIcon from "../assets/svg/highpass.svg"
+import ReverbIcon from "../assets/svg/reverb.svg"
+import DelayIcon from "../assets/svg/delay.svg"
+import PhaserIcon from "../assets/svg/phaser.svg"
+import BitcrushIcon from "../assets/svg/bitcrush.svg"
 import functions from "../functions/Functions"
 import {useThemeSelector, useFilterActions, useFilterSelector, useSessionSelector, 
 useActiveActions, useActiveSelector, useLayoutSelector} from "../store"
@@ -47,65 +47,59 @@ const Filters: React.FunctionComponent<Props> = (props) => {
     const {showMusicFilters} = useActiveSelector()
     const {setShowMusicFilters} = useActiveActions()
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "#FF579D")
-    }
-
     const imageFiltersJSX = () => {
         return (
             <>
             <div className="filter-dropdown-row filter-row">
-                <img className="filter-dropdown-img" src={getIcon(brightnessIcon)} style={{filter}}/>
+                <BrightnessIcon className="filter-dropdown-img"/>
                 <span className="filter-dropdown-text">{i18n.filters.brightness}</span>
                 <Slider className="filter-slider" trackClassName="filter-slider-track" thumbClassName="filter-slider-thumb" onChange={(value) => setBrightness(value)} min={60} max={140} step={1} value={brightness}/>
             </div>
             <div className="filter-dropdown-row filter-row">
-                <img className="filter-dropdown-img" src={getIcon(contrastIcon)} style={{marginLeft: "7px", marginRight: "-7px", filter}}/>
+                <ContrastIcon className="filter-dropdown-img" style={{marginLeft: "7px", marginRight: "-7px"}}/>
                 <span className="filter-dropdown-text">{i18n.filters.contrast}</span>
                 <Slider className="filter-slider" trackClassName="filter-slider-track" thumbClassName="filter-slider-thumb" onChange={(value) => setContrast(value)} min={60} max={140} step={1} value={contrast}/>
             </div>
             <div className="filter-dropdown-row filter-row">
-                <img className="filter-dropdown-img" src={getIcon(hueIcon)} style={{marginLeft: "20px", marginRight: "-20px", filter}}/>
+                <HueIcon className="filter-dropdown-img" style={{marginLeft: "20px", marginRight: "-20px"}}/>
                 <span className="filter-dropdown-text">{i18n.filters.hue}</span>
                 <Slider className="filter-slider" trackClassName="filter-slider-track" thumbClassName="filter-slider-thumb" onChange={(value) => setHue(value)} min={150} max={210} step={1} value={hue}/>
             </div>
             <div className="filter-dropdown-row filter-row">
-                <img className="filter-dropdown-img" src={getIcon(saturationIcon)} style={{filter}}/>
+                <SaturationIcon className="filter-dropdown-img"/>
                 <span className="filter-dropdown-text">{i18n.filters.saturation}</span>
                 <Slider className="filter-slider" trackClassName="filter-slider-track" thumbClassName="filter-slider-thumb" onChange={(value) => setSaturation(value)} min={60} max={140} step={1} value={saturation}/>
             </div>
             <div className="filter-dropdown-row filter-row">
-                <img className="filter-dropdown-img" src={getIcon(lightnessIcon)} style={{filter}}/>
+                <LightnessIcon className="filter-dropdown-img"/>
                 <span className="filter-dropdown-text">{i18n.filters.lightness}</span>
                 <Slider className="filter-slider" trackClassName="filter-slider-track" thumbClassName="filter-slider-thumb" onChange={(value) => setLightness(value)} min={60} max={140} step={1} value={lightness}/>
             </div>
             <div className="filter-dropdown-row filter-row">
-                <img className="filter-dropdown-img" src={getIcon(blurIcon)} style={{marginLeft: "20px", marginRight: "-20px", filter}}/>
+                <BlurIcon className="filter-dropdown-img" style={{marginLeft: "20px", marginRight: "-20px"}}/>
                 <span className="filter-dropdown-text">{i18n.filters.blur}</span>
                 <Slider className="filter-slider" trackClassName="filter-slider-track" thumbClassName="filter-slider-thumb" onChange={(value) => setBlur(value)} min={0} max={2} step={0.1} value={blur}/>
             </div>
             <div className="filter-dropdown-row filter-row">
-                <img className="filter-dropdown-img" src={getIcon(sharpenIcon)} style={{marginLeft: "8px", marginRight: "-8px", filter}}/>
+                <SharpenIcon className="filter-dropdown-img" style={{marginLeft: "8px", marginRight: "-8px"}}/>
                 <span className="filter-dropdown-text">{i18n.filters.sharpen}</span>
                 <Slider className="filter-slider" trackClassName="filter-slider-track" thumbClassName="filter-slider-thumb" onChange={(value) => setSharpen(value)} min={0} max={5} step={0.1} value={sharpen}/>
             </div>
             <div className="filter-dropdown-row filter-row">
-                <img className="filter-dropdown-img" src={getIcon(pixelateIcon)} style={{filter}}/>
+                <PixelateIcon className="filter-dropdown-img"/>
                 <span className="filter-dropdown-text">{i18n.filters.pixelate}</span>
                 <Slider className="filter-slider" trackClassName="filter-slider-track" thumbClassName="filter-slider-thumb" onChange={(value) => setPixelate(value)} min={1} max={10} step={0.1} value={pixelate}/>
             </div>
             {session.showR18 ? 
             <div className="filter-dropdown-row filter-row">
-                <img className="filter-dropdown-img" src={getIcon(splatterIcon)} style={{filter}}/>
+                <SplatterIcon className="filter-dropdown-img"/>
                 <span className="filter-dropdown-text">{i18n.filters.splatter}</span>
                 <Slider className="filter-slider" trackClassName="filter-slider-track" thumbClassName="filter-slider-thumb" onChange={(value) => setSplatter(value)} min={0} max={100} step={1} value={splatter}/>
             </div> : null}
             <div className="filter-dropdown-row filter-row">
                 <button className="filter-button" onClick={() => resetImageFilters()}>{i18n.filters.reset}</button>
                 <button style={{marginLeft: "20px"}} className="filter-button" onClick={() => setShowMusicFilters(!showMusicFilters)}>
-                    <img src={filterImage}/>
+                    <ImageIcon className="filter-button-icon"/>
                 </button>
             </div>
             </>
@@ -116,39 +110,39 @@ const Filters: React.FunctionComponent<Props> = (props) => {
         return (
             <>
             <div className="filter-dropdown-row filter-row">
-                <img className="filter-dropdown-img" src={getIcon(lowpassIcon)} style={{filter}}/>
+                <LowpassIcon className="filter-dropdown-img"/>
                 <span className="audio-filter-dropdown-text">{i18n.filters.lowpass}</span>
                 <Slider className="audio-filter-slider" trackClassName="audio-filter-slider-track" thumbClassName="audio-filter-slider-thumb" onChange={(value) => setLowpass(value)} min={0} max={100} step={1} value={lowpass}/>
             </div>
             <div className="filter-dropdown-row filter-row">
-                <img className="filter-dropdown-img" src={getIcon(highpassIcon)} style={{filter}}/>
+                <HighpassIcon className="filter-dropdown-img"/>
                 <span className="audio-filter-dropdown-text">{i18n.filters.highpass}</span>
                 <Slider className="audio-filter-slider" trackClassName="audio-filter-slider-track" thumbClassName="audio-filter-slider-thumb" onChange={(value) => setHighpass(value)} min={0} max={100} step={1} value={highpass}/>
             </div>
             <div className="filter-dropdown-row filter-row">
-                <img className="filter-dropdown-img" src={getIcon(reverbIcon)} style={{filter}}/>
+                <ReverbIcon className="filter-dropdown-img"/>
                 <span className="audio-filter-dropdown-text">{i18n.filters.reverb}</span>
                 <Slider className="audio-filter-slider" trackClassName="audio-filter-slider-track" thumbClassName="audio-filter-slider-thumb" onChange={(value) => setReverb(value)} min={0} max={1} step={0.01} value={reverb}/>
             </div>
             <div className="filter-dropdown-row filter-row">
-                <img className="filter-dropdown-img" src={getIcon(delayIcon)} style={{filter}}/>
+                <DelayIcon className="filter-dropdown-img"/>
                 <span className="audio-filter-dropdown-text">{i18n.filters.delay}</span>
                 <Slider className="audio-filter-slider" trackClassName="audio-filter-slider-track" thumbClassName="audio-filter-slider-thumb" onChange={(value) => setDelay(value)} min={0} max={1} step={0.01} value={delay}/>
             </div>
             <div className="filter-dropdown-row filter-row">
-                <img className="filter-dropdown-img" src={getIcon(phaserIcon)} style={{filter}}/>
+                <PhaserIcon className="filter-dropdown-img"/>
                 <span className="audio-filter-dropdown-text">{i18n.filters.phaser}</span>
                 <Slider className="audio-filter-slider" trackClassName="audio-filter-slider-track" thumbClassName="audio-filter-slider-thumb" onChange={(value) => setPhaser(value)} min={0} max={1} step={0.01} value={phaser}/>
             </div>
             <div className="filter-dropdown-row filter-row">
-                <img className="filter-dropdown-img" src={getIcon(bitcrushIcon)} style={{filter}}/>
+                <BitcrushIcon className="filter-dropdown-img"/>
                 <span className="audio-filter-dropdown-text">{i18n.filters.bitcrush}</span>
                 <Slider className="audio-filter-slider" trackClassName="audio-filter-slider-track" thumbClassName="audio-filter-slider-thumb" onChange={(value) => setBitcrush(value)} min={0} max={100} step={1} value={bitcrush}/>
             </div>
             <div className="filter-dropdown-row filter-row">
                 <button className="audio-filter-button" onClick={() => resetAudioFilters()}>{i18n.filters.reset}</button>
                 <button style={{marginLeft: "20px"}} className="audio-filter-button" onClick={() => setShowMusicFilters(!showMusicFilters)}>
-                    <img src={filterMusic}/>
+                    <MusicIcon className="filter-button-icon"/>
                 </button>
             </div>
             </>

@@ -8,11 +8,11 @@ import React, {useEffect, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useThreadDialogSelector, useThreadDialogActions, useSessionSelector} from "../../store"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
-import emojiSelect from "../../assets/svg/emoji-select.svg"
 import MiniTextBox, {MiniTextBoxRef} from "../../ui/MiniTextBox"
 import lewdIcon from "../../assets/icons/lewdgirl.png"
-import radioButton from "../../assets/svg/radiobutton.svg"
-import radioButtonChecked from "../../assets/svg/radiobutton-checked.svg"
+import EmojiSelectIcon from "../../assets/svg/emoji-select.svg"
+import RadioButtonIcon from "../../assets/svg/radiobutton.svg"
+import RadioButtonCheckedIcon from "../../assets/svg/radiobutton-checked.svg"
 import "../dialog.less"
 
 const EditThreadDialog: React.FunctionComponent = () => {
@@ -28,10 +28,6 @@ const EditThreadDialog: React.FunctionComponent = () => {
     const controls = useDragControls()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--titleButtons")
-    }
 
     useEffect(() => {
         if (editThreadID) {
@@ -72,14 +68,16 @@ const EditThreadDialog: React.FunctionComponent = () => {
                         <MiniTextBox ref={textBoxRef} type="reply" height={200} text={editThreadContent} setText={setEditThreadContent} textRef={textRef} emojiRef={emojiRef}/>
                         {session.showR18 ?
                         <div className="dialog-row">
-                            <img className="dialog-checkbox" src={editThreadR18 ? getIcon(radioButtonChecked) : getIcon(radioButton)} onClick={() => setEditThreadR18(!editThreadR18)} style={{marginLeft: "0px", filter}}/>
+                            {editThreadR18 ?
+                            <RadioButtonCheckedIcon className="dialog-checkbox" onClick={() => setEditThreadR18(!editThreadR18)} style={{marginLeft: "0px"}}/> :
+                            <RadioButtonIcon className="dialog-checkbox" onClick={() => setEditThreadR18(!editThreadR18)} style={{marginLeft: "0px"}}/>}
                             <span className="dialog-text" style={{marginLeft: "10px"}}>R18</span>
                             <img className="dialog-title-img" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter}}/>
                         </div> : null}
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
                             <button className="dialog-emoji-button" ref={emojiRef} onClick={() => textBoxRef.current?.toggleEmojiDropdown()}>
-                                <img src={emojiSelect}/>
+                                <EmojiSelectIcon className="dialog-emoji-button-icon"/>
                             </button>
                             <button className={textBoxRef.current?.getPreviewMode() ? "dialog-edit-button" : "dialog-preview-button"} 
                             onClick={() => textBoxRef.current?.togglePreviewMode()}>

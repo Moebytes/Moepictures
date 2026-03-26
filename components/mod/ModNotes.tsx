@@ -8,8 +8,8 @@ import React, {useEffect, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, usePageActions,
 useSearchSelector, usePageSelector, useActiveSelector} from "../../store"
-import approve from "../../assets/svg/approve.svg"
-import reject from "../../assets/svg/reject.svg"
+import ApproveIcon from "../../assets/svg/approve.svg"
+import RejectIcon from "../../assets/svg/reject.svg"
 import functions from "../../functions/Functions"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
@@ -30,12 +30,6 @@ const ModNotes: React.FunctionComponent = (props) => {
     const {modState} = useActiveSelector()
     const [hover, setHover] = useState(false)
     const navigate = useNavigate()
-
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
 
     const loadInitial = async () => {
         const notes = await functions.http.get("/api/note/list/unverified", null, session, setSessionFlag, true)
@@ -120,11 +114,11 @@ const ModNotes: React.FunctionComponent = (props) => {
                     </div>
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => rejectNote(noteGroup.postID, noteGroup.originalID, noteGroup.order, noteGroup.notes, noteGroup.updater)}>
-                            <img className="mod-post-options-img" src={getIcon(reject)} style={{filter}}/>
+                            <RejectIcon className="mod-post-options-img"/>
                             <span className="mod-post-options-text">{i18n.buttons.reject}</span>
                         </div>
                         <div className="mod-post-options-container" onClick={() => approveNote(noteGroup.postID, noteGroup.originalID, noteGroup.order, noteGroup.notes, noteGroup.updater)}>
-                            <img className="mod-post-options-img" src={getIcon(approve)} style={{filter}}/>
+                            <ApproveIcon className="mod-post-options-img"/>
                             <span className="mod-post-options-text">{i18n.buttons.approve}</span>
                         </div>
                     </div>

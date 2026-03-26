@@ -6,17 +6,17 @@
 
 import React, {useState, useEffect, useReducer} from "react"
 import {useNavigate} from "react-router-dom"
-import searchIcon from "../../assets/svg/search.svg"
-import history from "../../assets/svg/history-thin.svg"
-import music from "../../assets/svg/music.svg"
-import snowflake from "../../assets/svg/snowflake.svg"
-import hueshift from "../../assets/svg/hueshift.svg"
-import mail from "../../assets/svg/mail.svg"
-import mailNotif from "../../assets/svg/mail-notif.svg"
-import crown from "../../assets/svg/crown.svg"
-import logoutSVG from "../../assets/svg/logout.svg"
-import snowflakeSVG from "../../assets/svg/snowflake2.svg"
-import premiumStar from "../../assets/svg/star.svg"
+import SearchIcon from "../../assets/svg/search.svg"
+import HistoryIcon from "../../assets/svg/history-thin.svg"
+import MusicIcon from "../../assets/svg/music.svg"
+import SnowflakeIcon from "../../assets/svg/snowflake.svg"
+import HueShiftIcon from "../../assets/svg/hueshift.svg"
+import MailIcon from "../../assets/svg/mail.svg"
+import MailNotifIcon from "../../assets/svg/mail-notif.svg"
+import CrownIcon from "../../assets/svg/crown.svg"
+import LogoutIcon from "../../assets/svg/logout.svg"
+import SnowflakeButtonIcon from "../../assets/svg/snowflake2.svg"
+import PremiumStarIcon from "../../assets/svg/star.svg"
 
 import permissions from "../../structures/Permissions"
 import functions from "../../functions/Functions"
@@ -57,22 +57,6 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const navigate = useNavigate()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--titleButtons")
-    }
-
-    const getBlueIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "#23fbff")
-    }
-
-    const getPinkIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "#ff75fa")
-    }
-
-    const getPremiumIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--premiumColor")
-    }
 
     useEffect(() => {
         setShowMiniTitle(false)
@@ -144,18 +128,6 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
         setShowMiniPlayer(!showMiniPlayer)
     }
 
-    const getMusicIcon = () => {
-        return audio ? getPinkIcon(music) : getIcon(music)
-    }
-    
-    const getSnowflakeIcon = () => {
-        return particles ? getBlueIcon(snowflake) : getIcon(snowflake)
-    }
-
-    const getMailIcon = () => {
-        return hasNotification ? getIcon(mailNotif) : getIcon(mail)
-    }
-
     const logout = async () => {
         await functions.http.post("/api/user/logout", null, session, setSessionFlag)
         setSessionFlag(true)
@@ -209,14 +181,14 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
         }
         const colorClass = session.banned ? "banned" : colorMap[session.role] ?? ""
         const svgColor = session.banned ? "--banText" : svgMap[session.role] ?? "--userColor"
-        const logoutIcon = functions.color.colorizeSVG(logoutSVG, svgColor)
+
         return (
             <>
             <span className={`mobile-nav-text mobile-nav-user-text ${colorClass}`} 
                 onClick={() => {navigate("/profile"); setHideMobileNavbar(true)}}>
                 {functions.util.toProperCase(session.username)}
             </span>
-            <img className="mobile-nav-logout-img" src={logoutIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
+            <LogoutIcon className="mobile-nav-logout-img" style={{color: `var(${svgColor})`}} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
             </>
         )
     }
@@ -252,7 +224,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <button className="title-dropdown-button" onClick={() => resetParticles()}>{i18n.filters.reset}</button>
                     <button style={{backgroundColor: particles ? "#f536ac" : "#36eaf7"}} className="title-dropdown-button" onClick={() => setParticles(!particles)}>
                         {/*particles ? i18n.buttons.disable : i18n.buttons.enable*/}
-                        <img src={snowflakeSVG}/>
+                        <SnowflakeButtonIcon className="title-dropdown-button-icon"/>
                     </button>
                 </div>
             </div>
@@ -291,17 +263,24 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     {/*<span className="mobile-nav-text" onClick={() => {navigate("/forum"); setHideMobileNavbar(true)}}>{i18n.navbar.forum}</span>*/}
                     <span className="mobile-nav-text" onClick={() => {navigate("/help"); setHideMobileNavbar(true)}}>{i18n.navbar.help}</span>
                     {permissions.isPremiumEnabled() && session.username ? <div className="mobile-nav-img-container" onClick={() => {navigate("/premium"); setHideMobileNavbar(true)}}>
-                        <img className="mobile-nav-img" src={getPremiumIcon(premiumStar)} style={{marginRight: "10px"}}/>
+                        <PremiumStarIcon className="mobile-nav-img" style={{marginRight: "10px"}}/>
                         <span className="mobile-nav-text" style={{margin: "0px", color: "var(--premiumColor)"}}>{i18n.roles.premium}</span>
                     </div> : null}
                 </div>
                 <div className="mobile-nav-color-container">
-                    {session.username ? <img className="nav-color" src={getIcon(history)} onClick={() => navigate("/history")} style={{filter}}/> : null}
-                    <img className="mobile-nav-color" src={getMusicIcon()} onClick={miniPlayer} style={{filter}}/>
-                    <img className="mobile-nav-color" src={getSnowflakeIcon()} onClick={particleChange} style={{filter}}/>
-                    <img className="mobile-nav-color" src={getIcon(hueshift)} onClick={colorChange} style={{filter}}/>
-                    {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => navigate("/mail")} style={{filter}}/> : null}
-                    {permissions.isMod(session) ? <img className="nav-color" src={getIcon(crown)} onClick={() => navigate("/mod-queue")} style={{filter}}/> : null}
+                    {session.username ? <HistoryIcon className="mobile-nav-color" onClick={() => navigate("/history")}/> : null}
+                    {audio ?
+                    <MusicIcon className="mobile-nav-color-pink" onClick={miniPlayer}/> :
+                    <MusicIcon className="mobile-nav-color" onClick={miniPlayer}/>}
+                    {particles ?
+                    <SnowflakeIcon className="mobile-nav-color-blue" onClick={particleChange}/> :
+                    <SnowflakeIcon className="mobile-nav-color" onClick={particleChange}/>}
+                    <HueShiftIcon className="mobile-nav-color" onClick={colorChange}/>
+                    
+                    {session.username ? (hasNotification ? 
+                        <MailNotifIcon className="mobile-nav-color" onClick={() => navigate("/mail")}/> :
+                        <MailIcon className="mobile-nav-color" onClick={() => navigate("/mail")}/>) : null}
+                    {permissions.isMod(session) ? <CrownIcon className="mobile-nav-color" onClick={() => navigate("/mod-queue")}/> : null}
                 </div>
                 <MiniAudioPlayer/>
                 <HSLDropdown active={activeColorDropdown}/>
@@ -341,19 +320,26 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/groups")}>{i18n.sort.groups}</span>
                     {/*<span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/forum")}>{i18n.navbar.forum}</span>*/}
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/help")}>{i18n.navbar.help}</span>
-                    {permissions.isPremiumEnabled() && session.username ? <img style={{marginTop: "2px"}} className="nav-img" onClick={() => navigate("/premium")} src={getPremiumIcon(premiumStar)}/> : null}
+                    {permissions.isPremiumEnabled() && session.username ? <PremiumStarIcon  className="nav-img" style={{marginTop: "2px"}} onClick={() => navigate("/premium")}/> : null}
                     <div className={`nav-search-container ${!hideSidebar || tablet ? "hide-nav-search" : ""}`}>
-                        <img className="nav-search-icon" src={getIcon(searchIcon)} onClick={() => setSearchFlag(true)}/>
+                        <SearchIcon className="nav-search-icon" onClick={() => setSearchFlag(true)}/>
                         <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
                     </div>
                 </div>
                 <div className="nav-color-container">
-                    {session.username ? <img className="nav-color" src={getIcon(history)} onClick={() => navigate("/history")} style={{filter}}/> : null}
-                    <img className="nav-color" src={getMusicIcon()} onClick={miniPlayer} style={{filter}}/>
-                    <img className="nav-color" src={getSnowflakeIcon()} onClick={particleChange} style={{filter}}/>
-                    <img className="nav-color" src={getIcon(hueshift)} onClick={colorChange} style={{filter}}/>
-                    {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => navigate("/mail")} style={{filter}}/> : null}
-                    {permissions.isMod(session) && !hideSidebar ? <img className="nav-color" src={getIcon(crown)} onClick={() => navigate("/mod-queue")} style={{filter}}/> : null}
+                    {session.username ? <HistoryIcon className="nav-color" onClick={() => navigate("/history")}/> : null}
+                    {audio ?
+                    <MusicIcon className="nav-color-pink" onClick={miniPlayer}/> :
+                    <MusicIcon className="nav-color" onClick={miniPlayer}/>}
+                    {particles ?
+                    <SnowflakeIcon className="nav-color-blue" onClick={particleChange}/> :
+                    <SnowflakeIcon className="nav-color" onClick={particleChange}/>}
+                    <HueShiftIcon className="nav-color" onClick={colorChange}/>
+                    
+                    {session.username ? (hasNotification ? 
+                        <MailNotifIcon className="nav-color" onClick={() => navigate("/mail")}/> :
+                        <MailIcon className="nav-color" onClick={() => navigate("/mail")}/>) : null}
+                    {permissions.isMod(session) && !hideSidebar ? <CrownIcon className="nav-color" onClick={() => navigate("/mod-queue")}/> : null}
                 </div>
                 <MiniAudioPlayer/>
                 <HSLDropdown active={activeColorDropdown}/>

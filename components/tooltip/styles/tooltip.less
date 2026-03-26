@@ -96,6 +96,7 @@
     width: auto;
     margin-right: 5px;
     cursor: pointer;
+    color: var(--sortbarIcons);
     &:hover {
         filter: brightness(130%);
     }
@@ -105,6 +106,17 @@
     height: 15px;
     width: auto;
     margin-right: 5px;
+    color: var(--sortbarIcons);
+}
+
+.tooltip-icon-red {
+    .tooltip-icon();
+    color: var(--r18Color);
+}
+
+.tooltip-icon-blue {
+    .tooltip-icon();
+    color: var(--sketchColor);
 }
 
 .tooltip-column-container {

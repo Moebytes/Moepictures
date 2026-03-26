@@ -11,12 +11,12 @@ import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import search from "../../assets/svg/search.svg"
-import sort from "../../assets/svg/sort.svg"
-import sortRev from "../../assets/svg/sort-reverse.svg"
-import scrollIcon from "../../assets/svg/scroll.svg"
-import pageIcon from "../../assets/svg/pages.svg"
-import type from "../../assets/svg/all.svg"
+import SearchIcon from "../../assets/svg/search.svg"
+import SortIcon from "../../assets/svg/sort.svg"
+import SortReverseIcon from "../../assets/svg/sort-reverse.svg"
+import ScrollIcon from "../../assets/svg/scroll.svg"
+import PagesIcon from "../../assets/svg/pages.svg"
+import TypeIcon from "../../assets/svg/all.svg"
 import TagRow from "../../components/search/TagRow"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
@@ -51,12 +51,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     const sortRef = useRef<HTMLDivElement>(null)
     const typeRef = useRef<HTMLDivElement>(null)
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
     const getFilterSearch = functions.color.filter({theme, siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
 
     useEffect(() => {
         setHideNavbar(true)
@@ -142,7 +137,9 @@ const TagsPage: React.FunctionComponent = (props) => {
     const getSortJSX = () => {
         return (
             <div className="itemsort-item" ref={sortRef}>
-                <img className="itemsort-img" src={sortReverse ? getIcon(sortRev) : getIcon(sort)} style={{filter}} onClick={() => setSortReverse(!sortReverse)}/>
+                {sortReverse ?
+                <SortReverseIcon className="itemsort-img" onClick={() => setSortReverse(!sortReverse)}/> :
+                <SortIcon className="itemsort-img" onClick={() => setSortReverse(!sortReverse)}/>}
                 <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{i18n.sort[sortType]}</span>
             </div>
         )
@@ -151,7 +148,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     const getTypeJSX = () => {
         return (
             <div className="itemsort-item" ref={typeRef} onClick={() => {setActiveDropdown(activeDropdown === "type" ? "none" : "type")}}>
-                <img className="itemsort-img rotate" src={getIcon(type)} style={{filter}}/>
+                <TypeIcon className="itemsort-img rotate"/>
                 {!mobile ? <span className="itemsort-text">{i18n.tag[typeType]}</span> : null}
             </div>
         )
@@ -216,14 +213,16 @@ const TagsPage: React.FunctionComponent = (props) => {
                             <input className="item-search" type="search" spellCheck="false" value={searchQuery} style={{width: mobile ? "170px" : "230px"}}
                             onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
                             <button className="item-search-button" style={{filter: getFilterSearch}} onClick={() => initItems()}>
-                                <img src={search}/>
+                                <SearchIcon className="item-search-button-icon"/>
                             </button>
                         </div>
                         {!mobile && permissions.isAdmin(session) ? getMassImplyButton() : null}
                         {!mobile && permissions.isAdmin(session) ? getBlockedTagsButton() : null}
                         {getSortJSX()}
                         {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>
-                            <img className="itemsort-img" src={scroll ? getIcon(scrollIcon) : getIcon(pageIcon)} style={{filter}}/>
+                            {scroll ? 
+                            <ScrollIcon className="itemsort-img"/> :
+                            <PagesIcon className="itemsort-img"/>}
                             <span className="itemsort-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                         </div> : null}
                         <div className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 

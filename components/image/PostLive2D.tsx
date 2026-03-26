@@ -9,17 +9,17 @@ import {useNavigate} from "react-router-dom"
 import withPostWrapper, {PostWrapperProps, PostWrapperRef} from "./withPostWrapper"
 import {useSessionSelector, usePlaybackSelector, usePlaybackActions, useInteractionActions} from "../../store"
 import Slider from "react-slider"
-import zoomInIcon from "../../assets/svg/zoom-in.svg"
-import zoomOutIcon from "../../assets/svg/zoom-out.svg"
-import zoomOffIcon from "../../assets/svg/zoom-off.svg"
-import playIcon from "../../assets/svg/play.svg"
-import pauseIcon from "../../assets/svg/pause.svg"
-import fullscreenIcon from "../../assets/svg/fullscreen.svg"
-import halfSpeedIcon from "../../assets/svg/0.5x.svg"
-import normalSpeedIcon from "../../assets/svg/1x.svg"
-import doubleSpeedIcon from "../../assets/svg/2x.svg"
-import parameterIcon from "../../assets/svg/parameter.svg"
-import partIcon from "../../assets/svg/part.svg"
+import ZoomInIcon from "../../assets/svg/zoom-in.svg"
+import ZoomOutIcon from "../../assets/svg/zoom-out.svg"
+import ZoomOffIcon from "../../assets/svg/zoom-off.svg"
+import PlayIcon from "../../assets/svg/play.svg"
+import PauseIcon from "../../assets/svg/pause.svg"
+import FullscreenIcon from "../../assets/svg/fullscreen.svg"
+import HalfSpeedIcon from "../../assets/svg/0.5x.svg"
+import NormalSpeedIcon from "../../assets/svg/1x.svg"
+import DoubleSpeedIcon from "../../assets/svg/2x.svg"
+import ParameterIcon from "../../assets/svg/parameter.svg"
+import PartIcon from "../../assets/svg/part.svg"
 import {Live2DCubismModel} from "live2d-renderer"
 import path from "path"
 import functions from "../../functions/Functions"
@@ -44,14 +44,6 @@ const PostLive2D = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRe
     const {toggleFullscreen} = props
     const {live2DRef, lightnessRef, overlayRef, effectRef, pixelateRef, onLoaded} = props
     const navigate = useNavigate()
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "#ff6739")
-    }
-
-    const getRedIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "#ff3363")
-    }
 
     useEffect(() => {
         const savedSpeed = localStorage.getItem("live2dSpeed")
@@ -175,23 +167,6 @@ const PostLive2D = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRe
         if (live2dControls.current) live2dControls.current.style.opacity = "0"
     }
 
-    const getZoomOffIcon = () => {
-        if (disableZoom) return getRedIcon(zoomOffIcon)
-        return getIcon(zoomOffIcon)
-    }
-
-    const getPlayIcon = () => {
-        if (paused) return getIcon(playIcon)
-        return getIcon(pauseIcon)
-    }
-
-    const getFPSIcon = () => {
-        if (modelSpeed === 0.5) return getIcon(halfSpeedIcon)
-        if (modelSpeed === 1) return getIcon(normalSpeedIcon)
-        if (modelSpeed === 2) return getIcon(doubleSpeedIcon)
-        return getIcon(normalSpeedIcon)
-    }
-
     const changeFPS = () => {
         if (modelSpeed === 0.5) return setModelSpeed(1)
         if (modelSpeed === 1) return setModelSpeed(2)
@@ -298,14 +273,22 @@ const PostLive2D = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRe
         <div className="image-controls" ref={live2dControls} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
             <div className="image-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <div className="image-control-row-container">
-                    <img draggable={false} className="image-control-img" onClick={() => setDisableZoom(!disableZoom)} src={getZoomOffIcon()}/>
-                    <img draggable={false} className="image-control-img" onClick={zoomOut} src={getIcon(zoomOutIcon)}/>
-                    <img draggable={false} className="image-control-img" onClick={zoomIn} src={getIcon(zoomInIcon)}/>
-                    <img draggable={false} className="image-control-img" onClick={() => setPaused(!paused)} src={getPlayIcon()}/>
-                    <img draggable={false} className="image-control-img" onClick={() => changeFPS()} src={getFPSIcon()}/>
-                    <img draggable={false} className="image-control-img" ref={live2dParameterRef} src={getIcon(parameterIcon)} onClick={() => toggleDropdown("parameter")}/>
-                    <img draggable={false} className="image-control-img" ref={live2dPartRef} src={getIcon(partIcon)} onClick={() => toggleDropdown("part")}/>
-                    <img draggable={false} className="image-control-img" onClick={() => toggleFullscreen()} src={getIcon(fullscreenIcon)}/>
+                    {disableZoom ?
+                    <ZoomOffIcon className="image-control-img-red" onClick={() => setDisableZoom(!disableZoom)}/> :
+                    <ZoomOffIcon className="image-control-img-orange" onClick={() => setDisableZoom(!disableZoom)}/>}
+                    <ZoomOutIcon className="image-control-img-orange" onClick={zoomOut}/>
+                    <ZoomInIcon className="image-control-img-orange" onClick={zoomIn}/>
+                    {paused ?
+                    <PlayIcon className="image-control-img-orange" onClick={() => setPaused(!paused)}/> :
+                    <PauseIcon className="image-control-img-orange" onClick={() => setPaused(!paused)}/>}
+                    {modelSpeed === 2 ?
+                    <DoubleSpeedIcon className="image-control-img-orange" onClick={() => changeFPS()}/> :
+                    modelSpeed === 1 ? 
+                    <NormalSpeedIcon className="image-control-img-orange" onClick={() => changeFPS()}/> :
+                    <HalfSpeedIcon className="image-control-img-orange" onClick={() => changeFPS()}/>}
+                    <ParameterIcon className="image-control-img-orange" ref={live2dParameterRef} onClick={() => toggleDropdown("parameter")}/>
+                    <PartIcon className="image-control-img-orange" ref={live2dPartRef} onClick={() => toggleDropdown("part")}/>
+                    <FullscreenIcon className="image-control-img-orange" ref={live2dPartRef} onClick={() => toggleFullscreen()}/>
                 </div> 
             </div>
             {parameterDropdownJSX()}

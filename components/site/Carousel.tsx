@@ -8,8 +8,8 @@ import React, {useEffect, useRef, useState, useReducer} from "react"
 import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionActions, useLayoutSelector, 
 useSearchSelector, useFilterSelector, useFlagSelector, useCacheActions} from "../../store"
 import functions from "../../functions/Functions"
-import arrowLeft from "../../assets/svg/carousel-left.svg"
-import arrowRight from "../../assets/svg/carousel-right.svg"
+import LeftIcon from "../../assets/svg/carousel-left.svg"
+import RightIcon from "../../assets/svg/carousel-right.svg"
 import "./styles/carousel.less"
 
 interface Props {
@@ -70,12 +70,6 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const targetMarginRef = useRef<number>(0)
     const savedMarginRef = useRef<number>(0)
     const arrowJump = useRef<boolean>(false)
-
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
 
     useEffect(() => {
         const smoothingFactor = 0.5
@@ -534,13 +528,13 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="carousel" ref={carouselRef} style={{maxWidth, marginTop, overflowX: trackPad ? "auto" : "hidden"}} onScroll={handleScroll}>
-            <img className={`carousel-left ${showLeftArrow ? "arrow-visible" : ""}`} src={getIcon(arrowLeft)} style={{filter}} 
+            <LeftIcon className={`carousel-left ${showLeftArrow ? "arrow-visible" : ""}`}
             onClick={arrowLeftClick} onMouseEnter={arrowLeftEnter} onMouseLeave={() => setShowLeftArrow(false)}/>
             <div className="slider" ref={sliderRef} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} 
             onMouseUp={handleMouseUp} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
                 {generateJSX()}
             </div>
-            <img className={`carousel-right ${showRightArrow ? "arrow-visible" : ""}`} src={getIcon(arrowRight)} style={{filter}} 
+            <RightIcon className={`carousel-right ${showRightArrow ? "arrow-visible" : ""}`}
             onMouseEnter={arrowRightEnter} onMouseLeave={() => setShowRightArrow(false)} onClick={arrowRightClick}/>
         </div>
     )

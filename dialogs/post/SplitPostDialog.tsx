@@ -9,8 +9,8 @@ import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionA
 usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
-import checkbox from "../../assets/svg/checkbox.svg"
-import checkboxChecked from "../../assets/svg/checkbox-checked.svg"
+import CheckboxIcon from "../../assets/svg/checkbox.svg"
+import CheckboxCheckedIcon from "../../assets/svg/checkbox-checked.svg"
 import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
 
@@ -27,10 +27,6 @@ const SplitPostDialog: React.FunctionComponent = (props) => {
     const controls = useDragControls()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
 
     useEffect(() => {
         if (splitPostID) {
@@ -91,11 +87,15 @@ const SplitPostDialog: React.FunctionComponent = (props) => {
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center"}}>
                                 <span className="dialog-text">{i18n.dialogs.splitPost.currentOnly}?</span>
-                                <img className="dialog-checkbox" src={currentOnly ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => toggleCheckbox("currentOnly")} style={{marginRight: "10px", filter}}/>
+                                {currentOnly ?
+                                <CheckboxCheckedIcon className="dialog-checkbox" onClick={() => toggleCheckbox("currentOnly")} style={{marginRight: "10px"}}/> :
+                                <CheckboxIcon className="dialog-checkbox" onClick={() => toggleCheckbox("currentOnly")} style={{marginRight: "10px"}}/>}
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center"}}>
                                 <span className="dialog-text">{i18n.dialogs.splitPost.mergeSubsequent}?</span>
-                                <img className="dialog-checkbox" src={mergeSubsequent ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => toggleCheckbox("mergeSubsequent")} style={{marginRight: "10px", filter}}/>
+                                {mergeSubsequent ?
+                                <CheckboxCheckedIcon className="dialog-checkbox" onClick={() => toggleCheckbox("mergeSubsequent")} style={{marginRight: "10px"}}/> :
+                                <CheckboxIcon className="dialog-checkbox" onClick={() => toggleCheckbox("mergeSubsequent")} style={{marginRight: "10px"}}/>}
                             </div>
                             <div className="dialog-row">
                                 <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>

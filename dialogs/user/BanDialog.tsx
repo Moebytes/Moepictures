@@ -11,8 +11,8 @@ import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {motion, useDragControls} from "framer-motion"
-import checkbox from "../../assets/svg/checkbox.svg"
-import checkboxChecked from "../../assets/svg/checkbox-checked.svg"
+import CheckboxIcon from "../../assets/svg/checkbox.svg"
+import CheckboxCheckedIcon from "../../assets/svg/checkbox-checked.svg"
 import "../dialog.less"
 
 const BanDialog: React.FunctionComponent = (props) => {
@@ -34,10 +34,6 @@ const BanDialog: React.FunctionComponent = (props) => {
     const controls = useDragControls()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
 
     useEffect(() => {
         if (banName) {
@@ -159,19 +155,27 @@ const BanDialog: React.FunctionComponent = (props) => {
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.dialogs.ban.unverifiedChanges}</span>
-                            <img className="dialog-checkbox" src={deleteUnverifiedChanges ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setDeleteUnverifiedChanges((prev: boolean) => !prev)} style={{filter}}/>
+                            {deleteUnverifiedChanges ?
+                            <CheckboxCheckedIcon className="dialog-checkbox" onClick={() => setDeleteUnverifiedChanges((prev: boolean) => !prev)}/> :
+                            <CheckboxIcon className="dialog-checkbox" onClick={() => setDeleteUnverifiedChanges((prev: boolean) => !prev)}/>}
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.dialogs.ban.historyChanges}</span>
-                            <img className="dialog-checkbox" src={deleteHistoryChanges ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setDeleteHistoryChanges((prev: boolean) => !prev)} style={{filter}}/>
+                            {deleteHistoryChanges ?
+                            <CheckboxCheckedIcon className="dialog-checkbox" onClick={() => setDeleteHistoryChanges((prev: boolean) => !prev)}/> :
+                            <CheckboxIcon className="dialog-checkbox" onClick={() => setDeleteHistoryChanges((prev: boolean) => !prev)}/>}
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.dialogs.ban.comments}</span>
-                            <img className="dialog-checkbox" src={deleteComments ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setDeleteComments((prev: boolean) => !prev)} style={{filter}}/>
+                            {deleteComments ?
+                            <CheckboxCheckedIcon className="dialog-checkbox" onClick={() => setDeleteComments((prev: boolean) => !prev)}/> :
+                            <CheckboxIcon className="dialog-checkbox" onClick={() => setDeleteComments((prev: boolean) => !prev)}/>}
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.dialogs.ban.messages}</span>
-                            <img className="dialog-checkbox" src={deleteMessages ? getIcon(checkboxChecked) : getIcon(checkbox)} onClick={() => setDeleteMessages((prev: boolean) => !prev)} style={{filter}}/>
+                            {deleteMessages ?
+                            <CheckboxCheckedIcon className="dialog-checkbox" onClick={() => setDeleteMessages((prev: boolean) => !prev)}/> :
+                            <CheckboxIcon className="dialog-checkbox" onClick={() => setDeleteMessages((prev: boolean) => !prev)}/>}
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.labels.days}: </span>

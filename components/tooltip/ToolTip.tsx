@@ -26,26 +26,26 @@ import youtube from "../../assets/icons/youtube.png"
 import bandcamp from "../../assets/icons/bandcamp.png"
 import sketchfab from "../../assets/icons/sketchfab.png"
 
-import tagIcon from "../../assets/svg/tags.svg"
-import image from "../../assets/svg/image.svg"
-import animation from "../../assets/svg/animation.svg"
-import video from "../../assets/svg/video.svg"
-import comic from "../../assets/svg/comic.svg"
-import live2d from "../../assets/svg/live2d.svg"
-import model from "../../assets/svg/model.svg"
-import audio from "../../assets/svg/music.svg"
-import cute from "../../assets/svg/cute.svg"
-import sexy from "../../assets/svg/sexy.svg"
-import erotic from "../../assets/svg/erotic.svg"
-import lewd from "../../assets/svg/lewd.svg"
-import $2d from "../../assets/svg/2d.svg"
-import $3d from "../../assets/svg/3d.svg"
-import pixel from "../../assets/svg/pixel.svg"
-import chibi from "../../assets/svg/chibi.svg"
-import daki from "../../assets/svg/daki.svg"
-import sketch from "../../assets/svg/sketch.svg"
-import lineart from "../../assets/svg/lineart.svg"
-import promo from "../../assets/svg/promo.svg"
+import TagIcon from "../../assets/svg/tags.svg"
+import ImageIcon from "../../assets/svg/image.svg"
+import AnimationIcon from "../../assets/svg/animation.svg"
+import VideoIcon from "../../assets/svg/video.svg"
+import ComicIcon from "../../assets/svg/comic.svg"
+import Live2dIcon from "../../assets/svg/live2d.svg"
+import ModelIcon from "../../assets/svg/model.svg"
+import AudioIcon from "../../assets/svg/music.svg"
+import CuteIcon from "../../assets/svg/cute.svg"
+import SexyIcon from "../../assets/svg/sexy.svg"
+import EroticIcon from "../../assets/svg/erotic.svg"
+import LewdIcon from "../../assets/svg/lewd.svg"
+import $2dIcon from "../../assets/svg/2d.svg"
+import $3dIcon from "../../assets/svg/3d.svg"
+import PixelIcon from "../../assets/svg/pixel.svg"
+import ChibiIcon from "../../assets/svg/chibi.svg"
+import DakiIcon from "../../assets/svg/daki.svg"
+import SketchIcon from "../../assets/svg/sketch.svg"
+import LineartIcon from "../../assets/svg/lineart.svg"
+import PromoIcon from "../../assets/svg/promo.svg"
 import {TagCount, PostFull} from "../../types/Types"
 import "./styles/tooltip.less"
 
@@ -68,18 +68,6 @@ const ToolTip: React.FunctionComponent = (props) => {
     const scrollRef = useRef<HTMLDivElement>(null)
     const navigate = useNavigate()
     const location = useLocation()
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
-
-    const getRedIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--r18Color")
-    }
-    
-    const getBlueIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sketchColor")
-    }
 
     const updatePost = async () => {
         if (tooltipPost) setPost(tooltipPost)
@@ -286,34 +274,34 @@ const ToolTip: React.FunctionComponent = (props) => {
     }
 
     const getTypeIcon = () => {
-        if (post.type === "image") return getIcon(image)
-        if (post.type === "comic") return getIcon(comic)
-        if (post.type === "animation") return getIcon(animation)
-        if (post.type === "video") return getIcon(video)
-        if (post.type === "audio") return getIcon(audio)
-        if (post.type === "model") return getIcon(model)
-        if (post.type === "live2d") return getIcon(live2d)
-        return image
+        if (post.type === "image") return <ImageIcon className="tooltip-icon"/>
+        if (post.type === "comic") return <ComicIcon className="tooltip-icon"/>
+        if (post.type === "animation") return <AnimationIcon className="tooltip-icon"/>
+        if (post.type === "video") return <VideoIcon className="tooltip-icon"/>
+        if (post.type === "audio") return <AudioIcon className="tooltip-icon"/>
+        if (post.type === "model") return <ModelIcon className="tooltip-icon"/>
+        if (post.type === "live2d") return <Live2dIcon className="tooltip-icon"/>
+        return <ImageIcon className="tooltip-icon"/>
     }
 
     const getRatingIcon = () => {
-        if (post.rating === "cute") return getIcon(cute)
-        if (post.rating === "sexy") return getIcon(sexy)
-        if (post.rating === "erotic") return getIcon(erotic)
-        if (post.rating === "lewd") return getRedIcon(lewd)
-        return cute
+        if (post.rating === "cute") return <CuteIcon className="tooltip-icon"/>
+        if (post.rating === "sexy") return <SexyIcon className="tooltip-icon"/>
+        if (post.rating === "erotic") return <EroticIcon className="tooltip-icon"/>
+        if (post.rating === "lewd") return <LewdIcon className="tooltip-icon-red"/>
+        return <CuteIcon className="tooltip-icon"/>
     }
 
     const getStyleIcon = () => {
-        if (post.style === "2d") return getIcon($2d)
-        if (post.style === "3d") return getIcon($3d)
-        if (post.style === "chibi") return getIcon(chibi)
-        if (post.style === "pixel") return getIcon(pixel)
-        if (post.style === "daki") return getIcon(daki)
-        if (post.style === "promo") return getBlueIcon(promo)
-        if (post.style === "sketch") return getBlueIcon(sketch)
-        if (post.style === "lineart") return getBlueIcon(lineart)
-        return getIcon($2d)
+        if (post.style === "2d") return <$2dIcon className="tooltip-icon"/>
+        if (post.style === "3d") return <$3dIcon className="tooltip-icon"/>
+        if (post.style === "chibi") return <ChibiIcon className="tooltip-icon"/>
+        if (post.style === "pixel") return <PixelIcon className="tooltip-icon"/>
+        if (post.style === "daki") return <DakiIcon className="tooltip-icon"/>
+        if (post.style === "promo") return <PromoIcon className="tooltip-icon-blue"/>
+        if (post.style === "sketch") return <SketchIcon className="tooltip-icon-blue"/>
+        if (post.style === "lineart") return <LineartIcon className="tooltip-icon-blue"/>
+        return <$2dIcon className="tooltip-icon"/>
     }
  
     const imgClick = (event: React.MouseEvent) => {
@@ -332,7 +320,7 @@ const ToolTip: React.FunctionComponent = (props) => {
                 <div className="tooltip-artist-container">
                     <img className="tooltip-img" src={functions.link.getTagLink(artist.type, artist.image, artist.imageHash)}/>
                     <span className={`tooltip-tag-clickable ${post?.hidden ? "strikethrough" : ""}`} style={{marginRight: "5px"}} onClick={searchArtist} onAuxClick={openArtist}>{artist.tag}</span>
-                    <img className="tooltip-img-small" src={getIcon(tagIcon)} onClick={copyTags} onContextMenu={copyTags}/>
+                    <TagIcon className="tooltip-img-small" onClick={copyTags} onContextMenu={copyTags}/>
                 </div>
                 <div className="tooltip-artist-container">
                     <span className={`tooltip-tag-clickable ${post?.hidden ? "strikethrough" : ""}`} onClick={download} onAuxClick={openNewTab}>{getImageDimensions()}</span>
@@ -345,9 +333,9 @@ const ToolTip: React.FunctionComponent = (props) => {
                 </div> : null}
                 <div className="tooltip-column-container">
                     <div className="tooltip-tag-container">
-                        <span className={`tooltip-tag-text ${post?.hidden ? "strikethrough" : ""}`}><img src={getTypeIcon()} className="tooltip-icon"/>{post.type}</span>
-                        <span className={`tooltip-tag-text ${post?.hidden ? "strikethrough" : ""}`}><img src={getRatingIcon()} className="tooltip-icon"/>{post.rating}</span>
-                        <span className={`tooltip-tag-text ${post?.hidden ? "strikethrough" : ""}`}><img src={getStyleIcon()} className="tooltip-icon"/>{post.style}</span>
+                        <span className={`tooltip-tag-text ${post?.hidden ? "strikethrough" : ""}`}>{getTypeIcon()}{post.type}</span>
+                        <span className={`tooltip-tag-text ${post?.hidden ? "strikethrough" : ""}`}>{getRatingIcon()}{post.rating}</span>
+                        <span className={`tooltip-tag-text ${post?.hidden ? "strikethrough" : ""}`}>{getStyleIcon()}{post.style}</span>
                     </div>
                     <div className="tooltip-tag-container">
                         <span className={`tooltip-tag-text ${post?.hidden ? "strikethrough" : ""}`}>{post.englishTitle || i18n.labels.noTitle}</span>

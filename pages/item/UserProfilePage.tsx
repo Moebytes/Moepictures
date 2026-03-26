@@ -19,11 +19,11 @@ import functions from "../../functions/Functions"
 import Carousel from "../../components/site/Carousel"
 import VerticalCarousel from "../../components/site/VerticalCarousel"
 import permissions from "../../structures/Permissions"
-import premiumStar from "../../assets/svg/premium-star.svg"
-import r18 from "../../assets/svg/lewd.svg"
-import danger from "../../assets/svg/danger.svg"
-import lockIcon from "../../assets/svg/lock.svg"
-import emojiSelect from "../../assets/svg/emoji-select.svg"
+import PremiumStarIcon from "../../assets/svg/premium-star.svg"
+import R18Icon from "../../assets/svg/lewd.svg"
+import DangerIcon from "../../assets/svg/danger.svg"
+import LockIcon from "../../assets/svg/lock.svg"
+import EmojiSelectIcon from "../../assets/svg/emoji-select.svg"
 import MiniTextBox, {MiniTextBoxRef} from "../../ui/MiniTextBox"
 import {EditCounts, CommentSearch, Favgroup, PostSearch, UnverifiedPost, TagCount, ForumPostSearch} from "../../types/Types"
 import "./styles/userpage.less"
@@ -78,18 +78,6 @@ const UserProfilePage: React.FunctionComponent = () => {
     const textRef = useRef<HTMLTextAreaElement>(null)
     const textBoxRef = useRef<MiniTextBoxRef>(null)
     const navigate = useNavigate()
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
-
-    const getRedIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--r18Color")
-    }
-
-    const getPremiumIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--premiumColor")
-    }
 
     useEffect(() => {
         limit = mobile ? 5 : 25
@@ -555,7 +543,7 @@ const UserProfilePage: React.FunctionComponent = () => {
             jsx.push(
                 <div className="user-column">
                     <div className="user-title-container">
-                        {favgroup.private ? <img className="user-icon" src={getIcon(lockIcon)} style={{height: "20px", marginTop: "3px", filter}}/> : null}
+                        {favgroup.private ? <LockIcon className="user-icon" style={{height: "20px", marginTop: "3px"}}/> : null}
                         <span className="user-title" onClick={viewFavgroup}>{favgroup.name} <span className="user-text-alt">{favgroup.postCount}</span></span>
                     </div>
                     <Carousel images={images} noKey={true} set={setFavgroup} index={0} unlimited={true}/>
@@ -574,7 +562,7 @@ const UserProfilePage: React.FunctionComponent = () => {
             <div className="user-row">
                 <button className="user-button" onClick={changeBio}>{i18n.buttons.ok}</button>
                 <button className="user-emoji-button" ref={emojiRef} onClick={() => textBoxRef.current?.toggleEmojiDropdown()}>
-                    <img src={emojiSelect}/>
+                    <EmojiSelectIcon className="user-emoji-button-icon"/>
                 </button>
                 <button className={textBoxRef.current?.getPreviewMode() ? "user-edit-button" : "user-preview-button"} 
                 onClick={() => textBoxRef.current?.togglePreviewMode()}>
@@ -649,17 +637,18 @@ const UserProfilePage: React.FunctionComponent = () => {
                         <span className="user-text">{i18n.user.liveModelPreview}: <span className="user-text-action" onClick={liveModelPreview}>{session.liveModelPreview ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div>
                     <div className="user-row">
-                        {permissions.isPremiumEnabled() ? <img className="user-icon" src={getPremiumIcon(premiumStar)}/> : null}
+                        
+                        {permissions.isPremiumEnabled() ? <PremiumStarIcon className="user-icon-pink"/> : null}
                         <span style={permissions.isPremiumEnabled() ? {color: "var(--premiumColor)"} : {}} className="user-text">{i18n.user.upscaledImages}: <span style={permissions.isPremiumEnabled() ? {color: "var(--premiumColor)"} : {}} className="user-text-action" onClick={upscaledImages}>{session.upscaledImages ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div>
                     <div className="user-row">
-                        {permissions.isPremiumEnabled() ? <img className="user-icon" src={getPremiumIcon(premiumStar)}/> : null}
+                        {permissions.isPremiumEnabled() ? <PremiumStarIcon className="user-icon-pink"/> : null}
                         <span style={permissions.isPremiumEnabled() ? {color: "var(--premiumColor)"} : {}} className="user-text">{i18n.user.autosearchInterval}: </span>
                         <input style={permissions.isPremiumEnabled() ? {color: "var(--premiumColor)"} : {}} className="user-input" spellCheck={false} value={interval} onChange={(event) => setInterval(event.target.value)}
                         onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></input>
                     </div>
                     {permissions.isAdmin(session) ? <div className="user-row">
-                        <img className="user-icon" src={getRedIcon(r18)}/>
+                        <R18Icon className="user-icon-red"/>
                         <span style={{color: "var(--r18Color)"}} className="user-text">{i18n.user.showR18}: <span style={{color: "var(--r18Color)"}} className="user-text-action" onClick={showR18}>{session.showR18 ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div> : null}
                     <div onClick={clearPfp} className="user-row">
@@ -673,7 +662,7 @@ const UserProfilePage: React.FunctionComponent = () => {
                         <span className="user-link">{i18n.user.showBanner}</span>
                     </div> : null}
                     <div onClick={changeUsername} className="user-row">
-                        {permissions.isPremiumEnabled() ? <img className="user-icon" src={getPremiumIcon(premiumStar)} style={{height: "14px", marginRight: "5px"}}/> : null}
+                        {permissions.isPremiumEnabled() ? <PremiumStarIcon className="user-icon-pink" style={{height: "14px", marginRight: "5px"}}/> : null}
                         <span style={permissions.isPremiumEnabled() ? {color: "var(--premiumColor)"} : {}} className="user-link">{i18n.user.changeUsername}</span>
                     </div>
                     <Link to="/change-email" className="user-row">
@@ -759,7 +748,7 @@ const UserProfilePage: React.FunctionComponent = () => {
                         onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                     </div>
                     <div className="user-row">
-                        <img className="user-icon" src={getIcon(danger)}/>
+                        <DangerIcon className="user-icon"/>
                         <span className="user-link" onClick={deleteAccountDialog}>{i18n.buttons.deleteAccount}</span>
                     </div>
                 </div>

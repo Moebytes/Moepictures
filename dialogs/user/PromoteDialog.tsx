@@ -10,12 +10,12 @@ import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {motion, useDragControls} from "framer-motion"
-import checkbox from "../../assets/svg/checkbox.svg"
-import checkboxChecked from "../../assets/svg/checkbox-checked.svg"
-import crown from "../../assets/svg/crown.svg"
-import curatorStar from "../../assets/svg/curator-star.svg"
-import contributorPencil from "../../assets/svg/pencil.svg"
-import premiumStar from "../../assets/svg/premium-star.svg"
+import CheckboxIcon from "../../assets/svg/checkbox.svg"
+import CheckboxCheckedIcon from "../../assets/svg/checkbox-checked.svg"
+import CrownIcon from "../../assets/svg/crown.svg"
+import CuratorStarIcon from "../../assets/svg/curator-star.svg"
+import ContributorPencilIcon from "../../assets/svg/pencil.svg"
+import PremiumStarIcon from "../../assets/svg/premium-star.svg"
 import {UserRole} from "../../types/Types"
 import "../dialog.less"
 
@@ -33,34 +33,6 @@ const PromoteDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
-
-    const getAdminIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--adminColor")
-    }
-
-    const getModIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--modColor")
-    }
-
-    const getSystemIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--systemColor")
-    }
-
-    const getPremiumIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--premiumColor")
-    }
-
-    const getCuratorIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--curatorColor")
-    }
-
-    const getContributorIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--contributorColor")
-    }
-
-    const getUserIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--userColor")
-    }
 
     const updateRole = async () => {
         if (!promoteName) return
@@ -106,43 +78,59 @@ const PromoteDialog: React.FunctionComponent = (props) => {
                             <span className="dialog-title">{i18n.dialogs.promote.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <img className="dialog-icon" src={getAdminIcon(crown)}/>
+                            <CrownIcon className="dialog-icon" style={{color: "var(--adminColor)"}}/>
                             <span className="dialog-text admin-color">{i18n.roles.admin}:</span>
-                            <img className="dialog-checkbox" src={role === "admin" ? getAdminIcon(checkboxChecked) : getAdminIcon(checkbox)} onClick={() => setRole("admin")}/>
+                            {role === "admin" ? 
+                            <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--adminColor)"}} onClick={() => setRole("admin")}/> :
+                            <CheckboxIcon className="dialog-checkbox" style={{color: "var(--adminColor)"}} onClick={() => setRole("admin")}/>}
                         </div>
                         <div className="dialog-row">
-                            <img className="dialog-icon" src={getModIcon(crown)}/>
+                            <CrownIcon className="dialog-icon" style={{color: "var(--modColor)"}}/>
                             <span className="dialog-text mod-color">{i18n.roles.mod}:</span>
-                            <img className="dialog-checkbox" src={role === "mod" ? getModIcon(checkboxChecked) : getModIcon(checkbox)} onClick={() => setRole("mod")}/>
+                            {role === "mod" ? 
+                            <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--modColor)"}} onClick={() => setRole("mod")}/> :
+                            <CheckboxIcon className="dialog-checkbox" style={{color: "var(--modColor)"}} onClick={() => setRole("mod")}/>}
                         </div>
                         <div className="dialog-row">
-                            <img className="dialog-icon" src={getPremiumIcon(curatorStar)}/>
+                            <CuratorStarIcon className="dialog-icon" style={{color: "var(--premiumColor)"}}/>
                             <span className="dialog-text curator-color">{i18n.roles.premiumCurator}:</span>
-                            <img className="dialog-checkbox" src={role === "premium-curator" ? getPremiumIcon(checkboxChecked) : getPremiumIcon(checkbox)} onClick={() => setRole("premium-curator")}/>
+                            {role === "premium-curator" ? 
+                            <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--premiumColor)"}} onClick={() => setRole("premium-curator")}/> :
+                            <CheckboxIcon className="dialog-checkbox" style={{color: "var(--premiumColor)"}} onClick={() => setRole("premium-curator")}/>}
                         </div>
                         <div className="dialog-row">
-                            <img className="dialog-icon" src={getCuratorIcon(curatorStar)}/>
+                            <CuratorStarIcon className="dialog-icon" style={{color: "var(--curatorColor)"}}/>
                             <span className="dialog-text curator-color">{i18n.roles.curator}:</span>
-                            <img className="dialog-checkbox" src={role === "curator" ? getCuratorIcon(checkboxChecked) : getCuratorIcon(checkbox)} onClick={() => setRole("curator")}/>
+                            {role === "curator" ? 
+                            <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--curatorColor)"}} onClick={() => setRole("curator")}/> :
+                            <CheckboxIcon className="dialog-checkbox" style={{color: "var(--curatorColor)"}} onClick={() => setRole("curator")}/>}
                         </div>
                         <div className="dialog-row">
-                            <img className="dialog-icon" src={getPremiumIcon(contributorPencil)}/>
+                            <ContributorPencilIcon className="dialog-icon" style={{color: "var(--premiumColor)"}}/>
                             <span className="dialog-text premium-color">{i18n.roles.premiumContributor}:</span>
-                            <img className="dialog-checkbox" src={role === "premium-contributor" ? getPremiumIcon(checkboxChecked) : getPremiumIcon(checkbox)} onClick={() => setRole("premium-contributor")}/>
+                            {role === "premium-contributor" ? 
+                            <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--premiumColor)"}} onClick={() => setRole("premium-contributor")}/> :
+                            <CheckboxIcon className="dialog-checkbox" style={{color: "var(--premiumColor)"}} onClick={() => setRole("premium-contributor")}/>}
                         </div>
                         <div className="dialog-row">
-                            <img className="dialog-icon" src={getContributorIcon(contributorPencil)}/>
+                            <ContributorPencilIcon className="dialog-icon" style={{color: "var(--contributorColor)"}}/>
                             <span className="dialog-text contributor-color">{i18n.roles.contributor}:</span>
-                            <img className="dialog-checkbox" src={role === "contributor" ? getContributorIcon(checkboxChecked) : getContributorIcon(checkbox)} onClick={() => setRole("contributor")}/>
+                            {role === "contributor" ? 
+                            <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--contributorColor)"}} onClick={() => setRole("contributor")}/> :
+                            <CheckboxIcon className="dialog-checkbox" style={{color: "var(--contributorColor)"}} onClick={() => setRole("contributor")}/>}
                         </div>
                         <div className="dialog-row">
-                            <img className="dialog-icon" src={getPremiumIcon(premiumStar)}/>
+                            <PremiumStarIcon className="dialog-icon" style={{color: "var(--premiumColor)"}}/>
                             <span className="dialog-text premium-color">{i18n.roles.premium}:</span>
-                            <img className="dialog-checkbox" src={role === "premium" ? getPremiumIcon(checkboxChecked) : getPremiumIcon(checkbox)} onClick={() => setRole("premium")}/>
+                            {role === "premium" ? 
+                            <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--premiumColor)"}} onClick={() => setRole("premium")}/> :
+                            <CheckboxIcon className="dialog-checkbox" style={{color: "var(--premiumColor)"}} onClick={() => setRole("premium")}/>}
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text user-color">{i18n.roles.user}:</span>
-                            <img className="dialog-checkbox" src={role === "user" ? getUserIcon(checkboxChecked) : getUserIcon(checkbox)} onClick={() => setRole("user")}/>
+                            {role === "user" ? 
+                            <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--userColor)"}} onClick={() => setRole("user")}/> :
+                            <CheckboxIcon className="dialog-checkbox" style={{color: "var(--userColor)"}} onClick={() => setRole("user")}/>}
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">

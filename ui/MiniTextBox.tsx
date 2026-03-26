@@ -8,16 +8,16 @@ import React, {useState, useEffect, useRef, forwardRef, useImperativeHandle} fro
 import {useInteractionActions, useThemeSelector, useLayoutSelector, useCacheSelector,
 useSessionSelector, useSessionActions} from "../store"
 import functions from "../functions/Functions"
-import highlight from "../assets/svg/highlight.svg"
-import bold from "../assets/svg/bold.svg"
-import italic from "../assets/svg/italic.svg"
-import underline from "../assets/svg/underline.svg"
-import strikethrough from "../assets/svg/strikethrough.svg"
-import spoiler from "../assets/svg/spoiler.svg"
-import link from "../assets/svg/link.svg"
-import details from "../assets/svg/details.svg"
-import hexcolor from "../assets/svg/hash.svg"
-import codeblock from "../assets/svg/codeblock.svg"
+import HighlightIcon from "../assets/svg/highlight.svg"
+import BoldIcon from "../assets/svg/bold.svg"
+import ItalicIcon from "../assets/svg/italic.svg"
+import UnderlineIcon from "../assets/svg/underline.svg"
+import StrikethroughIcon from "../assets/svg/strikethrough.svg"
+import SpoilerIcon from "../assets/svg/spoiler.svg"
+import LinkIcon from "../assets/svg/link.svg"
+import DetailsIcon from "../assets/svg/details.svg"
+import HexcolorIcon from "../assets/svg/hash.svg"
+import CodeblockIcon from "../assets/svg/codeblock.svg"
 import "./styles/minitextbox.less"
 
 export interface MiniTextBoxRef {
@@ -76,12 +76,6 @@ const MiniTextBox = forwardRef<MiniTextBoxRef, Props>((props, ref) => {
             setError(false)
         }
     }))
-
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-    
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--titleButtons")
-    }
 
     useEffect(() => {
         const updatePreviewText = async () => {
@@ -149,16 +143,36 @@ const MiniTextBox = forwardRef<MiniTextBoxRef, Props>((props, ref) => {
         return (
             <div className="minitextbox-container" style={{width: props.bio && !mobile ? "50%" : ""}}>
                 <div className="minitextbox-textarea-buttons" style={{marginLeft: props.bio ? "0px" : "10px"}}>
-                    <button className="minitextbox-textarea-button"><img src={getIcon(highlight)} onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "highlight")} style={{filter}}/></button>
-                    <button className="minitextbox-textarea-button"><img src={getIcon(bold)} onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "bold")} style={{filter}}/></button>
-                    <button className="minitextbox-textarea-button"><img src={getIcon(italic)} onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "italic")} style={{filter}}/></button>
-                    <button className="minitextbox-textarea-button"><img src={getIcon(underline)} onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "underline")} style={{filter}}/></button>
-                    <button className="minitextbox-textarea-button"><img src={getIcon(strikethrough)} onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "strikethrough")} style={{filter}}/></button>
-                    <button className="minitextbox-textarea-button"><img src={getIcon(spoiler)} onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "spoiler")} style={{filter}}/></button>
-                    <button className="minitextbox-textarea-button"><img src={getIcon(link)} onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "link")} style={{filter}}/></button>
-                    <button className="minitextbox-textarea-button"><img src={getIcon(details)} onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "details")} style={{filter}}/></button>
-                    <button className="minitextbox-textarea-button"><img src={getIcon(hexcolor)} onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "color")} style={{filter}}/></button>
-                    <button className="minitextbox-textarea-button"><img src={getIcon(codeblock)} onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "code")} style={{filter}}/></button>
+                    <button className="minitextbox-textarea-button">
+                        <HighlightIcon className="minitextbox-icon" onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "highlight")}/>
+                    </button>
+                    <button className="minitextbox-textarea-button">
+                        <BoldIcon className="minitextbox-icon" onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "bold")}/>
+                    </button>
+                    <button className="minitextbox-textarea-button">
+                        <ItalicIcon className="minitextbox-icon" onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "italic")}/>
+                    </button>
+                    <button className="minitextbox-textarea-button">
+                        <UnderlineIcon className="minitextbox-icon" onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "underline")}/>
+                    </button>
+                    <button className="minitextbox-textarea-button">
+                        <StrikethroughIcon className="minitextbox-icon" onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "strikethrough")}/>
+                    </button>
+                    <button className="minitextbox-textarea-button">
+                        <SpoilerIcon className="minitextbox-icon" onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "spoiler")}/>
+                    </button>
+                    <button className="minitextbox-textarea-button">
+                        <LinkIcon className="minitextbox-icon" onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "link")}/>
+                    </button>
+                    <button className="minitextbox-textarea-button">
+                        <DetailsIcon className="minitextbox-icon" onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "details")}/>
+                    </button>
+                    <button className="minitextbox-textarea-button">
+                        <HexcolorIcon className="minitextbox-icon" onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "color")}/>
+                    </button>
+                    <button className="minitextbox-textarea-button">
+                        <CodeblockIcon className="minitextbox-icon" onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "code")}/>
+                    </button>
                 </div>
                 {previewMode ? <div className="minitextbox-preview" style={{marginLeft: props.bio ? "0px" : "10px"}}>{functions.jsx.renderText(previewText, emojis, props.type)}</div> : 
                 <div style={{marginTop: "0px"}} className="minitextbox-row-start" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>

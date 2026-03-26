@@ -8,8 +8,8 @@ import React, {useEffect, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, usePageActions,
 useSearchSelector, usePageSelector, useActiveSelector} from "../../store"
-import approve from "../../assets/svg/approve.svg"
-import reject from "../../assets/svg/reject.svg"
+import ApproveIcon from "../../assets/svg/approve.svg"
+import RejectIcon from "../../assets/svg/reject.svg"
 import functions from "../../functions/Functions"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
@@ -29,12 +29,6 @@ const ModTagAliases: React.FunctionComponent = (props) => {
     const {setModPage} = usePageActions()
     const {modState} = useActiveSelector()
     const navigate = useNavigate()
-
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--sortbarIcons")
-    }
 
     const loadInitial = async () => {
         const requests = await functions.http.get("/api/tag/aliasto/request/list", null, session, setSessionFlag, true)
@@ -110,11 +104,11 @@ const ModTagAliases: React.FunctionComponent = (props) => {
                     </div>
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => rejectRequest(request.username, request.tag, request.aliasTo)}>
-                            <img className="mod-post-options-img" src={getIcon(reject)} style={{filter}}/>
+                            <RejectIcon className="mod-post-options-img"/>
                             <span className="mod-post-options-text">{i18n.buttons.reject}</span>
                         </div>
                         <div className="mod-post-options-container" onClick={() => aliasTag(request.username, request.tag, request.aliasTo, request.reason)}>
-                            <img className="mod-post-options-img" src={getIcon(approve)} style={{filter}}/>
+                            <ApproveIcon className="mod-post-options-img"/>
                             <span className="mod-post-options-text">{i18n.buttons.approve}</span>
                         </div>
                     </div>

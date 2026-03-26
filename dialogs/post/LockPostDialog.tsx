@@ -9,8 +9,8 @@ import {useThemeSelector, useInteractionActions, usePostDialogSelector, usePostD
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
-import lockIcon from "../../assets/svg/lock.svg"
-import unlockIcon from "../../assets/svg/unlock.svg"
+import LockIcon from "../../assets/svg/lock.svg"
+import UnlockIcon from "../../assets/svg/unlock.svg"
 import "../dialog.less"
 
 const LockPostDialog: React.FunctionComponent = (props) => {
@@ -22,10 +22,6 @@ const LockPostDialog: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const controls = useDragControls()
-
-    const getIcon = (icon: string) => {
-        return functions.color.colorizeSVG(icon, "--lockColor")
-    }
 
     useEffect(() => {
         if (lockPostID) {
@@ -74,9 +70,9 @@ const LockPostDialog: React.FunctionComponent = (props) => {
 
     const getLockIcon = () => {
         if (lockPostID?.post.locked) {
-            return getIcon(unlockIcon)
+            return <UnlockIcon className="dialog-icon" style={{color: "var(--lockColor)"}}/>
         } else {
-            return getIcon(lockIcon)
+            return <LockIcon className="dialog-icon" style={{color: "var(--lockColor)"}}/>
         }
     }
 
@@ -88,7 +84,7 @@ const LockPostDialog: React.FunctionComponent = (props) => {
                     className="dialog-box" style={{width: "280px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
-                                <img draggable={false} className="dialog-icon" src={getLockIcon()}/>
+                                {getLockIcon()}
                                 <span className="dialog-title">{getTitle()}</span>
                             </div>
                             <div className="dialog-row">

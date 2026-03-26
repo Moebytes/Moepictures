@@ -6,7 +6,7 @@
 
 import React, {useEffect, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useCommentDialogSelector, useCommentDialogActions} from "../../store"
-import emojiSelect from "../../assets/svg/emoji-select.svg"
+import EmojiSelectIcon from "../../assets/svg/emoji-select.svg"
 import MiniTextBox, {MiniTextBoxRef} from "../../ui/MiniTextBox"
 import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
@@ -56,7 +56,7 @@ const EditCommentDialog: React.FunctionComponent = (props) => {
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
                             <button className="dialog-emoji-button" ref={emojiRef} onClick={() => textBoxRef.current?.toggleEmojiDropdown()}>
-                                <img src={emojiSelect}/>
+                                <EmojiSelectIcon className="dialog-emoji-button-icon"/>
                             </button>
                             <button className={textBoxRef.current?.getPreviewMode() ? "dialog-edit-button" : "dialog-preview-button"} 
                             onClick={() => textBoxRef.current?.togglePreviewMode()}>
