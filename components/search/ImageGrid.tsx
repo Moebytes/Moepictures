@@ -170,7 +170,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const state = location.state
 
-        if (state?.restorePosts) {
+        if (state?.restorePosts?.length) {
             setTimeout(() => {
                 const searchParams = new URLSearchParams(location.search)
                 let pathString = `${location.pathname}?${searchParams.toString()}`
@@ -211,7 +211,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const onDOMLoaded = async () => {
             const state = location.state
-            if (state?.restorePosts) return
+            if (state?.restorePosts?.length) return
 
             setTimeout(() => {
                 const img = document.querySelector(".image")
@@ -248,7 +248,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!settingsLoaded) return
         const state = location.state
-        if (state?.restorePosts) return
+        if (state?.restorePosts?.length) return
 
         if (reloadedPost) {
             setTimeout(() => {
