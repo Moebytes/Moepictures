@@ -534,6 +534,7 @@
         "saveImage": "Save Image",
         "share": "Share",
         "saveLocation": "Pick a save location",
+        "uploadLocation": "Pick an upload location",
         "photos": "Photos",
         "files": "Files"
     },
@@ -1831,100 +1832,113 @@
     "terms": {
         "tos": {
             "title": "Terms of Service",
-            "lastUpdated": "Last Updated: October 25, 2024",
-            "header": "This terms of service applies to the website (\"site\") provided by Moepictures (\"we\", \"us\", \"our\"). By using our site, you attest that you agree to all of these terms. If you don't agree to these terms, you should not use our site.",
-            "accessToSite": {
-                "title": "Access to the site",
-                "line1": "⇾ You must be 18 years or older (or otherwise above the age of majority in your country of residence) to make an account on our site.",
-                "line2": "⇾ We reserve the right to terminate accounts at any time for any or no reason, but most commonly for a violation of our terms of service."
+            "lastUpdated": "Last Updated: March 28, 2026",
+            "header1": "These Terms of Service (\"terms\") apply to your usage of the websites and apps (collectively, our \"services\") provided by Moepictures (\"Moepics\", \"we\", \"us\", \"our\").",
+            "header2": "We aim to provide you with a cute and enjoyable experience, but we still have some baseline rules for you to follow. By using our services, you affirm that you have read and agree with our terms.",
+            "ageRestriction": {
+                "title": "Age Restriction",
+                "line1": "No one under the age of 13 may use our services at all. Furthermore, you must meet the minimum age requirement to view content under each of our content ratings.",
+                "cuteRating": " - 13+ (Non-suggestive, cuteness only)",
+                "sexyRating": " - 15+ (Mildly suggestive, eg. tights and short skirts)",
+                "eroticRating": " - 17+ (Highly suggestive, eg. bikinis and pantyshots)",
+                "line2": "Sexual or violent (18+) content is not allowed. This also applies to textual content you may post in comments, to your username, and to your biography."
             },
-            "prohibitedActions": {
-                "title": "Prohibited actions",
-                "header": "When you are using our site, you are prohibited from doing the following:",
-                "line1": "⇾ Vandalize posts, tags, notes, or other content on the site.",
-                "line2": "⇾ Send spam in comments or through unsolicited private messages.",
-                "line3": "⇾ Harass or discriminate against other users.",
-                "line4": "⇾ Robotically scrape artworks, tags, or other site content.",
-                "line5": "⇾ Attempt to gain unauthorized access to another user’s account.",
-                "line6": "⇾ Sell access to your account to someone else.",
-                "line7": "⇾ Create multiple accounts to circumvent bans.",
-                "line8": "⇾ Attempt to upload viruses, malware or other malicious content.",
-                "line9": "⇾ Attempt to DDoS and disrupt the operation of our servers."
+            "animeOnly": {
+                "title": "Anime-only Content",
+                "line1": "You may only upload cute anime artwork of fictional girls and will never upload images of real people or other irrelevant subjects.",
+                "line2": "Additionally, the artwork must fall into one of our content ratings outlined above."
+            },
+            "spam": {
+                "title": "Spam",
+                "line1": "Our services are not the right place for you to spam gibberish or useless messages, or for you to self-advertise unrelated content.",
+                "line2": "If you are a moe artist then it would be more appropriate to self-promote your content, but keep it under a reasonable limit."
+            },
+            "harassment": {
+                "title": "Harassment",
+                "line1": "We don’t tolerate rudeness or harassment directed at other members and excessive swear language. Please contact us if you witness this behavior."
+            },
+            "vandalism": {
+                "title": "Vandalism",
+                "line1": "Vandalism is damaging the integrity of content on our services with low-quality or incorrect information. You must not vandalize our content or you will be promptly banned."
             },
             "userContent": {
-                "title": "User generated content",
-                "line1": "⇾ The content on our site is user-generated and we take no responsibility for content submitted by users, whether it be images, animations, videos, or text. That responsibility falls on the user who submitted the content.",
-                "line2": "⇾ We reserve the right to remove any content at any time for any or no reason."
+                "title": "User Content",
+                "line1": "The content on our site is user-submitted, and we bear no responsibility over any content submitted by users.",
+                "line2": "By submitting content, you grant Moepics a non-exclusive, worldwide license to display and distribute the content in connection with our services."
             },
-            "copyrightTakedown": {
-                "title": "Copyright and DMCA takedowns",
-                "header": "We respect the intellectual property of others. If you are an artist and want your work removed from the site, you can contact us through the copyright removal form and provide the following pieces of information:",
-                "line1": "⇾ Your name, artist tag, and links to specific works or your artist tag page.",
-                "line2": "⇾ A way to prove that you are the artist in question.",
-                "proofHeader": "These are some acceptable forms of proof:",
-                "proof1": "⇾ If your email is publicly listed on your accounts, contact us using that email. Post the link of where your email is listed.",
-                "proof2": "⇾ Post somewhere on your profile or in one of your posts \"Remove me from Moepictures\" and post the link to it.",
-                "proof3": "⇾ Attach a source file (.psd, .clip) to one of your works which isn't released publicly.",
-                "goText": "We are sad to see you go."
+            "copyrightDMCA": {
+                "title": "Copyright and DMCA Takedowns",
+                "line1": "We respect the rights to your intellectual property. While we love your works, if you aren’t happy to be on here with us you may submit a copyright removal form to remove your works.",
+                "line2": "We will require the following pieces of information:",
+                "bullet1": "• Your name, artist tag, links to specific works or link to your tag page.",
+                "bullet2": "• Proof that you are the artist in question.",
+                "line3": "Some available methods of showing proof:",
+                "bullet3": "• Contact us using your official email visible on one of your accounts.",
+                "bullet4": "• Post somewhere on your profile “Remove me from Moepictures” and send us a link.",
+                "bullet5": "• Attach a source file (.psd, .clip) to one of your works you did not release publicly."
             },
-            "webScraping": {
-                "title": "Web Scraping",
-                "line1": "⇾ Scraping our website for images, audio, and any other content we have is prohibited.",
-                "line2": "⇾ We reserve the right to fully ban IP addresses and IP ranges caught doing this (preventing them from accessing our site).",
-                "line3": "⇾ We also take measures such as rate limits, captchas, and encryption to make this difficult."
+            "scraping": {
+                "title": "Robotic Scraping",
+                "line1": "You may not use bots to robotically scrape any content on our services. We have measures in place such as encryption and captchas to make it more difficult."
             },
-            "accountUpgrades": {
-                "title": "Account Upgrades",
-                "line1": "⇾ You may submit payment information to purchase an account upgrade on our site. All of your payment information is handled solely by the third-party payment processor. We do not and will not handle your payment information.",
-                "line2": "⇾ We reserve the right to change the price or benefits of the upgrade at any point, with an advanced notice."
+            "maliciousActivity": {
+                "title": "Malicious Activity",
+                "line1": "Don’t attempt to gain unauthorized access to another person’s account. Don’t attempt to upload viruses, malware, or other malicious content. Don’t attempt to disrupt the operation of our servers (including DDoS attacks)."
+            },
+            "accounts": {
+                "title": "Accounts",
+                "line1": "You are responsible for maintaining the security of your own account. Ideally you should use a strong password and enable 2FA. You may not share or sell the access to your own account. You may not create multiple accounts to circumvent bans."
+            },
+            "accountTermination": {
+                "title": "Account Termination",
+                "line1": "We reserve the right to terminate your account at any time for any reason, but most commonly for a violation of our terms."
             },
             "liability": {
-                "title": "Liability",
-                "header": "The site is provided \"as is\", without warranty of any kind, express or implied. In no event shall we be liable for any claim, damages or other liability, arising from or in connection with usage of our site."
+                "title": "Limitation of Liability",
+                "line1": "OUR SERVICES ARE PROVIDED “AS IS”, WITHOUT ANY EXPRESSED OR IMPLIED WARRANTY OF ANY KIND. IN NO EVENT SHALL MOEPICS BE LIABLE FOR ANY DAMAGES ARISING FROM OR IN CONNECTION TO THE USAGE OF OUR SERVICES. MOEPICS IS NOT RESPONSIBLE FOR ANY CONTENT APPEARING ON OUR SERVICES ALLEGED TO BE OFFENSIVE."
             },
-            "changesToTerms": {
-                "title": "Changes to these terms",
-                "header": "We can make changes to these terms at any time, indicated by the \"last updated\" date. Changes to the terms are effective immediately and by using our site after the terms are revised you agree to the newly revised terms."
+            "changes": {
+                "title": "Changes to our Terms",
+                "line1": "We may make changes to our terms at any point, indicated by the \"last updated\" date. Changes to our terms are effective immediately on publication."
             }
         },
         "privacy": {
             "title": "Privacy Policy",
-            "header": "This Privacy Policy outlines the information that Moepictures (\"we\", \"us\", \"our\") collects when you use our website (\"site\"). It also describes how we use your information and how your information is shared.",
-            "collectedInformation": {
-                "title": "Collected information",
-                "header": "We collect information provided directly to us, which includes:",
-                "accountInfo": "Account information",
-                "accountInfoLine": " - We need to store your username, email, password, bio, ip address, and any account preferences you set. We only store a securely hashed password.",
-                "contentSubmitted": "Content you submit",
-                "contentSubmittedLine": " - We need to store any content that you submit which may include submitted text, images, gifs, videos, posts and comments. ",
-                "actionsTaken": "Actions you take",
-                "actionsTakenLine": " - We collect information on the interactions that you make with content, such as favoriting posts, rating them, and adding them to groups.",
-                "cookies": "Cookies",
-                "cookiesLine": " - We use cookies to maintain your login session, so that you are not logged out whenever you close your browser."
+            "header1": "This Privacy Policy covers the information that Moepictures (\"Moepics\", \"we\", \"us\", \"our\") collects when you use our websites and apps (collectively, our \"services\") and what we use it for.",
+            "accountRelated": {
+                "title": "Account-Related Information",
+                "line1": "If you register an account, we store the information that you provide us such as your username, password, email, ip address, and any preferences you set. We only store a securely hashed password."
             },
-            "howInfoIsUsed": {
-                "title": "How we use your information",
-                "header": "We use your information in order to:",
-                "line1": "⇾ Provide our site's functionality.",
-                "line2": "⇾ Protect our site from abuse and spam.",
-                "line3": "⇾ Collect anonymized analytics related to the usage of our site."
+            "submittedContent": {
+                "title": "Submitted Content and Interactions",
+                "line1": "If you submit content (such as posts and comments), we store the binary data of the content as well as the relationships linking it to your account. We also store a relationship when you take actions such as favoriting a post or rating its cuteness."
             },
-            "doNotShare": {
-                "title": "We do not share personal information with third parties unless one of the following is true:",
-                "line1": "⇾ We have your consent.",
-                "line2": "⇾ It is aggregated and anomalyzed in a way that can’t be traced back to you.",
-                "line3": "⇾ It is required to comply with the law."
+            "cookies": {
+                "title": "Cookies and Local Storage",
+                "line1": "We store your cookies on the website and mobile app so that you are not logged out whenever you close your browser or the app. Cookies store your session ID used to maintain your login session. We also store local cached settings in local storage, such as your search filters and theme configuration."
             },
-            "controllingInformation": {
-                "title": "Controlling your information",
-                "changingInfo": "Changing your information",
-                "changingInfoLine": " - You can update your information such as your email and password anytime in your account settings. You can choose to make your favorites and favorite groups private in order to control access to them.",
-                "deletingAccount": "Deleting your account",
-                "deletingAccountLine": " - You can delete your account in your account settings. When you delete your account all of your personal information is deleted. Your public contributions, such as posts, will not be deleted. Your contributions will however get disconnected from your username and be anomalyzed as being from the account \"deleted\"."
+            "informationUse": {
+                "title": "Information Use",
+                "line1": "We primarily use the collected information to:",
+                "bullet1": "• Provide the functionality of our services",
+                "bullet2": "• Store and remember your preferences",
+                "bullet3": "• Collect anonymous analytics in connection to the use of our services",
+                "bullet4": "• Detect and prevent spam"
             },
-            "changesToPolicy": {
-                "title": "Changes to this policy",
-                "header": "We can make changes to this policy at any time, indicated by its \"last updated\" date. Changes to this policy are effective immediately and by continuing to use our site after the policy is revised, you are agreeing to the revised policy."
+            "sharingInformation": {
+                "title": "Sharing Information",
+                "line1": "Your information is not shared with third-parties unless one of the following is true:",
+                "bullet1": "• We have your consent",
+                "bullet2": "• It’s anonymized in a way that won’t be tracked back to you",
+                "bullet3": "• It’s required to comply with applicable laws"
+            },
+            "accountDeletion": {
+                "title": "Account Deletion",
+                "line1": "You may delete your account in your account settings. When you delete your account, all the personal information we had on the account is deleted. Public contributions such as submitted posts and comments will remain, but your username will be disassociated and it will show up as being from the account \"deleted\". "
+            },
+            "changes": {
+                "title": "Changes to our Policy",
+                "line1": "We may make changes to our privacy policy at any point, indicated by the \"last updated\" date. Changes to our privacy policy are effective immediately on publication."
             }
         }
     }

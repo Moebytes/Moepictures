@@ -70,7 +70,7 @@ export default class Permissions {
     }
 
     public static noAPIEncryption = (session: ServerSession) => {
-        if (process.env.TESTING === "yes") return true
+        //if (process.env.TESTING === "yes") return true
         if (session.apiKey) return true
         return false
     }

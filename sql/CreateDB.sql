@@ -824,6 +824,7 @@ CREATE INDEX IF NOT EXISTS "idx_posts_uploadDate" ON "posts" ("uploadDate" DESC)
 CREATE INDEX IF NOT EXISTS "idx_post_posted" ON "posts" ("posted");
 CREATE INDEX IF NOT EXISTS "idx_post_bookmarks" ON "posts" ("bookmarks");
 CREATE INDEX IF NOT EXISTS "idx_images" ON "images" ("imageID" DESC NULLS LAST);
+CREATE INDEX IF NOT EXISTS "idx_images_postid" ON images ("postID");
 CREATE INDEX IF NOT EXISTS "idx_images_size" ON "images" ("size");
 CREATE INDEX IF NOT EXISTS "idx_cuteness" ON "cuteness" ("postID", "username");
 CREATE INDEX IF NOT EXISTS "idx_cuteness_cuteness" ON "cuteness" ("cuteness");
@@ -858,3 +859,5 @@ CREATE INDEX IF NOT EXISTS "idx_sessions_expire" ON "sessions" ("expires");
 CREATE INDEX IF NOT EXISTS "idx_tag_map_tags_gin" ON "tag map tags" USING gin ("tags");
 CREATE INDEX IF NOT EXISTS "idx_tag_map_posts_gin" ON "tag map posts" USING gin ("posts");
 CREATE INDEX IF NOT EXISTS "idx_posts_active" ON posts("postID") WHERE deleted = false AND hidden = false;
+CREATE INDEX IF NOT EXISTS "idx_posts_uploaddate_desc" ON posts ("uploadDate" DESC);
+CREATE INDEX IF NOT EXISTS "idx_posts_uploaddate_asc" ON posts ("uploadDate" ASC);

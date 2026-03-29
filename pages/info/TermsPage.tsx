@@ -67,67 +67,111 @@ const TermsPage: React.FunctionComponent = (props) => {
                         <div className="terms-text">
                             {i18n.terms.tos.lastUpdated}<br/><br/>
 
-                            {i18n.terms.tos.header}<br/><br/>
+                            {i18n.terms.tos.header1}<br/><br/>
 
-                            {i18n.terms.tos.accessToSite.title}<br/>
-                            <span className="terms-text-alt">
-                            {i18n.terms.tos.accessToSite.line1}<br/>
-                            {i18n.terms.tos.accessToSite.line2}<br/><br/>
-                            </span>
+                            {i18n.terms.tos.header2}<br/><br/>
 
-                            {i18n.terms.tos.prohibitedActions.title}<br/>
-                            {i18n.terms.tos.prohibitedActions.header}<br/>
                             <span className="terms-text-alt">
-                            {i18n.terms.tos.prohibitedActions.line1}<br/>
-                            {i18n.terms.tos.prohibitedActions.line2}<br/>
-                            {i18n.terms.tos.prohibitedActions.line3}<br/>
-                            {i18n.terms.tos.prohibitedActions.line4}<br/>
-                            {i18n.terms.tos.prohibitedActions.line5}<br/>
-                            {i18n.terms.tos.prohibitedActions.line6}<br/>
-                            {i18n.terms.tos.prohibitedActions.line7}<br/>
-                            {i18n.terms.tos.prohibitedActions.line8}<br/>
-                            {i18n.terms.tos.prohibitedActions.line9}<br/><br/>
-                            </span>
+                            {i18n.terms.tos.ageRestriction.title}
+                            </span><br/><br/>
 
-                            {i18n.terms.tos.userContent.title}<br/>
+                            {i18n.terms.tos.ageRestriction.line1}<br/><br/>
+
+                            <span className="terms-text-alt">{i18n.sortbar.rating.cute}</span>
+                            {i18n.terms.tos.ageRestriction.cuteRating}<br/><br/>
+                            <span className="terms-text-alt">{i18n.sortbar.rating.sexy}</span>
+                            {i18n.terms.tos.ageRestriction.sexyRating}<br/><br/>
+                            <span className="terms-text-alt">{i18n.sortbar.rating.erotic}</span>
+                            {i18n.terms.tos.ageRestriction.eroticRating}<br/><br/>
+
+                            {i18n.terms.tos.ageRestriction.line2}<br/><br/>
+
                             <span className="terms-text-alt">
-                            {i18n.terms.tos.userContent.line1}<br/>
+                            {i18n.terms.tos.animeOnly.title}
+                            </span><br/><br/>
+
+                            {i18n.terms.tos.animeOnly.line1}{" "}
+                            {i18n.terms.tos.animeOnly.line2}<br/><br/>
+
+                            <span className="terms-text-alt">
+                            {i18n.terms.tos.spam.title}
+                            </span><br/><br/>
+
+                            {i18n.terms.tos.spam.line1}{" "}
+                            {i18n.terms.tos.spam.line2}<br/><br/>
+
+                            <span className="terms-text-alt">
+                            {i18n.terms.tos.harassment.title}
+                            </span><br/><br/>
+
+                            {i18n.terms.tos.harassment.line1}<br/><br/>
+
+                            <span className="terms-text-alt">
+                            {i18n.terms.tos.vandalism.title}
+                            </span><br/><br/>
+
+                            {i18n.terms.tos.vandalism.line1}<br/><br/>
+
+                            <span className="terms-text-alt">
+                            {i18n.terms.tos.userContent.title}
+                            </span><br/><br/>
+
+                            {i18n.terms.tos.userContent.line1}{" "}
                             {i18n.terms.tos.userContent.line2}<br/><br/>
-                            </span>
 
-                            {i18n.terms.tos.copyrightTakedown.title}<br/>
-                            {i18n.terms.tos.copyrightTakedown.header}<br/>
                             <span className="terms-text-alt">
-                            {i18n.terms.tos.copyrightTakedown.line1}<br/>
-                            {i18n.terms.tos.copyrightTakedown.line2}<br/>
-                            </span>
-                            {i18n.terms.tos.copyrightTakedown.proofHeader}<br/>
+                            {i18n.terms.tos.copyrightDMCA.title}
+                            </span><br/><br/>
+
+                            {i18n.terms.tos.copyrightDMCA.line1}<br/><br/>
+
+                            {i18n.terms.tos.copyrightDMCA.line2}<br/>
                             <span className="terms-text-alt">
-                            {i18n.terms.tos.copyrightTakedown.proof1}<br/>
-                            {i18n.terms.tos.copyrightTakedown.proof2}<br/>
-                            {i18n.terms.tos.copyrightTakedown.proof3}<br/>
-                            </span>
-                            {i18n.terms.tos.copyrightTakedown.goText}<br/><br/>
-
-                            {i18n.terms.tos.webScraping.title}<br/>
+                                {i18n.terms.tos.copyrightDMCA.bullet1}<br/>
+                                {i18n.terms.tos.copyrightDMCA.bullet2}<br/>
+                            </span><br/>
+                            {i18n.terms.tos.copyrightDMCA.line3}<br/>
                             <span className="terms-text-alt">
-                            {i18n.terms.tos.webScraping.line1}<br/>
-                            {i18n.terms.tos.webScraping.line2}<br/>
-                            {i18n.terms.tos.webScraping.line3}<br/><br/>
-                            </span>
+                                {i18n.terms.tos.copyrightDMCA.bullet3}<br/>
+                                {i18n.terms.tos.copyrightDMCA.bullet4}<br/>
+                                {i18n.terms.tos.copyrightDMCA.bullet5}<br/>
+                            </span><br/>
 
-                            {permissions.isPremiumEnabled() ? <>
-                            {i18n.terms.tos.accountUpgrades.title}<br/>
                             <span className="terms-text-alt">
-                            {i18n.terms.tos.accountUpgrades.line1}<br/>
-                            {i18n.terms.tos.accountUpgrades.line2}<br/><br/>
-                            </span></> : null}
+                            {i18n.terms.tos.scraping.title}
+                            </span><br/><br/>
 
-                            {i18n.terms.tos.liability.title}<br/>
-                            {i18n.terms.tos.liability.header}<br/><br/>
+                            {i18n.terms.tos.scraping.line1}<br/><br/>
 
-                            {i18n.terms.tos.changesToTerms.title}<br/>
-                            {i18n.terms.tos.changesToTerms.header}
+                            <span className="terms-text-alt">
+                            {i18n.terms.tos.maliciousActivity.title}
+                            </span><br/><br/>
+
+                            {i18n.terms.tos.maliciousActivity.line1}<br/><br/>
+
+                            <span className="terms-text-alt">
+                            {i18n.terms.tos.accounts.title}
+                            </span><br/><br/>
+
+                            {i18n.terms.tos.accounts.line1}<br/><br/>
+
+                            <span className="terms-text-alt">
+                            {i18n.terms.tos.accountTermination.title}
+                            </span><br/><br/>
+
+                            {i18n.terms.tos.accountTermination.line1}<br/><br/>
+
+                            <span className="terms-text-alt">
+                            {i18n.terms.tos.liability.title}
+                            </span><br/><br/>
+
+                            {i18n.terms.tos.liability.line1}<br/><br/>
+
+                            <span className="terms-text-alt">
+                            {i18n.terms.tos.changes.title}
+                            </span><br/><br/>
+
+                            {i18n.terms.tos.changes.line1}<br/><br/>
                         </div>
                     </div>
                     <div className="privacy" id="privacy" onMouseOver={() => setOnPrivacy(true)} onMouseLeave={() => setOnPrivacy(false)}>
@@ -138,47 +182,58 @@ const TermsPage: React.FunctionComponent = (props) => {
                         <div className="privacy-text">
                             {i18n.terms.tos.lastUpdated}<br/><br/>
 
-                            {i18n.terms.privacy.header}<br/><br/>
-
-                            {i18n.terms.privacy.collectedInformation.title}<br/>
-                            {i18n.terms.privacy.collectedInformation.header}<br/><br/>
-
-                            <span className="privacy-text-alt">{i18n.terms.privacy.collectedInformation.accountInfo}</span>
-                            {i18n.terms.privacy.collectedInformation.accountInfoLine}<br/><br/>
-
-                            <span className="privacy-text-alt">{i18n.terms.privacy.collectedInformation.contentSubmitted}</span>
-                            {i18n.terms.privacy.collectedInformation.contentSubmittedLine}<br/><br/>
-
-                            <span className="privacy-text-alt">{i18n.terms.privacy.collectedInformation.actionsTaken}</span>
-                            {i18n.terms.privacy.collectedInformation.actionsTakenLine}<br/><br/>
-
-                            <span className="privacy-text-alt">{i18n.terms.privacy.collectedInformation.cookies}</span>
-                            {i18n.terms.privacy.collectedInformation.cookiesLine}<br/><br/>
-
-                            {i18n.terms.privacy.howInfoIsUsed.title}<br/>
-                            {i18n.terms.privacy.howInfoIsUsed.header}<br/>
                             <span className="privacy-text-alt">
-                            {i18n.terms.privacy.howInfoIsUsed.line1}<br/>
-                            {i18n.terms.privacy.howInfoIsUsed.line2}<br/>
-                            {i18n.terms.privacy.howInfoIsUsed.line3}<br/><br/>
-                            </span>
+                            {i18n.terms.privacy.accountRelated.title}
+                            </span><br/><br/>
 
-                            {i18n.terms.privacy.doNotShare.title}<br/>
+                            {i18n.terms.privacy.accountRelated.line1}<br/><br/>
+
                             <span className="privacy-text-alt">
-                            {i18n.terms.privacy.doNotShare.line1}<br/>
-                            {i18n.terms.privacy.doNotShare.line2}<br/>
-                            {i18n.terms.privacy.doNotShare.line3}<br/><br/>
-                            </span>
+                            {i18n.terms.privacy.submittedContent.title}
+                            </span><br/><br/>
 
-                            {i18n.terms.privacy.controllingInformation.title}<br/>
-                            <span className="privacy-text-alt">{i18n.terms.privacy.controllingInformation.changingInfo}</span>
-                            {i18n.terms.privacy.controllingInformation.changingInfoLine}<br/><br/>
+                            {i18n.terms.privacy.submittedContent.line1}<br/><br/>
 
-                            <span className="privacy-text-alt">{i18n.terms.privacy.controllingInformation.deletingAccount}</span>
-                            {i18n.terms.privacy.controllingInformation.deletingAccountLine}<br/><br/>
+                            <span className="privacy-text-alt">
+                            {i18n.terms.privacy.cookies.title}
+                            </span><br/><br/>
 
-                            {i18n.terms.privacy.changesToPolicy.title}<br/>
-                            {i18n.terms.privacy.changesToPolicy.header}
+                            {i18n.terms.privacy.cookies.line1}<br/><br/>
+
+                            <span className="privacy-text-alt">
+                            {i18n.terms.privacy.informationUse.title}
+                            </span><br/><br/>
+
+                            {i18n.terms.privacy.informationUse.line1}<br/>
+                            <span className="privacy-text-alt">
+                                {i18n.terms.privacy.informationUse.bullet1}<br/>
+                                {i18n.terms.privacy.informationUse.bullet2}<br/>
+                                {i18n.terms.privacy.informationUse.bullet3}<br/>
+                                {i18n.terms.privacy.informationUse.bullet4}<br/>
+                            </span><br/>
+
+                            <span className="privacy-text-alt">
+                            {i18n.terms.privacy.sharingInformation.title}
+                            </span><br/><br/>
+
+                            {i18n.terms.privacy.sharingInformation.line1}<br/>
+                            <span className="privacy-text-alt">
+                                {i18n.terms.privacy.sharingInformation.bullet1}<br/>
+                                {i18n.terms.privacy.sharingInformation.bullet2}<br/>
+                                {i18n.terms.privacy.sharingInformation.bullet3}<br/>
+                            </span><br/>
+
+                            <span className="privacy-text-alt">
+                            {i18n.terms.privacy.accountDeletion.title}
+                            </span><br/><br/>
+
+                            {i18n.terms.privacy.accountDeletion.line1}<br/><br/>
+
+                            <span className="privacy-text-alt">
+                            {i18n.terms.privacy.changes.title}
+                            </span><br/><br/>
+
+                            {i18n.terms.privacy.changes.line1}<br/>
                         </div>
                     </div>
                 </div>

@@ -32,28 +32,19 @@ export default class HTTPFunctions {
 
     public static updateClientKeys = async (session: Session, setSessionFlag?: (value: boolean) => void) => {
         if (this.privateKey) return this.privateKey
-        if (this.clientKeyLock) await functions.timeout(1000 + Math.random() * 1000)
+        if (this.clientKeyLock) await functions.timeout(100 + Math.random() * 100)
         if (!this.privateKey) {
             this.clientKeyLock = true
-            const savedPublicKey = await localforage.getItem("publicKey") as string
-            const savedPrivateKey = await localforage.getItem("privateKey") as string
-            if (savedPublicKey && savedPrivateKey) {
-                await functions.http.post("/api/client-key", {publicKey: savedPublicKey}, session, setSessionFlag)
-                this.privateKey = savedPrivateKey
-            } else {
-                const keys = decryption.generateKeys()
-                await functions.http.post("/api/client-key", {publicKey: keys.publicKey}, session, setSessionFlag)
-                await localforage.setItem("publicKey", keys.publicKey)
-                await localforage.setItem("privateKey", keys.privateKey)
-                this.privateKey = keys.privateKey
-            }
+            const keys = decryption.generateKeys()
+            functions.http.post("/api/client-key", {publicKey: keys.publicKey}, session, setSessionFlag)
+            this.privateKey = keys.privateKey
         }
         return this.privateKey
     }
 
     public static updateServerPublicKey = async (session: Session, setSessionFlag?: (value: boolean) => void) => {
         if (this.serverPublicKey) return this.serverPublicKey
-        if (this.serverKeyLock) await functions.timeout(1000 + Math.random() * 1000)
+        if (this.serverKeyLock) await functions.timeout(100 + Math.random() * 100)
         if (!this.serverPublicKey) {
             this.serverKeyLock = true
             const response = await functions.http.post("/api/server-key", null, session, setSessionFlag)
@@ -101,7 +92,6 @@ export default class HTTPFunctions {
                 response = await this.lockManager[endpoint]
                 this.lockManager[endpoint] = null
             }
-
             if (response.status === 404) throw new Error("404")
             if (response.status === 403) throw new Error("403")
             if (!response.ok) throw new Error(await response.text())
