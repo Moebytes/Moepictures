@@ -24,6 +24,7 @@ export default class SQLSearch {
         if (type === "audio") typeQuery = `posts.type = 'audio'`
         if (type === "model") typeQuery = `posts.type = 'model'`
         if (type === "live2d") typeQuery = `posts.type = 'live2d'`
+        if (type === "mobile") typeQuery = `(posts.type = 'image' OR posts.type = 'comic')`
         let ratingQuery = ""
         if (rating === "cute") ratingQuery = `posts.rating = 'cute'`
         if (rating === "sexy") ratingQuery = `posts.rating = 'sexy'`

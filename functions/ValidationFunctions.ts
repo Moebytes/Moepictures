@@ -157,7 +157,7 @@ export default class ValidationFunctions {
     }
 
     public static validType = (type: PostType, all?: boolean) => {
-        if (all) if (type === "all") return true
+        if (all) if (type === "all" || type === "mobile") return true
         if (type === "image" ||
             type === "animation" ||
             type === "video" ||

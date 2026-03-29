@@ -14,6 +14,7 @@ export type Languages =
 
 export type PostType =
     | "all"
+    | "mobile"
     | "image"
     | "animation"
     | "video"
