@@ -35,9 +35,18 @@ export default class HTTPFunctions {
         if (this.clientKeyLock) await functions.timeout(100 + Math.random() * 100)
         if (!this.privateKey) {
             this.clientKeyLock = true
-            const keys = decryption.generateKeys()
-            functions.http.post("/api/client-key", {publicKey: keys.publicKey}, session, setSessionFlag)
-            this.privateKey = keys.privateKey
+            const savedPublicKey = await localforage.getItem("publicKey") as string
+            const savedPrivateKey = await localforage.getItem("privateKey") as string
+            if (savedPublicKey && savedPrivateKey) {
+                await functions.http.post("/api/client-key", {publicKey: savedPublicKey}, session, setSessionFlag)
+                this.privateKey = savedPrivateKey
+            } else {
+                const keys = decryption.generateKeys()
+                await functions.http.post("/api/client-key", {publicKey: keys.publicKey}, session, setSessionFlag)
+                await localforage.setItem("publicKey", keys.publicKey)
+                await localforage.setItem("privateKey", keys.privateKey)
+                this.privateKey = keys.privateKey
+            }
         }
         return this.privateKey
     }
