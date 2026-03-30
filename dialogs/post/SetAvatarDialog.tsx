@@ -229,7 +229,7 @@ const SetAvatarDialog: React.FunctionComponent = (props) => {
                         <div className="dialog-row" style={{justifyContent: "center", alignItems: "flex-start"}}>
                             <ReactCrop className="avatar-crop" crop={crop} onChange={(crop, percentCrop) => {setCrop(percentCrop); setPixelCrop(crop)}}
                             keepSelection={true} minWidth={25} minHeight={25} aspect={1} onDragStart={dragStart} onDragEnd={dragEnd}>
-                                <img draggable={false} style={{maxHeight: mobile ? "300px" : "500px", height: "auto", width: "auto"}} src={image} onLoad={onImageLoad} ref={ref}/>
+                                <img draggable={false} style={{maxHeight: mobile ? "300px" : "500px", height: "auto", width: "auto"}} src={image} onLoad={onImageLoad} ref={ref} crossOrigin="anonymous"/>
                             </ReactCrop>
                             {!mobile ? <div style={{display: "flex", flexDirection: "column", marginLeft: "10px"}}>
                                 <canvas draggable={false} style={{height: "200px", width: "auto"}} ref={previewRef}></canvas>
