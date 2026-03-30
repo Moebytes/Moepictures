@@ -135,6 +135,7 @@ const SetAvatarDialog: React.FunctionComponent = (props) => {
                 const frame = gifData[i].frame as HTMLCanvasElement
                 const canvas = document.createElement("canvas")
                 const image = document.createElement("img")
+                image.crossOrigin = "anonymous"
                 image.src = frame.toDataURL()
                 await new Promise<void>((resolve) => {
                     image.onload = () => resolve()

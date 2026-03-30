@@ -99,6 +99,7 @@ const ModPosts: React.FunctionComponent = (props) => {
                 src = await functions.audio.songCover(img)
             }
             const imgElement = document.createElement("img")
+            imgElement.crossOrigin = "anonymous"
             imgElement.src = src 
             imgElement.onload = () => {
                 if (!ref.current) return

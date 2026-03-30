@@ -305,6 +305,7 @@ export default class ImageFunctions {
                     resolve({width, height, size: 0, duration: 0})
                 }
             })
+            img.crossOrigin = "anonymous"
             img.src = image
         })
     }
@@ -348,6 +349,7 @@ export default class ImageFunctions {
 
     public static createImage = async (image: string) => {
         const img = new window.Image()
+        img.crossOrigin = "anonymous"
         img.src = image
         return new Promise<HTMLImageElement>((resolve) => {
             img.onload = () => resolve(img)
@@ -386,6 +388,7 @@ export default class ImageFunctions {
                     resolve(outputImage.toDataURL(jpeg ? "image/jpeg" : "image/png") as CropReturn)
                 }
             }
+            inputImage.crossOrigin = "anonymous"
             inputImage.src = url
         })
     }

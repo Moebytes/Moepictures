@@ -91,6 +91,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
             if (!ref.current) continue
             let src = await functions.crypto.decryptThumb(img, session)
             const imgElement = document.createElement("img")
+            imgElement.crossOrigin = "anonymous"
             imgElement.src = src 
             imgElement.onload = () => {
                 if (!ref.current) return
