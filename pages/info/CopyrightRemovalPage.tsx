@@ -194,7 +194,7 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
                         </span>
                     </div>
                     <div className="contact-row">
-                        <span className="contact-text" style={{width: "100px"}}>{i18n.pages.upload.artistTag}:</span>
+                        <span className="contact-text" style={{width: "120px"}}>{i18n.pages.upload.artistTag}:</span>
                         <input className="contact-input-small" type="text" spellCheck={false} value={artistTag} onChange={(event) => setArtistTag(event.target.value)}/>
                     </div>
                     <div className="contact-row">
@@ -225,15 +225,11 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
                         <span className="contact-link">
                             {i18n.pages.copyrightRemoval.proofHeading}<br/>
                             <span className="contact-text-alt">
-                            {i18n.terms.tos.copyrightTakedown.proof1}<br/>
-                            {i18n.terms.tos.copyrightTakedown.proof2}<br/>
-                            {i18n.terms.tos.copyrightTakedown.proof3}<br/>
+                            {i18n.terms.tos.copyrightDMCA.bullet3}<br/>
+                            {i18n.terms.tos.copyrightDMCA.bullet4}<br/>
+                            {i18n.terms.tos.copyrightDMCA.bullet5}<br/>
                             </span>
                         </span>
-                    </div>
-                    <div className="contact-row">
-                        <span className="contact-text">{i18n.labels.attachFiles}:</span>
-                        <span className="contact-link">{i18n.pages.contact.attachFiles}</span>
                     </div>
                     <div className="contact-row-start">
                         <span className="contact-text" style={{width: "200px"}}>{i18n.pages.copyrightRemoval.proof}:</span>

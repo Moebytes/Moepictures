@@ -86,10 +86,6 @@ const ContactPage: React.FunctionComponent = (props) => {
                         <span className="contact-text">{i18n.labels.subject}:</span>
                         <input className="contact-input" type="text" spellCheck={false} value={subject} onChange={(event) => setSubject(event.target.value)}/>
                     </div>
-                    <div className="contact-row">
-                        <span className="contact-text">{i18n.labels.attachFiles}:</span>
-                        <span className="contact-link">{i18n.pages.contact.attachFiles}</span>
-                    </div>
                     <div className="contact-row-start">
                         <span className="contact-text">{i18n.buttons.message}:</span>
                         <textarea className="contact-textarea" spellCheck={false} value={message} onChange={(event) => setMessage(event.target.value)}></textarea>
