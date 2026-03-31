@@ -294,8 +294,8 @@ export default class ImageFunctions {
         return new Promise<{width: number, height: number, size: number, duration?: number}>(async (resolve) => {
             const img = document.createElement("img")
             img.addEventListener("load", async () => {
-                let width = img.width
-                let height = img.height
+                let width = img.naturalWidth
+                let height = img.naturalHeight
                 try {
                     let duration = await functions.anim.animationDuration(image)
                     const r = await fetch(image).then((r) => r.arrayBuffer())

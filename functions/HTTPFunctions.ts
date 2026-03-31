@@ -22,7 +22,12 @@ export default class HTTPFunctions {
     }
 
     public static getBuffer = async (link: string, headers?: any) => {
-        return fetch(link, {headers, credentials: "include"}).then((r) => r.arrayBuffer())
+        try {
+            let buffer = await fetch(link, {headers, credentials: "include"}).then((r) => r.arrayBuffer())
+            return buffer
+        } catch {
+            return new ArrayBuffer(0)
+        }
     }
     
     public static postBuffer = async (link: string, data: any, session: Session, moreHeaders?: any) => {
