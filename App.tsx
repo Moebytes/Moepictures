@@ -267,7 +267,7 @@ const App: React.FunctionComponent = (props) => {
     useEffect(() => {
         const resize = () => {
             const isMobile = window.matchMedia("(max-width: 500px)").matches
-            const isTablet = window.matchMedia("(min-width: 501px) and (max-width: 1200px)").matches
+            const isTablet = window.matchMedia("(min-width: 501px) and (max-width: 1300px)").matches
     
             if (isMobile) {
                 setMobile(true)

@@ -734,6 +734,7 @@
         "copyrightRemoval": {
             "title": "著作権の削除",
             "heading": "あなたの作品がMoepicturesに掲載されているということは、私たちがあなたの作品を愛しているということです。このフォームに必要事項を記入し、あなたのコンテンツの削除を要求することができます。",
+            "goText": "あなたがいなくなるのは寂しい。",
             "submitHeading": "削除依頼が届きました。",
             "artistTagHeading": "Moepicturesのアーティストタグの名前を正確にご記入ください。",
             "socialMediaHeading": "あなたのソーシャルメディアへのリンク（例：Twitter、Pixiv）をご記入ください。あなたのプロフィールで作品を見つけることができるはずです。",

@@ -853,7 +853,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                     <div className="mobileinfo-title-container">
                             <span className="mobileinfo-title">{i18n.tag.meta}</span>
                         </div>
-                    <div className="mobileinfo-subcontainer-column">
+                    <div className="mobileinfo-subcontainer">
                         {generateMetaJSX()}
                     </div> </>
                 : null}

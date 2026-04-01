@@ -733,6 +733,7 @@
         "copyrightRemoval": {
             "title": "Copyright Removal",
             "heading": "If your work is on Moepictures then it means that we love your work, but we are sorry if you are unhappy with your works appearing on our site. You may fill out this form to request the removal of your content.",
+            "goText": "We are sad to see you go.",
             "submitHeading": "Your removal request was delivered.",
             "artistTagHeading": "Please provide the exact name of your artist tag on Moepictures.",
             "socialMediaHeading": "Please provide your social media links (eg. Twitter, Pixiv). It should be possible to find the works on your profile.",
