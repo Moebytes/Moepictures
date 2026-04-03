@@ -167,7 +167,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
                     </> :
                     <>
                     <Link style={{width: "max-content"}} to="/login">
-                        <span className="sitepage-link-clickable">{i18n.pages.signup.loginText}</span>
+                        <span className="sitepage-link-clickable">{i18n.pages.signup.loginText} {i18n.pages.signup.loginText2}</span>
                     </Link>
                     <div className="sitepage-row">
                         <span className="sitepage-text-wide">{i18n.labels.emailAddress}:</span>

@@ -131,7 +131,7 @@ const LoginPage: React.FunctionComponent = (props) => {
                 <div className="sitepage">
                     <span className="sitepage-title">{i18n.navbar.login}</span>
                     <Link to="/signup">
-                        <span className="sitepage-link-clickable">{i18n.pages.login.signupText}</span>
+                        <span className="sitepage-link-clickable">{i18n.pages.login.signupText} {i18n.pages.login.signupText2}</span>
                     </Link>
                     <div className="sitepage-row">
                         <span className="sitepage-text">{i18n.labels.username}:</span>

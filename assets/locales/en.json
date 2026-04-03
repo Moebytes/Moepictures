@@ -247,7 +247,8 @@
         "dark": "Dark",
         "set": "Set",
         "remap": "Remap",
-        "apply": "Apply"
+        "apply": "Apply",
+        "continue": "Continue"
     },
     "history": {
         "post": "Post History",
@@ -299,6 +300,8 @@
         "updateBio": "Update Bio",
         "favoritesPrivacy": "Favorites Privacy",
         "tagFavoritesPrivacy": "Tag Favorites Privacy",
+        "privateFavorites": "Private Favorites",
+        "privateTagFavorites": "Private Tag Favorites",
         "showRelated": "Show Related",
         "showTooltips": "Show Tooltips",
         "showTagTooltips": "Show Tag Tooltips",
@@ -527,7 +530,9 @@
         "aliasing": "Aliasing",
         "drawingTools": "Drawing Tools",
         "userProfile": "User Profile",
-        "imageCount": "Image Count"
+        "imageCount": "Image Count",
+        "token": "Token",
+        "logout": "Logout"
     },
     "contextMenu": {
         "openWebsite": "Open Website Link",
@@ -536,12 +541,22 @@
         "saveLocation": "Pick a save location",
         "uploadLocation": "Pick an upload location",
         "photos": "Photos",
-        "files": "Files"
+        "files": "Files",
+        "logout": "Are you sure that you want to logout?",
+        "enterInterval": "Enter a new interval"
     },
     "options": {
         "searchOptions": "Search Options",
         "showChildPosts": "Show Child Posts",
         "sort": "Sort"
+    },
+    "toast": {
+        "loginRequired": "You must login to use this action.",
+        "verificationRequired": "You must verify your email to use this action.",
+        "loggedIn": "Logged in as ",
+        "loggedOut": "Successfully logged out!",
+        "deletedAccount": "Your account was deleted.",
+        "deletedAccountFailure": "Deletion failed, make sure you type the correct input."
     },
     "errors": {
         "$401":"401 error",
@@ -610,13 +625,14 @@
             "enable": "Enable 2FA"
         },
         "$2fa": {
+            "title": "2FA",
             "heading": "Please enter your 2FA token.",
             "token": "2FA Token",
             "badToken": "Bad token."
         },
         "changeEmail": {
             "heading": "A confirmation email will be sent to the new address. Your email will only be changed if you confirm the new one.",
-            "submitHeading": "A confirmation link has been sent to the new address. Your email will only get changed once you confirm it.",
+            "submitHeading": "A confirmation link has been sent to the new address. Your email will get changed once you confirm it.",
             "error": "Bad email or captcha.",
             "alreadySent": "Email already sent, check your email."
         },
@@ -635,7 +651,7 @@
             "submitHeading": "Your username has been changed.",
             "error": "Bad username or captcha.",
             "rateLimit": "You already changed your username in the last 7 days.",
-            "changeIn": "You can change your name in "
+            "changeIn": "You can change your name again in "
         },
         "forgotPassword": {
             "title": "Forgot Password",
@@ -666,22 +682,29 @@
             "heading": "New IP location has been verified. You should be able to login into your account now."
         },
         "login": {
-            "signupText": "Don't have an account? Sign up.",
+            "signupText": "Don't have an account?",
+            "signupText2": "Sign up.",
             "forgotText": "Forgot Password?",
             "captcha": "Solve the captcha.",
             "error": "Invalid username or password.",
             "rateLimit": "Too many login attempts, try again later.",
-            "newIP": "New IP location detected. Check your email."
+            "newIP": "New IP location detected. Check your email.",
+            "button": "Log In"
         },
         "signup": {
             "title": "Sign Up",
-            "loginText": "Already have an account? Login.",
-            "submitHeading": "Your account has been created. You should have received a confirmation link in your email. Please verify your email and login again.",
+            "loginText": "Already have an account?",
+            "loginText2": "Login.",
+            "submitHeading": "Your account has been created. Please verify your email and login again.",
             "error": "Bad username, password, or email.",
             "rateLimit": "Too many accounts created, try again later.",
             "banned": "This IP is associated with a banned account.",
             "lengthReq": "-Passwords must contain at least 10 characters",
             "varietyReq": "-At least three of the following: lowercase letters, uppercase letters, numbers, and special symbols"
+        },
+        "userSettings": {
+            "title": "User Settings",
+            "dangerZone": "Danger Zone"
         },
         "ipBlacklist": {
             "title": "Blacklist IP",
@@ -726,14 +749,13 @@
         },
         "contact": {
             "heading": "This is a contact form for general inquiries. If you would like to remove your work, please fill out our",
-            "copyrightForm": "Copyright Removal Form",
+            "copyrightForm": "Copyright Removal Form.",
             "submitHeading": "Your message was delivered.",
             "attachFiles": "You can attach files later using your email client."
         },
         "copyrightRemoval": {
             "title": "Copyright Removal",
             "heading": "If your work is on Moepictures then it means that we love your work, but we are sorry if you are unhappy with your works appearing on our site. You may fill out this form to request the removal of your content.",
-            "goText": "We are sad to see you go.",
             "submitHeading": "Your removal request was delivered.",
             "artistTagHeading": "Please provide the exact name of your artist tag on Moepictures.",
             "socialMediaHeading": "Please provide your social media links (eg. Twitter, Pixiv). It should be possible to find the works on your profile.",
@@ -923,7 +945,8 @@
             "header": "Are you sure that you want to delete your account? This action is irreversible. You will lose all of your favorites, comments, cuteness ratings, etc.",
             "header2": "Since Moepictures is a site focused on community contributions, we will not remove your submitted posts. The account that uploaded these posts will show up as \"deleted\".",
             "header3": "There is a 90-day grace period before your account is fully deleted. If you login again during this period, we will cancel the deletion and restore your account.",
-            "header4": "Are you sure that you want to continue?"
+            "header4": "Are you sure that you want to continue?",
+            "confirmation": "Please enter \"delete\" to confirm deletion."
         },
         "deleteAliasHistory": {
             "aliasTitle": "Delete Alias History",
@@ -1141,8 +1164,8 @@
         },
         "r18": {
             "pageTitle": "R18 Confirmation",
-            "title": "Warning: Explicit Content",
-            "header": "R18 Content is only suitable to be viewed by people over the age of 18. By continuing, you confirm that you are 18 years old or older and willing to view such content."
+            "title": "Enable R18",
+            "header": "R18 Content is only suitable for people over the age of 18. By continuing you confirm that you are 18 years old or older."
         },
         "promote": {
             "title": "Promote User"
@@ -1778,7 +1801,8 @@
             "submitForm": "With that said, we respect your rights and if you don't want your work to be here anymore, you may submit a copyright removal form at ",
             "copyrightForm": "Copyright Form",
             "emailUs": " or email us at ",
-            "line2": "After verifying that you are the artist, your works will be promptly removed, and if requested we will also prevent your future works from being uploaded."
+            "line2": "After verifying that you are the artist, your works will be promptly removed, and if requested we will also prevent your future works from being uploaded.",
+            "goText": "We are sad to see you go."
         }
     },
     "premium": {

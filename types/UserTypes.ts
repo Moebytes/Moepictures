@@ -215,6 +215,13 @@ export interface ForumPostSearchParams {
     offset?: number
 }
 
+export interface SearchHistoryParams {
+    query?: string
+    sort?: CommentSort
+    offset?: number
+    limit?: number
+}
+
 export type UserGetEndpoint<T extends string> = 
     T extends "/api/user" ? {params: {username: string}, response: PrunedUser | undefined} :
     T extends "/api/user/session" ? {params: null, response: Session} :
@@ -227,7 +234,7 @@ export type UserGetEndpoint<T extends string> =
     T extends "/api/user/comments" ? {params: UserCommentsParams, response: CommentSearch[]} :
     T extends "/api/user/ban" ? {params: {username: string}, response: Ban | undefined} :
     T extends "/api/user/checkmail" ? {params: null, response: boolean} :
-    T extends "/api/user/history" ? {params: {offset?: number, query?: string}, response: SearchHistory[]} :
+    T extends "/api/user/history" ? {params: SearchHistoryParams, response: SearchHistory[]} :
     T extends "/api/user/login/history" ? {params: null, response: LoginHistory[]} :
     T extends "/api/user/edit/counts" ? {params: {username: string} | null, response: EditCounts} :
     T extends "/api/user/forumposts" ? {params: ForumPostSearchParams, response: ForumPostSearch[]} :

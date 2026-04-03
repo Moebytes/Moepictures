@@ -824,7 +824,7 @@ const HelpPage: React.FunctionComponent = (props) => {
 
                     {i18n.help.copyrightRemoval.line2}<br/><br/>
 
-                    {i18n.pages.copyrightRemoval.goText}<br/>
+                    {i18n.help.copyrightRemoval.goText}<br/>
                 </span></>
             )
         }

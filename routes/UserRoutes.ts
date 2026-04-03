@@ -16,7 +16,7 @@ import moepictures from "../assets/images/moepictures.jpg"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server/ServerFunctions"
 import permissions from "../structures/Permissions"
 import path from "path"
-import {SignupParams, LoginParams, UserPfpParams, SaveSearchParams, SaveSearchEditParams, ChangeUsernameParams,
+import {SignupParams, LoginParams, UserPfpParams, SaveSearchParams, SaveSearchEditParams, ChangeUsernameParams, SearchHistoryParams,
 ChangePasswordParams, ChangeEmailParams, VerifyEmailParams, ForgotPasswordParams, ResetPasswordParams, UserFavoritesParams,
 PostSearch, Favgroup, CommentSearch, BanParams, UserRole, EditCounts, UserCommentsParams, User, ForumPostSearchParams} from "../types/Types"
 
@@ -1430,11 +1430,13 @@ const UserRoutes = (app: Express) => {
 
     app.get("/api/user/history", userLimiter, async (req: Request, res: Response) => {
         try {
-            let {query, offset} = req.query as unknown as {query: string, offset: number}
+            let {query, sort, offset, limit} = req.query as SearchHistoryParams
             if (!offset) offset = 0
+            if (!limit) limit = 100
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isPremium(req.session)) return void res.status(402).send("Premium only")
-            const result = await sql.history.userSearchHistory(req.session.username, 100, Number(offset), query)
+            const result = await sql.history.userSearchHistory(req.session.username, Number(limit), Number(offset), query, 
+                undefined, undefined, undefined, sort)
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
