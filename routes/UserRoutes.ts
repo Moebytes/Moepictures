@@ -1433,8 +1433,12 @@ const UserRoutes = (app: Express) => {
             let {query, sort, offset, limit} = req.query as SearchHistoryParams
             if (!offset) offset = 0
             if (!limit) limit = 100
-            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
-            if (!permissions.isPremium(req.session)) return void res.status(402).send("Premium only")
+            if (!req.session.username || !req.session.emailVerified) {
+                return void serverFunctions.sendEncrypted([], req, res)
+            }
+            if (!permissions.isPremium(req.session)) {
+                return void serverFunctions.sendEncrypted([], req, res)
+            }
             const result = await sql.history.userSearchHistory(req.session.username, Number(limit), Number(offset), query, 
                 undefined, undefined, undefined, sort)
             serverFunctions.sendEncrypted(result, req, res)
