@@ -15,6 +15,7 @@ import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
+import moeText from "../../moetext/MoeText"
 import HistoryIcon from "../../assets/svg/history.svg"
 import ReorderIcon from "../../assets/svg/reorder.svg"
 import CancelIcon from "../../assets/svg/cancel.svg"
@@ -323,7 +324,7 @@ const GroupPage: React.FunctionComponent = () => {
                         {groupOptionsJSX()}
                     </div>
                     <div className="group-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <span className="group-text">{group.description ? functions.jsx.renderCommentaryText(group.description) : i18n.labels.noDesc}</span>
+                        <span className="group-text">{group.description ? moeText.renderCommentaryText(group.description) : i18n.labels.noDesc}</span>
                     </div>
                     <div className="group-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <span><span className="group-label" onClick={searchGroup}>{i18n.sort.posts}</span> <span className="group-label-alt">{group.postCount}</span></span>

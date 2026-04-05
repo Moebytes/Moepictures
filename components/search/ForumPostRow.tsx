@@ -9,6 +9,7 @@ import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useLayoutSelector, useActiveActions, useSessionActions, 
 useThreadDialogSelector, useThreadDialogActions, useCacheSelector} from "../../store"
 import functions from "../../functions/Functions"
+import moeText from "../../moetext/MoeText"
 import permissions from "../../structures/Permissions"
 import favicon from "../../assets/icons/favicon.png"
 import QuoteIcon from "../../assets/svg/quote.svg"
@@ -153,12 +154,12 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
 
     const editForumPostDialog = async () => {
         if (props.forumPost.type === "reply") {
-            setEditReplyContent(functions.jsx.undoLinkReplacements(props.forumPost.content))
+            setEditReplyContent(moeText.undoLinkReplacements(props.forumPost.content))
             setEditReplyID(props.forumPost.id)
             setEditReplyR18(props.forumPost.r18 ?? false)
         } else if (props.forumPost.type === "thread") {
             setEditThreadTitle(props.forumPost.title)
-            setEditThreadContent(functions.jsx.undoLinkReplacements(props.forumPost.content))
+            setEditThreadContent(moeText.undoLinkReplacements(props.forumPost.content))
             setEditThreadID(props.forumPost.id)
             setEditThreadR18(props.forumPost.r18 ?? false)
         }
@@ -251,7 +252,7 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
                 <div className="commentrow-container" style={{width: "100%"}}>
                     <span className="commentrow-title" onClick={titleClick}>{props.forumPost.thread?.title}</span>
                     <span className="commentrow-date-text">{functions.date.timeAgo(props.forumPost?.createDate, i18n)}:</span>
-                    {functions.jsx.renderText(props.forumPost?.content, emojis, "comment", goToPost)}
+                    {moeText.renderText(props.forumPost?.content, emojis, "comment", goToPost)}
                 </div>
             </div>
             {session.username ? forumPostOptions() : null}

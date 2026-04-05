@@ -9,6 +9,7 @@ import {useNavigate} from "react-router-dom"
 import {useSessionSelector, useSessionActions, useSearchSelector, useInteractionSelector, useFlagActions, 
 useInteractionActions, useSearchActions, useFilterSelector, useLayoutSelector} from "../../store"
 import functions from "../../functions/Functions"
+import moeText from "../../moetext/MoeText"
 import website from "../../assets/icons/website.png"
 import fandom from "../../assets/icons/fandom.png"
 import wikipedia from "../../assets/icons/wikipedia.png"
@@ -264,7 +265,7 @@ const TagToolTip: React.FunctionComponent = (props) => {
             {tagAliasJSX()}
             <div className="tag-tooltip-row">
                 <div className="tag-tooltip-text-container">
-                    <span className="tag-tooltip-text">{functions.jsx.renderCommentaryText(tag.description)}</span>
+                    <span className="tag-tooltip-text">{moeText.renderCommentaryText(tag.description)}</span>
                 </div>
             </div>
             {tagImagesJSX()}

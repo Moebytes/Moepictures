@@ -16,6 +16,7 @@ useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearch
 useSearchSelector, useFlagSelector, useMiscDialogActions, useMessageDialogActions,
 useCacheSelector, useCacheActions} from "../../store"
 import functions from "../../functions/Functions"
+import moeText from "../../moetext/MoeText"
 import permissions from "../../structures/Permissions"
 import Carousel from "../../components/site/Carousel"
 import VerticalCarousel from "../../components/site/VerticalCarousel"
@@ -395,7 +396,7 @@ const UserPage: React.FunctionComponent = () => {
                     {banJSX()}
                     {user.deleted ? <button className="user-deleted-button">{i18n.user.deletedAccount}</button> : null}
                     <div className="user-row">
-                        <span className="user-text">{i18n.user.bio}: {functions.jsx.renderText(user.bio || i18n.user.noBio, emojis, "reply")}</span>
+                        <span className="user-text">{i18n.user.bio}: {moeText.renderText(user.bio || i18n.user.noBio, emojis, "reply")}</span>
                     </div>
                     <div className="user-row">
                         <span className="user-text">{i18n.user.joinDate}: {functions.date.prettyDate(user.joinDate, i18n)}</span>

@@ -7,7 +7,7 @@
 import React from "react"
 import {useInteractionActions, useThemeSelector} from "../../store"
 import BuyLinkIcon from "../../assets/svg/buy-link.svg"
-import functions from "../../functions/Functions"
+import moeText from "../../moetext/MoeText"
 import "./styles/commentary.less"
 
 interface Props {
@@ -26,7 +26,7 @@ const BuyLink: React.FunctionComponent<Props> = (props) => {
             </div>
             <div className="commentary-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="commentary-text">
-                    {functions.jsx.renderCommentaryText(props.link)}   
+                    {moeText.renderCommentaryText(props.link)}   
                 </span>
             </div>
         </div>

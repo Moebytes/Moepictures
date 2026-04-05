@@ -8,6 +8,7 @@ import React, {useState, useRef, forwardRef, useImperativeHandle, useEffect} fro
 import {useInteractionActions, useThemeSelector, useSessionSelector,
 useLayoutSelector,  useCacheSelector, useSessionActions} from "../store"
 import functions from "../functions/Functions"
+import moeText from "../moetext/MoeText"
 import permissions from "../structures/Permissions"
 import lewdIcon from "../assets/icons/lewdgirl.png"
 import RadioButtonIcon from "../assets/svg/radiobutton.svg"
@@ -83,13 +84,13 @@ const TextBox = forwardRef<TextBoxRef, Props>((props, ref) => {
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const onPost = async () => {
-        const replaced = await functions.jsx.linkReplacements(text, session, setSessionFlag)
+        const replaced = await moeText.linkReplacements(text, session, setSessionFlag)
         props.onPost(replaced)
     }
 
     useEffect(() => {
         const updatePreviewText = async () => {
-            const replaced = await functions.jsx.linkReplacements(text, session, setSessionFlag)
+            const replaced = await moeText.linkReplacements(text, session, setSessionFlag)
             setPreviewText(replaced)
         }
         updatePreviewText()
@@ -210,7 +211,7 @@ const TextBox = forwardRef<TextBoxRef, Props>((props, ref) => {
                             <CodeblockIcon className="textbox-icon" onClick={() => functions.render.triggerTextboxButton(textRef.current, setText, "code")}/>
                         </button>
                     </div>
-                    {previewMode ? <div className="textbox-preview" style={{width: props.manualWidth && !mobile ? "70%" : ""}}>{functions.jsx.renderText(previewText, emojis, props.type, undefined, r18)}</div> : 
+                    {previewMode ? <div className="textbox-preview" style={{width: props.manualWidth && !mobile ? "70%" : ""}}>{moeText.renderText(previewText, emojis, props.type, undefined, r18)}</div> : 
                     <div style={{marginTop: "0px"}} className="textbox-row-start" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <textarea ref={textRef} className="textbox-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)} onKeyDown={(event) => event.stopPropagation()} style={{width: props.manualWidth && !mobile ? "70%" : ""}}></textarea>
                     </div>}

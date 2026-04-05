@@ -8,6 +8,7 @@ import React, {useEffect, useState} from "react"
 import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionActions} from "../../store"
 import CommentaryTranslateIcon from "../../assets/svg/commentary.svg"
 import functions from "../../functions/Functions"
+import moeText from "../../moetext/MoeText"
 import "./styles/commentary.less"
 
 interface Props {
@@ -59,7 +60,7 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
             </div>
             <div className="commentary-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="commentary-text">
-                    {functions.jsx.renderCommentaryText(text)}   
+                    {moeText.renderCommentaryText(text)}   
                 </span>
             </div>
         </div>

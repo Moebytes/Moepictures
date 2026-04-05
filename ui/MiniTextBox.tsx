@@ -8,6 +8,7 @@ import React, {useState, useEffect, useRef, forwardRef, useImperativeHandle} fro
 import {useInteractionActions, useThemeSelector, useLayoutSelector, useCacheSelector,
 useSessionSelector, useSessionActions} from "../store"
 import functions from "../functions/Functions"
+import moeText from "../moetext/MoeText"
 import HighlightIcon from "../assets/svg/highlight.svg"
 import BoldIcon from "../assets/svg/bold.svg"
 import ItalicIcon from "../assets/svg/italic.svg"
@@ -54,7 +55,7 @@ const MiniTextBox = forwardRef<MiniTextBoxRef, Props>((props, ref) => {
 
     useImperativeHandle(ref, () => ({
         resolveReplacements: async () => {
-            const replaced = await functions.jsx.linkReplacements(props.text, session, setSessionFlag)
+            const replaced = await moeText.linkReplacements(props.text, session, setSessionFlag)
             props.setText(replaced)
             return replaced
         },
@@ -79,7 +80,7 @@ const MiniTextBox = forwardRef<MiniTextBoxRef, Props>((props, ref) => {
 
     useEffect(() => {
         const updatePreviewText = async () => {
-            const replaced = await functions.jsx.linkReplacements(props.text, session, setSessionFlag)
+            const replaced = await moeText.linkReplacements(props.text, session, setSessionFlag)
             setPreviewText(replaced)
         }
         updatePreviewText()
@@ -174,7 +175,7 @@ const MiniTextBox = forwardRef<MiniTextBoxRef, Props>((props, ref) => {
                         <CodeblockIcon className="minitextbox-icon" onClick={() => functions.render.triggerTextboxButton(props.textRef.current, props.setText, "code")}/>
                     </button>
                 </div>
-                {previewMode ? <div className="minitextbox-preview" style={{marginLeft: props.bio ? "0px" : "10px"}}>{functions.jsx.renderText(previewText, emojis, props.type)}</div> : 
+                {previewMode ? <div className="minitextbox-preview" style={{marginLeft: props.bio ? "0px" : "10px"}}>{moeText.renderText(previewText, emojis, props.type)}</div> : 
                 <div style={{marginTop: "0px"}} className="minitextbox-row-start" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <textarea ref={props.textRef} className="minitextbox-textarea" style={{resize: "vertical", height: `${props.height ?? 140}px`, marginLeft: props.bio ? "0px" : "10px"}} 
                     spellCheck={false} value={props.text} onChange={(event) => props.setText(event.target.value)} 

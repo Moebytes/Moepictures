@@ -11,6 +11,7 @@ import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
+import moeText from "../../moetext/MoeText"
 import Reply from "../../components/search/Reply"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useLayoutSelector, usePageActions,
@@ -235,7 +236,7 @@ const ThreadPage: React.FunctionComponent = () => {
 
     const editThreadDialog = () => {
         if (!thread) return
-        setEditThreadContent(functions.jsx.undoLinkReplacements(thread.content))
+        setEditThreadContent(moeText.undoLinkReplacements(thread.content))
         setEditThreadTitle(thread.title)
         setEditThreadID(thread.threadID)
         setEditThreadR18(thread.r18 ?? false)
@@ -361,7 +362,7 @@ const ThreadPage: React.FunctionComponent = () => {
                             <span className="thread-page-mini-text">{i18n.labels.joined} {functions.date.prettyDate(thread.joinDate, i18n, true)}</span>
                         </div>
                         <div className="thread-page-text-container">
-                            <p className="thread-page-text">{functions.jsx.renderReplyText(thread.content, emojis)}</p>
+                            <p className="thread-page-text">{moeText.renderReplyText(thread.content, emojis)}</p>
                         </div>
                     </div>
                     <div className="thread-page-container">

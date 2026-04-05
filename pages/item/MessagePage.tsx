@@ -11,6 +11,7 @@ import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
+import moeText from "../../moetext/MoeText"
 import MessageReply from "../../components/search/MessageReply"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
@@ -243,7 +244,7 @@ const MessagePage: React.FunctionComponent = () => {
 
     const editMessageDialog = () => {
         if (!message) return
-        setEditMessageContent(functions.jsx.undoLinkReplacements(message.content))
+        setEditMessageContent(moeText.undoLinkReplacements(message.content))
         setEditMessageTitle(message.title)
         setEditMessageID(message.messageID)
         setEditMessageR18(message.r18 ?? false)
@@ -367,7 +368,7 @@ const MessagePage: React.FunctionComponent = () => {
                             <img draggable={false} className="thread-page-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: defaultIcon ? filter : ""}}/>
                         </div>
                         <div className="thread-page-text-container">
-                            <p className="thread-page-text">{functions.jsx.renderMessageText(message.content, emojis)}</p>
+                            <p className="thread-page-text">{moeText.renderMessageText(message.content, emojis)}</p>
                         </div>
                     </div>
                     <div className="thread-page-container">

@@ -14,6 +14,7 @@ import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
+import moeText from "../../moetext/MoeText"
 import permissions from "../../structures/Permissions"
 
 import HeartIcon from "../../assets/svg/heart.svg"
@@ -556,7 +557,7 @@ const TagPage: React.FunctionComponent = () => {
                                 <span className="tag-text strikethrough-color">{i18n.pages.tag.bannedArtist}</span>
                             </div> : null}
                             <div className="tag-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                                <span className="tag-text">{functions.jsx.renderCommentaryText(tag.description)}</span>
+                                <span className="tag-text">{moeText.renderCommentaryText(tag.description)}</span>
                             </div>
                             {tagImplicationJSX()}
                             {relatedTagJSX()}

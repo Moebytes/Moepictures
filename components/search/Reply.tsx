@@ -10,6 +10,7 @@ import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActio
 useCacheSelector, useActiveActions, useThreadDialogSelector, useInteractionActions,
 useFlagActions} from "../../store"
 import functions from "../../functions/Functions"
+import moeText from "../../moetext/MoeText"
 import favicon from "../../assets/icons/favicon.png"
 import QuoteIcon from "../../assets/svg/quote.svg"
 import ReportIcon from "../../assets/svg/report.svg"
@@ -105,7 +106,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     }, [editReplyFlag, editReplyID, editReplyContent, editReplyR18, session])
 
     const editReplyDialog = async () => {
-        setEditReplyContent(functions.jsx.undoLinkReplacements(props.reply.content))
+        setEditReplyContent(moeText.undoLinkReplacements(props.reply.content))
         setEditReplyID(props.reply.replyID)
         setEditReplyR18(props.reply.r18)
     }
@@ -198,7 +199,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
             </div>
             <div className="reply-text-container" onMouseEnter={() => setEnableDrag(false)}>
                 {session.username && !mobile ? replyOptions() : null}
-                {functions.jsx.renderText(props.reply.content, emojis, "reply", goToReply, props.reply.r18)}
+                {moeText.renderText(props.reply.content, emojis, "reply", goToReply, props.reply.r18)}
             </div>
             {session.username && mobile ? replyOptions() : null}
         </div>

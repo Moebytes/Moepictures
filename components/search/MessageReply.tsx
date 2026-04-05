@@ -9,6 +9,7 @@ import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useMessageDialogActions, 
 useCacheSelector, useActiveActions, useMessageDialogSelector, useInteractionActions} from "../../store"
 import functions from "../../functions/Functions"
+import moeText from "../../moetext/MoeText"
 import favicon from "../../assets/icons/favicon.png"
 import QuoteIcon from "../../assets/svg/quote.svg"
 import EditIcon from "../../assets/svg/edit.svg"
@@ -101,7 +102,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
     }, [editMsgReplyFlag, editMsgReplyID, editMsgReplyContent, editMsgReplyR18, session])
 
     const editReplyDialog = async () => {
-        setEditMsgReplyContent(functions.jsx.undoLinkReplacements(props.reply?.content))
+        setEditMsgReplyContent(moeText.undoLinkReplacements(props.reply?.content))
         setEditMsgReplyID(props.reply?.replyID)
         setEditMsgReplyR18(props.reply?.r18)
     }
@@ -169,7 +170,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
             </div>
             <div className="reply-text-container" onMouseEnter={() => setEnableDrag(false)}>
                 {session.username && !mobile ? replyOptions() : null}
-                {functions.jsx.renderText(props.reply?.content, emojis, "message", goToReply, props.reply?.r18)}
+                {moeText.renderText(props.reply?.content, emojis, "message", goToReply, props.reply?.r18)}
             </div>
             {session.username && mobile ? replyOptions() : null}
         </div>

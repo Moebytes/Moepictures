@@ -12,6 +12,7 @@ import favicon from "../../assets/icons/favicon.png"
 import ApproveIcon from "../../assets/svg/approve.svg"
 import RejectIcon from "../../assets/svg/reject.svg"
 import functions from "../../functions/Functions"
+import moeText from "../../moetext/MoeText"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
 import {Report, ThreadReply, ThreadUser, UserComment} from "../../types/Types"
@@ -112,15 +113,15 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
         username = (asset as UserComment).username ? (asset as UserComment).username : (asset as ThreadUser).creator
         if (props.request.type === "comment") {
             textType = `${i18n.labels.comment}: `
-            text = functions.jsx.renderCommentText((asset as UserComment).comment, emojis)
+            text = moeText.renderCommentText((asset as UserComment).comment, emojis)
             id = (asset as UserComment).postID
         } else if (props.request.type === "thread") {
             textType = `${i18n.labels.thread}: `
-            text = functions.jsx.renderReplyText((asset as ThreadUser).title, emojis)
+            text = moeText.renderReplyText((asset as ThreadUser).title, emojis)
             id = (asset as ThreadUser).threadID
         } else if (props.request.type === "reply") {
             textType = `${i18n.buttons.reply}: `
-            text = functions.jsx.renderReplyText((asset as ThreadReply).content, emojis)
+            text = moeText.renderReplyText((asset as ThreadReply).content, emojis)
             id = (asset as ThreadReply).threadID
         }
     }

@@ -16,6 +16,7 @@ useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearch
 useSearchSelector, useMiscDialogActions, useCacheSelector, useCacheActions, 
 useInteractionActions, useMiscDialogSelector} from "../../store"
 import functions from "../../functions/Functions"
+import moeText from "../../moetext/MoeText"
 import Carousel from "../../components/site/Carousel"
 import VerticalCarousel from "../../components/site/VerticalCarousel"
 import permissions from "../../structures/Permissions"
@@ -211,7 +212,7 @@ const UserProfilePage: React.FunctionComponent = () => {
             navigate("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         } else {
-            setBio(functions.jsx.undoLinkReplacements(session.bio))
+            setBio(moeText.undoLinkReplacements(session.bio))
             if (init) {
                 setBlacklist(session.blacklist)
                 setInterval(Math.floor(Number(session.autosearchInterval || 3000) / 1000).toString())
@@ -595,7 +596,7 @@ const UserProfilePage: React.FunctionComponent = () => {
                         <span className="user-text">{i18n.user.joinDate}: {functions.date.prettyDate(session.joinDate, i18n)}</span>
                     </div>
                     <div className="user-row">
-                        <span className="user-text">{i18n.user.bio}: {functions.jsx.renderText(session.bio || i18n.user.noBio, emojis, "reply")}</span>
+                        <span className="user-text">{i18n.user.bio}: {moeText.renderText(session.bio || i18n.user.noBio, emojis, "reply")}</span>
                     </div>
                     <div className="user-row">
                         <span className="user-link" onClick={() => setShowBioInput((prev) => !prev)}>{i18n.user.updateBio}</span>

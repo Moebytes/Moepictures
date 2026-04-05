@@ -9,6 +9,7 @@ import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useLayoutSelector, useActiveActions, useSessionActions, 
 useFilterSelector, useCommentDialogSelector, useCommentDialogActions, useFlagActions, useCacheSelector} from "../../store"
 import functions from "../../functions/Functions"
+import moeText from "../../moetext/MoeText"
 import permissions from "../../structures/Permissions"
 import favicon from "../../assets/icons/favicon.png"
 import QuoteIcon from "../../assets/svg/quote.svg"
@@ -113,7 +114,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     }, [editCommentFlag, session])
 
     const editCommentDialog = async () => {
-        setEditCommentText(functions.jsx.undoLinkReplacements(props.comment?.comment))
+        setEditCommentText(moeText.undoLinkReplacements(props.comment?.comment))
         setEditCommentID(props.comment?.commentID)
     }
 
@@ -199,7 +200,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                 </div>
                 <div className="commentrow-container" style={{width: "100%"}}>
                     <span className="commentrow-date-link" onClick={commentJump}>{functions.date.timeAgo(props.comment?.postDate, i18n)}:</span>
-                    {functions.jsx.renderText(props.comment?.comment, emojis, "comment", goToComment)}
+                    {moeText.renderText(props.comment?.comment, emojis, "comment", goToComment)}
                 </div>
             </div>
             {session.username ? commentOptions() : null}
