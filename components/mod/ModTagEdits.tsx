@@ -78,7 +78,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
             } else {
                 const parts = request.image.split("/")
                 const link = `${window.location.protocol}//${window.location.host}/unverified/${parts[0]}/${encodeURIComponent(parts[1])}`
-                const arrayBuffer = await fetch(link).then((r) => r.arrayBuffer())
+                const arrayBuffer = await functions.http.getBuffer(link)
                 bytes = Object.values(new Uint8Array(arrayBuffer))
             }
         }

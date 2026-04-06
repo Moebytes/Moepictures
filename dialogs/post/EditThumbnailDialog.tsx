@@ -65,7 +65,7 @@ const EditThumbnailDialog: React.FunctionComponent = (props) => {
             let thumbnails = [] as ThumbnailUpdate[]
             for (let i = 0; i < images.length; i++) {
                 if (!updateAll) if (i !== order - 1) continue
-                const bytes = await fetch(images[i]).then((r) => r.arrayBuffer())
+                const bytes = await functions.http.getBuffer(images[i])
                 const result = functions.byte.bufferFileType(bytes)?.[0] || {}
                 const thumbnailExt = result.typename || "jpg"
                 thumbnails.push({order: i + 1, thumbnail: images[i], thumbnailExt})

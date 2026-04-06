@@ -62,7 +62,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 if (editTagObj.image === "delete") {
                     image = ["delete"]
                 } else {
-                    const arrayBuffer = await fetch(editTagObj.image).then((r) => r.arrayBuffer())
+                    const arrayBuffer = await functions.http.getBuffer(editTagObj.image)
                     const bytes = new Uint8Array(arrayBuffer)
                     image = bytes
                 }
@@ -125,7 +125,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                         } else {
                             croppedURL = await functions.image.crop(url, 1, false)
                         }
-                        const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
+                        const arrayBuffer = await functions.http.getBuffer(croppedURL)
                         bytes = new Uint8Array(arrayBuffer)
                         const blob = new Blob([bytes])
                         url = URL.createObjectURL(blob)

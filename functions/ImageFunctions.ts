@@ -92,7 +92,7 @@ export default class ImageFunctions {
             thumbnailExt = "jpg"
             thumbnail = await functions.audio.songCover(link)
         } else {
-            const bytes = await fetch(link).then((r) => r.arrayBuffer())
+            const bytes = await functions.http.getBuffer(link)
             const result = functions.byte.bufferFileType(bytes)?.[0] || {}
             thumbnailExt = result.typename || "jpg"
             thumbnail = link
@@ -209,7 +209,7 @@ export default class ImageFunctions {
                 } else {
                     croppedURL = await this.crop(url, 1, false)
                 }
-                const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
+                const arrayBuffer = await functions.http.getBuffer(croppedURL)
                 bytes = new Uint8Array(arrayBuffer)
                 const blob = new Blob([new Uint8Array(bytes)])
                 url = URL.createObjectURL(blob)
@@ -298,7 +298,7 @@ export default class ImageFunctions {
                 let height = img.naturalHeight
                 try {
                     let duration = await functions.anim.animationDuration(image)
-                    const r = await fetch(image).then((r) => r.arrayBuffer())
+                    const r = await functions.http.getBuffer(image)
                     const size = r.byteLength 
                     resolve({width, height, size, duration})
                 } catch {
@@ -650,7 +650,7 @@ export default class ImageFunctions {
                 pageName = path.basename(pageName, path.extname(pageName)) + `.${format}`
                 let data = new ArrayBuffer(0)
                 if (functions.byte.isBase64(image)) {
-                    data = await fetch(image).then((r) => r.arrayBuffer())
+                    data = await functions.http.getBuffer(image)
                 } else {
                     data = await functions.http.getBuffer(functions.util.appendURLParams(image, 
                     {upscaled: session.upscaledImages}), {"x-force-upscale": String(session.upscaledImages)})

@@ -25,7 +25,7 @@ export default class Decryption {
         if (permissions.noEncryption(session)) return link
         if (link.includes("/unverified")) return link
         if (functions.file.isVideo(link)) return link
-        const buffer = await fetch(link, {credentials: "include"}).then((r) => r.arrayBuffer())
+        const buffer = await functions.http.getBuffer(link)
         if (!functions.crypto.isEncrypted(buffer, link)) return link
         try {
             let decrypted = Decryption.decrypt(buffer, privateKey, serverPublicKey, session)
@@ -38,7 +38,7 @@ export default class Decryption {
      }
 
      public static decryptedBuffer = async (link: string, privateKey: string, serverPublicKey: string, session: ServerSession) => {
-        const buffer = await fetch(link, {credentials: "include"}).then((r) => r.arrayBuffer())
+        const buffer = await functions.http.getBuffer(link)
         if (permissions.noEncryption(session)) return buffer
         if (link.includes("/unverified")) return buffer
         if (functions.file.isVideo(link)) return buffer

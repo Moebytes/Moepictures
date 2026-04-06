@@ -137,7 +137,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             if (editTagObj.image === "delete") {
                 image = ["delete"]
             } else {
-                const arrayBuffer = await fetch(editTagObj.image).then((r) => r.arrayBuffer())
+                const arrayBuffer = await functions.http.getBuffer(editTagObj.image)
                 const bytes = new Uint8Array(arrayBuffer)
                 image = Object.values(bytes)
             }

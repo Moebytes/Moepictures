@@ -6,6 +6,7 @@
 
 import MP4Demuxer from "../structures/MP4Demuxer"
 import {JsWebm} from "jswebm"
+import functions from "./Functions"
 
 export default class VideoFunctions {
     public static extractMP4Frames = async (videoFile: string) => {
@@ -125,7 +126,7 @@ export default class VideoFunctions {
                 let height = video.videoHeight
                 let duration = video.duration
                 try {
-                    const r = await fetch(videoLink).then(((r) => r.arrayBuffer()))
+                    const r = await functions.http.getBuffer(videoLink)
                     const size = r.byteLength
                     resolve({width, height, size, duration})
                 } catch {

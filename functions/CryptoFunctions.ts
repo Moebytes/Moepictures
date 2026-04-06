@@ -81,11 +81,11 @@ export default class CryptoFunctions {
             return cacheUrl
         }
         if (functions.file.isWebP(img)) {
-            arrayBuffer = await fetch(img).then((r) => r.arrayBuffer()) as ArrayBuffer
+            arrayBuffer = await functions.http.getBuffer(img)
             isAnimatedWebP = functions.file.isAnimatedWebp(arrayBuffer)
         }
         if (functions.file.isPNG(img)) {
-            arrayBuffer = await fetch(img).then((r) => r.arrayBuffer()) as ArrayBuffer
+            arrayBuffer = await functions.http.getBuffer(img)
             isAnimatedPNG = functions.file.isAnimatedPng(arrayBuffer)
         }
         if (functions.file.isImage(img) && !isAnimatedWebP && !isAnimatedPNG) {
@@ -93,7 +93,7 @@ export default class CryptoFunctions {
             functions.cache.cachedImages.set(cacheKey, base64)
             return base64
         } else {
-            if (!arrayBuffer) arrayBuffer = await fetch(decryptedImg).then((r) => r.arrayBuffer()) as ArrayBuffer
+            if (!arrayBuffer) arrayBuffer = await functions.http.getBuffer(decryptedImg)
             const url = URL.createObjectURL(new Blob([arrayBuffer]))
             let cacheUrl = `${url}#${path.extname(img)}`
             functions.cache.cachedImages.set(cacheKey, cacheUrl)
@@ -117,11 +117,11 @@ export default class CryptoFunctions {
         let arrayBuffer = null as ArrayBuffer | null
         let decrypted = await decryption.decryptedLink(img, privateKey, serverPublicKey, session)
         if (functions.file.isWebP(img)) {
-            arrayBuffer = await fetch(img).then((r) => r.arrayBuffer()) as ArrayBuffer
+            arrayBuffer = await functions.http.getBuffer(img)
             isAnimatedWebP = functions.file.isAnimatedWebp(arrayBuffer)
         }
         if (functions.file.isPNG(img)) {
-            arrayBuffer = await fetch(img).then((r) => r.arrayBuffer()) as ArrayBuffer
+            arrayBuffer = await functions.http.getBuffer(img)
             isAnimatedPNG = functions.file.isAnimatedPng(arrayBuffer)
         }
         if (functions.file.isImage(img) && !isAnimatedWebP && !isAnimatedPNG) {
@@ -129,7 +129,7 @@ export default class CryptoFunctions {
             functions.cache.cachedImages.set(cacheKey, base64)
             return base64
         } else {
-            arrayBuffer = await fetch(decrypted).then((r) => r.arrayBuffer()) as ArrayBuffer
+            arrayBuffer = await functions.http.getBuffer(decrypted)
             const url = URL.createObjectURL(new Blob([arrayBuffer]))
             let cacheUrl = `${url}#${path.extname(img)}`
             functions.cache.cachedImages.set(cacheKey, cacheUrl)

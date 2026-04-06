@@ -82,7 +82,7 @@ export default class AudioFunctions {
     }
     
     public static audioDimensions = async (audio: string) => {
-        const buffer = await fetch(audio).then((r) => r.arrayBuffer())
+        const buffer = await functions.http.getBuffer(audio)
         const tagInfo = await mm.parseBuffer(new Uint8Array(buffer))
         const duration = tagInfo.format.duration || 0
         const size = buffer.byteLength
@@ -92,7 +92,7 @@ export default class AudioFunctions {
     }
 
     public static songCover = async (audio: string) => {
-        let buffer = await fetch(audio).then((r) => r.arrayBuffer())
+        let buffer = await functions.http.getBuffer(audio)
         const tagInfo = await mm.parseBuffer(new Uint8Array(buffer))
         const picture = tagInfo.common.picture
         if (picture) {

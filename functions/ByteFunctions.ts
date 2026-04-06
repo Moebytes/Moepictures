@@ -42,7 +42,7 @@ export default class ByteFunctions {
     }
 
     public static base64toUint8Array = async (base64: string) => {
-        return fetch(base64).then((r) => r.arrayBuffer()).then((a) => new Uint8Array(a))
+        return functions.http.getBuffer(base64).then((a) => new Uint8Array(a))
     }
 
     public static arrayBufferToBase64 = (arrayBuffer: ArrayBuffer) => {

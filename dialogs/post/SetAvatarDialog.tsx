@@ -120,7 +120,7 @@ const SetAvatarDialog: React.FunctionComponent = (props) => {
         let croppedURL = ""
         if (isAnimated && permissions.isPremium(session)) {
             let gifData = [] as GIFFrame[]
-            const arrayBuffer = await fetch(image).then((r) => r.arrayBuffer())
+            const arrayBuffer = await functions.http.getBuffer(image)
             if (functions.file.isGIF(images[0])) {
                 gifData = await functions.anim.extractGIFFrames(arrayBuffer)
             } else if (functions.file.isWebP(images[0])) {
@@ -160,7 +160,7 @@ const SetAvatarDialog: React.FunctionComponent = (props) => {
         if (!avatarID?.post) return
         const croppedURL = await getCroppedURL()
         if (!croppedURL) return
-        const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
+        const arrayBuffer = await functions.http.getBuffer(croppedURL)
         const bytes = new Uint8Array(arrayBuffer)
         await functions.http.post("/api/user/pfp", {postID: avatarID.post.postID, bytes: Object.values(bytes)}, session, setSessionFlag)
         setUserImg("")
@@ -187,11 +187,11 @@ const SetAvatarDialog: React.FunctionComponent = (props) => {
         const checkImage = async () => {
             if (functions.file.isGIF(images[0])) return setIsAnimated(true)
             if (functions.file.isWebP(images[0])) {
-                const buffer = await fetch(image).then((r) => r.arrayBuffer())
+                const buffer = await functions.http.getBuffer(image)
                 const animatedWebp = functions.file.isAnimatedWebp(buffer)
                 if (animatedWebp) return setIsAnimated(true)
             } else if (functions.file.isPNG(images[0])) {
-                const buffer = await fetch(image).then((r) => r.arrayBuffer())
+                const buffer = await functions.http.getBuffer(image)
                 const animatedPNG = functions.file.isAnimatedPng(buffer)
                 if (animatedPNG) return setIsAnimated(true)
             }

@@ -223,17 +223,17 @@ export default class AnimationFunctions {
 
     public static animationDuration = async (link: string) => {
         if (functions.file.isGIF(link)) {
-            const arrayBuffer = await fetch(link).then((r) => r.arrayBuffer())
+            const arrayBuffer = await functions.http.getBuffer(link)
             const frames = await this.extractGIFFrames(arrayBuffer)
             return frames.map((f) => f.delay).reduce((p, c) => p + c) / 1000
         } else if (functions.file.isWebP(link)) {
-            const arrayBuffer = await fetch(link).then((r) => r.arrayBuffer())
+            const arrayBuffer = await functions.http.getBuffer(link)
             if (functions.file.isAnimatedWebp(arrayBuffer)) {
                 const frames = await this.extractAnimatedWebpFrames(arrayBuffer)
                 return frames.map((f) => f.delay).reduce((p, c) => p + c) / 1000
             }
         } else if (functions.file.isPNG(link)) {
-            const arrayBuffer = await fetch(link).then((r) => r.arrayBuffer())
+            const arrayBuffer = await functions.http.getBuffer(link)
             if (functions.file.isAnimatedPng(arrayBuffer)) {
                 const frames = await this.extractAnimatedPngFrames(arrayBuffer)
                 return frames.map((f) => f.delay).reduce((p, c) => p + c) / 1000

@@ -101,7 +101,7 @@ const BanDialog: React.FunctionComponent = (props) => {
                     image = ["delete"]
                 } else {
                     const imageLink = functions.link.getTagLink(currentHistory)
-                    const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
+                    const arrayBuffer = await functions.http.getBuffer(imageLink)
                     const bytes = new Uint8Array(arrayBuffer)
                     image = Object.values(bytes)
                 }

@@ -178,7 +178,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const testFormats = async () => {
-            const buffer = await fetch(currentImg).then((r) => r.arrayBuffer())
+            const buffer = await functions.http.getBuffer(currentImg)
             setCurrentAnimatedWebp(functions.file.isAnimatedWebp(buffer))
             setCurrentAnimatedPng(functions.file.isAnimatedPng(buffer))
             setCurrentPixivUgoira(await functions.file.isUgoiraZip(buffer))

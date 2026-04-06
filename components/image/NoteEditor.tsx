@@ -311,7 +311,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
             if (typeof currentImg === "string") {
                 const imgLink = await functions.link.getPostThumbnail(props.post, index, "massive", session)
                 const decrypted = await functions.crypto.decryptThumb(imgLink, session)
-                const arrayBuffer = await fetch(decrypted).then((r) => r.arrayBuffer())
+                const arrayBuffer = await functions.http.getBuffer(decrypted)
                 const hash = await functions.http.post("/api/misc/imghash", Object.values(new Uint8Array(arrayBuffer)), session, setSessionFlag)
                 setTargetHash(hash)
             } else {
@@ -466,7 +466,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const ocrPage = async () => {
         const img = await getCurrentLink()
         const jpgURL = await functions.image.convertToFormat(img, "jpg")
-        const arrayBuffer = await fetch(jpgURL).then((r) => r.arrayBuffer())
+        const arrayBuffer = await functions.http.getBuffer(jpgURL)
         const bytes = new Uint8Array(arrayBuffer)
         let result = await functions.http.post(`/api/misc/ocr`, Object.values(bytes), session, setSessionFlag).catch(() => null)
         if (Array.isArray(result)) {

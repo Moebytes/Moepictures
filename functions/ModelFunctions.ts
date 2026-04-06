@@ -55,7 +55,7 @@ export default class ModelFunctions {
         const width = Math.round(Math.abs(maxScreen.x - minScreen.x))
         const height = Math.round(Math.abs(maxScreen.y - minScreen.y))
         const polycount = renderer.info.render.triangles
-        const r = await fetch(model).then((r) => r.arrayBuffer())
+        const r = await functions.http.getBuffer(model)
         const size = r.byteLength
         return {width, height, size, polycount}
     }

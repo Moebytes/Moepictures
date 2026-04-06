@@ -237,7 +237,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             let image = tagEditID.post.images[tagEditID.order - 1]
             if (typeof image === "string") throw new Error("History state")
             let link = functions.link.getImageLink(image)
-            let response = await fetch(functions.util.appendURLParams(link, {upscaled: false}), {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
+            let response = await functions.http.getBuffer(functions.util.appendURLParams(link, {upscaled: false}), {"x-force-upscale": "false"})
             let current = null as UploadImage | null
             if (response.byteLength) {
                 const decrypted = await functions.crypto.decryptBuffer(response, link, session)

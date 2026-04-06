@@ -186,7 +186,7 @@ export default class LinkFunctions {
     }
 
     public static linkToBase64 = async (link: string) => {
-        const arrayBuffer = await fetch(link).then((r) => r.arrayBuffer())
+        const arrayBuffer = await functions.http.getBuffer(link)
         if (!arrayBuffer.byteLength) return ""
         const buffer = Buffer.from(arrayBuffer)
         let mime = functions.byte.bufferFileType(arrayBuffer)[0]?.mime || "image/jpeg"

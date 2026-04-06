@@ -540,12 +540,12 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
 
         const getCurrentBuffer = async (forceOriginal?: boolean) => {
             let encryptedBuffer = new ArrayBuffer(0) 
-            if (!props.post) return fetch(getImg()!).then((r) => r.arrayBuffer())
+            if (!props.post) return functions.http.getBuffer(getImg()!)
             const img = await getCurrentLink(forceOriginal)
             if (forceOriginal) {
-                encryptedBuffer = await fetch(functions.util.appendURLParams(img, {upscaled: false}), {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
+                encryptedBuffer = await functions.http.getBuffer(functions.util.appendURLParams(img, {upscaled: false}), {"x-force-upscale": "false"})
             } else {
-                encryptedBuffer = await fetch(img).then((r) => r.arrayBuffer())
+                encryptedBuffer = await functions.http.getBuffer(img)
             }
             return functions.crypto.decryptBuffer(encryptedBuffer, img, session)
         }
