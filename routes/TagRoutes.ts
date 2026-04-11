@@ -261,7 +261,7 @@ const TagRoutes = (app: Express) => {
                 }
             }
             if (pixivTags !== undefined) {
-                await sql.tag.updateTag(tag, "pixivTags", pixivTags)
+                if (pixivTags?.length) await sql.tag.updateTag(tag, "pixivTags", pixivTags)
             }
             if (danbooruTag !== undefined) {
                 await sql.tag.updateTag(tag, "danbooruTag", danbooruTag)
@@ -335,7 +335,8 @@ const TagRoutes = (app: Express) => {
                 await sql.tag.updateTag(tag, "r18", r18)
             }
             if (featuredPost !== undefined) {
-                await sql.tag.updateTag(tag, "featuredPost", featuredPost)
+                const value = featuredPost === "" ? null : featuredPost
+                await sql.tag.updateTag(tag, "featuredPost", value)
             }
             if (type !== undefined) {
                 await sql.tag.updateTag(tag, "type", type)

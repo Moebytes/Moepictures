@@ -244,7 +244,7 @@ export type TagPostEndpoint<T extends string> =
     T extends "/api/tag/delete/request/fulfill" ? {params: TagDeleteRequestFulfillParams, response: string} :
     T extends "/api/tag/aliasto/request" ? {params: AliasToRequestParams, response: string} :
     T extends "/api/tag/aliasto/request/fulfill" ? {params: AliasToRequestFulfillParams, response: string} :
-    T extends "/api/tag/edit/request" ? {params: any, response: string} :
+    T extends "/api/tag/edit/request" ? {params: TagEditRequestParams, response: string} :
     T extends "/api/tag/edit/request/fulfill" ? {params: TagEditRequestFulfillParams, response: string} :
     T extends "/api/tag/massimply" ? {params: {wildcard: string, implyTo: string}, response: string} :
     never
