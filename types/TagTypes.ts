@@ -199,7 +199,7 @@ export interface TagEditParams {
     key?: string
     type?: TagType
     description?: string
-    image?: number[] | ["delete"]
+    image?: number[] | ["delete"] | null
     aliases?: string[]
     implications?: string[]
     pixivTags?: string[] | null

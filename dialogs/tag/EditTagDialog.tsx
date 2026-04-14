@@ -57,19 +57,19 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 setError(false)
                 return
             }
-            let image = null as Uint8Array | ["delete"] | null
+            let image = null as number[] | ["delete"] | null
             if (editTagObj.image) {
                 if (editTagObj.image === "delete") {
                     image = ["delete"]
                 } else {
                     const arrayBuffer = await functions.http.getBuffer(editTagObj.image)
                     const bytes = new Uint8Array(arrayBuffer)
-                    image = bytes
+                    image = Object.values(bytes)
                 }
             }
             await functions.http.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
             implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, danbooruTag: editTagObj.danbooruTag, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
-            wikipedia: editTagObj.wikipedia, r18: editTagObj.r18, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
+            wikipedia: editTagObj.wikipedia, r18: editTagObj.r18!, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
             setSubmitted(true)
         }
     }

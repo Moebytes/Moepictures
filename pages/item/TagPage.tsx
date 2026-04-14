@@ -265,7 +265,7 @@ const TagPage: React.FunctionComponent = () => {
             if (err.message.includes("No permission to edit implications") || err.message.includes("No permission to rename tag")) {
                 await functions.http.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
                 implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, danbooruTag: editTagObj.danbooruTag, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
-                wikipedia: editTagObj.wikipedia, r18: editTagObj.r18, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
+                wikipedia: editTagObj.wikipedia, r18: editTagObj.r18!, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
                 setEditTagObj({tag: editTagObj.tag, failed: "implication"})
             } else {
                 setEditTagObj({tag: editTagObj.tag, failed: true})
@@ -410,7 +410,7 @@ const TagPage: React.FunctionComponent = () => {
         if (jsx.length) {
             return (
                 <div className="tag-row">
-                    <span className="tag-text-italic">This tag implies the following: </span>
+                    <span className="tag-text-italic">{i18n.pages.tag.implication}</span>
                     {jsx}
                 </div>
             )
@@ -431,7 +431,7 @@ const TagPage: React.FunctionComponent = () => {
         if (jsx.length) {
             return (
                 <div className="tag-row">
-                    <span className="tag-text-italic">Related tags: </span>
+                    <span className="tag-text-italic">{i18n.pages.tag.relatedTags}</span>
                     {jsx}
                 </div>
             )
