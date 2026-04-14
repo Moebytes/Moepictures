@@ -90,15 +90,15 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
     const [displayImage, setDisplayImage] = useState(false)
     const [uploadError, setUploadError] = useState(false)
     const [submitError, setSubmitError] = useState(false)
-    const [saucenaoError, setSaucenaoError] = useState(false)
-    const [danbooruError, setDanbooruError] = useState(false)
+    const [sourceError, setSourceError] = useState(false)
+    const [tagError, setTagError] = useState(false)
     const [originalFiles, setOriginalFiles] = useState([] as UploadImage[])
     const [upscaledFiles, setUpscaledFiles] = useState([] as UploadImage[])
     const [dupPosts, setDupPosts] = useState([] as Post[])
     const uploadErrorRef = useRef<HTMLSpanElement>(null!)
     const submitErrorRef = useRef<HTMLSpanElement>(null!)
-    const saucenaoErrorRef = useRef<HTMLSpanElement>(null!)
-    const danbooruErrorRef = useRef<HTMLSpanElement>(null!)
+    const sourceErrorRef = useRef<HTMLSpanElement>(null!)
+    const tagErrorRef = useRef<HTMLSpanElement>(null!)
     const enterLinksRef = useRef<HTMLTextAreaElement>(null!)
     const [currentImg, setCurrentImg] = useState("")
     const [currentIndex, setCurrentIndex] = useState(0)
@@ -142,7 +142,6 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
     const [tagY, setTagY] = useState(0)
     const [metaActive, setMetaActive] = useState(false)
     const [originalID, setOriginalID] = useState("")
-    const [danbooruLink, setDanbooruLink] = useState("")
     const [post, setPost] = useState(null as PostFull | UnverifiedPost | null)
     const [needsPermission, setNeedsPermission] = useState(false)
     const [postLocked, setPostLocked] = useState(false)
@@ -488,7 +487,6 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
         setSourceUserProfile("")
         setSourceImageCount("")
         setRawTags("")
-        setDanbooruLink("")
         setArtists([{}])
         setCharacters([{}])
         setSeries([{}])
@@ -1055,13 +1053,13 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const sourceLookup = async () => {
-        setSaucenaoError(true)
-        if (!saucenaoErrorRef.current) await functions.timeout(20)
-        saucenaoErrorRef.current!.innerText = i18n.buttons.fetching
+        setSourceError(true)
+        if (!sourceErrorRef.current) await functions.timeout(20)
+        sourceErrorRef.current!.innerText = i18n.buttons.fetching
         if (saucenaoTimeout) {
-            saucenaoErrorRef.current!.innerText = i18n.pages.upload.wait
+            sourceErrorRef.current!.innerText = i18n.pages.upload.wait
             await functions.timeout(3000)
-            return setSaucenaoError(false)
+            return setSourceError(false)
         }
         try {
             saucenaoTimeout = true
@@ -1069,7 +1067,6 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
             let current = currentFiles[currentIndex]
     
             const sourceLookup = await functions.http.post("/api/misc/sourcelookup", {current, rating}, session, setSessionFlag)
-            if (sourceLookup.danbooruLink) setDanbooruLink(sourceLookup.danbooruLink)
             if (sourceLookup.artists[0]?.tag) {
                 artists[artists.length - 1].tag = sourceLookup.artists[0].tag
                 if (sourceLookup.artistIcon) {
@@ -1093,19 +1090,19 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
             setSourceDate(sourceLookup.source.posted)
             setSourceMirrors(sourceLookup.source.mirrors)
             if (!sourceLookup.source.title && !sourceLookup.source.artist && !sourceLookup.source.source) {
-                saucenaoErrorRef.current!.innerText = i18n.pages.upload.noResults
+                sourceErrorRef.current!.innerText = i18n.pages.upload.noResults
                 await functions.timeout(3000)
             }
             if (artists.length > 1) artists.pop()
             setArtists(artists)
             setSourceLinks(sourceLookup.sourceLinks)
             forceUpdate()
-            setSaucenaoError(false)
+            setSourceError(false)
         } catch (e) {
             console.log(e)
-            saucenaoErrorRef.current!.innerText = i18n.pages.upload.noResults
+            sourceErrorRef.current!.innerText = i18n.pages.upload.noResults
             await functions.timeout(3000)
-            setSaucenaoError(false)
+            setSourceError(false)
         }
         setTimeout(async () => {
             saucenaoTimeout = false
@@ -1113,16 +1110,15 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const tagLookup = async () => {
-        setDanbooruError(true)
-        if (!danbooruErrorRef.current) await functions.timeout(20)
-        danbooruErrorRef.current!.innerText = i18n.buttons.fetching
+        setTagError(true)
+        if (!tagErrorRef.current) await functions.timeout(20)
+        tagErrorRef.current!.innerText = i18n.buttons.fetching
         try {
             const currentFiles = getCurrentFiles()
             let current = currentFiles[currentIndex]
             let hasUpscaled = upscaledFiles.length ? true : false
             const tagLookup = await functions.http.post("/api/misc/taglookup", {current, type, rating, style, hasUpscaled}, session, setSessionFlag)
 
-            if (tagLookup.danbooruLink) setDanbooruLink(tagLookup.danbooruLink)
             let characters = [{}] as UploadTag[]
             let characterInputRefs = [] as React.RefObject<HTMLInputElement | null>[]
             for (let i = 0; i < tagLookup.characters.length; i++) {
@@ -1176,12 +1172,12 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
             setMetaTags(tagLookup.meta.join(" "))
             setRawTags(tagLookup.tags.join(" "))
             setRating(tagLookup.rating)
-            setDanbooruError(false)
+            setTagError(false)
         } catch (e) {
             console.log(e)
-            danbooruErrorRef.current!.innerText = i18n.pages.upload.nothingFound
+            tagErrorRef.current!.innerText = i18n.pages.upload.nothingFound
             await functions.timeout(3000)
-            setDanbooruError(false)
+            setTagError(false)
         }
     }
 
@@ -1811,7 +1807,7 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
             </div>
             <span className="upload-heading">{i18n.labels.source}</span>
             <div className="upload-container">
-                {saucenaoError ? <span ref={saucenaoErrorRef} className="submit-error-text"></span> : null}
+                {sourceErrorRef ? <span ref={sourceErrorRef} className="submit-error-text"></span> : null}
                 <span className="upload-link" onClick={sourceLookup}>{i18n.pages.upload.fetchFromPixiv}</span>
                 <div className="upload-container-row">
                     <span className="upload-text">{i18n.labels.title}: </span>
@@ -1918,7 +1914,7 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
                     </button>
                 </div>
             </div>
-            {danbooruError ? <span ref={danbooruErrorRef} className="submit-error-text"></span> : null}
+            {tagErrorRef ? <span ref={tagErrorRef} className="submit-error-text"></span> : null}
             <span className="upload-link" onClick={tagLookup} style={{marginBottom: "5px"}}>{i18n.pages.upload.fetchFromDanbooru}</span>
             <span className="upload-text-alt">{i18n.pages.upload.enterTags}
             <Link className="upload-bold-link" target="_blank" to="/help#tagging">{i18n.pages.upload.taggingGuide}</Link>

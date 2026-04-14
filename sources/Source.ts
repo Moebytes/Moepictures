@@ -4,13 +4,9 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import {AnimePicturesSource} from "./AnimePicturesSource"
 import {ArtstationSource} from "./ArtstationSource"
 import {ArtStreetSource} from "./ArtStreetSource"
-import {DanbooruSource} from "./DanbooruSource"
 import {DeviantArtSource} from "./DeviantArtSource"
-import {EShuushuuSource} from "./EShuushuuSource"
-import {GelbooruSource} from "./GelbooruSource"
 import {ImgurSource} from "./ImgurSource"
 import {NewgroundsSource} from "./NewgroundsSource"
 import {PinterestSource} from "./PinterestSource"
@@ -19,8 +15,6 @@ import {RedditSource} from "./RedditSource"
 import {SkebSource} from "./SkebSource"
 import {TumblrSource} from "./TumblrSource"
 import {TwitterSource} from "./TwitterSource"
-import {YandereSource} from "./YandereSource"
-import {ZerochanSource} from "./ZerochanSource"
 import functions from "../functions/Functions"
 
 export default class Source {
@@ -36,13 +30,7 @@ export default class Source {
             new NewgroundsSource(url),
             new ArtStreetSource(url),
             new PinterestSource(url),
-            new ImgurSource(url),
-            new DanbooruSource(url),
-            new GelbooruSource(url),
-            new ZerochanSource(url),
-            new YandereSource(url),
-            new EShuushuuSource(url),
-            new AnimePicturesSource(url)
+            new ImgurSource(url)
         ]
 
         for (const source of sources) {

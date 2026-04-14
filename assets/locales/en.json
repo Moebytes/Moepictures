@@ -1590,7 +1590,7 @@
                     "bookmarks": " - The amount of pixiv bookmarks or \"likes\" if it's a different site.",
                     "commentary": " - The original description of the work as posted on social media.",
                     "english commentary": " - A commentary english translation, as they are very commonly written in japanese.",
-                    "mirrors": " - Reposts of the work posted on different sites. Include the artists own reposts.",
+                    "mirrors": " - Other sites that the artist posted the image to.",
                     "buy link": " - If a paid reward is available, you may post the link to buy here."
                 }
             },

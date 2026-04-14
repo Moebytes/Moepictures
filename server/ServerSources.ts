@@ -58,7 +58,6 @@ export default class ServerSources {
         let bookmarks = ""
         let userProfile = ""
         let sourceImageCount = null as number | null
-        let danbooruLink = ""
         let artistIcon = ""
         let artists = [{}] as UploadTag[]
         let sourceLinks = [] as {link: string, hash: string}[]
@@ -71,7 +70,6 @@ export default class ServerSources {
         try {
             const result = await functions.http.getJSON(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`)
             if (result.length) {
-                danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
                 if (result[0].rating === "q") rating = functions.highestRating(rating, functions.r17())
                 if (result[0].rating === "e") rating = functions.highestRating(rating, functions.r18())
             }
@@ -126,7 +124,7 @@ export default class ServerSources {
         }
 
         return {source, artist, title, englishTitle, commentary, englishCommentary, pixivTags,
-            userProfile, drawingTools, sourceImageCount, posted, bookmarks, danbooruLink, 
+            userProfile, drawingTools, sourceImageCount, posted, bookmarks, 
             artistIcon, artists, rating, sourceLinks, isAI}
     }
 
@@ -141,7 +139,6 @@ export default class ServerSources {
         let bookmarks = ""
         let userProfile = ""
         let sourceImageCount = null as number | null
-        let danbooruLink = ""
         let artistIcon = ""
         let artists = [{}] as UploadTag[]
         let sourceLinks = [] as {link: string, hash: string}[]
@@ -162,7 +159,6 @@ export default class ServerSources {
                 let cleaned = redirect.replace("/photo/1", "")
                 const result = await functions.http.getJSON(`https://danbooru.donmai.us/posts.json?tags=source%3A${cleaned}`)
                 if (result.length) {
-                    danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
                     if (result[0].rating === "q") rating = functions.highestRating(rating, functions.r17())
                     if (result[0].rating === "e") rating = functions.highestRating(rating, functions.r18())
                 }
@@ -205,7 +201,7 @@ export default class ServerSources {
         }
 
         return {source, artist, title, englishTitle, commentary, englishCommentary, userProfile,
-            sourceImageCount, posted, bookmarks, danbooruLink, artistIcon, artists, rating, sourceLinks}
+            sourceImageCount, posted, bookmarks, artistIcon, artists, rating, sourceLinks}
     }
 
     public static deviantartLookup = async (deviantartLink: string, rating: PostRating) => {
@@ -219,7 +215,6 @@ export default class ServerSources {
         let bookmarks = ""
         let userProfile = ""
         let sourceImageCount = null as number | null
-        let danbooruLink = ""
         let artistIcon = ""
         let artists = [{}] as UploadTag[]
         let sourceLinks = [] as {link: string, hash: string}[]
@@ -252,7 +247,7 @@ export default class ServerSources {
         }
 
         return {source, artist, title, englishTitle, commentary, englishCommentary, userProfile,
-            sourceImageCount, posted, bookmarks, danbooruLink, artistIcon, artists, rating, sourceLinks}
+            sourceImageCount, posted, bookmarks, artistIcon, artists, rating, sourceLinks}
     }
 
     public static danbooruLookup = async (danbooruLink: string, rating: PostRating) => {
@@ -268,7 +263,7 @@ export default class ServerSources {
         let artists = [{}] as UploadTag[]
         let sourceLinks = [] as {link: string, hash: string}[]
 
-        let id = source.match(/\d+/)?.[0]
+        let id = danbooruLink.match(/\d+/)?.[0]
         let danbooruPost = await functions.http.getJSON(`https://danbooru.donmai.us/posts/${id}.json`)
         if (danbooruPost.rating === "q") rating = functions.highestRating(rating, functions.r17())
         if (danbooruPost.rating === "e") rating = functions.highestRating(rating, functions.r18())
@@ -306,7 +301,7 @@ export default class ServerSources {
         }
 
         return {source, artist, title, englishTitle, commentary, englishCommentary, 
-                posted, bookmarks, danbooruLink, artistIcon, artists, rating, sourceLinks}
+                posted, bookmarks, artistIcon, artists, rating, sourceLinks}
     }
 
     public static saucenaoLookup = async (bytes: number[]) => {
@@ -350,7 +345,6 @@ export default class ServerSources {
         let bookmarks = ""
         let userProfile = ""
         let sourceImageCount = null as number | null
-        let danbooruLink = ""
         let artistIcon = ""
         let artists = [{}] as UploadTag[]
         let mirrors = [] as string[]
@@ -375,7 +369,6 @@ export default class ServerSources {
                 englishCommentary = data.englishCommentary
                 posted = data.posted
                 bookmarks = data.bookmarks
-                danbooruLink = data.danbooruLink
                 artistIcon = data.artistIcon
                 artists = data.artists
                 rating = data.rating
@@ -386,13 +379,10 @@ export default class ServerSources {
                 sourceImageCount = data.sourceImageCount
                 isAI = data.isAI
 
-                mirrors = await serverFunctions.links.booruLinks(pngBytes)
-                mirrors = functions.util.removeItem(mirrors, source)
                 const mirrorStr = mirrors?.length ? mirrors.join("\n") : ""
                 return {
                     rating,
                     artists,
-                    danbooruLink,
                     sourceLinks,
                     isAI,
                     source: {
@@ -428,7 +418,6 @@ export default class ServerSources {
                 englishCommentary = data.englishCommentary
                 posted = data.posted
                 bookmarks = data.bookmarks
-                danbooruLink = data.danbooruLink
                 artistIcon = data.artistIcon
                 artists = data.artists
                 rating = data.rating
@@ -436,13 +425,10 @@ export default class ServerSources {
                 userProfile = data.userProfile
                 sourceImageCount = data.sourceImageCount
 
-                mirrors = await serverFunctions.links.booruLinks(pngBytes)
-                mirrors = functions.util.removeItem(mirrors, source)
                 const mirrorStr = mirrors?.length ? mirrors.join("\n") : ""
                 return {
                     rating,
                     artists,
-                    danbooruLink,
                     sourceLinks,
                     isAI,
                     source: {
@@ -473,9 +459,6 @@ export default class ServerSources {
             const deviantart = results.filter((r) => r.header.index_id === 34)
             const artstation = results.filter((r) => r.header.index_id === 39)
             const danbooru = results.filter((r) => r.header.index_id === 9)
-            const gelbooru = results.filter((r) => r.header.index_id === 25)
-            const konachan = results.filter((r) => r.header.index_id === 26)
-            const yandere = results.filter((r) => r.header.index_id === 12)
             if (pixiv.length) mirrors.push(`https://www.pixiv.net/artworks/${pixiv[0].data.pixiv_id}`)
             if (twitter.length) mirrors.push(twitter[0].data.ext_urls[0])
             if (deviantart.length) {
@@ -483,11 +466,6 @@ export default class ServerSources {
                 mirrors.push(redirectedLink ? redirectedLink : deviantart[0].data.ext_urls[0])
             }
             if (artstation.length) mirrors.push(artstation[0].data.ext_urls[0])
-            if (danbooru.length) mirrors.push(danbooru[0].data.ext_urls[0])
-            if (gelbooru.length) mirrors.push(gelbooru[0].data.ext_urls[0])
-            if (yandere.length) mirrors.push(yandere[0].data.ext_urls[0])
-            if (konachan.length) mirrors.push(konachan[0].data.ext_urls[0])
-            if (danbooru.length) danbooruLink = `https://danbooru.donmai.us/posts/${danbooru[0].data.danbooru_id}.json`
             if (pixiv.length) {
                 source = `https://www.pixiv.net/artworks/${pixiv[0].data.pixiv_id}`
                 artist = pixiv[0].data.author_name || ""
@@ -502,7 +480,6 @@ export default class ServerSources {
                     englishCommentary = data.englishCommentary
                     posted = data.posted
                     bookmarks = data.bookmarks
-                    danbooruLink = data.danbooruLink
                     artistIcon = data.artistIcon
                     artists = data.artists
                     rating = data.rating
@@ -528,7 +505,6 @@ export default class ServerSources {
                     englishCommentary = data.englishCommentary
                     posted = data.posted
                     bookmarks = data.bookmarks
-                    danbooruLink = data.danbooruLink
                     artistIcon = data.artistIcon
                     artists = data.artists
                     rating = data.rating
@@ -553,7 +529,6 @@ export default class ServerSources {
                     englishCommentary = data.englishCommentary
                     posted = data.posted
                     bookmarks = data.bookmarks
-                    danbooruLink = data.danbooruLink
                     artistIcon = data.artistIcon
                     artists = data.artists
                     rating = data.rating
@@ -577,7 +552,6 @@ export default class ServerSources {
                     englishCommentary = data.englishCommentary
                     posted = data.posted
                     bookmarks = data.bookmarks
-                    danbooruLink = data.danbooruLink
                     artistIcon = data.artistIcon
                     artists = data.artists
                     rating = data.rating
@@ -585,18 +559,6 @@ export default class ServerSources {
                 } catch (e) {
                     console.log(e)
                 }
-            } else if (gelbooru.length) {
-                source = gelbooru[0].data.ext_urls[0]
-                artist = gelbooru[0].data.creator || ""
-                title = gelbooru[0].data.characters || ""
-            } else if (yandere.length) {
-                source = yandere[0].data.ext_urls[0]
-                artist = yandere[0].data.creator || ""
-                title = yandere[0].data.characters || ""
-            } else if (konachan.length) {
-                source = konachan[0].data.ext_urls[0]
-                artist = konachan[0].data.creator || ""
-                title = konachan[0].data.characters || ""
             }
         }
         mirrors = functions.util.removeItem(mirrors, source)
@@ -604,7 +566,6 @@ export default class ServerSources {
         return {
             rating,
             artists,
-            danbooruLink,
             sourceLinks,
             artistIcon,
             isAI,

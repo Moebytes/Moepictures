@@ -129,6 +129,6 @@ export default class ServerLinks {
                 tagData.series = ""
             }
         }
-        return {tagData, danbooruLink, newRating: rating}
+        return {tagData, newRating: rating}
     }
 }

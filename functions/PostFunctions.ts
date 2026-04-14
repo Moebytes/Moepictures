@@ -17,18 +17,10 @@ export default class PostFunctions {
         const mirrorsArr = sourceMirrors.split("\n")
         let json = {}
         for (const mirror of mirrorsArr) {
-            if (mirror.includes("danbooru")) json["danbooru"] = mirror
-            if (mirror.includes("gelbooru")) json["gelbooru"] = mirror
-            if (mirror.includes("safebooru")) json["safebooru"] = mirror
-            if (mirror.includes("yande.re")) json["yandere"] = mirror
-            if (mirror.includes("konachan")) json["konachan"] = mirror
-            if (mirror.includes("zerochan")) json["zerochan"] = mirror
-            if (mirror.includes("e-shuushuu")) json["eshuushuu"] = mirror
-            if (mirror.includes("anime-pictures")) json["animepictures"] = mirror
             if (mirror.includes("deviantart")) json["deviantart"] = mirror
             if (mirror.includes("artstation")) json["artstation"] = mirror
-            if (mirror.includes("soundcloud")) json["soundcloud"] = mirror
             if (mirror.includes("youtube")) json["youtube"] = mirror
+            if (mirror.includes("soundcloud")) json["soundcloud"] = mirror
             if (mirror.includes("bandcamp")) json["bandcamp"] = mirror
             if (mirror.includes("sketchfab")) json["sketchfab"] = mirror
             if (mirror.includes("twitter") || mirror.includes("x.com")) json["twitter"] = mirror

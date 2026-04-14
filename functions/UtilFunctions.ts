@@ -235,7 +235,6 @@ export default class UtilFunctions {
             if (link.includes("pximg.net")) return "Pximg"
             if (link.includes("pbs.twimg")) return "Twimg"
             const domain = new URL(link).hostname.replace("www.", "").split(".")?.[0] || ""
-            if (domain.toLowerCase() === "yande") return "Yandere"
             return this.toProperCase(domain)
         } catch {
             return i18n.labels.unknown || "Unknown"

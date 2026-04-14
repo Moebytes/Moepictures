@@ -51,14 +51,6 @@ import bandcamp from "../../assets/icons/bandcamp.png"
 import sketchfab from "../../assets/icons/sketchfab.png"
 import fandom from "../../assets/icons/fandom.png"
 import wikipedia from "../../assets/icons/wikipedia.png"
-import danbooru from "../../assets/icons/danbooru.png"
-import gelbooru from "../../assets/icons/gelbooru.png"
-import safebooru from "../../assets/icons/safebooru.png"
-import yandere from "../../assets/icons/yandere.png"
-import konachan from "../../assets/icons/konachan.png"
-import zerochan from "../../assets/icons/zerochan.png"
-import eshuushuu from "../../assets/icons/eshuushuu.png"
-import animepictures from "../../assets/icons/animepictures.png"
 import functions from "../../functions/Functions"
 import path from "path"
 import {PostSearch, PostHistory, UnverifiedPost, TagCount, TagGroupCategory, PrunedUser} from "../../types/Types"
@@ -512,12 +504,6 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             if (source.includes("pixiv")) {
                 jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(source, "_blank")}/>)
             }
-            if (source.includes("soundcloud")) {
-                jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(source, "_blank")}/>)
-            }
-            if (source.includes("sketchfab")) {
-                jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(source, "_blank")}/>)
-            }
             if (source.includes("twitter") || source.includes("x.com")) {
                 jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(source, "_blank")}/>)
             }
@@ -530,34 +516,15 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             if (source.includes("youtube")) {
                 jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(source, "_blank")}/>)
             }
+            if (source.includes("soundcloud")) {
+                jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(source, "_blank")}/>)
+            }
             if (source.includes("bandcamp")) {
                 jsx.push(<img className="sidebar-social" src={bandcamp} onClick={() => window.open(source, "_blank")}/>)
             }
-            /*
-            if (source.includes("danbooru")) {
-                jsx.push(<img className="sidebar-social" src={danbooru} onClick={() => window.open(source, "_blank")}/>)
+            if (source.includes("sketchfab")) {
+                jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(source, "_blank")}/>)
             }
-            if (source.includes("gelbooru")) {
-                jsx.push(<img className="sidebar-social" src={gelbooru} onClick={() => window.open(source, "_blank")}/>)
-            }
-            if (source.includes("safebooru")) {
-                jsx.push(<img className="sidebar-social" src={safebooru} onClick={() => window.open(source, "_blank")}/>)
-            }
-            if (source.includes("yande.re")) {
-                jsx.push(<img className="sidebar-social" src={yandere} onClick={() => window.open(source, "_blank")}/>)
-            }
-            if (source.includes("konachan")) {
-                jsx.push(<img className="sidebar-social" src={konachan} onClick={() => window.open(source, "_blank")}/>)
-            }
-            if (source.includes("zerochan")) {
-                jsx.push(<img className="sidebar-social" src={zerochan} onClick={() => window.open(source, "_blank")}/>)
-            }
-            if (source.includes("eshuushuu")) {
-                jsx.push(<img className="sidebar-social" src={eshuushuu} onClick={() => window.open(source, "_blank")}/>)
-            }
-            if (source.includes("animepictures")) {
-                jsx.push(<img className="sidebar-social" src={animepictures} onClick={() => window.open(source, "_blank")}/>)
-            }*/
         }
         return (
             <div className="mobileinfo-row">
@@ -575,12 +542,6 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             if (props.post.mirrors.pixiv) {
                 jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.post?.mirrors?.pixiv, "_blank")}/>)
             }
-            if (props.post.mirrors.soundcloud) {
-                jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(props.post?.mirrors?.soundcloud, "_blank")}/>)
-            }
-            if (props.post.mirrors.sketchfab) {
-                jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(props.post?.mirrors?.sketchfab, "_blank")}/>)
-            }
             if (props.post.mirrors.twitter) {
                 jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(props.post?.mirrors?.twitter, "_blank")}/>)
             }
@@ -593,34 +554,15 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             if (props.post.mirrors.youtube) {
                 jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(props.post?.mirrors?.youtube, "_blank")}/>)
             }
+            if (props.post.mirrors.soundcloud) {
+                jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(props.post?.mirrors?.soundcloud, "_blank")}/>)
+            }
             if (props.post.mirrors.bandcamp) {
                 jsx.push(<img className="sidebar-social" src={bandcamp} onClick={() => window.open(props.post?.mirrors?.bandcamp, "_blank")}/>)
             }
-            /*
-            if (props.post.mirrors.danbooru) {
-                jsx.push(<img className="sidebar-social" src={danbooru} onClick={() => window.open(props.post?.mirrors?.danbooru, "_blank")}/>)
+            if (props.post.mirrors.sketchfab) {
+                jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(props.post?.mirrors?.sketchfab, "_blank")}/>)
             }
-            if (props.post.mirrors.gelbooru) {
-                jsx.push(<img className="sidebar-social" src={gelbooru} onClick={() => window.open(props.post?.mirrors?.gelbooru, "_blank")}/>)
-            }
-            if (props.post.mirrors.safebooru) {
-                jsx.push(<img className="sidebar-social" src={safebooru} onClick={() => window.open(props.post?.mirrors?.safebooru, "_blank")}/>)
-            }
-            if (props.post.mirrors.yandere) {
-                jsx.push(<img className="sidebar-social" src={yandere} onClick={() => window.open(props.post?.mirrors?.yandere, "_blank")}/>)
-            }
-            if (props.post.mirrors.konachan) {
-                jsx.push(<img className="sidebar-social" src={konachan} onClick={() => window.open(props.post?.mirrors?.konachan, "_blank")}/>)
-            }
-            if (props.post.mirrors.zerochan) {
-                jsx.push(<img className="sidebar-social" src={zerochan} onClick={() => window.open(props.post?.mirrors?.zerochan, "_blank")}/>)
-            }
-            if (props.post.mirrors.eshuushuu) {
-                jsx.push(<img className="sidebar-social" src={eshuushuu} onClick={() => window.open(props.post?.mirrors?.eshuushuu, "_blank")}/>)
-            }
-            if (props.post.mirrors.animepictures) {
-                jsx.push(<img className="sidebar-social" src={animepictures} onClick={() => window.open(props.post?.mirrors?.animepictures, "_blank")}/>)
-            }*/
         }
         if (jsx.length) {
             return (

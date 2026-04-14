@@ -103,7 +103,6 @@ export interface SourceLookupParams {
 export interface SourceLookup {
     rating: PostRating
     artists: UploadTag[]
-    danbooruLink: string
     sourceLinks: {link: string, hash: string}[]
     artistIcon: string
     isAI: boolean
@@ -142,7 +141,6 @@ export interface TagLookup {
     meta: string[]
     tags: string[]
     newTags: UploadTag[]
-    danbooruLink: string
 }
 
 export interface PixelateOptions {

@@ -13,14 +13,6 @@ import pixiv from "../../assets/icons/pixiv.png"
 import twitter from "../../assets/icons/twitter.png"
 import deviantart from "../../assets/icons/deviantart.png"
 import artstation from "../../assets/icons/artstation.png"
-import danbooru from "../../assets/icons/danbooru.png"
-import gelbooru from "../../assets/icons/gelbooru.png"
-import safebooru from "../../assets/icons/safebooru.png"
-import yandere from "../../assets/icons/yandere.png"
-import konachan from "../../assets/icons/konachan.png"
-import zerochan from "../../assets/icons/zerochan.png"
-import eshuushuu from "../../assets/icons/eshuushuu.png"
-import animepictures from "../../assets/icons/animepictures.png"
 import soundcloud from "../../assets/icons/soundcloud.png"
 import youtube from "../../assets/icons/youtube.png"
 import bandcamp from "../../assets/icons/bandcamp.png"
@@ -195,32 +187,22 @@ const ToolTip: React.FunctionComponent = (props) => {
         let jsx = [] as React.ReactElement[]
         if (!post) return jsx
         if (post.source?.includes("pixiv")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={pixiv} onClick={() => window.open(post.source, "_blank")}/>)
-        if (post.source?.includes("soundcloud")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={soundcloud} onClick={() => window.open(post.source, "_blank")}/>)
-        if (post.source?.includes("sketchfab")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={sketchfab} onClick={() => window.open(post.source, "_blank")}/>)
         if (post.source?.includes("twitter") || post.source?.includes("x.com")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={twitter} onClick={() => window.open(post.source, "_blank")}/>)
         if (post.source?.includes("deviantart")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={deviantart} onClick={() => window.open(post.source, "_blank")}/>)
         if (post.source?.includes("artstation")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={artstation} onClick={() => window.open(post.source, "_blank")}/>)
         if (post.source?.includes("youtube")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={youtube} onClick={() => window.open(post.source, "_blank")}/>)
+        if (post.source?.includes("soundcloud")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={soundcloud} onClick={() => window.open(post.source, "_blank")}/>)
         if (post.source?.includes("bandcamp")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={bandcamp} onClick={() => window.open(post.source, "_blank")}/>)
-        //if (post.source?.includes("danbooru")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={danbooru} onClick={() => window.open(post.source, "_blank")}/>)
-        //if (post.source?.includes("yande.re")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={yandere} onClick={() => window.open(post.source, "_blank")}/>)
+        if (post.source?.includes("sketchfab")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={sketchfab} onClick={() => window.open(post.source, "_blank")}/>)
         if (post.mirrors) {
             if (post.mirrors.pixiv) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={pixiv} onClick={() => window.open(post.mirrors?.pixiv, "_blank")}/>)
-            if (post.mirrors.soundcloud) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={soundcloud} onClick={() => window.open(post.mirrors?.soundcloud, "_blank")}/>)
-            if (post.mirrors.sketchfab) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={sketchfab} onClick={() => window.open(post.mirrors?.sketchfab, "_blank")}/>)
             if (post.mirrors.twitter) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={twitter} onClick={() => window.open(post.mirrors?.twitter, "_blank")}/>)
             if (post.mirrors.deviantart) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={deviantart} onClick={() => window.open(post.mirrors?.deviantart, "_blank")}/>)
             if (post.mirrors.artstation) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={artstation} onClick={() => window.open(post.mirrors?.artstation, "_blank")}/>)
             if (post.mirrors.youtube) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={youtube} onClick={() => window.open(post.mirrors?.youtube, "_blank")}/>)
+            if (post.mirrors.soundcloud) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={soundcloud} onClick={() => window.open(post.mirrors?.soundcloud, "_blank")}/>)
             if (post.mirrors.bandcamp) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={bandcamp} onClick={() => window.open(post.mirrors?.bandcamp, "_blank")}/>)
-            //if (post.mirrors.danbooru) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={danbooru} onClick={() => window.open(post.mirrors?.danbooru, "_blank")}/>)
-            //if (post.mirrors.gelbooru) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={gelbooru} onClick={() => window.open(post.mirrors?.gelbooru, "_blank")}/>)
-            //if (post.mirrors.safebooru) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={safebooru} onClick={() => window.open(post.mirrors?.safebooru, "_blank")}/>)
-            //if (post.mirrors.yandere) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={yandere} onClick={() => window.open(post.mirrors?.yandere, "_blank")}/>)
-            //if (post.mirrors.konachan) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={konachan} onClick={() => window.open(post.mirrors?.konachan, "_blank")}/>)
-            //if (post.mirrors.zerochan) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={zerochan} onClick={() => window.open(post.mirrors?.zerochan, "_blank")}/>)
-            //if (post.mirrors.eshuushuu) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={eshuushuu} onClick={() => window.open(post.mirrors?.eshuushuu, "_blank")}/>)
-            //if (post.mirrors.animepictures) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={animepictures} onClick={() => window.open(post.mirrors?.animepictures, "_blank")}/>)
+            if (post.mirrors.sketchfab) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={sketchfab} onClick={() => window.open(post.mirrors?.sketchfab, "_blank")}/>)
         }
         return jsx
     }

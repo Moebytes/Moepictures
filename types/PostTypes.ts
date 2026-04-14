@@ -18,21 +18,13 @@ export type ImageUpdateColumns = "type" | "order" | "filename" | "upscaledFilena
 
 export interface PostMirrors {
     pixiv?: string
-    soundcloud?: string
-    sketchfab?: string
     twitter?: string
     deviantart?: string
     artstation?: string
-    danbooru?: string
-    gelbooru?: string
-    safebooru?: string
-    yandere?: string
-    konachan?: string
-    zerochan?: string
-    eshuushuu?: string
-    animepictures?: string
     youtube?: string
+    soundcloud?: string
     bandcamp?: string
+    sketchfab?: string
 }
 
 export interface Image {
