@@ -557,7 +557,7 @@ const UserProfilePage: React.FunctionComponent = () => {
     const getBioTextArea = () => {
         return (
             <>
-            <div className="user-column" style={{marginTop: "0px"}}>
+            <div className="user-column" style={{position: "relative", marginTop: "0px"}}>
                 <MiniTextBox ref={textBoxRef} type="comment" bio={true} height={100} text={bio} setText={setBio} textRef={textRef} emojiRef={emojiRef}/>
             </div>
             <div className="user-row">

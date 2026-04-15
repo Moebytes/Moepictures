@@ -1073,17 +1073,17 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         <div className={`mobile-sidebar ${relative ? "mobile-sidebar-relative" : ""} ${mobileScrolling ? "hide-mobile-sidebar" : ""}`}>
             <div className="mobile-search-container">
                 <input className="mobile-search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null} onFocus={(event) => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
-                <button className="search-mobile-button" style={{filter}} onClick={triggerSearch}>
+                <button className="search-mobile-button" onClick={triggerSearch}>
                     <SearchIcon/>
                 </button>
                 <label style={{display: "flex", width: "max-content", height: "max-content"}} htmlFor="image-search">
-                    <div className="search-mobile-button" style={{filter}}>
+                    <div className="search-mobile-button">
                         <SearchImageIcon/>
                     </div>
                 </label>
                 <input id="image-search" type="file" onChange={(event) => imageSearch(event)}/>
-                <button className="search-mobile-button" style={{filter}} onClick={randomSearch}>
-                    <RandomIcon/>
+                <button className="search-mobile-button" onClick={randomSearch}>
+                    <RandomIcon className="random-button-icon"/>
                 </button>
             </div>
         </div>
@@ -1104,18 +1104,18 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 </div> : null}
                 <div className="search-container" onMouseEnter={() => setEnableDrag(false)}>
                     <input className="search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
-                    <button className="search-button" style={{filter}} onClick={triggerSearch}>
-                        <SearchIcon className="search-button-icon"/>
+                    <button className="search-button" onClick={triggerSearch}>
+                        <SearchIcon/>
                     </button>
                     <label style={{display: "flex", width: "max-content", height: "max-content"}} htmlFor="image-search">
-                        <div className="search-button" style={{filter}}>
-                            <SearchImageIcon className="search-button-icon"/>
+                        <div className="search-button">
+                            <SearchImageIcon/>
                         </div>
                     </label>
                     <input id="image-search" type="file" onChange={(event) => imageSearch(event)}/>
                 </div>
                 <div className="random-container">
-                    <button className="random-button" style={{filter}} onClick={randomSearch}>
+                    <button className="random-button"onClick={randomSearch}>
                         <span>{i18n.sort.random}</span>
                         <RandomIcon className="random-button-icon"/>
                     </button>

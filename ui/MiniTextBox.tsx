@@ -5,7 +5,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import React, {useState, useEffect, useRef, forwardRef, useImperativeHandle} from "react"
-import {useInteractionActions, useThemeSelector, useLayoutSelector, useCacheSelector,
+import {useInteractionActions, useLayoutSelector, useCacheSelector,
 useSessionSelector, useSessionActions} from "../store"
 import functions from "../functions/Functions"
 import moeText from "../moetext/MoeText"
@@ -41,7 +41,6 @@ interface Props {
 }
 
 const MiniTextBox = forwardRef<MiniTextBoxRef, Props>((props, ref) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {setEnableDrag} = useInteractionActions()
@@ -94,7 +93,7 @@ const MiniTextBox = forwardRef<MiniTextBoxRef, Props>((props, ref) => {
         if (!rect || !bodyRect) return "0px"
         const raw = bodyRect.right - rect.right
         let offset = -100
-        if (props.bio) offset = 525
+        if (props.bio) offset = 500
         if (mobile) offset -= 0
         return `${raw + offset}px`
     }
@@ -107,7 +106,7 @@ const MiniTextBox = forwardRef<MiniTextBoxRef, Props>((props, ref) => {
         if (!rect || !bodyRect) return "0px"
         const raw = bodyRect.bottom - rect.bottom
         let offset = props.type === "comment" ? 100 : 160
-        if (props.bio) offset = 410
+        if (props.bio) offset = 50
         if (mobile) offset += 0
         return `${raw + offset}px`
     }
@@ -131,6 +130,7 @@ const MiniTextBox = forwardRef<MiniTextBoxRef, Props>((props, ref) => {
             }
             if (items.length) rows.push(<div className="minitextbox-emoji-row">{items}</div>)
         }
+
         return (
             <div className={`minitextbox-emoji-grid ${showEmojiDropdown ? "" : "hide-minitextbox-emoji-grid"}`}
             onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}
