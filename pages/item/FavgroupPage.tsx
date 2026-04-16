@@ -230,8 +230,8 @@ const FavgroupPage: React.FunctionComponent = () => {
                 jsx.push(<AcceptIcon className="group-opt" onClick={() => commitReorder()}/>)
             }
             jsx.push(deleteMode ? 
-                <DeleteIcon className="group-opt-pink" onClick={() => setDeleteMode((prev: boolean) => !prev)}/> :
-                <DeleteIcon className="group-opt" onClick={() => setDeleteMode((prev: boolean) => !prev)}/>)
+                <CancelIcon className="group-opt-pink" onClick={() => setDeleteMode((prev: boolean) => !prev)}/> :
+                <CancelIcon className="group-opt" onClick={() => setDeleteMode((prev: boolean) => !prev)}/>)
             jsx.push(<AddIcon className="group-opt" onClick={() => showFavgroupAddDialog()}/>)
             jsx.push(<EditIcon className="group-opt" onClick={() => showFavgroupEditDialog()}/>)
             jsx.push(<RemapIcon className="group-opt" onClick={() => showFavgroupRemapDialog()}/>)
