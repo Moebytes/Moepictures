@@ -475,8 +475,10 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
         const toggleUpscale = async () => {
             if (!props.post) return
             if (!session.username) {
-                setActionBanner("login-required")
-                return
+                return setActionBanner("login-required")
+            }
+            if (!session.emailVerified) {
+                return setActionBanner("verification-required")
             }
             if (permissions.isPremium(session)) {
                 functions.cache.clearResponseCacheKey("/api/user/session")
@@ -490,8 +492,10 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
         const toggleSegmentate = async () => {
             if (!props.post) return
             if (!session.username) {
-                setActionBanner("login-required")
-                return
+                return setActionBanner("login-required")
+            }
+            if (!session.emailVerified) {
+                return setActionBanner("verification-required")
             }
             if (permissions.isPremium(session)) {
                 childRef.current?.toggleSegmentate?.()
@@ -503,8 +507,10 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
         const toggleLineart = async () => {
             if (!props.post) return
             if (!session.username) {
-                setActionBanner("login-required")
-                return
+                return setActionBanner("login-required")
+            }
+            if (!session.emailVerified) {
+                return setActionBanner("verification-required")
             }
             if (permissions.isPremium(session)) {
                 childRef.current?.toggleLineart?.()
@@ -602,8 +608,10 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
             } else {
                 if (!props.post || "historyID" in props.post) return
                 if (!session.username) {
-                    setActionBanner("login-required")
-                    return
+                    return setActionBanner("login-required")
+                }
+                if (!session.emailVerified) {
+                    return setActionBanner("verification-required")
                 }
                 let order = (props.order || 1) - 1
                 setImgSourceID({post: props.post, image: props.post.images[order], unverified: props.unverified})

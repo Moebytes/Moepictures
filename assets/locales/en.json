@@ -54,6 +54,7 @@
         "result": "result.",
         "results": "results.",
         "loginRequired": "Login required.",
+        "emailVerificationRequired": "You need to verify your email.",
         "accountDeleted": "Account Deleted.",
         "$401": "401 error.",
         "$403": "403 error.",
@@ -1985,10 +1986,6 @@
         "searchHistory": {
             "header": "View the history of all posts you have viewed in the past. This is great if you saw a post you really liked but forgot to favorite it."
         },
-        "unlimitedTages": {
-            "title": "Unlimited Tags",
-            "header": "Regular accounts can only search for 3 tags. Premium accounts have this restriction removed and you may search an unlimited number of tags."
-        },
         "bookmarkSort": {
             "title": "Bookmark Sort",
             "header": "Unlocks the sorting by amount of pixiv bookmarks. This makes it easy to find the posts that attracted the most popularity."
@@ -1999,22 +1996,6 @@
         },
         "changeUsername": {
             "header": "Premium users unlock the ability to change their username. You may change your name as many times as you wish."
-        },
-        "noAds": {
-            "title": "No Ads",
-            "header": "Advertisements will get removed for premium users which will make the site more aesthetically pleasing. Thank you!"
-        },
-        "purchase": {
-            "title": "Purchase",
-            "line1": "If you would like to purchase a premium upgrade you can do so here via Coinbase.",
-            "line2": "Currently the price is $15 USD/yr. Your upgrade will last for one year from the date of purchase. To extend your term, you may purchase it multiple times. ",
-            "createA": "Create a ",
-            "line3": " account if you don't already have one. You can buy crypto (eg. bitcoin) with paypal or card through them and then use it to purchase.",
-            "payWithCrypto": "Pay with Crypto"
-        },
-        "refundPolicy": {
-            "title": "Refund Policy",
-            "header": "You can contact us within 48 hours of making your purchase if you weren’t satisfied. You will receive a refund minus any processing fees. Contact us at moepictures.moe@gmail.com."
         }
     },
     "terms": {

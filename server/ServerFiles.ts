@@ -368,6 +368,7 @@ export default class ServerFiles {
 
     public static appendImageLinks = <T extends PostSearch | PostFull | Post>(post: T) => {
         if (functions.config.useLocalFiles()) return post
+        if (!functions.config.useCDNLinks()) return post
 
         post.images = post.images.map((image) => {
             let thumbLink = !image.thumbnail || functions.post.isR18(post.rating) ? null :
@@ -391,6 +392,7 @@ export default class ServerFiles {
 
     public static appendTagLinks = <T extends TagCategorySearch | TagSearch | TagCount | MiniTag | Tag>(tag: T) => {
         if (functions.config.useLocalFiles()) return tag
+        if (!functions.config.useCDNLinks()) return tag
 
         let folder = "tag"
         if (tag.type === "artist") folder = "artist"

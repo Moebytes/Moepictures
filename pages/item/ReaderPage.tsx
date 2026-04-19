@@ -243,8 +243,10 @@ const ReaderPage: React.FunctionComponent = () => {
 
     const toggleUpscale = async () => {
         if (!session.username) {
-            setActionBanner("login-required")
-            return
+            return setActionBanner("login-required")
+        }
+        if (!session.emailVerified) {
+            return setActionBanner("verification-required")
         }
         if (permissions.isPremium(session)) {
             functions.cache.clearResponseCacheKey("/api/user/session")

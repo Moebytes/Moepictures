@@ -4,7 +4,7 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useState} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {Routes, Route, Navigate, useNavigate, useLocation} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useLayoutActions, 
 useSessionSelector, useSessionActions, useInteractionSelector,
@@ -99,6 +99,7 @@ const App: React.FunctionComponent = (props) => {
     const {selectionMode} = useSearchSelector()
     const navigate = useNavigate()
     const location = useLocation()
+    const redirectRef = useRef(false)
 
     const getSessionCookie = async () => {
         await fetch("/")
@@ -195,8 +196,11 @@ const App: React.FunctionComponent = (props) => {
             setActiveFavgroup(null)
         }
         if (session.username && !session.emailVerified) {
-            if (location.pathname !== "/verify-email") {
-                navigate("/verify-email")
+            if (!redirectRef.current) {
+                if (location.pathname !== "/verify-email") {
+                    navigate("/verify-email")
+                    redirectRef.current = true
+                }
             }
         }
         clearTimeout(destroy2FATimeout)

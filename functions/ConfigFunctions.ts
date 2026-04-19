@@ -18,6 +18,10 @@ export default class ConfigFunctions {
         return process.env.LOCAL_FILES === "yes"
     }
 
+    public static useCDNLinks = () => {
+        return process.env.CDN_LINKS === "yes"
+    }
+
     public static backupsEnabled = () => {
         return process.env.DATABASE_BACKUPS === "yes"
     }

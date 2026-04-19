@@ -35,6 +35,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
+    const {setActionBanner} = useActiveActions()
     const {tagFlag} = useFlagSelector()
     const {setTagFlag} = useFlagActions()
     const {setSearch, setSearchFlag} = useSearchActions()
@@ -127,6 +128,9 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     }, [deleteTagFlag, session])
 
     const deleteTagDialog = async () => {
+        if (!session.emailVerified) {
+            return setActionBanner("verification-required")
+        }
         setDeleteTagID(props.tag.tag)
     }
 
@@ -168,6 +172,9 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     }, [editTagFlag, session])
 
     const editTagDialog = async () => {
+        if (!session.emailVerified) {
+            return setActionBanner("verification-required")
+        }
         setEditTagObj({
             failed: false,
             tag: props.tag.tag,
@@ -204,11 +211,17 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     }, [aliasTagFlag, session])
 
     const aliasTagDialog = async () => {
+        if (!session.emailVerified) {
+            return setActionBanner("verification-required")
+        }
         setAliasTagName("")
         setAliasTagID(props.tag.tag)
     }
 
     const categorizeTagDialog = async () => {
+        if (!session.emailVerified) {
+            return setActionBanner("verification-required")
+        }
         setCategorizeTag(props.tag)
     }
 

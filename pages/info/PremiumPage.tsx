@@ -5,65 +5,31 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import React, {useEffect, useState} from "react"
-import {useNavigate} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
-import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+import {useThemeSelector, useInteractionActions, useSessionSelector,
 useLayoutActions, useActiveActions, useLayoutSelector} from "../../store"
 import premiumImg from "../../assets/images/premiumupgrade.png"
 import upscaledImg from "../../assets/images/upscaled.png"
 import bookmarksImg from "../../assets/images/bookmarks.png"
 import historyImg from "../../assets/images/searchhistory.png"
-import unlimitedTagsImg from "../../assets/images/unlimitedtags.png"
 import autosearchImg from "../../assets/images/autosearchimg.png"
 import animatedImg from "../../assets/images/animatedavatar.gif"
 import changeUsernameImg from "../../assets/images/changeusername.png"
 import upscaledImages from "../../assets/images/premium-upscaled-images.png"
 import autosearch from "../../assets/images/premium-autosearch.png"
 import searchHistory from "../../assets/images/premium-search-history.png"
-import unlimitedTags from "../../assets/images/premium-unlimited-tags.png"
 import bookmarkSort from "../../assets/images/premium-bookmark-sort.png"
 import animatedAvatar from "../../assets/images/premium-animated-avatar.png"
 import changeUsername from "../../assets/images/premium-change-username.png"
-import noAds from "../../assets/images/premium-no-ads.png"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import PremiumStarIcon from "../../assets/svg/premium-star.svg"
-import BitcoinIcon from "../../assets/svg/bitcoin.svg"
 import "./styles/premiumpage.less"
 
-const PaymentButton: React.FunctionComponent = (props) => {
-    const {i18n} = useThemeSelector()
-    const {session} = useSessionSelector()
-    const {setSessionFlag} = useSessionActions()
-    const [paymentLink, setPaymentLink] = useState("")
-    const navigate = useNavigate()
-
-    const createCharge = async () => {
-        const result = await functions.http.post("/api/premium/paymentlink", null, session, setSessionFlag)
-        setPaymentLink(result.hosted_url)
-    }
-
-    useEffect(() => {
-        if (!session.username) return
-        createCharge()
-    }, [session])
-
-    const openPaymentLink = () => {
-        window.open(paymentLink)
-    }
-
-    return (
-        <button className="premium-button" onClick={openPaymentLink}>
-            <BitcoinIcon className="premium-button-icon"/>
-            <span>{i18n.premium.purchase.payWithCrypto}</span>
-        </button>
-    )
-}
-
-const PremiumPage: React.FunctionComponent = (props) => {
+const PremiumPage: React.FunctionComponent = () => {
     const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
@@ -71,7 +37,6 @@ const PremiumPage: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {mobile} = useLayoutSelector()
     const [premiumFeature, setPremiumFeature] = useState("premium")
-    const navigate = useNavigate()
 
     useEffect(() => {
         if (!session.cookie) return
@@ -124,10 +89,6 @@ const PremiumPage: React.FunctionComponent = (props) => {
         }
     }, [premiumFeature])
 
-    const openLink = (url: string) => {
-        window.open(url, "_blank", "noreferrer")
-    }
-
     const getContainerJSX = () => {
         if (premiumFeature === "premium") {
             return (
@@ -172,15 +133,6 @@ const PremiumPage: React.FunctionComponent = (props) => {
                 <div className="premium-img-container"><img className="premium-img" src={historyImg}/></div></>
             )
         }
-        if (premiumFeature === "unlimited-tags") {
-            return (
-                <><img className="premium-banner" src={unlimitedTags}/>
-                <span className="premium-text" style={{color: "#ff3afd"}}>
-                    {i18n.premium.unlimitedTages.header}
-                </span>
-                <div className="premium-img-container"><img className="premium-img" src={unlimitedTagsImg}/></div></>
-            )
-        }
         if (premiumFeature === "bookmark-sort") {
             return (
                 <><img className="premium-banner" src={bookmarkSort}/>
@@ -208,36 +160,6 @@ const PremiumPage: React.FunctionComponent = (props) => {
                 <div className="premium-img-container"><img className="premium-img" src={changeUsernameImg}/></div></>
             )
         }
-        if (premiumFeature === "no-ads") {
-            return (
-                <><img className="premium-banner" src={noAds} style={{width: "300px"}}/>
-                <span className="premium-text" style={{color: "#297aff"}}>
-                    {i18n.premium.noAds.header}
-                </span></>
-            )
-        }
-        if (premiumFeature === "purchase") {
-            return (
-                <><span className="premium-heading">{i18n.premium.purchase.title}</span>
-                <span className="premium-text">
-                    {i18n.premium.purchase.line1}<br/><br/>
-
-                    {i18n.premium.purchase.line2}<br/><br/>
-                    
-                    {i18n.premium.purchase.createA}<a className="premium-link" onClick={() => openLink("https://www.coinbase.com")}>Coinbase</a>
-                    {i18n.premium.purchase.line3}
-                </span>
-                <PaymentButton/></>
-            )
-        }
-        if (premiumFeature === "refund-policy") {
-            return (
-                <><span className="premium-heading">{i18n.premium.refundPolicy.title}</span>
-                <span className="premium-text">
-                    {i18n.premium.refundPolicy.header}
-                </span></>
-            )
-        }
     }
 
     return (
@@ -253,13 +175,9 @@ const PremiumPage: React.FunctionComponent = (props) => {
                         <span className="premium-nav-text" style={{color: "#2f91ff"}} onClick={() => setPremiumFeature("upscaled-images")}>{i18n.user.upscaledImages}</span>
                         <span className="premium-nav-text" style={{color: "#5b2fff"}} onClick={() => setPremiumFeature("autosearch")}>{i18n.premium.autoSearch.title}</span>
                         <span className="premium-nav-text" style={{color: "#ff2792"}} onClick={() => setPremiumFeature("search-history")}>{i18n.history.search}</span>
-                        <span className="premium-nav-text" style={{color: "#ff3afd"}} onClick={() => setPremiumFeature("unlimited-tags")}>{i18n.premium.unlimitedTages.title}</span>
                         <span className="premium-nav-text" style={{color: "#3a51ff"}} onClick={() => setPremiumFeature("bookmark-sort")}>{i18n.premium.bookmarkSort.title}</span>
                         <span className="premium-nav-text" style={{color: "#fb1d90"}} onClick={() => setPremiumFeature("animated-avatar")}>{i18n.premium.animatedAvatar.title}</span>
                         <span className="premium-nav-text" style={{color: "#5e2cff"}} onClick={() => setPremiumFeature("change-username")}>{i18n.user.changeUsername}</span>
-                        <span className="premium-nav-text" style={{color: "#297aff"}} onClick={() => setPremiumFeature("no-ads")}>{i18n.premium.noAds.title}</span>
-                        <span className="premium-nav-text" onClick={() => setPremiumFeature("purchase")}>{i18n.premium.purchase.title}</span>
-                        <span className="premium-nav-text" onClick={() => setPremiumFeature("refund-policy")}>{i18n.premium.refundPolicy.title}</span>
                     </div>
                     <div className="premium-container">
                         {getContainerJSX()}

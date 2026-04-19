@@ -23,7 +23,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {quoteText} = useActiveSelector()
-    const {setQuoteText} = useActiveActions()
+    const {setQuoteText, setActionBanner} = useActiveActions()
     const {commentID, commentJumpFlag} = useFlagSelector()
     const {setCommentID, setCommentJumpFlag} = useFlagActions()
     const [comments, setComments] = useState([] as UserComment[])
@@ -101,6 +101,10 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     }, [quoteText])
 
     const post = async (text: string) => {
+        if (!session.emailVerified) {
+            setActionBanner("verification-required")
+            return
+        }
         const badComment = functions.validation.validateComment(text, i18n)
         if (badComment) {
             textBoxRef.current?.showError(badComment)

@@ -42,7 +42,7 @@ const GroupPage: React.FunctionComponent = () => {
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {reorderState} = useActiveSelector()
-    const {setHeaderText, setSidebarText, setActiveGroup, setActiveDropdown, setReorderState} = useActiveActions()
+    const {setHeaderText, setSidebarText, setActiveGroup, setActiveDropdown, setReorderState, setActionBanner} = useActiveActions()
     const {groupFlag} = useFlagSelector()
     const {setGroupFlag} = useFlagActions()
     const {session} = useSessionSelector()
@@ -205,6 +205,9 @@ const GroupPage: React.FunctionComponent = () => {
     }
 
     const changeReorderState = () => {
+        if (!session.emailVerified) {
+            return setActionBanner("verification-required")
+        }
         if (reorderState) {
             cancelReorder()
         } else {
@@ -212,19 +215,38 @@ const GroupPage: React.FunctionComponent = () => {
         }
     }
 
+    const changeDeleteState = () => {
+        if (!session.emailVerified) {
+            return setActionBanner("verification-required")
+        }
+        setDeleteMode((prev: boolean) => !prev)
+    }
+
     const showGroupAddDialog = async () => {
+        if (!session.emailVerified) {
+            return setActionBanner("verification-required")
+        }
         setAddGroupPostObj(group)
     }
 
     const showGroupEditDialog = async () => {
+        if (!session.emailVerified) {
+            return setActionBanner("verification-required")
+        }
         setEditGroupObj(group)
     }
 
     const showGroupDeleteDialog = async () => {
+        if (!session.emailVerified) {
+            return setActionBanner("verification-required")
+        }
         setDeleteGroupObj(group)
     }
 
     const showGroupRemapDialog = async () => {
+        if (!session.emailVerified) {
+            return setActionBanner("verification-required")
+        }
         setRemapGroupObj(group)
     }
 
@@ -242,8 +264,8 @@ const GroupPage: React.FunctionComponent = () => {
                 }
             }
             jsx.push(deleteMode ? 
-                <CancelIcon className="group-opt-pink" onClick={() => setDeleteMode((prev: boolean) => !prev)}/> :
-                <CancelIcon className="group-opt" onClick={() => setDeleteMode((prev: boolean) => !prev)}/>)
+                <CancelIcon className="group-opt-pink" onClick={() => changeDeleteState()}/> :
+                <CancelIcon className="group-opt" onClick={() => changeDeleteState()}/>)
             jsx.push(<AddIcon className="group-opt" onClick={() => showGroupAddDialog()}/>)
             jsx.push(<EditIcon className="group-opt" onClick={() => showGroupEditDialog()}/>)
             jsx.push(<RemapIcon className="group-opt" onClick={() => showGroupRemapDialog()}/>)

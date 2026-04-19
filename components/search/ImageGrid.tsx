@@ -110,18 +110,6 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         if (query?.includes(" ") && !saveSearchFlag) {
             query = await functions.native.parseSpaceEnabledSearch(query, session, setSessionFlag)
         }
-        let tags = query?.trim().split(/\s+/g).filter(Boolean) || []
-        if (tags.length > 3) {
-            if (!session.username) {
-                setSearch("")
-                setActionBanner("login-required")
-                return []
-            }
-            if (!permissions.isPremium(session)) {
-                setPremiumRequired("tags")
-                return []
-            }
-        }
         if (query?.startsWith("history:")) {
             if (!session.username) {
                 setSearch("")

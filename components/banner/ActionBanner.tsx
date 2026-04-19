@@ -23,6 +23,10 @@ const ActionBanner: React.FunctionComponent = (props) => {
             setStickyText(i18n.sidebar.loginRequired)
             document.documentElement.style.setProperty("--actionBannerColor", "#ff547cCC")
         }
+        if (actionBanner === "verification-required") {
+            setStickyText(i18n.sidebar.emailVerificationRequired)
+            document.documentElement.style.setProperty("--actionBannerColor", "#ff54e0cc")
+        }
         if (actionBanner === "copy-tags") {
             setStickyText(i18n.banner.copiedTags)
             document.documentElement.style.setProperty("--actionBannerColor", "#ed517dCC")

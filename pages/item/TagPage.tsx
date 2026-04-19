@@ -45,7 +45,7 @@ const TagPage: React.FunctionComponent = () => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
-    const {setSidebarText, setHeaderText, setActiveDropdown} = useActiveActions()
+    const {setSidebarText, setHeaderText, setActiveDropdown, setActionBanner} = useActiveActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
@@ -284,6 +284,9 @@ const TagPage: React.FunctionComponent = () => {
 
     const showTagEditDialog = async () => {
         if (!tag) return
+        if (!session.emailVerified) {
+            return setActionBanner("verification-required")
+        }
         setEditTagObj({
             failed: false,
             tag: tag.tag,
@@ -325,11 +328,17 @@ const TagPage: React.FunctionComponent = () => {
 
     const showTagDeleteDialog = async () => {
         if (!tag) return
+        if (!session.emailVerified) {
+            return setActionBanner("verification-required")
+        }
         setDeleteTagID(tag.tag)
     }
 
     const showTagCategorizeDialog = async () => {
         if (!tag) return
+        if (!session.emailVerified) {
+            return setActionBanner("verification-required")
+        }
         setCategorizeTag({tag: tag.tag, type: tag.type})
     }
 

@@ -440,8 +440,10 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const saveTextDialog = () => {
         if (!props.post) return
         if (!session.username) {
-            setActionBanner("login-required")
-            return
+            return setActionBanner("login-required")
+        }
+        if (!session.emailVerified) {
+            return setActionBanner("verification-required")
         }
         setSaveNoteOrder(props.order || 1)
         setSaveNoteData(items)
@@ -494,8 +496,10 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
 
     const ocrDialog = () => {
         if (!session.username) {
-            setActionBanner("login-required")
-            return
+            return setActionBanner("login-required")
+        }
+        if (!session.emailVerified) {
+            return setActionBanner("verification-required")
         }
         setNoteOCRDialog(!noteOCRDialog)
     }
@@ -503,8 +507,10 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const showHistory = () => {
         if (!props.post) return
         if (!session.username) {
-            setActionBanner("login-required")
-            return
+            return setActionBanner("login-required")
+        }
+        if (!session.emailVerified) {
+            return setActionBanner("verification-required")
         }
         navigate(`/note/history/${props.post.postID}/${props.post.slug}/${props.order || 1}`)
     }
