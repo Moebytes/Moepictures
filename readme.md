@@ -2,7 +2,7 @@
 
 Moepictures is a website for posting cute anime artworks.
 
-<img src="assets/images/readme.png">
+<img src="assets/images/mainimg.png">
 
 ### Search With Spaces
 
