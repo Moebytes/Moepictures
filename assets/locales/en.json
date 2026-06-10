@@ -15,7 +15,8 @@
         "contact": "Contact",
         "mail": "Mail",
         "modQueue": "Mod Queue",
-        "profile": "Profile"
+        "profile": "Profile",
+        "mobile": "Mobile"
     },
     "sidebar": {
         "copyTags": "Copy Tags",
@@ -2110,5 +2111,11 @@
                 "line1": "We may make changes to our privacy policy at any point, indicated by the \"last updated\" date. Changes to our privacy policy are effective immediately on publication."
             }
         }
+    },
+    "mobileApp": {
+        "title": "Mobile App",
+        "line1": "Download our mobile app for a better experience on phones and tablets!",
+        "line2": "*Note, not all site features are available on mobile.",
+        "download": "Currently you can only install it on android. Get it here!"
     }
 }

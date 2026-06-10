@@ -67,6 +67,7 @@ import NewsBannerPage from "./pages/settings/NewsBannerPage"
 import APIKeyPage from "./pages/settings/APIKeyPage"
 import PremiumPage from "./pages/info/PremiumPage"
 import PremiumSuccessPage from "./pages/settings/PremiumSuccessPage"
+import MobileAppPage from "./pages/info/MobileAppPage"
 import ReaderPage from "./pages/item/ReaderPage"
 import Dialogs from "./dialogs/Dialogs"
 import DragAndDrop from "./components/site/DragAndDrop"
@@ -319,6 +320,7 @@ const App: React.FunctionComponent = (props) => {
                 <Route path="/groups" element={<GroupsPage/>}/>
                 <Route path="/history" element={<HistoryPage/>}/>
                 <Route path="/premium" element={<PremiumPage/>}/>
+                <Route path="/mobile" element={<MobileAppPage/>}/>
                 <Route path="/user/:username" element={<UserPage/>}/>
                 <Route path="/tag/history/:tag" element={<TagHistoryPage/>}/>
                 <Route path="/user/:username/tag/history" element={<TagHistoryPage/>}/>

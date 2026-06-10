@@ -74,14 +74,6 @@ const PremiumPage: React.FunctionComponent = () => {
     }, [mobile])
 
     useEffect(() => {
-        if (mobile) {
-            setRelative(true)
-        } else {
-            setRelative(false)
-        }
-    }, [mobile])
-
-    useEffect(() => {
         if (premiumFeature === "premium") {
             window.history.pushState(null, document.title, window.location.pathname + window.location.search)
         } else {
