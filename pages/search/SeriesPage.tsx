@@ -74,13 +74,13 @@ const SeriesPage: React.FunctionComponent = (props) => {
     const loadInitial = async (query?: string) => {
         let sort = functions.validation.parseSort(sortType, sortReverse)
         const result = await functions.http.get("/api/search/series", {sort, query, limit}, session, setSessionFlag)
-        return functions.util.removeDuplicates(result)
+        return result
     }
 
     const updateOffset = async (offset: number, query?: string) => {
         let sort = functions.validation.parseSort(sortType, sortReverse)
         let result = await functions.http.get("/api/search/series", {sort, query, limit, offset}, session, setSessionFlag)
-        return functions.util.removeDuplicates(result)
+        return result
     }
 
     const {items, visibleItems, page, setPage, maxPage, searchQuery, setSearchQuery, initItems, setManagedPage, setManagedItems,

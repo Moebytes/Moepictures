@@ -624,7 +624,8 @@ export default class SQLSearch {
                     JOIN post_json ON post_json."postID" = post_tags."postID"
                 )
                 SELECT * FROM (
-                    SELECT ranked_posts."tagID",
+                    SELECT DISTINCT ON (ranked_posts."tagID")
+                    ranked_posts."tagID",
                     ranked_posts.tag, ranked_posts.type,
                     ranked_posts.image, ranked_posts."imageHash",
                     ranked_posts.website, ranked_posts.social,
