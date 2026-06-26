@@ -34,10 +34,9 @@ Tags support custom grouping, useful to separate each characters specific tags i
 MoeText is our custom language used to format styling in comments and replies. It also handles linking to items such as posts. 
 See https://moepictures.net/help#commenting for the list of formatting replacements. 
 
-### Mobile
+### Mobile App
 
-You may want to use our mobile app for a better experience on mobile.
-- [Moepictures App](https://github.com/Moebytes/Moepictures-App)
+We also have a mobile app: https://github.com/Moebytes/Moepictures-App
 
 ### Design
 
