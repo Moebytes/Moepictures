@@ -34,10 +34,6 @@ Tags support custom grouping, useful to separate each characters specific tags i
 MoeText is our custom language used to format styling in comments and replies. It also handles linking to items such as posts. 
 See https://moepictures.net/help#commenting for the list of formatting replacements. 
 
-### Mobile App
-
-We also have a mobile app: https://github.com/Moebytes/Moepictures-App
-
 ### Design
 
 Our design is available here: https://www.figma.com/design/f7fQmrcMwfKOGYUnHnXZ0B/Moepictures-Website 
@@ -87,3 +83,8 @@ To enable live2d support, you need to download the Cubism Core web sdk and place
 https://www.live2d.com/en/sdk/download/web/
 
 That's pretty much it. Following our license (CC BY-NC 4.0) you may not commercialize self-hosted instances.
+
+### Mobile App
+
+- [Moepictures App](https://github.com/Moebytes/Moepictures-App)
+
