@@ -2,7 +2,7 @@
 
 Moepictures is a website for posting cute anime artworks.
 
-<img src="assets/images/mainimg.png">
+<img src="assets/images/design.png">
 
 ### Search With Spaces
 
@@ -82,11 +82,9 @@ pip3 install pandas torch torchvision numpy scipy Pillow timm opencv-python mang
 To enable live2d support, you need to download the Cubism Core web sdk and place it in `assets/live2d`.
 https://www.live2d.com/en/sdk/download/web/
 
-#### A Note on Updating
-Because I am a solo developer, there is no system provided for database schema and data migrations, since it's 
-mainly a hassle for me. You update at your own risk and handle changes manually. You can check the file 
-`sql/CreateDB.sql` to see if anything changed. 
-
 That's pretty much it. Following our license (CC BY-NC 4.0) you may not commercialize self-hosted instances.
 
+### Mobile App
+
+- [Moepictures App](https://github.com/Moebytes/Moepictures-App)
 
