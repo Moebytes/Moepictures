@@ -149,7 +149,7 @@ const PostImage = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
                     <ZoomOffIcon className="image-control-img" onClick={() => setDisableZoom(!disableZoom)}/>}
                     <ZoomOutIcon className="image-control-img" onClick={zoomOut}/>
                     <ZoomInIcon className="image-control-img" onClick={zoomIn}/>
-                    <FullscreenIcon className="image-control-img" onClick={zoomIn}/>
+                    <FullscreenIcon className="image-control-img" onClick={toggleFullscreen}/>
                     <ReaderIcon className="image-control-img" onClick={() => navigate(`/post/${props.post?.postID}/${props.post?.slug}/reader`)}/>
                 </div> 
             </div>
