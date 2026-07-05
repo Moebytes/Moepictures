@@ -547,7 +547,6 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <a className="help-link" onClick={() => openLink("https://imgur.com/")}>Imgur</a><br/>
                     <a className="help-link" onClick={() => openLink("https://www.pinterest.com/")}>Pinterest</a><br/>
                     <a className="help-link" onClick={() => openLink("https://medibang.com/")}>ARTStreet</a><br/>
-                    <a className="help-link" onClick={() => openLink("https://newgrounds.com/")}>Newgrounds</a><br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={""}/></div></>
             )

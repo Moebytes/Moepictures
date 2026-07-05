@@ -8,7 +8,6 @@ import {ArtstationSource} from "./ArtstationSource"
 import {ArtStreetSource} from "./ArtStreetSource"
 import {DeviantArtSource} from "./DeviantArtSource"
 import {ImgurSource} from "./ImgurSource"
-import {NewgroundsSource} from "./NewgroundsSource"
 import {PinterestSource} from "./PinterestSource"
 import {PixivSource} from "./PixivSource"
 import {RedditSource} from "./RedditSource"
@@ -27,7 +26,6 @@ export default class Source {
             new ArtstationSource(url),
             new RedditSource(url),
             new TumblrSource(url),
-            new NewgroundsSource(url),
             new ArtStreetSource(url),
             new PinterestSource(url),
             new ImgurSource(url)
