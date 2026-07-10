@@ -125,8 +125,8 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         sort: functions.validation.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch}, session, setSessionFlag)
         setHeaderFlag(true)
         setIsRandomSearch(false)
-        if (!result.length) setNoResults(true)
-        if (!search) document.title = i18n.title
+        setNoResults(result.length === 0)
+        if (!query) document.title = i18n.title
 
         return result
     })
@@ -242,7 +242,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             setTimeout(() => {
                 reloadedPost = false
             }, 500)
-            return
+            //return
         }
         initItems(search, true)
     }, [settingsLoaded, imageType, ratingType, styleType, 
