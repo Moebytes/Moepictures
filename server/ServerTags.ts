@@ -471,97 +471,58 @@ export default class ServerTags {
 
     public static appendArtToolTags = (tags: string[], drawingTools?: string[] | null) => {
         if (!drawingTools?.length) return tags
-        let appendTags = [] as string[]
 
-        drawingTools = drawingTools.map((tool) => String(tool).toLowerCase())
-
-        for (const tool of drawingTools) {
-            if (tool === "clip studio paint") {
-                appendTags.push("clip-studio-paint")
-            } else if (tool === "sai") {
-                appendTags.push("paint-tool-sai")
-            } else if (tool === "photoshop") {
-                appendTags.push("photoshop")
-            } else if (tool === "live2d") {
-                appendTags.push("live2d")
-            } else if (tool === "illuststudio") {
-                appendTags.push("illust-studio")
-            } else if (tool === "photostudio") {
-                appendTags.push("photo-studio")
-            } else if (tool === "comicstudio") {
-                appendTags.push("comic-studio")
-            } else if (tool === "firealpaca") {
-                appendTags.push("fire-alpaca")
-            } else if (tool === "medibang paint" || tool === "medibang paint pro") {
-                appendTags.push("medibang-paint")
-            } else if (tool === "procreate") {
-                appendTags.push("procreate")
-            } else if (tool === "gimp") {
-                appendTags.push("gimp")
-            } else if (tool === "pixia") {
-                appendTags.push("pixia")
-            } else if (tool === "opencanvas") {
-                appendTags.push("open-canvas")
-            } else if (tool === "illustrator") {
-                appendTags.push("illustrator")
-            } else if (tool === "poser") {
-                appendTags.push("poser")
-            } else if (tool === "blender") {
-                appendTags.push("blender")
-            } else if (tool === "ms_paint") {
-                appendTags.push("ms-paint")
-            } else if (tool === "azpainter" || tool === "azpainter2") {
-                appendTags.push("azpainter")
-            } else if (tool === "krita") {
-                appendTags.push("krita")
-            } else if (tool === "aseprite") {
-                appendTags.push("aseprite")
-            } else if (tool === "aftereffects") {
-                appendTags.push("after-effects")
-            } else if (tool === "ibispaint") {
-                appendTags.push("ibis-paint")
-            } else if (tool === "zbrush") {
-                appendTags.push("zbrush")
-            } else if (tool === "maya") {
-                appendTags.push("maya")
-            } else if (tool === "3dsmax") {
-                appendTags.push("3ds-max")
-            } else if (tool === "cinema4d") {
-                appendTags.push("cinema4d")
-            } else if (tool === "inkscape") {
-                appendTags.push("inkscape")
-            } else if (tool === "azdrawing" || tool === "azdrawing2") {
-                appendTags.push("azdrawing")
-            } else if (tool === "pixiv sketch") {
-                appendTags.push("pixiv-sketch")
-            } else if (tool === "vroid studio") {
-                appendTags.push("vroid-studio")
-            } else if (tool === "retas studio") {
-                appendTags.push("retas-studio")
-            } else if (tool === "drawr") {
-                appendTags.push("drawr")
-            } else if (tool === "paintgraphic") {
-                appendTags.push("paintgraphic")
-            } else if (tool === "comicworks") {
-                appendTags.push("comicworks")
-            } else if (tool === "clip paint lab") {
-                appendTags.push("clip-paint-lab")
-            } else if (tool === "sketchbookpro") {
-                appendTags.push("sketchbook-pro")
-            } else if (tool === "paintshoppro") {
-                appendTags.push("paintshop-pro")
-            } else if (tool === "cgillust") {
-                appendTags.push("cgillust")
-            } else if (tool === "metasequoia") {
-                appendTags.push("metasequoia")
-            } else if (tool === "shade") {
-                appendTags.push("shade3d")
-            } else if (tool === "flash") {
-                appendTags.push("flash")
-            } else if (tool === "painter") {
-                appendTags.push("corel-painter")
-            }
+        const toolMap = {
+            "clip studio paint": "clip-studio-paint",
+            "sai": "paint-tool-sai",
+            "photoshop": "photoshop",
+            "live2d": "live2d",
+            "illuststudio": "illust-studio",
+            "photostudio": "photo-studio",
+            "comicstudio": "comic-studio",
+            "firealpaca": "fire-alpaca",
+            "medibang paint": "medibang-paint",
+            "medibang paint pro": "medibang-paint",
+            "procreate": "procreate",
+            "gimp": "gimp",
+            "pixia": "pixia",
+            "opencanvas": "open-canvas",
+            "illustrator": "illustrator",
+            "poser": "poser",
+            "blender": "blender",
+            "ms_paint": "ms-paint",
+            "azpainter": "azpainter",
+            "azpainter2": "azpainter",
+            "krita": "krita",
+            "aseprite": "aseprite",
+            "aftereffects": "after-effects",
+            "ibispaint": "ibis-paint",
+            "zbrush": "zbrush",
+            "maya": "maya",
+            "3dsmax": "3ds-max",
+            "cinema4d": "cinema4d",
+            "inkscape": "inkscape",
+            "azdrawing": "azdrawing",
+            "azdrawing2": "azdrawing",
+            "pixiv sketch": "pixiv-sketch",
+            "vroid studio": "vroid-studio",
+            "retas studio": "retas-studio",
+            "drawr": "drawr",
+            "paintgraphic": "paintgraphic",
+            "comicworks": "comicworks",
+            "clip paint lab": "clip-paint-lab",
+            "sketchbookpro": "sketchbook-pro",
+            "paintshoppro": "paintshop-pro",
+            "cgillust": "cgillust",
+            "metasequoia": "metasequoia",
+            "shade": "shade3d",
+            "flash": "flash",
+            "painter": "corel-painter",
         }
+
+        const appendTags = drawingTools
+            .map((tool) => toolMap[String(tool).toLowerCase()])
+            .filter((tag): tag is string => tag !== undefined)
 
         return functions.util.removeDuplicates([...tags, ...appendTags])
     }
