@@ -877,7 +877,8 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                     <span className="side-info">{i18n.sidebar.getInfo}</span>
                                 </span>
                             </div>
-                            {!props.unverified && !functions.post.isR18(props.post.rating) ? <div className="mobileinfo-row">
+                            {session.username && !props.unverified && !functions.post.isR18(props.post.rating) ? 
+                            <div className="mobileinfo-row">
                                 <span className="tag-hover" onClick={triggerSetAvatar}>
                                     <SetAvatarIcon className="mobileinfo-icon"/>
                                     <span className="side-info">{i18n.sidebar.setAvatar}</span>

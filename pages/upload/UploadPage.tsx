@@ -399,8 +399,7 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
             }
             navigate("/login")
             setSidebarText(i18n.sidebar.loginRequired)
-        }
-        if (!session.emailVerified) {
+        } else if (!session.emailVerified) {
             navigate("/posts")
             setSidebarText(i18n.sidebar.emailVerificationRequired)
         }
