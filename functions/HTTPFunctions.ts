@@ -37,7 +37,7 @@ export default class HTTPFunctions {
 
     public static updateClientKeys = async (session: Session, setSessionFlag?: (value: boolean) => void) => {
         if (this.privateKey) return this.privateKey
-        if (this.clientKeyLock) await functions.timeout(100 + Math.random() * 100)
+        if (this.clientKeyLock) await functions.timeout(1000 + Math.random() * 1000)
         if (!this.privateKey) {
             this.clientKeyLock = true
             const savedPublicKey = await localforage.getItem("publicKey") as string
@@ -58,7 +58,7 @@ export default class HTTPFunctions {
 
     public static updateServerPublicKey = async (session: Session, setSessionFlag?: (value: boolean) => void) => {
         if (this.serverPublicKey) return this.serverPublicKey
-        if (this.serverKeyLock) await functions.timeout(100 + Math.random() * 100)
+        if (this.serverKeyLock) await functions.timeout(1000 + Math.random() * 1000)
         if (!this.serverPublicKey) {
             this.serverKeyLock = true
             const response = await functions.http.post("/api/server-key", null, session, setSessionFlag)
