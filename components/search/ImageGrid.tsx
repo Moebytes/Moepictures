@@ -59,6 +59,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const [noResults, setNoResults] = useState(false)
+    const [afterFirstLoad, setAfterFirstLoad] = useState(false)
     const [isRandomSearch, setIsRandomSearch] = useState(false)
     const [postsRef, setPostsRef] = useState([] as React.RefObject<Ref | null>[])
     const [reupdateFlag, setReupdateFlag] = useState(false)
@@ -126,6 +127,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         setHeaderFlag(true)
         setIsRandomSearch(false)
         setNoResults(result.length === 0)
+        if (result.length) setAfterFirstLoad(true)
         if (!query) document.title = i18n.title
 
         return result
@@ -401,7 +403,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
                     comicPages={comicPages} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             }
         }
-        if (!jsx.length && noResults) {
+        if (!jsx.length && noResults && afterFirstLoad) {
             jsx.push(
                 <div className="noresults-container">
                     <img className="noresults" src={noresults}/>
