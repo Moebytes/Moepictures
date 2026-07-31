@@ -1751,6 +1751,76 @@
             "title": "Tooltips",
             "line1": "Posts and tags have their own tooltips when you hover over them. If you don't like the tooltips, you may disable them in your account settings if you register for an account. You may also toggle the displaying of the tag banner and the related posts section in the post page. The site will be a bit faster with these disabled."
         },
+        "moetext": {
+            "title": "MoeText",
+            "header": "MoeText is our markup language to format comments/replies, inspired somewhat by markdown.",
+            "quotes": {
+                "title": "Quoting:",
+                "line1": ">>>[id] User said:",
+                "line2": "> Comment"
+            },
+            "emojis": {
+                "title": "Emojis:",
+                "line1": ":emojiName:"
+            },
+            "highlight": {
+                "title": "Highlight:",
+                "line1": "==Highlighted text=="
+            },
+            "bold": {
+                "title": "Bold:",
+                "line1": "**Bolded text**"
+            },
+            "italic": {
+                "title": "Italic:",
+                "line1": "//Italicized text//"
+            },
+            "underline": {
+                "title": "Underline:",
+                "line1": "__Underlined text__"
+            },
+            "strikethrough": {
+                "title": "Strikethrough:",
+                "line1": "~~Strikethrough text~~"
+            },
+            "spoiler": {
+                "title": "Spoiler:",
+                "line1": "||Spoiler text||"
+            },
+            "link": {
+                "title": "Link:",
+                "line1": "[Name](link)"
+            },
+            "dropdown": {
+                "title": "Dropdown:",
+                "line1": "<<Header text||Dropdown text||>>"
+            },
+            "color": {
+                "title": "Hex Color:",
+                "line1": "#hexcolor{Colored text}"
+            },
+            "code": {
+                "title": "Code:",
+                "line1": "```Code block```"
+            },
+            "mention": {
+                "title": "User Mention:",
+                "line1": "@username"
+            },
+            "links": {
+                "postTitle": "Post Link:",
+                "postLine": "Post #id",
+                "threadTitle": "Thread Link:",
+                "threadLine": "Thread #id",
+                "messageTitle": "Message Link:",
+                "messageLine": "Message #id",
+                "tagTitle": "Tag Link:",
+                "tagLine": "[[tag]]"
+            },
+            "images": {
+                "header": "Posted image and video links are automatically displayed."
+            }
+        },
         "commenting": {
             "title": "Commenting",
             "rules": {
@@ -1760,76 +1830,6 @@
                 "rule3": "⇾ No foul language (if you somehow bypassed the filter).",
                 "rule4": "⇾ No unnecessary rudeness or impoliteness, please be kind.",
                 "rule5": "⇾ No otherwise distasteful/inappropriate comments."
-            },
-            "moetext": {
-                "title": "MoeText",
-                "header": "MoeText is our markup language to format comments/replies, inspired somewhat by markdown.",
-                "quotes": {
-                    "title": "Quoting:",
-                    "line1": ">>>[id] User said:",
-                    "line2": "> Comment"
-                },
-                "emojis": {
-                    "title": "Emojis:",
-                    "line1": ":emojiName:"
-                },
-                "highlight": {
-                    "title": "Highlight:",
-                    "line1": "==Highlighted text=="
-                },
-                "bold": {
-                    "title": "Bold:",
-                    "line1": "**Bolded text**"
-                },
-                "italic": {
-                    "title": "Italic:",
-                    "line1": "//Italicized text//"
-                },
-                "underline": {
-                    "title": "Underline:",
-                    "line1": "__Underlined text__"
-                },
-                "strikethrough": {
-                    "title": "Strikethrough:",
-                    "line1": "~~Strikethrough text~~"
-                },
-                "spoiler": {
-                    "title": "Spoiler:",
-                    "line1": "||Spoiler text||"
-                },
-                "link": {
-                    "title": "Link:",
-                    "line1": "[Name](link)"
-                },
-                "dropdown": {
-                    "title": "Dropdown:",
-                    "line1": "<<Header text||Dropdown text||>>"
-                },
-                "color": {
-                    "title": "Hex Color:",
-                    "line1": "#hexcolor{Colored text}"
-                },
-                "code": {
-                    "title": "Code:",
-                    "line1": "```Code block```"
-                },
-                "mention": {
-                    "title": "User Mention:",
-                    "line1": "@username"
-                },
-                "links": {
-                    "postTitle": "Post Link:",
-                    "postLine": "Post #id",
-                    "threadTitle": "Thread Link:",
-                    "threadLine": "Thread #id",
-                    "messageTitle": "Message Link:",
-                    "messageLine": "Message #id",
-                    "tagTitle": "Tag Link:",
-                    "tagLine": "[[tag]]"
-                },
-                "images": {
-                    "header": "Posted image and video links are automatically displayed."
-                }
             }
         },
         "bans": {
@@ -1854,7 +1854,7 @@
         },
         "accountDeletion": {
             "title": "Account Deletion",
-            "line1": "Since Moepictures is heavily focused on user contributions, when you delete your account we won't remove your public contributions like submitted posts and edits. The account that uploaded them will be anonymized and show up as \"deleted\". The rest of your account data will be deleted."
+            "line1": "You may delete your account in your profile settings. Since Moepictures is heavily focused on user contributions, when you delete your account we won't remove your public contributions like submitted posts and edits. The account that uploaded them will be anonymized and show up as \"deleted\". The rest of your account data will be deleted."
         },
         "copyrightRemoval": {
             "line1": "If your work is up on Moepictures then it means that we love your work and we always make sure to source posts back to you.",

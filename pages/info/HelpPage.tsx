@@ -37,6 +37,7 @@ import aliasesImg from "../../assets/images/aliases.png"
 import implicationsImg from "../../assets/images/implications.png"
 import captchaImg from "../../assets/images/captcha.png"
 import languageImg from "../../assets/images/language.png"
+import deleteAccountImg from "../../assets/images/deleteaccount.jpg"
 import pixivDownloaderImg from "../../assets/images/pixiv-downloader.png"
 import setAvatarImg from "../../assets/images/set-avatar.png"
 import musicImg from "../../assets/images/audioplayer.png"
@@ -651,6 +652,103 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <div className="help-img-container"><img className="help-img" src={tooltipsImg}/></div></>
             )
         }
+        if (helpTab === "moetext") {
+            return (
+                <><span className="help-heading">{i18n.help.moetext.title}</span>
+                <span className="help-text">
+                    {i18n.help.moetext.header}<br/><br/>
+
+                    {i18n.help.moetext.quotes.title}<br/>
+                    <span className="help-alt">
+                    {i18n.help.moetext.quotes.line1}<br/>
+                    {i18n.help.moetext.quotes.line2}<br/>
+                    </span>
+
+                    {i18n.help.moetext.highlight.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.moetext.highlight.line1}<br/>
+                    </span>
+
+                    {i18n.help.moetext.bold.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.moetext.bold.line1}<br/>
+                    </span>
+
+                    {i18n.help.moetext.italic.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.moetext.italic.line1}<br/>
+                    </span>
+
+                    {i18n.help.moetext.underline.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.moetext.underline.line1}<br/>
+                    </span>
+
+                    {i18n.help.moetext.strikethrough.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.moetext.strikethrough.line1}<br/>
+                    </span>
+
+                    {i18n.help.moetext.spoiler.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.moetext.spoiler.line1}<br/>
+                    </span>
+
+                    {i18n.help.moetext.link.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.moetext.link.line1}<br/>
+                    </span>
+
+                    {i18n.help.moetext.dropdown.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.moetext.dropdown.line1}<br/>
+                    </span>
+
+                    {i18n.help.moetext.color.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.moetext.color.line1}<br/>
+                    </span>
+
+                    {i18n.help.moetext.code.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.moetext.code.line1}<br/>
+                    </span>
+
+                    {i18n.help.moetext.emojis.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.moetext.emojis.line1}<br/>
+                    </span>
+
+                    {i18n.help.moetext.links.postTitle}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.moetext.links.postLine}<br/>
+                    </span>
+
+                    {i18n.help.moetext.links.threadTitle}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.moetext.links.threadLine}<br/>
+                    </span>
+
+                    {i18n.help.moetext.links.messageTitle}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.moetext.links.messageLine}<br/>
+                    </span>
+
+                    {i18n.help.moetext.mention.title}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.moetext.mention.line1}<br/>
+                    </span>
+
+                    {i18n.help.moetext.links.tagTitle}
+                    <span className="help-alt" style={{marginLeft: "10px"}}>
+                    {i18n.help.moetext.links.tagLine}<br/><br/>
+                    </span>
+
+                    {i18n.help.moetext.images.header}
+                </span>
+                <div className="help-img-container"><img className="help-img" src={emojisImg}/></div></>
+            )
+        }
         if (helpTab === "commenting") {
             return (
                 <><span className="help-heading">{i18n.help.commenting.title}</span>
@@ -663,99 +761,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     {i18n.help.commenting.rules.rule4}<br/>
                     {i18n.help.commenting.rules.rule5}<br/><br/>
                     </span>
-
-                    <span className="help-alt">{i18n.help.commenting.moetext.title}</span><br/>
-                    {i18n.help.commenting.moetext.header}<br/><br/>
-
-                    {i18n.help.commenting.moetext.quotes.title}<br/>
-                    <span className="help-alt">
-                    {i18n.help.commenting.moetext.quotes.line1}<br/>
-                    {i18n.help.commenting.moetext.quotes.line2}<br/>
-                    </span>
-
-                    {i18n.help.commenting.moetext.highlight.title}
-                    <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moetext.highlight.line1}<br/>
-                    </span>
-
-                    {i18n.help.commenting.moetext.bold.title}
-                    <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moetext.bold.line1}<br/>
-                    </span>
-
-                    {i18n.help.commenting.moetext.italic.title}
-                    <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moetext.italic.line1}<br/>
-                    </span>
-
-                    {i18n.help.commenting.moetext.underline.title}
-                    <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moetext.underline.line1}<br/>
-                    </span>
-
-                    {i18n.help.commenting.moetext.strikethrough.title}
-                    <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moetext.strikethrough.line1}<br/>
-                    </span>
-
-                    {i18n.help.commenting.moetext.spoiler.title}
-                    <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moetext.spoiler.line1}<br/>
-                    </span>
-
-                    {i18n.help.commenting.moetext.link.title}
-                    <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moetext.link.line1}<br/>
-                    </span>
-
-                    {i18n.help.commenting.moetext.dropdown.title}
-                    <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moetext.dropdown.line1}<br/>
-                    </span>
-
-                    {i18n.help.commenting.moetext.color.title}
-                    <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moetext.color.line1}<br/>
-                    </span>
-
-                    {i18n.help.commenting.moetext.code.title}
-                    <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moetext.code.line1}<br/>
-                    </span>
-
-                    {i18n.help.commenting.moetext.emojis.title}
-                    <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moetext.emojis.line1}<br/>
-                    </span>
-
-                    {i18n.help.commenting.moetext.links.postTitle}
-                    <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moetext.links.postLine}<br/>
-                    </span>
-
-                    {i18n.help.commenting.moetext.links.threadTitle}
-                    <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moetext.links.threadLine}<br/>
-                    </span>
-
-                    {i18n.help.commenting.moetext.links.messageTitle}
-                    <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moetext.links.messageLine}<br/>
-                    </span>
-
-                    {i18n.help.commenting.moetext.mention.title}
-                    <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moetext.mention.line1}<br/>
-                    </span>
-
-                    {i18n.help.commenting.moetext.links.tagTitle}
-                    <span className="help-alt" style={{marginLeft: "10px"}}>
-                    {i18n.help.commenting.moetext.links.tagLine}<br/><br/>
-                    </span>
-
-                    {i18n.help.commenting.moetext.images.header}
-                </span>
-                <div className="help-img-container"><img className="help-img" src={emojisImg}/></div></>
+                </span></>
             )
         }
         if (helpTab === "bans") {
@@ -800,7 +806,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <><span className="help-heading">{i18n.help.accountDeletion.title}</span>
                 <span className="help-text">
                     {i18n.help.accountDeletion.line1}<br/><br/>
-                </span></>
+                </span>
+                <div className="help-img-container"><img className="help-img" src={deleteAccountImg}/></div></>
             )
         }
         if (helpTab === "copyright-removal") {
@@ -858,6 +865,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-nav-text" onClick={() => setHelpTab("implications")}>{i18n.labels.implications}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("users")}>{i18n.help.users.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("tooltips")}>{i18n.help.tooltips.title}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("moetext")}>{i18n.help.moetext.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("commenting")}>{i18n.help.commenting.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("bans")}>{i18n.help.bans.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("captcha")}>{i18n.help.captcha.title}</span>

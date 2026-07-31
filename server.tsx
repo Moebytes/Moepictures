@@ -113,9 +113,10 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
       const allowedBot = await serverFunctions.util.isAllowedBot(ip)
       if (!allowedBot) {
         // Created over 300 sessions in a 24 hour period, spam bot?
-        await sql.report.insertBlacklist(ip, "automatic")
-        await sql.user.pruneIPSessions(ip)
-        blacklist.add(ip)
+        // await sql.report.insertBlacklist(ip, "automatic")
+        // await sql.user.pruneIPSessions(ip)
+        // blacklist.add(ip)
+        await sql.user.destroyOtherIPSessions(ip, req.sessionID)
       } else {
         await sql.user.destroyOtherIPSessions(ip, req.sessionID)
       }

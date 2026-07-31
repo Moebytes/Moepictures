@@ -207,7 +207,7 @@ const UserRoutes = (app: Express) => {
             const region = await serverFunctions.util.ipRegion(ip)
             const matches = await bcrypt.compare(password, user.password!)
             if (matches) {
-                if (user.ips?.length) {
+                if (user.ips?.length && user.username !== process.env.TESTER_NAME) {
                     if (!user.ips.includes(ip)) {
                         const tokenData = await sql.token.ipTokenByUsername(user.username)
                         if (tokenData && ip === tokenData.ip && new Date() <= new Date(tokenData.expires)) {
