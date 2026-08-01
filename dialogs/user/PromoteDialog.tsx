@@ -55,9 +55,19 @@ const PromoteDialog: React.FunctionComponent = (props) => {
     const promote = async () => {
         if (!promoteName) return
         if (!permissions.isAdmin(session)) return setPromoteName(null)
-        await functions.http.post("/api/user/promote", {username: promoteName, role}, session, setSessionFlag)
-        setPromoteName(null)
-        setUpdateUserFlag(true)
+        try {
+            await functions.http.post("/api/user/promote", {username: promoteName, role}, session, setSessionFlag)
+            setPromoteName(null)
+            setUpdateUserFlag(true)
+        } catch (err: any) {
+            let errMsg = i18n.toast.error
+            if (err.message.includes("User doesn't have 2fa")) errMsg = i18n.dialogs.promote.no2fa
+            setError(true)
+            if (!errorRef.current) await functions.timeout(20)
+            errorRef.current!.innerText = errMsg
+            await functions.timeout(3000)
+            setError(false)
+        }
     }
 
     const click = (button: "accept" | "reject") => {
@@ -72,7 +82,7 @@ const PromoteDialog: React.FunctionComponent = (props) => {
         return (
             <div className="dialog">
                 <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
-                className="dialog-box" style={{width: "300px", height: "420px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                className="dialog-box" style={{width: "300px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.dialogs.promote.title}</span>

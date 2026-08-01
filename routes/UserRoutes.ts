@@ -1373,6 +1373,10 @@ const UserRoutes = (app: Express) => {
             if ((!user.role.includes("premium") && role.includes("curator")) || (user.role.includes("premium") && role === "premium-curator")) curatorPromotion = true
             if ((!user.role.includes("premium") && role.includes("contributor")) || (user.role.includes("premium") && role === "premium-contributor")) contributorPromotion = true
             if (!user.role.includes("premium") && role.includes("premium")) premiumPromotion = true
+
+            if (role === "admin" || role === "mod" || curatorPromotion) {
+                if (!user.$2fa) return void res.status(400).send("User doesn't have 2fa")
+            }
             
             let premiumExpiration = user.premiumExpiration ? new Date(user.premiumExpiration) : new Date()
             if (premiumPromotion && premiumExpiration <= new Date()) {
@@ -1390,11 +1394,11 @@ const UserRoutes = (app: Express) => {
                 await serverFunctions.systemMessage(username, `Notice: Your account was demoted to ${role}`, message)
             } else {
                 if (role === "admin") {
-                    const message = `You have been promoted to the role of admin. You now have access to all special privileges, including deleting posts and promoting others. Thanks for being one of our highest trusted members!\n\nPlease enable 2FA if you don't have it already.`
+                    const message = `You have been promoted to the role of admin. You now have access to all special privileges, including deleting posts and promoting others. Thanks for being one of our highest trusted members!\n\nYou must have 2FA enabled to keep this role.`
                     await serverFunctions.systemMessage(username, "Notice: Your account was promoted to admin", message)
                 }
                 if (role === "mod") {
-                    const message = `You have been promoted to the role of mod. You now have access to the mod queue where you approve posts and can take moderation actions such as banning users. Thanks for being a trusted member!\n\nPlease enable 2FA if you don't have it already.`
+                    const message = `You have been promoted to the role of mod. You now have access to the mod queue where you approve posts and can take moderation actions such as banning users. Thanks for being a trusted member!\n\nYou must have 2FA enabled to keep this role.`
                     await serverFunctions.systemMessage(username, "Notice: Your account was promoted to mod", message)
                 } 
                 if (premiumPromotion) {
@@ -1402,7 +1406,7 @@ const UserRoutes = (app: Express) => {
                     await serverFunctions.systemMessage(username, "Notice: Your account was upgraded to premium", message)
                 } 
                 if (curatorPromotion) {
-                    const message = `Your account has been upgraded to curator. You can now upload directly without passing through the mod queue. Thanks for your great contributions!`
+                    const message = `Your account has been upgraded to curator. You can now upload directly without passing through the mod queue. Thanks for your great contributions!\n\nYou must have 2FA enabled to keep this role.`
                     await serverFunctions.systemMessage(username, "Notice: Your account was upgraded to curator", message)
                 } 
                 if (contributorPromotion) {

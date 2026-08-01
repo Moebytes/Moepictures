@@ -1228,7 +1228,8 @@
             "header": "R18 Content is only suitable for people over the age of 18. By continuing you confirm that you are 18 years old or older."
         },
         "promote": {
-            "title": "Promote User"
+            "title": "Promote User",
+            "no2fa": "Can't promote this user, 2fa is disabled."
         },
         "reportComment": {
             "title": "Report Comment",
