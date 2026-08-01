@@ -591,6 +591,7 @@ export default class SQLTag {
                 jsonb_build_object(
                     'username', users."username",
                     'role', users."role",
+                    'premium', users."premium",
                     'banned', users."banned",
                     'deleted', users."deleted",
                     'imagePost', users."imagePost"
@@ -613,6 +614,7 @@ export default class SQLTag {
                 jsonb_build_object(
                     'username', users."username",
                     'role', users."role",
+                    'premium', users."premium",
                     'banned', users."banned",
                     'deleted', users."deleted",
                     'imagePost', users."imagePost"
@@ -648,6 +650,7 @@ export default class SQLTag {
                 jsonb_build_object(
                     'username', users."username",
                     'role', users."role",
+                    'premium', users."premium",
                     'banned', users."banned",
                     'deleted', users."deleted",
                     'imagePost', users."imagePost"

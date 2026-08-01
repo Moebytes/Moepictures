@@ -299,21 +299,16 @@ const UserRoutes = (app: Express) => {
                 req.session.savedSearches = user.savedSearches
                 req.session.blacklist = user.blacklist
                 req.session.showR18 = user.showR18
+                req.session.premium = user.premium
                 req.session.premiumExpiration = user.premiumExpiration
                 req.session.banExpiration = user.banExpiration
                 req.session.lastNameChange = user.lastNameChange
                 req.session.deleted = user.deleted
 
-                if (user.role.includes("premium") && user.premiumExpiration) {
+                if (user.premium && user.premiumExpiration) {
                     if (new Date(user.premiumExpiration) < new Date()) {
-                        if (user.role.includes("curator")) {
-                            await sql.user.updateUser(req.session.username, "role", "curator")
-                        } else if (user.role.includes("contributor")) {
-                            await sql.user.updateUser(req.session.username, "role", "contributor")
-                        } else {
-                            await sql.user.updateUser(req.session.username, "role", "user")
-                        }
-                        const message = `Unfortunately, it seems like your premium membership has expired. Thank you for supporting us! We greatly appreciate your time spent as a premium member and we hope that you are interested in renewing it again.\n\n${functions.config.getDomain()}/premium#purchase`
+                        await sql.user.updateUser(req.session.username, "premium", false)
+                        const message = `Unfortunately, it seems like your premium membership has expired. Thank you for supporting us! We greatly appreciate your time spent as a premium member and we hope that you are interested in renewing it again.`
                         await serverFunctions.systemMessage(req.session.username, "Notice: Your premium membership expired", message)
                     }
                 }
@@ -1367,26 +1362,21 @@ const UserRoutes = (app: Express) => {
                 return void res.status(403).end()
             }
 
-            let curatorPromotion = false
-            let contributorPromotion = false
-            let premiumPromotion = false
-            if ((!user.role.includes("premium") && role.includes("curator")) || (user.role.includes("premium") && role === "premium-curator")) curatorPromotion = true
-            if ((!user.role.includes("premium") && role.includes("contributor")) || (user.role.includes("premium") && role === "premium-contributor")) contributorPromotion = true
-            if (!user.role.includes("premium") && role.includes("premium")) premiumPromotion = true
-
-            if (role === "admin" || role === "mod" || curatorPromotion) {
+            if (role === "admin" || role === "mod" || role === "curator") {
                 if (!user.$2fa) return void res.status(400).send("User doesn't have 2fa")
             }
             
+            let premiumPromotion = false
             let premiumExpiration = user.premiumExpiration ? new Date(user.premiumExpiration) : new Date()
-            if (premiumPromotion && premiumExpiration <= new Date()) {
+            if (role === "premium" && premiumExpiration <= new Date()) {
                 premiumExpiration.setFullYear(premiumExpiration.getFullYear() + 1)
+                await sql.user.updateUser(username, "premium", true)
                 await sql.user.updateUser(username, "premiumExpiration", premiumExpiration.toISOString())
+                premiumPromotion = true
             }
-            if (!role.includes("premium")) {
-                await sql.user.updateUser(username, "premiumExpiration", null)
+            if (role !== "premium") {
+                await sql.user.updateUser(username, "role", role)
             }
-            await sql.user.updateUser(username, "role", role)
 
             let isDemotion = functions.validation.isDemotion(user.role, role)
             if (isDemotion) {
@@ -1405,11 +1395,11 @@ const UserRoutes = (app: Express) => {
                     const message = `Your account has been upgraded to premium. You can now access all the premium features. Thank you for supporting us!\n\nYour membership will last until ${functions.date.prettyDate(premiumExpiration, enLocale)}.`
                     await serverFunctions.systemMessage(username, "Notice: Your account was upgraded to premium", message)
                 } 
-                if (curatorPromotion) {
+                if (role === "curator") {
                     const message = `Your account has been upgraded to curator. You can now upload directly without passing through the mod queue. Thanks for your great contributions!\n\nYou must have 2FA enabled to keep this role.`
                     await serverFunctions.systemMessage(username, "Notice: Your account was upgraded to curator", message)
                 } 
-                if (contributorPromotion) {
+                if (role === "contributor") {
                     const message = `Your account has been upgraded to contributor. You can now edit posts and tags without passing through the mod queue. Thanks for your edits!`
                     await serverFunctions.systemMessage(username, "Notice: Your account was upgraded to contributor", message)
                 }

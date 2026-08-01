@@ -1975,29 +1975,31 @@
         "premium": {
             "title": "Premium Upgrade",
             "line1": "You can purchase an account upgrade to unlock more features. Thank you for supporting us!",
-            "line2": "Your contribution allows us to stay up online for the foreseeable future. We will use it to pay our hosting and storage costs.",
-            "line3": "All of the premium features are listed on the left."
+            "line2": "All of the premium features are listed on the left."
         },
         "upscaledImages": {
-            "header": "View images upscaled to a much higher resolution. Upscaled images have much sharper details and often fixes any blurriness. We currently use the Real-CUGAN 4x upscaler."
+            "header": "View images upscaled to a higher resolution. Upscaled images have sharper details and often fix any blurriness."
+        },
+        "searchHistory": {
+            "header": "View the history of posts you have viewed in the past. This is great if you saw a post you liked but forgot to favorite it."
+        },
+        "favoriteGroups": {
+            "header": "Collect posts into personal favorite groups and edit the privacy level of each. Greatly improves your collection experience."
         },
         "autoSearch": {
             "title": "Autosearch",
             "header": "Use the autosearch, which automatically searches your current tags in a loop. You can configure the time interval between searches."
         },
-        "searchHistory": {
-            "header": "View the history of all posts you have viewed in the past. This is great if you saw a post you really liked but forgot to favorite it."
-        },
         "bookmarkSort": {
             "title": "Bookmark Sort",
-            "header": "Unlocks the sorting by amount of pixiv bookmarks. This makes it easy to find the posts that attracted the most popularity."
+            "header": "Unlocks the sorting by amount of pixiv bookmarks. This makes it easy to find posts that attracted the most popularity."
         },
         "animatedAvatar": {
             "title": "Animated Avatar",
-            "header": "Premium users can render animated avatars out of animation posts. Regular users are only able to use a static frame."
+            "header": "You can render an animated avatar out of animation posts."
         },
         "changeUsername": {
-            "header": "Premium users unlock the ability to change their username. You may change your name as many times as you wish."
+            "header": "Change your username once every 7 days so you can choose a name that you are happier with."
         }
     },
     "terms": {

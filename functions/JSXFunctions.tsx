@@ -39,8 +39,8 @@ export default class JSXFunctions {
         return <VerifyLogin username={username} link={link} ip={ip} region={region}/>
     }
 
-    public static usernameJSX = (userData: {username: string, role: string, banned: boolean | null, deleted: boolean | null, 
-        imagePost?: string | null}, classNames: {containerClass: string, textClass: string, imageClass: string, 
+    public static usernameJSX = (userData: {username: string, role: string, premium: boolean | null, banned: boolean | null, 
+        deleted: boolean | null, imagePost?: string | null}, classNames: {containerClass: string, textClass: string, imageClass: string, 
         profilePictureClass?: string, recipientClass?: string, editText?: string, date?: string, profilePicture?: string, 
         filter?: string, recipientAmount?: number, session?: Session, setSessionFlag?: (value: boolean) => void}, 
         i18n: typeof enLocale, navigate: NavigateFunction) => {
@@ -95,7 +95,7 @@ export default class JSXFunctions {
                     {(recipientAmount ?? 0) > 1 ? <span className={recipientClass}>(+{recipientAmount! - 1})</span> : null}
                 </div>
             )
-        } else if (userData.role === "premium-curator") {
+        } else if (userData.premium && userData.role === "curator") {
             return (
                 <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
                     {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
@@ -117,7 +117,7 @@ export default class JSXFunctions {
                     {(recipientAmount ?? 0) > 1 ? <span className={recipientClass}>(+{recipientAmount! - 1})</span> : null}
                 </div>
             )
-        } else if (userData.role === "premium-contributor") {
+        } else if (userData.premium && userData.role === "contributor") {
             return (
                 <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
                     {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
@@ -139,7 +139,7 @@ export default class JSXFunctions {
                     {(recipientAmount ?? 0) > 1 ? <span className={recipientClass}>(+{recipientAmount! - 1})</span> : null}
                 </div>
             )
-        } else if (userData.role === "premium") {
+        } else if (userData.premium) {
             return (
                 <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
                     {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}

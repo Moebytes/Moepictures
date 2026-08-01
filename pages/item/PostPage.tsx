@@ -175,7 +175,7 @@ const PostPage: React.FunctionComponent = () => {
     }
 
     const saveHistory = async () => {
-        if (post && session.username) {
+        if (post && session.username && permissions.isPremium(session)) {
             if (!viewPromise) {
                 viewPromise = functions.http.post("/api/post/view", {postID: post.postID}, session, setSessionFlag)
             }

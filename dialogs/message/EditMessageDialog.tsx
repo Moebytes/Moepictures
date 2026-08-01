@@ -56,7 +56,7 @@ const EditMessageDialog: React.FunctionComponent = (props) => {
                 className="dialog-box" ref={dialogRef} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
-                            <span className="dialog-title">{i18n.dialogs.deleteMessage.title}</span>
+                            <span className="dialog-title">{i18n.dialogs.editMessage.title}</span>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">{i18n.labels.title}: </span>

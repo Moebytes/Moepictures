@@ -163,25 +163,24 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
             "admin": "admin-color",
             "mod": "mod-color",
             "system": "system-color",
-            "premium-curator": "curator-color",
             "curator": "curator-color",
-            "premium-contributor": "premium-color",
-            "contributor": "contributor-color",
-            "premium": "premium-color"
+            "contributor": "contributor-color"
         }
         const svgMap = {
             "admin": "--adminColor",
             "mod": "--modColor",
             "system": "--systemColor",
-            "premium-curator": "--curatorColor",
             "curator": "--curatorColor",
-            "premium-contributor": "--premiumColor",
             "contributor": "--contributorColor",
-            "premium": "--premiumColor",
             "user": "--userColor"
         }
-        const colorClass = session.banned ? "banned" : colorMap[session.role] ?? ""
-        const svgColor = session.banned ? "--banText" : svgMap[session.role] ?? "--userColor"
+        let colorClass = session.banned ? "banned" : colorMap[session.role] ?? ""
+        let svgColor = session.banned ? "--banText" : svgMap[session.role] ?? "--userColor"
+
+        if (session.role === "user" && session.premium) {
+            colorClass = "premium-color"
+            svgColor = "--premiumColor"
+        }
 
         return (
             <>
@@ -265,7 +264,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span className="mobile-nav-text" onClick={() => {navigate("/help"); setHideMobileNavbar(true)}}>{i18n.navbar.help}</span>
                     <span className="mobile-nav-text" onClick={() => {navigate("/mobile"); setHideMobileNavbar(true)}}>{i18n.navbar.mobile}</span>
                     {permissions.isPremiumEnabled() && session.username ? <div className="mobile-nav-img-container" onClick={() => {navigate("/premium"); setHideMobileNavbar(true)}}>
-                        <PremiumStarIcon className="mobile-nav-img" style={{marginRight: "10px"}}/>
+                        {/* <PremiumStarIcon className="mobile-nav-img" style={{marginRight: "10px"}}/> */}
                         <span className="mobile-nav-text" style={{margin: "0px", color: "var(--premiumColor)"}}>{i18n.roles.premium}</span>
                     </div> : null}
                 </div>
@@ -322,8 +321,8 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/groups")}>{i18n.sort.groups}</span>
                     {/*<span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/forum")}>{i18n.navbar.forum}</span>*/}
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/help")}>{i18n.navbar.help}</span>
-                    <PhoneIcon  className="nav-img" style={{marginTop: "2px"}} onClick={() => navigate("/mobile")}/>
-                    {permissions.isPremiumEnabled() && session.username ? <PremiumStarIcon  className="nav-img" style={{marginTop: "2px"}} onClick={() => navigate("/premium")}/> : null}
+                    <PhoneIcon  className="nav-img" style={{marginRight: marginR, marginTop: "2px"}} onClick={() => navigate("/mobile")}/>
+                    {permissions.isPremiumEnabled() && session.username ? <PremiumStarIcon  className="premium-nav-img" style={{marginTop: "2px"}} onClick={() => navigate("/premium")}/> : null}
                     <div className={`nav-search-container ${!hideSidebar || tablet ? "hide-nav-search" : ""}`}>
                         <SearchIcon className="nav-search-icon" onClick={() => setSearchFlag(true)}/>
                         <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>

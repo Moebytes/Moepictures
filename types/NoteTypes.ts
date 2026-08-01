@@ -73,6 +73,7 @@ export interface NoteSearch {
     imageHash: string | null
     imagePost: string | null
     role: UserRole
+    premium: boolean | null
     banned: boolean | null
     deleted: boolean | null
     row: string

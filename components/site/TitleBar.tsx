@@ -106,25 +106,24 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
             "admin": "admin-color",
             "mod": "mod-color",
             "system": "system-color",
-            "premium-curator": "curator-color",
             "curator": "curator-color",
-            "premium-contributor": "premium-color",
-            "contributor": "contributor-color",
-            "premium": "premium-color"
+            "contributor": "contributor-color"
         }
         const svgMap = {
             "admin": "--adminColor",
             "mod": "--modColor",
             "system": "--systemColor",
-            "premium-curator": "--curatorColor",
             "curator": "--curatorColor",
-            "premium-contributor": "--premiumColor",
             "contributor": "--contributorColor",
-            "premium": "--premiumColor",
             "user": "--userColor"
         }
-        const colorClass = session.banned ? "banned" : colorMap[session.role] ?? ""
-        const svgColor = session.banned ? "--banText" : svgMap[session.role] ?? "--userColor"
+        let colorClass = session.banned ? "banned" : colorMap[session.role] ?? ""
+        let svgColor = session.banned ? "--banText" : svgMap[session.role] ?? "--userColor"
+
+        if (session.role === "user" && session.premium) {
+            colorClass = "premium-color"
+            svgColor = "--premiumColor"
+        }
 
         return (
             <>

@@ -268,7 +268,7 @@ export default class SQLNote {
                 SELECT base_notes."noteID", base_notes."postID", base_notes."updater", base_notes."updatedDate",
                 base_notes."order", note_json.data AS notes,
                 users."image", users."imageHash", users."imagePost", 
-                users."role", users."banned", users."deleted",
+                users."role", users."premium", users."banned", users."deleted",
                 to_jsonb(post_json) AS post,
                 COUNT(*) OVER () AS "noteCount"
                 FROM base_notes
@@ -311,7 +311,7 @@ export default class SQLNote {
                 SELECT base_notes."noteID", base_notes."postID", base_notes."updater", base_notes."updatedDate",
                 base_notes."order", note_json.data AS notes,
                 users."image", users."imageHash", users."imagePost", 
-                users."role", users."banned", users."deleted",
+                users."role", users."premium", users."banned", users."deleted",
                 to_jsonb(post_json) AS post,
                 COUNT(*) OVER () AS "noteCount"
                 FROM base_notes
@@ -366,7 +366,7 @@ export default class SQLNote {
                 SELECT base_notes."noteID", base_notes."postID", base_notes."updater", base_notes."updatedDate",
                 base_notes."order", note_json.data AS notes,
                 users."image", users."imageHash", users."imagePost", 
-                users."role", users."banned", users."deleted",
+                users."role", users."premium", users."banned", users."deleted",
                 to_jsonb(post_json) AS post,
                 COUNT(*) OVER () AS "noteCount"
                 FROM base_notes
@@ -426,7 +426,7 @@ export default class SQLNote {
                 SELECT base_notes."noteID", base_notes."postID", base_notes."updater", base_notes."updatedDate",
                 base_notes."order", note_json.data AS notes,
                 users."image", users."imageHash", users."imagePost", 
-                users."role", users."banned", users."deleted",
+                users."role", users."premium", users."banned", users."deleted",
                 to_jsonb(post_json) AS post,
                 COUNT(*) OVER () AS "noteCount"
                 FROM base_notes

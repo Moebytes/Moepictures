@@ -23,6 +23,7 @@ export interface Thread {
 
 export interface ThreadUser extends Thread {
     role: UserRole
+    premium: boolean | null
     image: string | null
     imagePost: string | null
     imageHash: string | null
@@ -46,6 +47,7 @@ export interface ThreadReply {
     content: string
     r18: boolean
     role: UserRole
+    premium: boolean | null
     image: string | null
     imagePost: string | null
     imageHash: string | null
@@ -75,6 +77,7 @@ export interface ForumPostSearch {
     r18: boolean | null
     type: "thread" | "reply"
     role: UserRole
+    premium: boolean | null
     image: string | null
     imagePost: string | null
     imageHash: string | null

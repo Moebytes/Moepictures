@@ -15,12 +15,14 @@ import premiumImg from "../../assets/images/premiumupgrade.png"
 import upscaledImg from "../../assets/images/upscaled.png"
 import bookmarksImg from "../../assets/images/bookmarks.png"
 import historyImg from "../../assets/images/searchhistory.png"
+import favoriteGroupsImg from "../../assets/images/favgroups2.png"
 import autosearchImg from "../../assets/images/autosearchimg.png"
 import animatedImg from "../../assets/images/animatedavatar.gif"
 import changeUsernameImg from "../../assets/images/changeusername.png"
 import upscaledImages from "../../assets/images/premium-upscaled-images.png"
 import autosearch from "../../assets/images/premium-autosearch.png"
 import searchHistory from "../../assets/images/premium-search-history.png"
+import favoriteGroups from "../../assets/images/premium-favorite-groups.png"
 import bookmarkSort from "../../assets/images/premium-bookmark-sort.png"
 import animatedAvatar from "../../assets/images/premium-animated-avatar.png"
 import changeUsername from "../../assets/images/premium-change-username.png"
@@ -91,9 +93,7 @@ const PremiumPage: React.FunctionComponent = () => {
                 <span className="premium-text">
                     {i18n.premium.premium.line1}<br/><br/>
 
-                    {i18n.premium.premium.line2}<br/><br/>
-
-                    {i18n.premium.premium.line3}
+                    {i18n.premium.premium.line2}
                 </span>
                 <div className="premium-img-container"><img className="premium-img" src={premiumImg}/></div></>
             )
@@ -125,6 +125,15 @@ const PremiumPage: React.FunctionComponent = () => {
                 <div className="premium-img-container"><img className="premium-img" src={historyImg}/></div></>
             )
         }
+        if (premiumFeature === "favorite-groups") {
+            return (
+                <><img className="premium-banner" src={favoriteGroups}/>
+                <span className="premium-text" style={{color: "#e84bff"}}>
+                    {i18n.premium.favoriteGroups.header}
+                </span>
+                <div className="premium-img-container"><img className="premium-img" src={favoriteGroupsImg}/></div></>
+            )
+        }
         if (premiumFeature === "bookmark-sort") {
             return (
                 <><img className="premium-banner" src={bookmarkSort}/>
@@ -146,7 +155,7 @@ const PremiumPage: React.FunctionComponent = () => {
         if (premiumFeature === "change-username") {
             return (
                 <><img className="premium-banner" src={changeUsername}/>
-                <span className="premium-text" style={{color: "#5e2cff"}}>
+                <span className="premium-text" style={{color: "#ff2ca9"}}>
                     {i18n.premium.changeUsername.header}
                 </span>
                 <div className="premium-img-container"><img className="premium-img" src={changeUsernameImg}/></div></>
@@ -165,11 +174,12 @@ const PremiumPage: React.FunctionComponent = () => {
                     <div className="premium-nav">
                         <span className="premium-nav-text" onClick={() => setPremiumFeature("premium")}>{i18n.roles.premium}</span>
                         <span className="premium-nav-text" style={{color: "#2f91ff"}} onClick={() => setPremiumFeature("upscaled-images")}>{i18n.user.upscaledImages}</span>
-                        <span className="premium-nav-text" style={{color: "#5b2fff"}} onClick={() => setPremiumFeature("autosearch")}>{i18n.premium.autoSearch.title}</span>
                         <span className="premium-nav-text" style={{color: "#ff2792"}} onClick={() => setPremiumFeature("search-history")}>{i18n.history.search}</span>
+                        <span className="premium-nav-text" style={{color: "#e84bff"}} onClick={() => setPremiumFeature("favorite-groups")}>{i18n.help.favoriteGroups.title}</span>
+                        <span className="premium-nav-text" style={{color: "#5b2fff"}} onClick={() => setPremiumFeature("autosearch")}>{i18n.premium.autoSearch.title}</span>
                         <span className="premium-nav-text" style={{color: "#3a51ff"}} onClick={() => setPremiumFeature("bookmark-sort")}>{i18n.premium.bookmarkSort.title}</span>
                         <span className="premium-nav-text" style={{color: "#fb1d90"}} onClick={() => setPremiumFeature("animated-avatar")}>{i18n.premium.animatedAvatar.title}</span>
-                        <span className="premium-nav-text" style={{color: "#5e2cff"}} onClick={() => setPremiumFeature("change-username")}>{i18n.user.changeUsername}</span>
+                        <span className="premium-nav-text" style={{color: "#ff2ca9"}} onClick={() => setPremiumFeature("change-username")}>{i18n.user.changeUsername}</span>
                     </div>
                     <div className="premium-container">
                         {getContainerJSX()}

@@ -306,9 +306,7 @@ export default class ValidationFunctions {
     public static validRole = (role: UserRole) => {
         if (role === "admin" ||
             role === "mod" ||
-            role === "premium-curator" ||
             role === "curator" ||
-            role === "premium-contributor" ||
             role === "contributor" ||
             role === "premium" ||
             role === "user") return true 
@@ -333,19 +331,6 @@ export default class ValidationFunctions {
             "curator": 3,
             "contributor": 2,
             "user": 1
-        }
-        let premiumHierarchy = {
-            "admin": 5,
-            "mod": 4,
-            "premium-curator": 3,
-            "premium-contributor": 2,
-            "premium": 1
-        }
-        if (oldRole.includes("premium")) {
-            if (!newRole.includes("premium")) return true
-            if (premiumHierarchy[oldRole] && premiumHierarchy[newRole]) {
-                return premiumHierarchy[newRole] < premiumHierarchy[oldRole]
-            }
         }
         if (hierarchy[oldRole] && hierarchy[newRole]) {
             return hierarchy[newRole] < hierarchy[oldRole]

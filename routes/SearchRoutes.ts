@@ -58,7 +58,7 @@ const SearchRoutes = (app: Express) => {
                 }
             }
             let result = [] as PostSearch[]
-            if (tags?.length > 3 || sort === "bookmarks" || sort === "reverse bookmarks") {
+            if (sort === "bookmarks" || sort === "reverse bookmarks") {
                 if (!permissions.isPremium(req.session)) return void res.status(402).send("Premium only")
             }
             if (sort === "favorites" || sort === "reverse favorites") {

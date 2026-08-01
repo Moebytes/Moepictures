@@ -342,7 +342,7 @@ const App: React.FunctionComponent = (props) => {
                 <Route path="/help" element={<HelpPage/>}/>
                 {/*<Route path="/forum" element={<ForumPage/>}/>*/}
                 {/* <Route path="/posts/:username" element={<ForumPostsPage/>}/> */}
-                <Route path="/thread/:id" element={<ThreadPage/>}/>
+                {/* <Route path="/thread/:id" element={<ThreadPage/>}/> */}
                 <Route path="/mail" element={<MailPage/>}/>
                 <Route path="/message/:id" element={<MessagePage/>}/>
                 <Route path="/change-username" element={<ChangeUsernamePage/>}/>

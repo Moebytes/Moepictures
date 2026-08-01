@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "savedSearches" jsonb,
     "blacklist" text,
     "showR18" boolean,
+    "premium" boolean,
     "premiumExpiration" timestamptz,
     "image" text,
     "imageHash" text,

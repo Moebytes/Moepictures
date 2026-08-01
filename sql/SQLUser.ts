@@ -47,13 +47,13 @@ export default class SQLUser {
     }
 
     /** Updates a user */
-    public static updateUser = async (username: string, column: "username" | "password" | "role" | "ips" | "premiumExpiration" | "banExpiration" | "banned"
+    public static updateUser = async (username: string, column: "username" | "password" | "role" | "ips" | "premium" | "premiumExpiration" | "banExpiration" | "banned"
         | "bio" | "email" | "upscaledImages" | "showTagBanner" | "downloadPixivID" | "showTagTooltips" | "showTooltips" | "emailVerified" | "$2fa"
         | "image" | "imagePost" | "imageHash" | "showR18" | "savedSearches" | "autosearchInterval" | "publicFavorites" | "showRelated" | "lastLogin"
         | "postCount" | "joinDate" | "forceNoteBubbles" | "globalMusicPlayer" | "blacklist" | "cookieConsent" | "liveModelPreview" | "liveAnimationPreview" 
         | "publicTagFavorites" | "deletedPosts" | "lastNameChange" | "deleted" | "deletionDate", value?: string | number | boolean | null | string[]) => {
 
-        let whitelist = ["username", "password", "role", "ips", "premiumExpiration", "banExpiration", "banned", "bio", "email",
+        let whitelist = ["username", "password", "role", "ips", "premium", "premiumExpiration", "banExpiration", "banned", "bio", "email",
         "upscaledImages", "showTagBanner", "downloadPixivID", "showTagTooltips", "showTooltips", "emailVerified", "$2fa",
         "image", "imagePost", "imageHash", "showR18", "savedSearches", "autosearchInterval", "publicFavorites", "showRelated", "lastLogin",
         "postCount", "joinDate", "forceNoteBubbles", "globalMusicPlayer", "blacklist", "cookieConsent", "liveModelPreview", "liveAnimationPreview",

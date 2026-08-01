@@ -7,13 +7,15 @@
 import React, {useEffect, useState} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, 
-useFlagSelector, useCacheActions, useGroupDialogActions, useSearchActions, useActiveSelector} from "../../store"
+useFlagSelector, useCacheActions, useGroupDialogActions, useSearchActions, useActiveSelector,
+useMiscDialogActions} from "../../store"
 import {useNavigate, useParams, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
+import permissions from "../../structures/Permissions"
 import ReorderIcon from "../../assets/svg/reorder.svg"
 import CancelIcon from "../../assets/svg/cancel.svg"
 import AcceptIcon from "../../assets/svg/accept.svg"
@@ -42,6 +44,7 @@ const FavgroupPage: React.FunctionComponent = () => {
     const {groupFlag} = useFlagSelector()
     const {setGroupFlag} = useFlagActions()
     const {session} = useSessionSelector()
+    const {setPremiumRequired} = useMiscDialogActions()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
     const {setAddFavgroupPostObj, setEditFavGroupObj, setDeleteFavGroupObj, setRemapFavGroupObj} = useGroupDialogActions()
@@ -205,7 +208,11 @@ const FavgroupPage: React.FunctionComponent = () => {
     }
 
     const showFavgroupAddDialog = async () => {
-        setAddFavgroupPostObj(favgroup)
+        if (permissions.isPremium(session)) {
+            setAddFavgroupPostObj(favgroup)
+        } else {
+            setPremiumRequired(true)
+        }
     }
 
     const showFavgroupDeleteDialog = async () => {
@@ -217,7 +224,11 @@ const FavgroupPage: React.FunctionComponent = () => {
     }
 
     const showFavgroupRemapDialog = async () => {
-        setRemapFavGroupObj(favgroup)
+        if (permissions.isPremium(session)) {
+            setRemapFavGroupObj(favgroup)
+        } else {
+            setPremiumRequired(true)
+        }
     }
 
     const favgroupOptionsJSX = () => {

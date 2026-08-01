@@ -638,7 +638,6 @@ const UserProfilePage: React.FunctionComponent = () => {
                         <span className="user-text">{i18n.user.liveModelPreview}: <span className="user-text-action" onClick={liveModelPreview}>{session.liveModelPreview ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div>
                     <div className="user-row">
-                        
                         {permissions.isPremiumEnabled() ? <PremiumStarIcon className="user-icon-pink"/> : null}
                         <span style={permissions.isPremiumEnabled() ? {color: "var(--premiumColor)"} : {}} className="user-text">{i18n.user.upscaledImages}: <span style={permissions.isPremiumEnabled() ? {color: "var(--premiumColor)"} : {}} className="user-text-action" onClick={upscaledImages}>{session.upscaledImages ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div>

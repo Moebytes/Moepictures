@@ -102,25 +102,11 @@ const PromoteDialog: React.FunctionComponent = (props) => {
                             <CheckboxIcon className="dialog-checkbox" style={{color: "var(--modColor)"}} onClick={() => setRole("mod")}/>}
                         </div>
                         <div className="dialog-row">
-                            <CuratorStarIcon className="dialog-icon" style={{color: "var(--premiumColor)"}}/>
-                            <span className="dialog-text curator-color">{i18n.roles.premiumCurator}:</span>
-                            {role === "premium-curator" ? 
-                            <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--premiumColor)"}} onClick={() => setRole("premium-curator")}/> :
-                            <CheckboxIcon className="dialog-checkbox" style={{color: "var(--premiumColor)"}} onClick={() => setRole("premium-curator")}/>}
-                        </div>
-                        <div className="dialog-row">
                             <CuratorStarIcon className="dialog-icon" style={{color: "var(--curatorColor)"}}/>
                             <span className="dialog-text curator-color">{i18n.roles.curator}:</span>
                             {role === "curator" ? 
                             <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--curatorColor)"}} onClick={() => setRole("curator")}/> :
                             <CheckboxIcon className="dialog-checkbox" style={{color: "var(--curatorColor)"}} onClick={() => setRole("curator")}/>}
-                        </div>
-                        <div className="dialog-row">
-                            <ContributorPencilIcon className="dialog-icon" style={{color: "var(--premiumColor)"}}/>
-                            <span className="dialog-text premium-color">{i18n.roles.premiumContributor}:</span>
-                            {role === "premium-contributor" ? 
-                            <CheckboxCheckedIcon className="dialog-checkbox" style={{color: "var(--premiumColor)"}} onClick={() => setRole("premium-contributor")}/> :
-                            <CheckboxIcon className="dialog-checkbox" style={{color: "var(--premiumColor)"}} onClick={() => setRole("premium-contributor")}/>}
                         </div>
                         <div className="dialog-row">
                             <ContributorPencilIcon className="dialog-icon" style={{color: "var(--contributorColor)"}}/>

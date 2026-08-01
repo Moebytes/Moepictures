@@ -20,7 +20,6 @@ export default class Permissions {
 
     public static isCurator = (session: ServerSession) => {
         if (Permissions.isMod(session)) return true
-        if (session.role === "premium-curator") return true
         if (session.role === "curator") return true
         return false
     }
@@ -28,7 +27,6 @@ export default class Permissions {
     public static isContributor = (session: ServerSession) => {
         if (Permissions.isMod(session)) return true
         if (Permissions.isCurator(session)) return true
-        if (session.role === "premium-contributor") return true
         if (session.role === "contributor") return true
         return false
     }
@@ -37,9 +35,7 @@ export default class Permissions {
         if (!Permissions.isPremiumEnabled()) return true
         if (Permissions.isMod(session)) return true
         if (Permissions.isSystem(session)) return true
-        if (session.role === "premium-curator") return true
-        if (session.role === "premium-contributor") return true
-        if (session.role === "premium") return true
+        if (session.premium) return true
         return false
     }
 

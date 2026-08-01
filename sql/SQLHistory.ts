@@ -86,6 +86,7 @@ export default class SQLHistory {
                 jsonb_build_object(
                     'username', users."username",
                     'role', users."role",
+                    'premium', users."premium",
                     'banned', users."banned",
                     'deleted', users."deleted",
                     'imagePost', users."imagePost"
@@ -97,7 +98,7 @@ export default class SQLHistory {
                 LEFT JOIN post_json ON post_json."postID" = "tag history"."featuredPost"
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
                 GROUP BY "tag history"."historyID", users."username", users."role", 
-                users."banned", users."deleted", users."imagePost"
+                users."premium", users."banned", users."deleted", users."imagePost"
                 ORDER BY "tag history"."date" DESC
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
             `),
@@ -122,6 +123,7 @@ export default class SQLHistory {
                 jsonb_build_object(
                     'username', users."username",
                     'role', users."role",
+                    'premium', users."premium",
                     'banned', users."banned",
                     'deleted', users."deleted",
                     'imagePost', users."imagePost"
@@ -133,7 +135,7 @@ export default class SQLHistory {
                 LEFT JOIN post_json ON post_json."postID" = "tag history"."featuredPost"
                 WHERE "tag history"."tag" = $1 AND "tag history"."historyID" = $2
                 GROUP BY "tag history"."historyID", users."username", users."role", 
-                users."banned", users."deleted", users."imagePost"
+                users."premium", users."banned", users."deleted", users."imagePost"
             `),
             values: [tag, historyID]
         }
@@ -155,6 +157,7 @@ export default class SQLHistory {
                 jsonb_build_object(
                     'username', users."username",
                     'role', users."role",
+                    'premium', users."premium", 
                     'banned', users."banned",
                     'deleted', users."deleted",
                     'imagePost', users."imagePost"
@@ -166,7 +169,7 @@ export default class SQLHistory {
                 LEFT JOIN post_json ON post_json."postID" = "tag history"."featuredPost"
                 WHERE "tag history"."user" = $1
                 GROUP BY "tag history"."historyID", users."username", users."role", 
-                users."banned", users."deleted", users."imagePost"
+                users."premium", users."banned", users."deleted", users."imagePost"
                 ORDER BY "tag history"."date" DESC
             `),
             values: [username]
@@ -259,6 +262,7 @@ export default class SQLHistory {
                 jsonb_build_object(
                     'username', users."username",
                     'role', users."role",
+                    'premium', users."premium", 
                     'banned', users."banned",
                     'deleted', users."deleted",
                     'imagePost', users."imagePost"
@@ -272,7 +276,7 @@ export default class SQLHistory {
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
                 GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
                 posts.approver, posts."approveDate", posts.deleted, posts."deletionDate", users."username", 
-                users."role", users."banned", users."deleted", users."imagePost"
+                users."premium", users."role", users."banned", users."deleted", users."imagePost"
                 ORDER BY "post history"."date" DESC
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
             `),
@@ -291,6 +295,7 @@ export default class SQLHistory {
                 jsonb_build_object(
                     'username', users."username",
                     'role', users."role",
+                    'premium', users."premium", 
                     'banned', users."banned",
                     'deleted', users."deleted",
                     'imagePost', users."imagePost"
@@ -303,7 +308,7 @@ export default class SQLHistory {
                 WHERE "post history"."postID" = $1 AND "post history"."historyID" = $2
                 GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
                 posts.approver, posts."approveDate", posts.deleted, posts."deletionDate", users."username", 
-                users."role", users."banned", users."deleted", users."imagePost"
+                users."premium", users."role", users."banned", users."deleted", users."imagePost"
             `),
             values: [postID, historyID]
         }
@@ -319,6 +324,7 @@ export default class SQLHistory {
                 jsonb_build_object(
                     'username', users."username",
                     'role', users."role",
+                    'premium', users."premium", 
                     'banned', users."banned",
                     'deleted', users."deleted",
                     'imagePost', users."imagePost"
@@ -332,7 +338,7 @@ export default class SQLHistory {
                 WHERE "post history"."user" = $1
                 GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
                 posts.approver, posts."approveDate", posts.deleted, posts."deletionDate", users."username", 
-                users."role", users."banned", users."deleted", users."imagePost"
+                users."premium", users."role", users."banned", users."deleted", users."imagePost"
                 ORDER BY "post history"."date" DESC
             `),
             values: [username]
@@ -405,6 +411,7 @@ export default class SQLHistory {
                 jsonb_build_object(
                     'username', users."username",
                     'role', users."role",
+                    'premium', users."premium", 
                     'banned', users."banned",
                     'deleted', users."deleted",
                     'imagePost', users."imagePost"
@@ -416,7 +423,7 @@ export default class SQLHistory {
                 JOIN post_json ON post_json."postID" = "note history"."postID"
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
                 GROUP BY "note history"."historyID", users."username", users."role", 
-                users."banned", users."deleted", users."imagePost"
+                users."premium", users."banned", users."deleted", users."imagePost"
                 ORDER BY "note history"."updatedDate" DESC
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
         `),
@@ -441,6 +448,7 @@ export default class SQLHistory {
                     jsonb_build_object(
                         'username', users."username",
                         'role', users."role",
+                        'premium', users."premium", 
                         'banned', users."banned",
                         'deleted', users."deleted",
                         'imagePost', users."imagePost"
@@ -452,7 +460,7 @@ export default class SQLHistory {
                     JOIN post_json ON post_json."postID" = "note history"."postID"
                     WHERE "note history"."postID" = $1 AND "note history"."historyID" = $2
                     GROUP BY "note history"."historyID", users."username", users."role", 
-                users."banned", users."deleted", users."imagePost"
+                    users."premium", users."banned", users."deleted", users."imagePost"
             `),
             values: [postID, historyID]
         }
@@ -474,6 +482,7 @@ export default class SQLHistory {
                 jsonb_build_object(
                     'username', users."username",
                     'role', users."role",
+                    'premium', users."premium",
                     'banned', users."banned",
                     'deleted', users."deleted",
                     'imagePost', users."imagePost"
@@ -485,7 +494,7 @@ export default class SQLHistory {
                 JOIN post_json ON post_json."postID" = "note history"."postID"
                 WHERE "note history"."updater" = $1
                 GROUP BY "note history"."historyID", users."username", users."role", 
-                users."banned", users."deleted", users."imagePost"
+                users."premium", users."banned", users."deleted", users."imagePost"
                 ORDER BY "note history"."updatedDate" DESC
         `),
         values: [username]
@@ -550,6 +559,7 @@ export default class SQLHistory {
                 jsonb_build_object(
                     'username', users."username",
                     'role', users."role",
+                    'premium', users."premium",
                     'banned', users."banned",
                     'deleted', users."deleted",
                     'imagePost', users."imagePost"
@@ -559,7 +569,7 @@ export default class SQLHistory {
                 LEFT JOIN users ON users."username" = "group history"."user"
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
                 GROUP BY "group history"."historyID", users."username", users."role", 
-                users."banned", users."deleted", users."imagePost"
+                users."premium", users."banned", users."deleted", users."imagePost"
                 ORDER BY "group history"."date" DESC
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
             `),
@@ -578,6 +588,7 @@ export default class SQLHistory {
                 jsonb_build_object(
                     'username', users."username",
                     'role', users."role",
+                    'premium', users."premium", 
                     'banned', users."banned",
                     'deleted', users."deleted",
                     'imagePost', users."imagePost"
@@ -586,7 +597,7 @@ export default class SQLHistory {
                 LEFT JOIN users ON users."username" = "group history"."user"
                 WHERE "group history"."groupID" = $1 AND "group history"."historyID" = $2
                 GROUP BY "group history"."historyID", users."username", users."role", 
-                users."banned", users."deleted", users."imagePost"
+                users."premium", users."banned", users."deleted", users."imagePost"
             `),
             values: [groupID, historyID]
         }
@@ -602,6 +613,7 @@ export default class SQLHistory {
                 jsonb_build_object(
                     'username', users."username",
                     'role', users."role",
+                    'premium', users."premium", 
                     'banned', users."banned",
                     'deleted', users."deleted",
                     'imagePost', users."imagePost"
@@ -611,7 +623,7 @@ export default class SQLHistory {
                 LEFT JOIN users ON users."username" = "group history"."user"
                 WHERE "group history"."user" = $1
                 GROUP BY "group history"."historyID", users."username", users."role", 
-                users."banned", users."deleted", users."imagePost"
+                users."premium", users."banned", users."deleted", users."imagePost"
                 ORDER BY "group history"."date" DESC
             `),
             values: [username]

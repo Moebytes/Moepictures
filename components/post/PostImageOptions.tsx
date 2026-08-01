@@ -7,9 +7,10 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useInteractionActions, useLayoutSelector,  
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, 
-useSessionActions, useCacheSelector, useGroupDialogActions,
+useSessionActions, useCacheSelector, useGroupDialogActions, useMiscDialogActions,
 useCacheActions} from "../../store"
 import functions from "../../functions/Functions"
+import permissions from "../../structures/Permissions"
 import StarIcon from "../../assets/svg/star.svg"
 import StarGroupIcon from "../../assets/svg/stargroup.svg"
 import DownloadIcon from "../../assets/svg/download.svg"
@@ -46,6 +47,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const {posts} = useCacheSelector()
     const {setPosts} = useCacheActions()
     const {setFavGroupID} = useGroupDialogActions()
+    const {setPremiumRequired} = useMiscDialogActions()
     const [favorited, setFavorited] = useState(false)
     const [favGrouped, setFavGrouped] = useState(false)
     const [showFilterDropdown, setShowFilterDropdown] = useState(false)
@@ -185,6 +187,14 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         setFavorited(value)
     }
 
+    const updateFavgroup = async () => {
+        if (permissions.isPremium(session)) {
+            setFavGroupID(props.post?.postID!)
+        } else {
+            setPremiumRequired(true)
+        }
+    }
+
     const closeDropdowns = () => {
         setShowFilterDropdown(false)
         setShowFormatDropdown(false)
@@ -231,7 +241,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                     <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? i18n.post.favorited : i18n.post.favorite}</div>
                 </div> : null}
                 {session.username ?
-                <div className="post-image-options-box" onClick={() => setFavGroupID(props.post?.postID!)}
+                <div className="post-image-options-box" onClick={() => updateFavgroup()}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     {favGrouped ? 
                     <StarGroupIcon className="post-image-icon-pink"/> :
@@ -273,7 +283,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                         <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? i18n.post.favorited : i18n.post.favorite}</div>
                     </div> : null}
                     {session.username && !props.noFavorite ?
-                    <div className="post-image-options-box" onClick={() => setFavGroupID(props.post?.postID!)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="post-image-options-box" onClick={() => updateFavgroup()} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         {favGrouped ? 
                         <StarGroupIcon className="post-image-icon-pink"/> :
                         <StarGroupIcon className="post-image-icon"/>}

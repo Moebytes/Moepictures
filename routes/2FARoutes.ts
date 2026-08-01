@@ -41,13 +41,9 @@ const $2FARoutes = (app: Express) => {
                 const region = await serverFunctions.util.ipRegion(ip)
                 await sql.user.insertLoginHistory(user.username, "2fa disabled", ip, device, region)
 
-                if (user.role === "admin" || user.role === "mod" || user.role.includes("curator")
+                if ((user.role === "admin" || user.role === "mod" || user.role.includes("curator"))
                     && user.username !== process.env.OWNER_NAME) {
-                    if (user.role === "premium-curator") {
-                        await sql.user.updateUser(user.username, "role", "premium-contributor")
-                    } else {
-                        await sql.user.updateUser(user.username, "role", "contributor")
-                    }
+                    await sql.user.updateUser(user.username, "role", "contributor")
                     const message = `You must have 2fa enabled to maintain roles above curator. Your account was auto demoted back to contributor.\n\nEnable 2fa and contact us to consider restoring your role.`
                     await serverFunctions.systemMessage(user.username, `Notice: Your account was demoted due to removing 2fa`, message)
                 }

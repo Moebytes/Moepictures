@@ -76,6 +76,7 @@ const FavoriteRoutes = (app: Express) => {
         try {
             const {postIDs, name, isPrivate} = req.body as FavgroupUpdateParams
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
+            if (!permissions.isPremium(req.session)) return void res.status(402).send("Premium only")
 
             const slug = functions.post.generateSlug(name)
 
@@ -262,6 +263,7 @@ const FavoriteRoutes = (app: Express) => {
         try {
             const {name, postIDs} = req.body as Omit<FavgroupUpdateParams, "isPrivate">
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
+            if (!permissions.isPremium(req.session)) return void res.status(402).send("Premium only")
 
             const slug = functions.post.generateSlug(name)
             const favgroup = await sql.favorite.favgroup(req.session.username, slug)

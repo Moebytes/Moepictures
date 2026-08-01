@@ -1076,6 +1076,7 @@ const PostRoutes = (app: Express) => {
             const {postID} = req.body as {postID: string}
             if (Number.isNaN(Number(postID))) return void res.status(400).send("Invalid postID")
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
+            if (!permissions.isPremium(req.session)) return void res.status(402).send("Premium only")
             let result = await sql.post.post(postID)
             if (!result) return void res.status(400).send("Invalid postID")
             await sql.history.updateSearchHistory(req.session.username, postID)

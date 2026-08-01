@@ -144,12 +144,12 @@ export default class SQLThread {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT threads.*, users."postCount", users."joinDate", users."image", 
-                users."imagePost", users."imageHash", users."role", users."banned", users."deleted"
+                users."imagePost", users."imageHash", users."role", users."premium", users."banned", users."deleted"
                 FROM threads 
                 JOIN users ON users.username = threads.creator
                 WHERE threads."threadID" = $1
                 GROUP BY threads."threadID", users."postCount", users."joinDate", users."image", 
-                users."imagePost", users."imageHash", users."role", users."banned", users."deleted"
+                users."imagePost", users."imageHash", users."role", users."premium", users."banned", users."deleted"
             `),
         values: [threadID]
         }
@@ -199,13 +199,13 @@ export default class SQLThread {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT replies.*, users."postCount", users."joinDate", users."image", 
-                users."imagePost", users."imageHash", users."role", users."banned", users."deleted",
+                users."imagePost", users."imageHash", users."role", users."premium", users."banned", users."deleted",
                 COUNT(*) OVER() AS "replyCount"
                 FROM replies 
                 JOIN users ON users.username = replies.creator
                 WHERE replies."threadID" = $1 
                 GROUP BY replies."replyID", users."postCount", users."joinDate", users."image", 
-                users."imagePost", users."imageHash", users."role", users."banned", users."deleted"
+                users."imagePost", users."imageHash", users."role", users."premium", users."banned", users."deleted"
                 ${offset ? "OFFSET $2" : ""}
             `),
         values: [threadID]
@@ -220,13 +220,13 @@ export default class SQLThread {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT replies.*, users."postCount", users."joinDate", users."image", 
-                users."imagePost", users."imageHash", users."role", users."banned", users."deleted",
+                users."imagePost", users."imageHash", users."role", users."premium", users."banned", users."deleted",
                 COUNT(*) OVER() AS "replyCount"
                 FROM replies 
                 JOIN users ON users.username = replies.creator
                 WHERE replies.creator = $1 
                 GROUP BY replies."replyID", users."postCount", users."joinDate", users."image", 
-                users."imagePost", users."imageHash", users."role", users."banned", users."deleted"
+                users."imagePost", users."imageHash", users."role", users."premium", users."banned", users."deleted"
             `),
         values: [username]
         }
@@ -239,12 +239,12 @@ export default class SQLThread {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT replies.*, users."postCount", users."joinDate", users."image", 
-                users."imagePost", users."imageHash", users."role", users."banned", users."deleted"
+                users."imagePost", users."imageHash", users."role", users."premium", users."banned", users."deleted"
                 FROM replies 
                 JOIN users ON users.username = replies.creator
                 WHERE replies."replyID" = $1
                 GROUP BY replies."replyID", users."postCount", users."joinDate", users."image", 
-                users."imagePost", users."imageHash", users."role", users."banned", users."deleted"
+                users."imagePost", users."imageHash", users."role", users."premium", users."banned", users."deleted"
             `),
         values: [replyID]
         }
@@ -355,7 +355,7 @@ export default class SQLThread {
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                 SELECT forum_post.*, users."image", users."imagePost", users."imageHash", 
-                users."role", users."banned", users."deleted",
+                users."role", users."premium", users."banned", users."deleted",
                 to_jsonb(thread_data.*) AS thread,
                 COUNT(*) OVER() AS "postCount"
                 FROM (

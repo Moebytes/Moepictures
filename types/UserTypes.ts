@@ -18,6 +18,7 @@ export type Optional<T> = {
 export interface TinyUser {
     username: string
     role: UserRole
+    premium: boolean | null
     banned: boolean | null
     deleted: boolean | null
     imagePost: string | null
@@ -35,6 +36,7 @@ export interface PrunedUser {
     publicFavorites: boolean
     publicTagFavorites: boolean
     role: UserRole
+    premium: boolean | null
     banned: boolean | null
     deleted: boolean | null
     deletionDate: string | null

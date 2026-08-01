@@ -18,6 +18,7 @@ export interface UserComment {
     imagePost: string | null
     imageHash: string | null
     role: UserRole
+    premium: boolean | null
     banned: boolean | null
     deleted: boolean | null
 }

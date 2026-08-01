@@ -88,7 +88,8 @@ const SortBar: React.FunctionComponent = (props) => {
     const {scroll, square, imageType, ratingType, styleType, sizeType, sortType, sortReverse, selectionMode, 
     pageMultiplier, selectionItems, showChildren, autoScroll} = useSearchSelector()
     const {setScroll, setImageType, setRatingType, setStyleType, setSizeType, setSortType, setSortReverse, 
-    setSelectionMode, setPageMultiplier, setSquare, setSearchFlag, setShowChildren, setAutoScroll} = useSearchActions()
+    setSelectionMode, setPageMultiplier, setSquare, setSearchFlag, setShowChildren, setAutoScroll,
+    setSelectionItems, setSelectionPosts} = useSearchActions()
     const {setDownloadFlag, setDownloadIDs, setPageFlag} = useFlagActions()
     const {showDownloadDialog} = useMiscDialogSelector()
     const {setPremiumRequired, setShowDownloadDialog} = useMiscDialogActions()
@@ -729,6 +730,8 @@ const SortBar: React.FunctionComponent = (props) => {
             })
         }
         setSelectionMode(false)
+        setSelectionItems(new Set())
+        setSelectionPosts(new Map())
         if (sortType === "favorites") setSearchFlag(true)
         setTimeout(() => {
             setSelectionMode(true)
@@ -745,6 +748,8 @@ const SortBar: React.FunctionComponent = (props) => {
             setDownloadIDs(newDownloadIDs)
             setDownloadFlag(true)
             setSelectionMode(false)
+            setSelectionItems(new Set())
+            setSelectionPosts(new Map())
             setTimeout(() => {
                 setSelectionMode(true)
             }, 200)
@@ -758,7 +763,11 @@ const SortBar: React.FunctionComponent = (props) => {
     }
 
     const bulkFavgroup = () => {
-        setBulkFavGroupDialog(!bulkFavGroupDialog)
+        if (permissions.isPremium(session)) {
+            setBulkFavGroupDialog(!bulkFavGroupDialog)
+        } else {
+            setPremiumRequired(true)
+        }
     }
 
     const bulkTagEdit = () => {

@@ -348,14 +348,7 @@ const MiscRoutes = (app: Express) => {
                 let premiumExpiration = user.premiumExpiration ? new Date(user.premiumExpiration) : new Date()
                 premiumExpiration.setFullYear(premiumExpiration.getFullYear() + 1)
 
-                if (user.role === "curator") {
-                    await sql.user.updateUser(metadata.username, "role", "premium-curator")
-                } else if (user.role === "contributor") {
-                    await sql.user.updateUser(metadata.username, "role", "premium-contributor")
-                } else if (user.role === "user") {
-                    await sql.user.updateUser(metadata.username, "role", "premium")
-                }
-
+                await sql.user.updateUser(metadata.username, "premium", true)
                 await sql.user.updateUser(metadata.username, "premiumExpiration", premiumExpiration.toISOString())
 
                 const message = `Your account has been upgraded to premium. You can now access all the premium features. Thank you for supporting us!\n\nYour membership will last until ${functions.date.prettyDate(premiumExpiration, enLocale)}.`

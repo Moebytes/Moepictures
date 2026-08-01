@@ -41,6 +41,7 @@ export default class ServerUsers {
         req.session.postCount = user.postCount
         req.session.deletedPosts = user.deletedPosts
         req.session.showR18 = user.showR18
+        req.session.premium = user.premium
         req.session.premiumExpiration = user.premiumExpiration
         req.session.banExpiration = user.banExpiration
         req.session.lastNameChange = user.lastNameChange
@@ -110,6 +111,7 @@ export default class ServerUsers {
             await sql.user.updateUser(user.username, "savedSearches", null)
             await sql.user.updateUser(user.username, "blacklist", null)
             await sql.user.updateUser(user.username, "showR18", null)
+            await sql.user.updateUser(user.username, "premium", null)
             await sql.user.updateUser(user.username, "premiumExpiration", null)
             await sql.user.updateUser(user.username, "image", null)
             await sql.user.updateUser(user.username, "imageHash", null)

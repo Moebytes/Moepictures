@@ -28,6 +28,7 @@ export interface Message {
     recipients: Array<string | null>
     recipientData: Recipient[]
     role: UserRole
+    premium: boolean | null
     image: string | null
     imagePost: string | null
     imageHash: string | null
@@ -37,6 +38,7 @@ export interface Message {
 
 export interface MessageUser extends Message {
     role: UserRole
+    premium: boolean | null
     image: string | null
     imagePost: string | null
     imageHash: string | null
@@ -59,6 +61,7 @@ export interface MessageUserReply {
     content: string
     r18: boolean
     role: UserRole
+    premium: boolean | null
     image: string | null
     imagePost: string | null
     imageHash: string | null
