@@ -18,7 +18,7 @@ const appleCertificates = [
 ]
 
 const verifier = new SignedDataVerifier(appleCertificates, true, 
-    Environment.PRODUCTION, bundleID, appleID)
+    Environment.XCODE, bundleID, appleID)
 
 export default class ServerPayment {
     public static verifyAppleTransaction = async (signedTransaction: string) => {
