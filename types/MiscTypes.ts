@@ -79,22 +79,6 @@ export interface OCRResponse {
     imageHeight: number
 }
 
-export interface CoinbaseEvent {
-    id: string
-    type: string
-    resource: string
-    api_version: string
-    created_at: string
-    data: {
-        id: string
-        code: string
-        metadata: {
-            username: string
-            email: string
-        }
-    }
-}
-
 export interface SourceLookupParams {
     current: UploadImage
     rating: PostRating
@@ -167,6 +151,11 @@ export interface SplatterOptions {
     clientHeight?: number
 }
 
+export interface PurchaseParams {
+    platform: string
+    purchaseToken: string
+}
+
 export type MiscGetEndpoint<T extends string> = 
     T extends "/api/misc/captcha/create" ? {params: {color: string}, response: {captcha: string}} :
     T extends "/api/misc/redirect" ? {params: {url: string}, response: string} :
@@ -188,8 +177,6 @@ export type MiscPostEndpoint<T extends string> =
     T extends "/api/misc/ocr" ? {params: number[], response: OCRResponse[]} :
     T extends "/api/misc/segmentate" ? {params: number[], response: ArrayBuffer} :
     T extends "/api/misc/lineart" ? {params: number[], response: ArrayBuffer} :
-    T extends "/api/premium/paymentlink" ? {params: null, response: {hosted_url: string}} :
-    T extends "/api/premium/payment" ? {params: {event: CoinbaseEvent}, response: string} :
     T extends "/api/misc/setbanner" ? {params: {text: string, link: string}, response: string} :
     T extends "/api/client-key" ? {params: {publicKey: string}, response: string} :
     T extends "/api/server-key" ? {params: null, response: {publicKey: string}} :
@@ -201,6 +188,8 @@ export type MiscPostEndpoint<T extends string> =
     T extends "/api/misc/danboorutags" ? {params: {tags: string}, response: {tags: string}} :
     T extends "/api/misc/moepicstags" ? {params: {tags: string}, response: {tags: string}} :
     T extends "/storage" ? {params: {link: string, songCover?: boolean}, response: string} :
+    T extends "/api/premium/verify-purchase" ? {params: PurchaseParams, response: boolean} :
+    T extends "/api/apple/notifications" ? {params: {signedPayload: string}, response: null} :
     never
 
 export type MiscDeleteEndpoint<T extends string> = 

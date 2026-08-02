@@ -14,6 +14,7 @@ import {render} from "@react-email/components"
 import CSRF from "csrf"
 import ServerFiles from "./ServerFiles"
 import ServerLinks from "./ServerLinks"
+import ServerPayment from "./ServerPayment"
 import ServerPosts from "./ServerPosts"
 import ServerSources from "./ServerSources"
 import ServerTags from "./ServerTags"
@@ -62,6 +63,7 @@ export const apiKeyLogin = async (req: Request, res: Response, next: NextFunctio
 export default class ServerFunctions {
     public static files = ServerFiles
     public static links = ServerLinks
+    public static payment = ServerPayment
     public static posts = ServerPosts
     public static sources = ServerSources
     public static tags = ServerTags

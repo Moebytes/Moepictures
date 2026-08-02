@@ -81,6 +81,7 @@ const UserRoutes = (app: Express) => {
             delete user.$2fa
             delete user.email
             delete user.emailVerified
+            delete user.accountToken
             delete user.cookieConsent
             delete user.password
             delete user.showRelated
@@ -123,7 +124,7 @@ const UserRoutes = (app: Express) => {
             let bannedIp = await sql.report.activeBannedIP(ip)
             if (bannedIp) return void res.status(400).send("IP banned")
             try {
-                const userID = await sql.user.insertUser(username, email)
+                const userID = await sql.user.insertUser(username, email, crypto.randomUUID())
                 await sql.user.updateUser(username, "joinDate", new Date().toISOString())
                 await sql.user.updateUser(username, "publicFavorites", true)
                 await sql.user.updateUser(username, "publicTagFavorites", true)
@@ -165,7 +166,7 @@ const UserRoutes = (app: Express) => {
                     // First created user will be admin
                     await sql.user.updateUser(username, "role", "admin")
                     // Make the bot account with the same password
-                    await sql.user.insertUser("moepictures", process.env.EMAIL_ADDRESS || "changethis@email.com")
+                    await sql.user.insertUser("moepictures", process.env.EMAIL_ADDRESS || "changethis@email.com", crypto.randomUUID())
                     await sql.user.updateUser("moepictures", "joinDate", new Date().toISOString())
                     await sql.user.updateUser("moepictures", "role", "system")
                     await sql.user.updateUser("moepictures", "bio", "This is a bot account!")
@@ -275,6 +276,7 @@ const UserRoutes = (app: Express) => {
                 req.session.banned = user.banned
                 req.session.email = user.email
                 req.session.emailVerified = user.emailVerified
+                req.session.accountToken = user.accountToken
                 req.session.cookieConsent = user.cookieConsent
                 req.session.image = user.image
                 req.session.imageHash = user.imageHash
@@ -308,8 +310,6 @@ const UserRoutes = (app: Express) => {
                 if (user.premium && user.premiumExpiration) {
                     if (new Date(user.premiumExpiration) < new Date()) {
                         await sql.user.updateUser(req.session.username, "premium", false)
-                        const message = `Unfortunately, it seems like your premium membership has expired. Thank you for supporting us! We greatly appreciate your time spent as a premium member and we hope that you are interested in renewing it again.`
-                        await serverFunctions.systemMessage(req.session.username, "Notice: Your premium membership expired", message)
                     }
                 }
 

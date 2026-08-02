@@ -5,7 +5,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import {Express, NextFunction, Request, Response} from "express"
-import axios from "axios"
 import path from "path"
 import functions from "../functions/Functions"
 import encryption from "../structures/Encryption"
@@ -16,13 +15,12 @@ import fs from "fs"
 import phash from "sharp-phash"
 import svgCaptcha from "svg-captcha"
 import child_process from "child_process"
-import crypto from "crypto"
 import util from "util"
 import sql from "../sql/SQLQuery"
 import dotline from "../assets/fonts/Dotline.ttf"
 import enLocale from "../assets/locales/en.json"
 import source from "../sources/Source"
-import {OCRResponse, CoinbaseEvent, SourceLookupParams, TagLookupParams} from "../types/Types"
+import {OCRResponse, PurchaseParams, SourceLookupParams, TagLookupParams} from "../types/Types"
 
 svgCaptcha.loadFont(path.join(__dirname, dotline))
 
@@ -33,6 +31,15 @@ const exec = util.promisify(child_process.exec)
 const miscLimiter = rateLimit({
 	windowMs: 60 * 1000,
 	max: 300,
+	standardHeaders: true,
+	legacyHeaders: false,
+    keyGenerator,
+    handler
+})
+
+const notificationLimiter = rateLimit({
+	windowMs: 60 * 1000,
+	max: 1000,
 	standardHeaders: true,
 	legacyHeaders: false,
     keyGenerator,
@@ -298,69 +305,6 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/premium/paymentlink", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            if (!permissions.isPremiumEnabled()) return void res.status(400).send("Closed")
-            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
-            const data = {
-                local_price: {
-                    amount: "15.00",
-                    currency: "USD"
-                },
-                pricing_type: "fixed_price",
-                name: "Moepictures Premium",
-                description: "Moepictures premium account upgrade",
-                redirect_url: `${functions.config.getDomain()}/premium-success`,
-                metadata: {
-                    username: req.session.username,
-                    email: req.session.email
-                },
-            }
-            const headers = {"X-CC-Api-Key": process.env.COINBASE_KEY!}
-            const response = await axios.post("https://api.commerce.coinbase.com/charges", data, {headers, responseType: "json"}).then((r) => r.data)
-            res.status(200).json(response.data)
-        } catch (e) {
-            console.log(e)
-            res.status(400).send("Bad request") 
-        }
-    })
-
-    app.post("/api/premium/payment", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            if (!permissions.isPremiumEnabled()) return void res.status(400).send("Closed")
-            const {event} = req.body as {event: CoinbaseEvent}
-            const signature = req.headers["x-cc-webhook-signature"]
-
-            const computedSignature = crypto.createHmac("sha256", process.env.COINBASE_WEBHOOK_SECRET!)
-            .update(JSON.stringify(req.body), "utf8").digest("hex")
-            
-            if (signature !== computedSignature) {
-                return void res.status(400).send("Invalid signature")
-            }
-        
-            if (event.type === "charge:pending") {
-                const id = event.data.id
-                const metadata = event.data.metadata
-
-                const user = await sql.user.user(metadata.username)
-                if (!user) return void res.status(400).send("Invalid username")
-
-                let premiumExpiration = user.premiumExpiration ? new Date(user.premiumExpiration) : new Date()
-                premiumExpiration.setFullYear(premiumExpiration.getFullYear() + 1)
-
-                await sql.user.updateUser(metadata.username, "premium", true)
-                await sql.user.updateUser(metadata.username, "premiumExpiration", premiumExpiration.toISOString())
-
-                const message = `Your account has been upgraded to premium. You can now access all the premium features. Thank you for supporting us!\n\nYour membership will last until ${functions.date.prettyDate(premiumExpiration, enLocale)}.`
-                await serverFunctions.systemMessage(metadata.username, "Notice: Your account was upgraded to premium", message)
-            }
-            res.status(200).send("Success")
-        } catch (e) {
-            console.log(e)
-            res.status(400).send("Bad request") 
-        }
-    })
-
     app.post("/api/misc/setbanner", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {text, link} = req.body as {text: string, link: string}
@@ -504,6 +448,115 @@ const MiscRoutes = (app: Express) => {
             const {tags} = req.body as {tags: string}
             let moepicsTags = await serverFunctions.tags.convertFromDanbooru(tags)
             res.status(200).json({tags: moepicsTags})
+        } catch (e) {
+            console.log(e)
+            res.status(400).end()
+        }
+    })
+
+    app.post("/api/premium/verify-purchase", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const {platform, purchaseToken} = req.body as PurchaseParams
+            if (!req.session.username) return void res.status(200).send(false)
+
+            if (platform === "ios") {
+                const transaction = await serverFunctions.payment.verifyAppleTransaction(purchaseToken).catch(() => null)
+
+                if (transaction) {
+                    if (!transaction.appAccountToken) return void res.status(200).send(false)
+                    if (transaction.productId !== "com.moebytes.moepictures.premium.yearly" &&
+                        transaction.productId !== "com.moebytes.moepictures.premium.monthly") {
+                        return void res.status(200).send(false)
+                    }
+
+                    const user = await sql.user.userByAccountToken(transaction.appAccountToken)
+                    if (user?.username !== req.session.username) return void res.status(200).send(false)
+
+                    if (transaction.revocationDate) {
+                        let revocationDate = new Date(transaction.revocationDate!).toISOString()
+
+                        await sql.user.updateUser(user.username, "premium", false)
+                        await sql.user.updateUser(user.username, "premiumExpiration", revocationDate)
+
+                        return void res.status(200).send(false)
+                    }
+
+                    if (transaction.expiresDate! > Date.now()) {
+                        let premiumExpiration = new Date(transaction.expiresDate!).toISOString()
+
+                        await sql.user.updateUser(user.username, "premium", true)
+                        await sql.user.updateUser(user.username, "premiumExpiration", premiumExpiration)
+
+                        return void res.status(200).send(true)
+                    }
+                }
+            }
+
+            res.status(200).send(false)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send(false)
+        }
+    })
+
+    app.post("/api/apple/notifications", notificationLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const {signedPayload} = req.body as {signedPayload: string}
+
+            const notification = await serverFunctions.payment.verifyAppleNotification(signedPayload).catch(() => null)
+            if (!notification) return void res.status(400).end()
+
+            const transaction = await serverFunctions.payment.verifyAppleTransaction(notification.data?.signedTransactionInfo!)
+            if (!transaction.appAccountToken) return void res.status(400).end()
+
+            if (transaction.productId !== "com.moebytes.moepictures.premium.yearly" &&
+                transaction.productId !== "com.moebytes.moepictures.premium.monthly") {
+                return void res.status(400).end()
+            }
+
+            const user = await sql.user.userByAccountToken(transaction.appAccountToken)
+            if (!user) return void res.status(400).end()
+
+            let premiumExpiration = new Date(transaction.expiresDate!).toISOString()
+
+            switch(notification.notificationType) {
+                case "SUBSCRIBED":
+                    await sql.user.updateUser(user.username, "premium", true)
+                    await sql.user.updateUser(user.username, "premiumExpiration", premiumExpiration)
+
+                    const message = `Your account has been upgraded to premium. You can now access all the premium features. Thank you for supporting us!\n\nYour membership will last until ${functions.date.prettyDate(premiumExpiration, enLocale)}.`
+                    await serverFunctions.systemMessage(user.username, "Notice: Your account was upgraded to premium", message)
+                    break
+
+                case "DID_RENEW":
+                    await sql.user.updateUser(user.username, "premium", true)
+                    await sql.user.updateUser(user.username, "premiumExpiration", premiumExpiration)
+
+                    const renewMsg = `Your premium subscription was renewed. Thanks for your continued support!\n\nYour membership will last until ${functions.date.prettyDate(premiumExpiration, enLocale)}.`
+                    await serverFunctions.systemMessage(user.username, "Notice: Your premium subscription was renewed", renewMsg)
+                    break
+
+                case "EXPIRED":
+                    await sql.user.updateUser(user.username, "premium", false)
+                    await sql.user.updateUser(user.username, "premiumExpiration", premiumExpiration)
+
+                    const expireMsg = `Unfortunately, it seems like your premium membership has expired. We appreciate your time spent as a premium member and we hope that you are interested in renewing it again.`
+                    await serverFunctions.systemMessage(user.username, "Notice: Your premium membership expired", expireMsg)
+                    break
+
+                case "REFUND":
+                case "REVOKE":
+                    let revocationDate = new Date(transaction.revocationDate!).toISOString()
+
+                    await sql.user.updateUser(user.username, "premium", false)
+                    await sql.user.updateUser(user.username, "premiumExpiration", revocationDate)
+
+                    const revokeMsg = `Unfortunately, it seems like your premium membership was revoked. This could be due to it being refunded.`
+                    await serverFunctions.systemMessage(user.username, "Notice: Your premium membership was revoked", revokeMsg)
+                    break
+            }
+
+            res.status(200).end()
         } catch (e) {
             console.log(e)
             res.status(400).end()

@@ -35,11 +35,11 @@ export default class SQLUser {
     }
 
     /** Create a new user. */
-    public static insertUser = async (username: string, email: string) => {
+    public static insertUser = async (username: string, email: string, accountToken: string) => {
         const query: QueryArrayConfig = {
-            text: /*sql*/`INSERT INTO "users" ("username", "email") VALUES ($1, $2) RETURNING "userID"`,
+            text: /*sql*/`INSERT INTO "users" ("username", "email", "accountToken") VALUES ($1, $2, $3) RETURNING "userID"`,
             rowMode: "array",
-            values: [username, email]
+            values: [username, email, accountToken]
         }
 
         const result = await SQLQuery.run(query)
@@ -48,13 +48,13 @@ export default class SQLUser {
 
     /** Updates a user */
     public static updateUser = async (username: string, column: "username" | "password" | "role" | "ips" | "premium" | "premiumExpiration" | "banExpiration" | "banned"
-        | "bio" | "email" | "upscaledImages" | "showTagBanner" | "downloadPixivID" | "showTagTooltips" | "showTooltips" | "emailVerified" | "$2fa"
+        | "bio" | "email" | "upscaledImages" | "showTagBanner" | "downloadPixivID" | "showTagTooltips" | "showTooltips" | "emailVerified" | "$2fa" | "accountToken"
         | "image" | "imagePost" | "imageHash" | "showR18" | "savedSearches" | "autosearchInterval" | "publicFavorites" | "showRelated" | "lastLogin"
         | "postCount" | "joinDate" | "forceNoteBubbles" | "globalMusicPlayer" | "blacklist" | "cookieConsent" | "liveModelPreview" | "liveAnimationPreview" 
         | "publicTagFavorites" | "deletedPosts" | "lastNameChange" | "deleted" | "deletionDate", value?: string | number | boolean | null | string[]) => {
 
         let whitelist = ["username", "password", "role", "ips", "premium", "premiumExpiration", "banExpiration", "banned", "bio", "email",
-        "upscaledImages", "showTagBanner", "downloadPixivID", "showTagTooltips", "showTooltips", "emailVerified", "$2fa",
+        "upscaledImages", "showTagBanner", "downloadPixivID", "showTagTooltips", "showTooltips", "emailVerified", "$2fa", "accountToken",
         "image", "imagePost", "imageHash", "showR18", "savedSearches", "autosearchInterval", "publicFavorites", "showRelated", "lastLogin",
         "postCount", "joinDate", "forceNoteBubbles", "globalMusicPlayer", "blacklist", "cookieConsent", "liveModelPreview", "liveAnimationPreview",
         "publicTagFavorites", "deletedPosts", "lastNameChange", "deleted", "deletionDate"]
@@ -94,6 +94,21 @@ export default class SQLUser {
             GROUP BY users."userID"
             `),
             values: [email]
+        }
+        const result = await SQLQuery.run(query)
+        return result[0] as Promise<User | undefined>
+    }
+
+    /** Get user by accountToken. */
+    public static userByAccountToken = async (accountToken: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            SELECT users.*
+            FROM users
+            WHERE users."accountToken" = $1
+            GROUP BY users."userID"
+            `),
+            values: [accountToken]
         }
         const result = await SQLQuery.run(query)
         return result[0] as Promise<User | undefined>

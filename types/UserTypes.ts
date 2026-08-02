@@ -46,6 +46,7 @@ export interface PrunedUser {
 
 export interface User extends PrunedUser {
     email?: string
+    accountToken?: string
     emailVerified?: boolean
     cookieConsent?: boolean | null
     $2fa?: boolean

@@ -780,7 +780,6 @@ const runDaily = async () => {
   await pruneEmptyTags()
   await sql.user.pruneAnonSessions().catch(() => null)
   await sql.user.pruneExpiredSessions().catch(() => null)
-
 }
 
 const run = async () => {
