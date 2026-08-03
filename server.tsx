@@ -31,6 +31,7 @@ import CommentRoutes from "./routes/CommentRoutes"
 import CutenessRoutes from "./routes/CutenessRoutes"
 import FavoriteRoutes from "./routes/FavoriteRoutes"
 import MiscRoutes from "./routes/MiscRoutes"
+import PaymentRoutes from "./routes/PaymentRoutes.ts"
 import PostRoutes from "./routes/PostRoutes"
 import SearchRoutes from "./routes/SearchRoutes"
 import TagRoutes from "./routes/TagRoutes"
@@ -136,6 +137,7 @@ CommentRoutes(app)
 CutenessRoutes(app)
 FavoriteRoutes(app)
 MiscRoutes(app)
+PaymentRoutes(app)
 PostRoutes(app)
 SearchRoutes(app)
 TagRoutes(app)

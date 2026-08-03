@@ -18,6 +18,7 @@ import {ThreadGetEndpoint, ThreadPostEndpoint, ThreadPutEndpoint, ThreadDeleteEn
 import {TokenPostEndpoint, TokenDeleteEndpoint} from "./TokenTypes"
 import {UploadPostEndpoint, UploadPutEndpoint} from "./UploadTypes"
 import {UserGetEndpoint, UserPostEndpoint, UserPutEndpoint, UserDeleteEndpoint} from "./UserTypes"
+import {PaymentPostEndpoint} from "./PaymentTypes"
 
 export type GetEndpoint<T extends string> = 
     | CommentGetEndpoint<T>
@@ -40,6 +41,7 @@ export type PostEndpoint<T extends string> =
     | GroupPostEndpoint<T>
     | MessagePostEndpoint<T>
     | MiscPostEndpoint<T>
+    | PaymentPostEndpoint<T>
     | NotePostEndpoint<T>
     | PostPostEndpoint<T>
     | SearchPostEndpoint<T>
@@ -84,6 +86,7 @@ export * from "./MessageTypes"
 export * from "./MiscTypes"
 export * from "./NoteTypes"
 export * from "./ParamTypes"
+export * from "./PaymentTypes"
 export * from "./PostTypes"
 export * from "./ReportTypes"
 export * from "./RequestTypes"

@@ -151,11 +151,6 @@ export interface SplatterOptions {
     clientHeight?: number
 }
 
-export interface PurchaseParams {
-    platform: string
-    purchaseToken: string
-}
-
 export type MiscGetEndpoint<T extends string> = 
     T extends "/api/misc/captcha/create" ? {params: {color: string}, response: {captcha: string}} :
     T extends "/api/misc/redirect" ? {params: {url: string}, response: string} :
@@ -188,9 +183,6 @@ export type MiscPostEndpoint<T extends string> =
     T extends "/api/misc/danboorutags" ? {params: {tags: string}, response: {tags: string}} :
     T extends "/api/misc/moepicstags" ? {params: {tags: string}, response: {tags: string}} :
     T extends "/storage" ? {params: {link: string, songCover?: boolean}, response: string} :
-    T extends "/api/premium/verify-purchase" ? {params: PurchaseParams, response: boolean} :
-    T extends "/api/apple/notifications" ? {params: {signedPayload: string}, response: null} :
-    T extends "/api/google/notifications" ? {params: {message: {data: string}}, response: null} :
     never
 
 export type MiscDeleteEndpoint<T extends string> = 
