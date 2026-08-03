@@ -5,6 +5,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import {SignedDataVerifier, Environment} from "@apple/app-store-server-library"
+import {google} from "googleapis"
 import fs from "fs"
 import path from "path"
 
@@ -18,7 +19,18 @@ const appleCertificates = [
 ]
 
 const verifier = new SignedDataVerifier(appleCertificates, true, 
-    Environment.XCODE, bundleID, appleID)
+    Environment.PRODUCTION, bundleID, appleID)
+
+
+const auth = new google.auth.GoogleAuth({
+    credentials: {
+        client_email: process.env.GOOGLE_CLIENT_EMAIL,
+        private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g,"\n")
+    },
+    scopes: ["https://www.googleapis.com/auth/androidpublisher"]
+})
+
+const androidPublisher = google.androidpublisher({version: "v3", auth})
 
 export default class ServerPayment {
     public static verifyAppleTransaction = async (signedTransaction: string) => {
@@ -27,5 +39,10 @@ export default class ServerPayment {
 
     public static verifyAppleNotification = async (signedPayload: string) => {
         return verifier.verifyAndDecodeNotification(signedPayload)
+    }
+
+    public static verifyGoogleTransaction = async (signedTransaction: string) => {
+        const result = await androidPublisher.purchases.subscriptionsv2.get({packageName: bundleID, token: signedTransaction})
+        return result.data
     }
 }

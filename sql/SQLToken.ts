@@ -271,4 +271,19 @@ export default class SQLToken {
         const result = await SQLQuery.run(query)
         return result[0] as Promise<APIKey | undefined>
     }
+
+    /** Insert or update a subscription. */
+    public static insertSubscription = async (username: string, accountToken: string,
+        subscriptionKey: string, platform: string, productID: string, expirationDate: string) => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                INSERT INTO "subscriptions" ("username", "accountToken", "subscriptionKey", "platform", "productID", "expirationDate")
+                VALUES ($1, $2, $3, $4, $5, $6)
+                ON CONFLICT ("subscriptionKey")
+                DO UPDATE SET "username" = $1, "accountToken" = $2, "platform" = $4, "productID" = $5, "expirationDate" = $6
+            `),
+            values: [username, accountToken, subscriptionKey, platform, productID, expirationDate]
+        }
+        await SQLQuery.run(query)
+    }
 }

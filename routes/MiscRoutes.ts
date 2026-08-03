@@ -487,6 +487,45 @@ const MiscRoutes = (app: Express) => {
                         await sql.user.updateUser(user.username, "premium", true)
                         await sql.user.updateUser(user.username, "premiumExpiration", premiumExpiration)
 
+                        await sql.token.insertSubscription(user.username, transaction.appAccountToken,
+                            transaction.originalTransactionId!, "ios",  transaction.productId, premiumExpiration)
+
+                        return void res.status(200).send(true)
+                    }
+                }
+            } else if (platform === "android") {
+                const transaction = await serverFunctions.payment.verifyGoogleTransaction(purchaseToken).catch(() => null)
+                if (transaction) {
+                    if (!transaction.externalAccountIdentifiers?.obfuscatedExternalAccountId) return void res.status(200).send(false)
+
+                    const lineItem = transaction.lineItems?.[0]
+                    if (lineItem?.productId !== "premium-yearly" &&
+                        lineItem?.productId !== "premium-monthly") {
+                        return void res.status(200).send(false)
+                    }
+
+                    const user = await sql.user.userByAccountToken(transaction.externalAccountIdentifiers?.obfuscatedExternalAccountId)
+                    if (user?.username !== req.session.username) return void res.status(200).send(false)
+
+                    if (transaction.subscriptionState !== "SUBSCRIPTION_STATE_ACTIVE") {
+                        let premiumExpiration = new Date(lineItem.expiryTime!).toISOString()
+
+                        await sql.user.updateUser(user.username, "premium", false)
+                        await sql.user.updateUser(user.username, "premiumExpiration", premiumExpiration)
+
+                        return void res.status(200).send(false)
+                    }
+
+                    if (Date.parse(lineItem.expiryTime!) > Date.now()) {
+                        let premiumExpiration = new Date(lineItem.expiryTime!).toISOString()
+
+                        await sql.user.updateUser(user.username, "premium", true)
+                        await sql.user.updateUser(user.username, "premiumExpiration", premiumExpiration)
+
+                        await sql.token.insertSubscription(user.username, 
+                            transaction.externalAccountIdentifiers?.obfuscatedExternalAccountId,
+                            purchaseToken, "android",  lineItem.productId, premiumExpiration)
+
                         return void res.status(200).send(true)
                     }
                 }
@@ -518,6 +557,7 @@ const MiscRoutes = (app: Express) => {
             if (!user) return void res.status(400).end()
 
             let premiumExpiration = new Date(transaction.expiresDate!).toISOString()
+            let updateDB = false
 
             switch(notification.notificationType) {
                 case "SUBSCRIBED":
@@ -526,6 +566,7 @@ const MiscRoutes = (app: Express) => {
 
                     const message = `Your account has been upgraded to premium. You can now access all the premium features. Thank you for supporting us!\n\nYour membership will last until ${functions.date.prettyDate(premiumExpiration, enLocale)}.`
                     await serverFunctions.systemMessage(user.username, "Notice: Your account was upgraded to premium", message)
+                    updateDB = true
                     break
 
                 case "DID_RENEW":
@@ -534,6 +575,7 @@ const MiscRoutes = (app: Express) => {
 
                     const renewMsg = `Your premium subscription was renewed. Thanks for your continued support!\n\nYour membership will last until ${functions.date.prettyDate(premiumExpiration, enLocale)}.`
                     await serverFunctions.systemMessage(user.username, "Notice: Your premium subscription was renewed", renewMsg)
+                    updateDB = true
                     break
 
                 case "EXPIRED":
@@ -542,18 +584,127 @@ const MiscRoutes = (app: Express) => {
 
                     const expireMsg = `Unfortunately, it seems like your premium membership has expired. We appreciate your time spent as a premium member and we hope that you are interested in renewing it again.`
                     await serverFunctions.systemMessage(user.username, "Notice: Your premium membership expired", expireMsg)
+                    updateDB = true
                     break
 
                 case "REFUND":
                 case "REVOKE":
                     let revocationDate = new Date(transaction.revocationDate!).toISOString()
+                    premiumExpiration = revocationDate
 
                     await sql.user.updateUser(user.username, "premium", false)
                     await sql.user.updateUser(user.username, "premiumExpiration", revocationDate)
 
                     const revokeMsg = `Unfortunately, it seems like your premium membership was revoked. This could be due to it being refunded.`
                     await serverFunctions.systemMessage(user.username, "Notice: Your premium membership was revoked", revokeMsg)
+                    updateDB = true
                     break
+            }
+
+            if (updateDB) {
+                await sql.token.insertSubscription(user.username, transaction.appAccountToken,
+                    transaction.originalTransactionId!, "ios",  transaction.productId, premiumExpiration)
+            }
+
+            res.status(200).end()
+        } catch (e) {
+            console.log(e)
+            res.status(400).end()
+        }
+    })
+
+    enum NotificationType {
+        SUBSCRIPTION_RECOVERED = 1,
+        SUBSCRIPTION_RENEWED = 2,
+        SUBSCRIPTION_CANCELED = 3,
+        SUBSCRIPTION_PURCHASED = 4,
+        SUBSCRIPTION_ON_HOLD = 5,
+        SUBSCRIPTION_IN_GRACE_PERIOD = 6,
+        SUBSCRIPTION_RESTARTED = 7,
+        SUBSCRIPTION_PRICE_CHANGE_CONFIRMED = 8,
+        SUBSCRIPTION_DEFERRED = 9,
+        SUBSCRIPTION_PAUSED = 10,
+        SUBSCRIPTION_PAUSE_SCHEDULE_CHANGED = 11,
+        SUBSCRIPTION_REVOKED = 12,
+        SUBSCRIPTION_EXPIRED = 13,
+        SUBSCRIPTION_ITEMS_CHANGED = 17,
+        SUBSCRIPTION_CANCELLATION_SCHEDULED = 18,
+        SUBSCRIPTION_PRICE_CHANGE_UPDATED = 19,
+        SUBSCRIPTION_PENDING_PURCHASE_CANCELED = 20,
+        SUBSCRIPTION_PRICE_STEP_UP_CONSENT_UPDATED = 22
+    }
+
+    app.post("/api/google/notifications", notificationLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const {message} = req.body as {message: {data: string}}
+            if (!message?.data) return void res.status(400).end()
+
+            const notification = JSON.parse(Buffer.from(message.data, "base64").toString("utf8"))?.subscriptionNotification
+            if (!notification) return void res.status(400).end()
+
+            const purchaseToken = notification.purchaseToken
+            if (!purchaseToken) return void res.status(400).end()
+
+            const transaction = await serverFunctions.payment.verifyGoogleTransaction(purchaseToken)
+            if (!transaction.externalAccountIdentifiers?.obfuscatedExternalAccountId) return void res.status(400).end()
+
+            const lineItem = transaction.lineItems?.[0]
+            if (lineItem?.productId !== "premium-yearly" &&
+                lineItem?.productId !== "premium-monthly") {
+                return void res.status(400).end()
+            }
+
+            const user = await sql.user.userByAccountToken(transaction.externalAccountIdentifiers.obfuscatedExternalAccountId)
+            if (!user) return void res.status(400).end()
+
+            let premiumExpiration = new Date(lineItem.expiryTime!).toISOString()
+            let updateDB = false
+
+            switch (notification.notificationType) {
+                case NotificationType.SUBSCRIPTION_PURCHASED:
+                    await sql.user.updateUser(user.username, "premium", true)
+                    await sql.user.updateUser(user.username, "premiumExpiration", premiumExpiration)
+
+                    const message = `Your account has been upgraded to premium. You can now access all the premium features. Thank you for supporting us!\n\nYour membership will last until ${functions.date.prettyDate(premiumExpiration, enLocale)}.`
+                    await serverFunctions.systemMessage(user.username, "Notice: Your account was upgraded to premium", message)
+                    updateDB = true
+                    break
+
+                case NotificationType.SUBSCRIPTION_RECOVERED:
+                case NotificationType.SUBSCRIPTION_RENEWED:
+                    await sql.user.updateUser(user.username, "premium", true)
+                    await sql.user.updateUser(user.username, "premiumExpiration", premiumExpiration)
+
+                    const renewMsg = `Your premium subscription was renewed. Thanks for your continued support!\n\nYour membership will last until ${functions.date.prettyDate(premiumExpiration, enLocale)}.`
+                    await serverFunctions.systemMessage(user.username, "Notice: Your premium subscription was renewed", renewMsg)
+                    updateDB = true
+                    break
+
+                case NotificationType.SUBSCRIPTION_EXPIRED:
+                case NotificationType.SUBSCRIPTION_PAUSED:
+                case NotificationType.SUBSCRIPTION_ON_HOLD:
+                    await sql.user.updateUser(user.username, "premium", false)
+                    await sql.user.updateUser(user.username, "premiumExpiration", premiumExpiration)
+
+                    const expireMsg = `Unfortunately, it seems like your premium membership has expired. We appreciate your time spent as a premium member and we hope that you are interested in renewing it again.`
+                    await serverFunctions.systemMessage(user.username, "Notice: Your premium membership expired", expireMsg)
+                    updateDB = true
+                    break
+
+                case NotificationType.SUBSCRIPTION_REVOKED:
+                    await sql.user.updateUser(user.username, "premium", false)
+                    await sql.user.updateUser(user.username, "premiumExpiration", premiumExpiration)
+
+                    const revokeMsg = `Unfortunately, it seems like your premium membership was revoked. This could be due to it being refunded.`
+                    await serverFunctions.systemMessage(user.username, "Notice: Your premium membership was revoked", revokeMsg)
+                    updateDB = true
+                    break
+            }
+
+            if (updateDB) {
+                await sql.token.insertSubscription(user.username, 
+                    transaction.externalAccountIdentifiers?.obfuscatedExternalAccountId,
+                    purchaseToken, "android",  lineItem.productId, premiumExpiration)
             }
 
             res.status(200).end()

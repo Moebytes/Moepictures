@@ -92,6 +92,7 @@
     "framer-motion": "^12.38.0",
     "gif-encoder": "^0.7.2",
     "gif-frames": "github:Moestash/gif-frames#no-cumulative",
+    "googleapis": "^173.0.0",
     "hangul-romanization": "^1.0.1",
     "image-pixels": "^2.2.2",
     "imagetracerjs": "^1.2.6",

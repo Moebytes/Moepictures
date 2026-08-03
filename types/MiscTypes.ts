@@ -190,6 +190,7 @@ export type MiscPostEndpoint<T extends string> =
     T extends "/storage" ? {params: {link: string, songCover?: boolean}, response: string} :
     T extends "/api/premium/verify-purchase" ? {params: PurchaseParams, response: boolean} :
     T extends "/api/apple/notifications" ? {params: {signedPayload: string}, response: null} :
+    T extends "/api/google/notifications" ? {params: {message: {data: string}}, response: null} :
     never
 
 export type MiscDeleteEndpoint<T extends string> = 
