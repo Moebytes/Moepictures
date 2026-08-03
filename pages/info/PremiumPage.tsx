@@ -5,6 +5,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import React, {useEffect, useState} from "react"
+import {useNavigate} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -39,6 +40,7 @@ const PremiumPage: React.FunctionComponent = () => {
     const {session} = useSessionSelector()
     const {mobile} = useLayoutSelector()
     const [premiumFeature, setPremiumFeature] = useState("premium")
+    const navigate = useNavigate()
 
     useEffect(() => {
         if (!session.cookie) return
@@ -161,6 +163,18 @@ const PremiumPage: React.FunctionComponent = () => {
                 <div className="premium-img-container"><img className="premium-img" src={changeUsernameImg}/></div></>
             )
         }
+        if (premiumFeature === "purchase") {
+            return (
+                <><div className="premium-row">
+                    <span className="premium-heading">{i18n.premium.purchase.title}</span>
+                </div>
+                <span className="premium-text" style={{color: "var(--text)"}}>
+                    {i18n.premium.purchase.line1}<br/><br/>
+
+                    <a className="premium-link" onClick={() => navigate("/mobile")}>{`${functions.config.getDomain()}/mobile`}</a>
+                </span></>
+            )
+        }
     }
 
     return (
@@ -180,6 +194,7 @@ const PremiumPage: React.FunctionComponent = () => {
                         <span className="premium-nav-text" style={{color: "#3a51ff"}} onClick={() => setPremiumFeature("bookmark-sort")}>{i18n.premium.bookmarkSort.title}</span>
                         <span className="premium-nav-text" style={{color: "#fb1d90"}} onClick={() => setPremiumFeature("animated-avatar")}>{i18n.premium.animatedAvatar.title}</span>
                         <span className="premium-nav-text" style={{color: "#ff2ca9"}} onClick={() => setPremiumFeature("change-username")}>{i18n.user.changeUsername}</span>
+                        <span className="premium-nav-text" onClick={() => setPremiumFeature("purchase")}>{i18n.premium.purchase.title}</span>
                     </div>
                     <div className="premium-container">
                         {getContainerJSX()}

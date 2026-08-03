@@ -566,6 +566,7 @@
     "toast": {
         "loginRequired": "You must login to use this action.",
         "verificationRequired": "You must verify your email to use this action.",
+        "premiumRequired": "You must have a premium account to use this feature.",
         "banned": "You are banned. Cannot perform this action.",
         "loggedIn": "Logged in as ",
         "loggedOut": "Successfully logged out!",
@@ -573,7 +574,9 @@
         "deletedAccountFailure": "Deletion failed, make sure you type the correct input.",
         "changedAvatar": "Successfully changed your avatar!",
         "editRequest": "Successfully submitted your edit request.",
-        "error": "Sorry, something went wrong with this request."
+        "error": "Sorry, something went wrong with this request.",
+        "paymentError": "Sorry, there was an error processing your payment.",
+        "premiumUpgrade": "Your account was successfully upgraded to premium!"
     },
     "placeholder": {
         "enterFavgroupName": "Enter favgroup name...",
@@ -2000,6 +2003,41 @@
         },
         "changeUsername": {
             "header": "Change your username once every 7 days so you can choose a name that you are happier with."
+        },
+        "purchase": {
+            "title": "Purchase",
+            "line1": "Please purchase a subscription on our mobile app (available on the Apple App Store or Google Play Store), we are not currently handling payments on the web at this time. A mobile subscription will also reflect on the web since it is tied to your account and not to a single device."
+        }
+    },
+    "mobilePremium": {
+        "premium": {
+            "line1": "Improve your experience on Moepictures by upgrading your account! Enjoy the following features:",
+            "alreadyPremium": "You're already a premium member! Here is an overview of the features:",
+            "purchase": "Purchase Premium",
+            "restore": "Restore Purchase",
+            "manage": "Manage Purchase",
+            "yearly": "Yearly",
+            "yearlyPrice": "/ year",
+            "monthly": "Monthly",
+            "monthlyPrice": "/ month"
+        },
+        "upscaledImages": {
+            "header": "View the upscaled versions of posts, often restoring sharp details and clarity."
+        },
+        "searchHistory": {
+            "header": "Your search history is now tracked, and you can return to posts you visited but forgot to favorite!"
+        },
+        "favoriteGroups": {
+            "header": "Organize posts into custom personal groups and edit the privacy level of each!"
+        },
+        "autoSearch": {
+            "header": "Unlock the auto search to automatically run your search again after an interval."
+        },
+        "bookmarkSort": {
+            "header": "Sort results by bookmarks/likes, usually bringing the best quality art to the front."
+        },
+        "changeUsername": {
+            "header": "You are able to change your username once every 7 days!"
         }
     },
     "terms": {
@@ -2062,6 +2100,10 @@
                 "title": "Accounts",
                 "line1": "You are responsible for maintaining the security of your own account. Ideally you should use a strong password and enable 2FA. You may not share or sell the access to your own account. You may not create multiple accounts to circumvent bans."
             },
+            "premiumSubscriptions": {
+                "title": "Premium Subscriptions",
+                "line1": "You may purchase a subscription to unlock additional features on our services. Subscriptions are managed by a third-party platform (Apple App Store or Google Play Store) and we do not handle payments directly. Your subscription will auto-renew unless you cancel before the renewal date. Uninstalling our app does not cancel your subscription, you are responsible for canceling in the platform's settings. We reserve the right to update subscription pricing and features or discontinue availability at any point; pricing changes will only take affect on the next renewal. Multiple people cannot share an account to use the same subscription. You could lose access to premium features without a refund if you violate our terms."
+            },
             "accountTermination": {
                 "title": "Account Termination",
                 "line1": "We reserve the right to terminate your account at any time for any reason, but most commonly for a violation of our terms."
@@ -2089,6 +2131,10 @@
             "cookies": {
                 "title": "Cookies and Local Storage",
                 "line1": "We store your cookies on the website and mobile app so that you are not logged out whenever you close your browser or the app. Cookies store your session ID used to maintain your login session. We also store local cached settings in local storage, such as your search filters and theme configuration."
+            },
+            "subscriptionRelated": {
+                "title": "Subscription Information",
+                "line1": "Premium subscriptions are processed by a third-party platform such as the Apple App Store and Google Play Store and we do not store your payment card information. We may still store limited information such as transaction identifiers and expiration dates used to verify your premium status."
             },
             "informationUse": {
                 "title": "Information Use",

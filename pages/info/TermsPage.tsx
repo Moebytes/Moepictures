@@ -156,6 +156,12 @@ const TermsPage: React.FunctionComponent = (props) => {
                             {i18n.terms.tos.accounts.line1}<br/><br/>
 
                             <span className="terms-text-alt">
+                            {i18n.terms.tos.premiumSubscriptions.title}
+                            </span><br/><br/>
+
+                            {i18n.terms.tos.premiumSubscriptions.line1}<br/><br/>
+
+                            <span className="terms-text-alt">
                             {i18n.terms.tos.accountTermination.title}
                             </span><br/><br/>
 
@@ -199,6 +205,12 @@ const TermsPage: React.FunctionComponent = (props) => {
                             </span><br/><br/>
 
                             {i18n.terms.privacy.cookies.line1}<br/><br/>
+
+                            <span className="privacy-text-alt">
+                            {i18n.terms.privacy.subscriptionRelated.title}
+                            </span><br/><br/>
+
+                            {i18n.terms.privacy.subscriptionRelated.line1}<br/><br/>
 
                             <span className="privacy-text-alt">
                             {i18n.terms.privacy.informationUse.title}
