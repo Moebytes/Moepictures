@@ -99,14 +99,13 @@ const PaymentRoutes = (app: Express) => {
             } else if (platform === "android") {
                 const transaction = await androidPublisher.purchases.subscriptionsv2.get({packageName: bundleID, 
                     token: purchaseToken}).then((result) => result.data).catch(() => null)
-                console.log(transaction)
                 if (transaction) {
                     if (!transaction.externalAccountIdentifiers?.obfuscatedExternalAccountId) return void res.status(200).send(false)
 
                     const lineItem = transaction.lineItems?.[0]
-                    console.log(lineItem)
-                    if (lineItem?.productId !== "premium-yearly" &&
-                        lineItem?.productId !== "premium-monthly") {
+                    if (lineItem?.productId !== "com.moebytes.moepictures.premium" &&
+                        lineItem?.offerDetails?.basePlanId !== "premium-yearly" &&
+                        lineItem?.offerDetails?.basePlanId !== "premium-monthly") {
                         return void res.status(200).send(false)
                     }
 
@@ -130,7 +129,7 @@ const PaymentRoutes = (app: Express) => {
 
                         await sql.token.insertSubscription(user.username, 
                             transaction.externalAccountIdentifiers?.obfuscatedExternalAccountId,
-                            purchaseToken, "android",  lineItem.productId, premiumExpiration)
+                            purchaseToken, "android", lineItem?.offerDetails?.basePlanId!, premiumExpiration)
 
                         return void res.status(200).send(true)
                     }
@@ -238,9 +237,10 @@ const PaymentRoutes = (app: Express) => {
             if (!transaction.externalAccountIdentifiers?.obfuscatedExternalAccountId) return void res.status(400).end()
 
             const lineItem = transaction.lineItems?.[0]
-            if (lineItem?.productId !== "premium-yearly" &&
-                lineItem?.productId !== "premium-monthly") {
-                return void res.status(400).end()
+            if (lineItem?.productId !== "com.moebytes.moepictures.premium" &&
+                lineItem?.offerDetails?.basePlanId !== "premium-yearly" &&
+                lineItem?.offerDetails?.basePlanId !== "premium-monthly") {
+                return void res.status(200).send(false)
             }
 
             const user = await sql.user.userByAccountToken(transaction.externalAccountIdentifiers.obfuscatedExternalAccountId)
@@ -293,7 +293,7 @@ const PaymentRoutes = (app: Express) => {
             if (updateDB) {
                 await sql.token.insertSubscription(user.username, 
                     transaction.externalAccountIdentifiers?.obfuscatedExternalAccountId,
-                    purchaseToken, "android",  lineItem.productId, premiumExpiration)
+                    purchaseToken, "android", lineItem?.offerDetails?.basePlanId!, premiumExpiration)
             }
 
             res.status(200).end()
