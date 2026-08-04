@@ -148,18 +148,18 @@ const PaymentRoutes = (app: Express) => {
             const {signedPayload} = req.body as {signedPayload: string}
 
             const notification = await iosVerifier.verifyAndDecodeNotification(signedPayload).catch(() => null)
-            if (!notification) return void res.status(400).end()
+            if (!notification) return void res.status(200).end()
 
             const transaction = await iosVerifier.verifyAndDecodeTransaction(notification.data?.signedTransactionInfo!)
-            if (!transaction.appAccountToken) return void res.status(400).end()
+            if (!transaction.appAccountToken) return void res.status(200).end()
 
             if (transaction.productId !== "com.moebytes.moepictures.premium.yearly" &&
                 transaction.productId !== "com.moebytes.moepictures.premium.monthly") {
-                return void res.status(400).end()
+                return void res.status(200).end()
             }
 
             const user = await sql.user.userByAccountToken(transaction.appAccountToken)
-            if (!user) return void res.status(400).end()
+            if (!user) return void res.status(200).end()
 
             let premiumExpiration = new Date(transaction.expiresDate!).toISOString()
             let updateDB = false
@@ -221,30 +221,30 @@ const PaymentRoutes = (app: Express) => {
     app.post("/api/google/notifications", notificationLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {message} = req.body as PubSubMessage
-            if (!message?.data) return void res.status(400).end()
+            if (!message?.data) return void res.status(200).end()
 
             const decoded = JSON.parse(Buffer.from(message.data, "base64").toString("utf8")) as DecodedPubSubMessage
             const notification = decoded.subscriptionNotification
-            if (!notification) return void res.status(400).end()
+            if (!notification) return void res.status(200).end()
 
             const purchaseToken = notification.purchaseToken
-            if (!purchaseToken) return void res.status(400).end()
+            if (!purchaseToken) return void res.status(200).end()
 
             const transaction = await androidPublisher.purchases.subscriptionsv2.get({packageName: bundleID, 
                 token: purchaseToken}).then((result) => result.data).catch(() => null)
-            if (!transaction) return void res.status(400).end()
+            if (!transaction) return void res.status(200).end()
 
-            if (!transaction.externalAccountIdentifiers?.obfuscatedExternalAccountId) return void res.status(400).end()
+            if (!transaction.externalAccountIdentifiers?.obfuscatedExternalAccountId) return void res.status(200).end()
 
             const lineItem = transaction.lineItems?.[0]
             if (lineItem?.productId !== "com.moebytes.moepictures.premium" &&
                 lineItem?.offerDetails?.basePlanId !== "premium-yearly" &&
                 lineItem?.offerDetails?.basePlanId !== "premium-monthly") {
-                return void res.status(200).send(false)
+                return void res.status(200).end()
             }
 
             const user = await sql.user.userByAccountToken(transaction.externalAccountIdentifiers.obfuscatedExternalAccountId)
-            if (!user) return void res.status(400).end()
+            if (!user) return void res.status(200).end()
 
             let premiumExpiration = new Date(lineItem.expiryTime!).toISOString()
             let updateDB = false
