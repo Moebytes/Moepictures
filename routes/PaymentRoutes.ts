@@ -99,10 +99,12 @@ const PaymentRoutes = (app: Express) => {
             } else if (platform === "android") {
                 const transaction = await androidPublisher.purchases.subscriptionsv2.get({packageName: bundleID, 
                     token: purchaseToken}).then((result) => result.data).catch(() => null)
+                console.log(transaction)
                 if (transaction) {
                     if (!transaction.externalAccountIdentifiers?.obfuscatedExternalAccountId) return void res.status(200).send(false)
 
                     const lineItem = transaction.lineItems?.[0]
+                    console.log(lineItem)
                     if (lineItem?.productId !== "premium-yearly" &&
                         lineItem?.productId !== "premium-monthly") {
                         return void res.status(200).send(false)
