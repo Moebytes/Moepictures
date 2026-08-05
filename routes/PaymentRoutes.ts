@@ -169,11 +169,11 @@ const PaymentRoutes = (app: Express) => {
             const exists = await sql.token.subscriptionEventExists(notification.notificationUUID!)
             if (exists) return void res.status(200).end()
 
-            let transaction = await iosVerifier.verifyAndDecodeTransaction(notification.data?.signedTransactionInfo!)
+            let transaction = await iosVerifier.verifyAndDecodeTransaction(notification.data?.signedTransactionInfo!).catch(() => null)
             if (!transaction) {
-                transaction = await iosVerifierSandbox.verifyAndDecodeTransaction(notification.data?.signedTransactionInfo!)
+                transaction = await iosVerifierSandbox.verifyAndDecodeTransaction(notification.data?.signedTransactionInfo!).catch(() => null)
             }
-            if (!transaction.appAccountToken) return void res.status(200).end()
+            if (!transaction?.appAccountToken) return void res.status(200).end()
 
             if (transaction.productId !== "com.moebytes.moepictures.premium.yearly" &&
                 transaction.productId !== "com.moebytes.moepictures.premium.monthly") {
