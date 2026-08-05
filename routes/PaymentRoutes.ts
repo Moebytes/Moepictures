@@ -28,6 +28,9 @@ const appleCertificates = [
 const iosVerifier = new SignedDataVerifier(appleCertificates, true, 
     Environment.PRODUCTION, bundleID, appleID)
 
+const iosVerifierSandbox = new SignedDataVerifier(appleCertificates, true, 
+    Environment.SANDBOX, bundleID)
+
 const googleAuth = new google.auth.GoogleAuth({
     credentials: {
         client_email: process.env.GOOGLE_CLIENT_EMAIL,
@@ -63,7 +66,11 @@ const PaymentRoutes = (app: Express) => {
             if (!req.session.username) return void res.status(200).send(false)
 
             if (platform === "ios") {
-                const transaction = await iosVerifier.verifyAndDecodeTransaction(purchaseToken).catch(() => null)
+                let transaction = await iosVerifier.verifyAndDecodeTransaction(purchaseToken).catch(() => null)
+
+                if (!transaction) {
+                    transaction = await iosVerifierSandbox.verifyAndDecodeTransaction(purchaseToken).catch(() => null)
+                }
 
                 if (transaction) {
                     if (!transaction.appAccountToken) return void res.status(200).send(false)
@@ -147,10 +154,16 @@ const PaymentRoutes = (app: Express) => {
         try {
             const {signedPayload} = req.body as {signedPayload: string}
 
-            const notification = await iosVerifier.verifyAndDecodeNotification(signedPayload).catch(() => null)
+            let notification = await iosVerifier.verifyAndDecodeNotification(signedPayload).catch(() => null)
+            if (!notification) {
+                notification = await iosVerifierSandbox.verifyAndDecodeNotification(signedPayload).catch(() => null)
+            }
             if (!notification) return void res.status(200).end()
 
-            const transaction = await iosVerifier.verifyAndDecodeTransaction(notification.data?.signedTransactionInfo!)
+            let transaction = await iosVerifier.verifyAndDecodeTransaction(notification.data?.signedTransactionInfo!)
+            if (!transaction) {
+                transaction = await iosVerifierSandbox.verifyAndDecodeTransaction(notification.data?.signedTransactionInfo!)
+            }
             if (!transaction.appAccountToken) return void res.status(200).end()
 
             if (transaction.productId !== "com.moebytes.moepictures.premium.yearly" &&
