@@ -274,16 +274,45 @@ export default class SQLToken {
 
     /** Insert or update a subscription. */
     public static insertSubscription = async (username: string, accountToken: string,
-        subscriptionKey: string, platform: string, productID: string, expirationDate: string) => {
+        subscriptionKey: string, transactionID: string, platform: string, productID: string, expirationDate: string) => {
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                INSERT INTO "subscriptions" ("username", "accountToken", "subscriptionKey", "platform", "productID", "expirationDate")
-                VALUES ($1, $2, $3, $4, $5, $6)
+                INSERT INTO "subscriptions" ("username", "accountToken", "subscriptionKey", "transactionID", "platform", "productID", "expirationDate")
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
                 ON CONFLICT ("subscriptionKey")
-                DO UPDATE SET "username" = $1, "accountToken" = $2, "platform" = $4, "productID" = $5, "expirationDate" = $6
+                DO UPDATE SET "username" = $1, "accountToken" = $2, "transactionID" = $4, 
+                "platform" = $5, "productID" = $6, "expirationDate" = $7
             `),
-            values: [username, accountToken, subscriptionKey, platform, productID, expirationDate]
+            values: [username, accountToken, subscriptionKey, transactionID, platform, productID, expirationDate]
         }
         await SQLQuery.run(query)
+    }
+
+    /** Insert subscription event. */
+    public static insertSubscriptionEvent = async (messageID: string, subscriptionKey: string, 
+        platform: string, event: string) => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                INSERT INTO "subscription events" ("messageID", "subscriptionKey", "platform", "event")
+                VALUES ($1, $2, $3, $4)
+                ON CONFLICT ("messageID") DO NOTHING
+            `),
+            values: [messageID, subscriptionKey, platform, event]
+        }
+        await SQLQuery.run(query)
+    }
+
+    /** Check for duplicate subscription event. */
+    public static subscriptionEventExists = async (messageID: string) => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                SELECT *
+                FROM "subscription events"
+                WHERE "messageID" = $1
+            `),
+            values: [messageID]
+        }
+        const result = await SQLQuery.run(query)
+        return result.length > 0
     }
 }

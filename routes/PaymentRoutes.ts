@@ -9,6 +9,7 @@ import functions from "../functions/Functions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server/ServerFunctions"
 import {SignedDataVerifier, Environment} from "@apple/app-store-server-library"
 import {google} from "googleapis"
+import {OAuth2Client} from "google-auth-library"
 import rateLimit from "express-rate-limit"
 import sql from "../sql/SQLQuery"
 import enLocale from "../assets/locales/en.json"
@@ -38,6 +39,8 @@ const googleAuth = new google.auth.GoogleAuth({
     },
     scopes: ["https://www.googleapis.com/auth/androidpublisher"]
 })
+
+const googleAuthClient = new OAuth2Client()
 
 const androidPublisher = google.androidpublisher({version: "v3", auth: googleAuth})
 
@@ -98,7 +101,8 @@ const PaymentRoutes = (app: Express) => {
                         await sql.user.updateUser(user.username, "premiumExpiration", premiumExpiration)
 
                         await sql.token.insertSubscription(user.username, transaction.appAccountToken,
-                            transaction.originalTransactionId!, "ios",  transaction.productId, premiumExpiration)
+                            transaction.originalTransactionId!, transaction.transactionId!, "ios", 
+                            transaction.productId, premiumExpiration)
 
                         return void res.status(200).send(true)
                     }
@@ -106,13 +110,14 @@ const PaymentRoutes = (app: Express) => {
             } else if (platform === "android") {
                 const transaction = await androidPublisher.purchases.subscriptionsv2.get({packageName: bundleID, 
                     token: purchaseToken}).then((result) => result.data).catch(() => null)
+
                 if (transaction) {
                     if (!transaction.externalAccountIdentifiers?.obfuscatedExternalAccountId) return void res.status(200).send(false)
 
                     const lineItem = transaction.lineItems?.[0]
-                    if (lineItem?.productId !== "com.moebytes.moepictures.premium" &&
-                        lineItem?.offerDetails?.basePlanId !== "premium-yearly" &&
-                        lineItem?.offerDetails?.basePlanId !== "premium-monthly") {
+                    if (lineItem?.productId !== "com.moebytes.moepictures.premium" ||
+                        (lineItem?.offerDetails?.basePlanId !== "premium-yearly" &&
+                        lineItem?.offerDetails?.basePlanId !== "premium-monthly")) {
                         return void res.status(200).send(false)
                     }
 
@@ -136,7 +141,8 @@ const PaymentRoutes = (app: Express) => {
 
                         await sql.token.insertSubscription(user.username, 
                             transaction.externalAccountIdentifiers?.obfuscatedExternalAccountId,
-                            purchaseToken, "android", lineItem?.offerDetails?.basePlanId!, premiumExpiration)
+                            purchaseToken, lineItem.latestSuccessfulOrderId!, "android", 
+                            lineItem?.offerDetails?.basePlanId!, premiumExpiration)
 
                         return void res.status(200).send(true)
                     }
@@ -159,6 +165,9 @@ const PaymentRoutes = (app: Express) => {
                 notification = await iosVerifierSandbox.verifyAndDecodeNotification(signedPayload).catch(() => null)
             }
             if (!notification) return void res.status(200).end()
+
+            const exists = await sql.token.subscriptionEventExists(notification.notificationUUID!)
+            if (exists) return void res.status(200).end()
 
             let transaction = await iosVerifier.verifyAndDecodeTransaction(notification.data?.signedTransactionInfo!)
             if (!transaction) {
@@ -221,7 +230,11 @@ const PaymentRoutes = (app: Express) => {
 
             if (updateDB) {
                 await sql.token.insertSubscription(user.username, transaction.appAccountToken,
-                    transaction.originalTransactionId!, "ios",  transaction.productId, premiumExpiration)
+                    transaction.originalTransactionId!, transaction.transactionId!, "ios", 
+                    transaction.productId, premiumExpiration)
+
+                await sql.token.insertSubscriptionEvent(notification.notificationUUID!,
+                    transaction.originalTransactionId!, "ios", notification.notificationType!)
             }
 
             res.status(200).end()
@@ -233,12 +246,24 @@ const PaymentRoutes = (app: Express) => {
 
     app.post("/api/google/notifications", notificationLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
+            const token = req.headers.authorization?.substring("Bearer ".length)
+            if (!token) return void res.status(401).end()
+
+            const ticket = await googleAuthClient.verifyIdToken({idToken: token, 
+                audience: "https://moepictures.net/api/google/notifications"})
+
+            const payload = ticket.getPayload()
+            if (payload?.email !== process.env.GOOGLE_CLIENT_EMAIL) return void res.status(401).end()
+
             const {message} = req.body as PubSubMessage
             if (!message?.data) return void res.status(200).end()
 
             const decoded = JSON.parse(Buffer.from(message.data, "base64").toString("utf8")) as DecodedPubSubMessage
             const notification = decoded.subscriptionNotification
             if (!notification) return void res.status(200).end()
+
+            const exists = await sql.token.subscriptionEventExists(message.messageId)
+            if (exists) return void res.status(200).end()
 
             const purchaseToken = notification.purchaseToken
             if (!purchaseToken) return void res.status(200).end()
@@ -250,9 +275,9 @@ const PaymentRoutes = (app: Express) => {
             if (!transaction.externalAccountIdentifiers?.obfuscatedExternalAccountId) return void res.status(200).end()
 
             const lineItem = transaction.lineItems?.[0]
-            if (lineItem?.productId !== "com.moebytes.moepictures.premium" &&
-                lineItem?.offerDetails?.basePlanId !== "premium-yearly" &&
-                lineItem?.offerDetails?.basePlanId !== "premium-monthly") {
+            if (lineItem?.productId !== "com.moebytes.moepictures.premium" ||
+                (lineItem?.offerDetails?.basePlanId !== "premium-yearly" &&
+                lineItem?.offerDetails?.basePlanId !== "premium-monthly")) {
                 return void res.status(200).end()
             }
 
@@ -283,7 +308,6 @@ const PaymentRoutes = (app: Express) => {
                     break
 
                 case NotificationType.SUBSCRIPTION_EXPIRED:
-                case NotificationType.SUBSCRIPTION_PAUSED:
                 case NotificationType.SUBSCRIPTION_ON_HOLD:
                     await sql.user.updateUser(user.username, "premium", false)
                     await sql.user.updateUser(user.username, "premiumExpiration", premiumExpiration)
@@ -306,7 +330,11 @@ const PaymentRoutes = (app: Express) => {
             if (updateDB) {
                 await sql.token.insertSubscription(user.username, 
                     transaction.externalAccountIdentifiers?.obfuscatedExternalAccountId,
-                    purchaseToken, "android", lineItem?.offerDetails?.basePlanId!, premiumExpiration)
+                    purchaseToken, lineItem.latestSuccessfulOrderId!, "android", 
+                    lineItem?.offerDetails?.basePlanId!, premiumExpiration)
+
+                await sql.token.insertSubscriptionEvent(message.messageId, purchaseToken, 
+                    "android", NotificationType[notification.notificationType])
             }
 
             res.status(200).end()
