@@ -78,6 +78,7 @@ import CookieBanner from "./components/banner/CookieBanner"
 import TagToolTip from "./components/tooltip/TagToolTip"
 import ToolTip from "./components/tooltip/ToolTip"
 import ParticleEffect from "./components/site/ParticleEffect"
+import BetaTestPage from "./pages/info/BetaTestPage"
 import LocalStorage from "./LocalStorage"
 import DragScroll from "./components/site/DragScroll"
 import "./index.less"
@@ -368,6 +369,7 @@ const App: React.FunctionComponent = (props) => {
                 <Route path="/news-banner" element={<NewsBannerPage/>}/>
                 <Route path="/ip-blacklist" element={<IPBlacklistPage/>}/>
                 <Route path="/api-key" element={<APIKeyPage/>}/>
+                <Route path="/beta-test" element={<BetaTestPage/>}/>
                 <Route path="/401" element={<$401Page/>}/>
                 <Route path="/403" element={<$403Page/>}/>
                 <Route path="*" element={<$404Page/>}/>

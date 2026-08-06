@@ -160,6 +160,8 @@ const TermsPage: React.FunctionComponent = (props) => {
                             </span><br/><br/>
 
                             {i18n.terms.tos.premiumSubscriptions.line1}<br/><br/>
+                            {i18n.terms.tos.premiumSubscriptions.line2}<br/><br/>
+                            {i18n.terms.tos.premiumSubscriptions.line3}<br/><br/>
 
                             <span className="terms-text-alt">
                             {i18n.terms.tos.accountTermination.title}
