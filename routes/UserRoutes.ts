@@ -120,7 +120,7 @@ const UserRoutes = (app: Express) => {
             const badPassword = functions.validation.validatePassword(username, password, enLocale)
             if (badUsername || badEmail || badPassword) return void res.status(400).send("Bad username, password, or email.")
             let ip = serverFunctions.util.ip(req)
-            if (req.session.captchaAnswer !== captchaResponse?.trim()) return void res.status(400).send("Bad captchaResponse")
+            if (!serverFunctions.verifyCaptcha(req, captchaResponse)) return void res.status(400).send("Bad captchaResponse")
             let bannedIp = await sql.report.activeBannedIP(ip)
             if (bannedIp) return void res.status(400).send("IP banned")
             try {
@@ -200,7 +200,7 @@ const UserRoutes = (app: Express) => {
             if (!username || !password || !captchaResponse) return void res.status(400).send("Bad username, password, or captchaResponse")
             username = username.trim().toLowerCase()
             password = password.trim()
-            if (req.session.captchaAnswer !== captchaResponse?.trim()) return void res.status(400).send("Bad captchaResponse")
+            if (!serverFunctions.verifyCaptcha(req, captchaResponse)) return void res.status(400).send("Bad captchaResponse")
             const user = await sql.user.user(username)
             if (!user) return void res.status(400).send("Bad request")
             let ip = serverFunctions.util.ip(req)
@@ -682,7 +682,7 @@ const UserRoutes = (app: Express) => {
         try {
             let {newUsername, captchaResponse} = req.body as ChangeUsernameParams
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
-            if (req.session.captchaAnswer !== captchaResponse?.trim()) return void res.status(400).send("Bad captchaResponse")
+            if (!serverFunctions.verifyCaptcha(req, captchaResponse)) return void res.status(400).send("Bad captchaResponse")
             if (!permissions.isPremium(req.session)) return void res.status(402).send("Premium only")
             newUsername = newUsername.trim().toLowerCase()
             const badUsername = functions.validation.validateUsername(newUsername, enLocale)
@@ -809,7 +809,7 @@ const UserRoutes = (app: Express) => {
         try {
             let {newEmail, captchaResponse} = req.body as ChangeEmailParams
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
-            if (req.session.captchaAnswer !== captchaResponse?.trim()) return void res.status(400).send("Bad captchaResponse")
+            if (!serverFunctions.verifyCaptcha(req, captchaResponse)) return void res.status(400).send("Bad captchaResponse")
             const badEmail = functions.validation.validateEmail(newEmail, enLocale)
             if (badEmail) return void res.status(400).send("Bad newEmail")
             const user = await sql.user.user(req.session.username)
@@ -867,7 +867,7 @@ const UserRoutes = (app: Express) => {
         try {
             let {email, captchaResponse} = req.body as VerifyEmailParams
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
-            if (req.session.captchaAnswer !== captchaResponse?.trim()) return void res.status(400).send("Bad captchaResponse")
+            if (!serverFunctions.verifyCaptcha(req, captchaResponse)) return void res.status(400).send("Bad captchaResponse")
             const badEmail = functions.validation.validateEmail(email, enLocale)
             if (badEmail) return void res.status(400).send("Bad email")
             const user = await sql.user.user(req.session.username)
@@ -911,7 +911,7 @@ const UserRoutes = (app: Express) => {
     app.post("/api/user/forgotpassword", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
             const {email, captchaResponse} = req.body as ForgotPasswordParams
-            if (req.session.captchaAnswer !== captchaResponse?.trim()) return void res.status(400).send("Bad captchaResponse")
+            if (!serverFunctions.verifyCaptcha(req, captchaResponse)) return void res.status(400).send("Bad captchaResponse")
             if (!email) {
                 await functions.timeout(2000) 
                 return void res.status(200).send("Success")

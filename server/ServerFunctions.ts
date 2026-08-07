@@ -80,6 +80,11 @@ export default class ServerFunctions {
         return csrf.verify(req.session.csrfSecret!, csrfToken)
     }
 
+    public static verifyCaptcha = (req: Request, captchaResponse: string) => {
+        return req.session.captchaAnswer === captchaResponse?.trim() ||
+            req.session.previousCaptchaAnswer === captchaResponse?.trim()
+    }
+
     public static sendEncrypted = (data: any, req: Request, res: Response) => {
         if (req.session.apiKey) return res.status(200).send(data)
         if (permissions.noAPIEncryption(req.session)) return res.status(200).send(data)

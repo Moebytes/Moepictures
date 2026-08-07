@@ -77,6 +77,7 @@ const MiscRoutes = (app: Express) => {
                 background: color,
                 width: 230
             })
+            req.session.previousCaptchaAnswer = req.session.captchaAnswer
             req.session.captchaAnswer = captcha.text
             serverFunctions.sendEncrypted({captcha: captcha.data}, req, res)
         } catch (e) {
@@ -88,7 +89,7 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/captcha", captchaLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {captchaResponse} = req.body as {captchaResponse: string}
-            if (req.session.captchaAnswer === captchaResponse?.trim()) {
+            if (serverFunctions.verifyCaptcha(req, captchaResponse)) {
                 req.session.captchaNeeded = false
                 res.status(200).send("Success")
             } else {
