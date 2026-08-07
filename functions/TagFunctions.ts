@@ -7,7 +7,8 @@
 import functions from "./Functions"
 import permissions from "../structures/Permissions"
 import {MiniTag, TagCount, Post, PostFull, TagHistory, PostOrdered, Tag, Session, PostHistory,
-UploadTag, PostSearch, UnverifiedPost, TagGroupCategory, MiniTagGroup} from "../types/Types"
+UploadTag, PostSearch, UnverifiedPost, TagGroupCategory, MiniTagGroup,
+TagCategorySearch} from "../types/Types"
 
 export default class TagFunctions {
     public static fixTwitterTag = (tag: string) => {
@@ -315,5 +316,21 @@ export default class TagFunctions {
             }
         }
         return tagGroups
+    }
+
+    public static removeDuplicateCategories = (items: TagCategorySearch[]) => {
+        const map = new Map<string, TagCategorySearch>()
+
+        for (const item of items) {
+            const existing = map.get(item.tagID)
+
+            if (!existing) {
+                map.set(item.tagID, {...item, posts: [...item.posts]})
+            } else {
+                existing.posts.push(...item.posts)
+            }
+        }
+
+        return [...map.values()]
     }
 }
