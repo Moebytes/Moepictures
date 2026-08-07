@@ -1008,8 +1008,9 @@ const PostRoutes = (app: Express) => {
 
     app.get("/api/post/history", postLimiter, async (req: Request, res: Response) => {
         try {
-            let {postID, historyID, username, query, offset} = req.query as unknown as PostHistoryParams
+            let {postID, historyID, username, query, offset, limit} = req.query as unknown as PostHistoryParams
             if (!offset) offset = 0
+            if (!limit) limit = 100
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             let result = [] as PostHistory[]
             if (postID && historyID) {
@@ -1020,7 +1021,7 @@ const PostRoutes = (app: Express) => {
                 result = await sql.history.userPostHistory(username)
                 if (req.session.captchaNeeded) result = functions.post.stripTags(result)
             } else {
-                result = await sql.history.postHistory(postID, Number(offset), query)
+                result = await sql.history.postHistory(postID, Number(offset), Number(limit), query)
                 if (req.session.captchaNeeded) result = functions.post.stripTags(result)
             }
             serverFunctions.sendEncrypted(result, req, res)

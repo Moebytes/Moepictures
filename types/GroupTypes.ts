@@ -153,6 +153,7 @@ export interface GroupHistoryParams {
     username?: string
     query?: string
     offset?: number
+    limit?: number
 }
 
 export type GroupGetEndpoint<T extends string> = 

@@ -777,8 +777,9 @@ const TagRoutes = (app: Express) => {
 
     app.get("/api/tag/history", tagLimiter, async (req: Request, res: Response) => {
         try {
-            let {tag, historyID, username, query, offset} = req.query as unknown as TagHistoryParams
+            let {tag, historyID, username, query, offset, limit} = req.query as unknown as TagHistoryParams
             if (!offset) offset = 0
+            if (!limit) limit = 100
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             let result = [] as TagHistory[]
             if (tag && historyID) {
@@ -787,7 +788,7 @@ const TagRoutes = (app: Express) => {
             } else if (username) {
                 result = await sql.history.userTagHistory(username)
             } else {
-                result = await sql.history.tagHistory(tag, Number(offset), query)
+                result = await sql.history.tagHistory(tag, Number(offset), Number(limit), query)
             }
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {

@@ -54,7 +54,7 @@ export default class SQLHistory {
     }
 
     /** Get tag history */
-    public static tagHistory = async (tag?: string, offset?: number, search?: string) => {
+    public static tagHistory = async (tag?: string, offset?: number, limit?: number, search?: string) => {
         let i = 1
         let values = [] as any
         let searchValue = i
@@ -70,6 +70,12 @@ export default class SQLHistory {
         if (tag) {
             values.push(tag)
             tagQuery = `"tag history"."tag" = $${tagValue}`
+            i++
+        }
+        let limitValue = i
+        if (limit) {
+            if (Number(limit) > 100) limit = 100
+            values.push(limit)
             i++
         }
         if (offset) values.push(offset)
@@ -100,7 +106,7 @@ export default class SQLHistory {
                 GROUP BY "tag history"."historyID", users."username", users."role", 
                 users."premium", users."banned", users."deleted", users."imagePost"
                 ORDER BY "tag history"."date" DESC
-                LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
             `),
             values: []
         }
@@ -234,7 +240,7 @@ export default class SQLHistory {
     }
 
     /** Get post history */
-    public static postHistory = async (postID?: string | number, offset?: number, search?: string) => {
+    public static postHistory = async (postID?: string | number, offset?: number, limit?: number, search?: string) => {
         let i = 1
         let values = [] as any
         let searchValue = i
@@ -252,6 +258,12 @@ export default class SQLHistory {
         if (postID) {
             values.push(postID)
             postQuery =`"post history"."postID" = $${postValue}`
+            i++
+        }
+        let limitValue = i
+        if (limit) {
+            if (Number(limit) > 100) limit = 100
+            values.push(limit)
             i++
         }
         if (offset) values.push(offset)
@@ -278,7 +290,7 @@ export default class SQLHistory {
                 posts.approver, posts."approveDate", posts.deleted, posts."deletionDate", users."username", 
                 users."premium", users."role", users."banned", users."deleted", users."imagePost"
                 ORDER BY "post history"."date" DESC
-                LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
             `),
             values: []
         }
@@ -531,7 +543,7 @@ export default class SQLHistory {
     }
 
     /** Get group history */
-    public static groupHistory = async (groupID?: string, offset?: number, search?: string) => {
+    public static groupHistory = async (groupID?: string, offset?: number, limit?: number, search?: string) => {
         let i = 1
         let values = [] as any
         let searchValue = i
@@ -549,6 +561,12 @@ export default class SQLHistory {
         if (groupID) {
             values.push(groupID)
             groupQuery = `"group history"."groupID" = $${groupValue}`
+            i++
+        }
+        let limitValue = i
+        if (limit) {
+            if (Number(limit) > 100) limit = 100
+            values.push(limit)
             i++
         }
         if (offset) values.push(offset)
@@ -571,7 +589,7 @@ export default class SQLHistory {
                 GROUP BY "group history"."historyID", users."username", users."role", 
                 users."premium", users."banned", users."deleted", users."imagePost"
                 ORDER BY "group history"."date" DESC
-                LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
             `),
             values: []
         }

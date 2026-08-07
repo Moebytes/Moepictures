@@ -192,6 +192,7 @@ export interface TagHistoryParams {
     username?: string
     query?: string
     offset?: number
+    limit?: number
 }
 
 export interface TagEditParams {

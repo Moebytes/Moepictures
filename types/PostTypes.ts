@@ -170,6 +170,7 @@ export interface PostHistoryParams {
     username?: string
     query?: string
     offset?: number
+    limit?: number
 }
 
 export interface PostCompressParams {

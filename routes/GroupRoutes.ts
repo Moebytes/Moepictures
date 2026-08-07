@@ -639,8 +639,9 @@ const GroupRoutes = (app: Express) => {
 
     app.get("/api/group/history", groupLimiter, async (req: Request, res: Response) => {
         try {
-            let {slug, historyID, username, query, offset} = req.query as unknown as GroupHistoryParams
+            let {slug, historyID, username, query, offset, limit} = req.query as unknown as GroupHistoryParams
             if (!offset) offset = 0
+            if (!limit) limit = 100
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             let result = [] as GroupHistory[]
             if (slug) {
@@ -652,10 +653,10 @@ const GroupRoutes = (app: Express) => {
                 } else if (username) {
                     result = await sql.history.userGroupHistory(username)
                 } else {
-                    result = await sql.history.groupHistory(group.groupID, Number(offset), query)
+                    result = await sql.history.groupHistory(group.groupID, Number(offset), Number(limit), query)
                 }
             } else {
-                result = await sql.history.groupHistory(undefined, Number(offset))
+                result = await sql.history.groupHistory(undefined, Number(offset), Number(limit))
             }
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
