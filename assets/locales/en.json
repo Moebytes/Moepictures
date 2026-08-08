@@ -2027,6 +2027,10 @@
         },
         "changeUsername": {
             "header": "Change your username once every 7 days so you can choose a name that you are happier with."
+        },
+        "purchase": {
+            "title": "Purchase",
+            "line1": "Please purchase a subscription on our mobile app (available on the Apple App Store or Google Play Store), we are not currently handling payments on the web at this time. A mobile subscription will also reflect on the web since it is tied to your account and not to a single device."
         }
     },
     "mobilePremium": {
