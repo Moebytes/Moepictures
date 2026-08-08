@@ -86,7 +86,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const {reverse} = usePlaybackSelector()
     const {setReverse, setSpeed} = usePlaybackActions()
     const {scroll, square, imageType, ratingType, styleType, sizeType, sortType, sortReverse, selectionMode, 
-    pageMultiplier, selectionItems, showChildren, autoScroll} = useSearchSelector()
+    pageMultiplier, selectionItems, selectionPosts, showChildren, autoScroll} = useSearchSelector()
     const {setScroll, setImageType, setRatingType, setStyleType, setSizeType, setSortType, setSortReverse, 
     setSelectionMode, setPageMultiplier, setSquare, setSearchFlag, setShowChildren, setAutoScroll,
     setSelectionItems, setSelectionPosts} = useSearchActions()
@@ -730,8 +730,10 @@ const SortBar: React.FunctionComponent = (props) => {
             })
         }
         setSelectionMode(false)
-        setSelectionItems(new Set())
-        setSelectionPosts(new Map())
+        selectionItems.clear()
+        selectionPosts.clear()
+        setSelectionItems(selectionItems)
+        setSelectionPosts(selectionPosts)
         if (sortType === "favorites") setSearchFlag(true)
         setTimeout(() => {
             setSelectionMode(true)
@@ -748,8 +750,10 @@ const SortBar: React.FunctionComponent = (props) => {
             setDownloadIDs(newDownloadIDs)
             setDownloadFlag(true)
             setSelectionMode(false)
-            setSelectionItems(new Set())
-            setSelectionPosts(new Map())
+            selectionItems.clear()
+            selectionPosts.clear()
+            setSelectionItems(selectionItems)
+            setSelectionPosts(selectionPosts)
             setTimeout(() => {
                 setSelectionMode(true)
             }, 200)

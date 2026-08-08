@@ -112,7 +112,7 @@ const PostLive2D = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRe
         const rect = live2dPartRef.current?.getBoundingClientRect()
         if (!rect || !controlRect) return "400px"
         const raw = controlRect.right - rect.right
-        let offset = -160
+        let offset = -130
         return `${raw + offset}px`
     }
 

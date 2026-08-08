@@ -80,7 +80,10 @@ const PostSong = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef)
     useEffect(() => {
         if (song) {
             setAudio(song)
-            if (props.post) setAudioPost(props.post)
+            if (props.post) {
+                setAudioPost(props.post)
+                setPlayFlag("always")
+            }
             updateSongCover()
         }
     }, [song])
@@ -122,7 +125,7 @@ const PostSong = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef)
         const rect = audioVolumeRef.current?.getBoundingClientRect()
         if (!rect || !controlRect) return "400px"
         const raw = controlRect.right - rect.right
-        let offset = -7
+        let offset = -10
         return `${raw + offset}px`
     }
 
@@ -257,7 +260,7 @@ const PostSong = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef)
                     <VolumeMuteIcon className="audio-control-img" ref={audioVolumeRef} onClick={updateMute}/>}
                 </div> 
             </div>
-            <div className={`audio-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), marginTop: "-230px"}}
+            <div className={`audio-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), marginTop: "-250px"}}
             onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(4); setShowSpeedDropdown(false)}}>
                     <span className="audio-speed-dropdown-text">4x</span>
@@ -287,7 +290,7 @@ const PostSong = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef)
                     <span className="audio-speed-dropdown-text">0.25x</span>
                 </div>
             </div>
-            <div className={`audio-pitch-dropdown ${showPitchDropdown ? "" : "hide-pitch-dropdown"}`} style={{marginRight: getPitchMarginRight(), marginTop: "-240px"}}
+            <div className={`audio-pitch-dropdown ${showPitchDropdown ? "" : "hide-pitch-dropdown"}`} style={{marginRight: getPitchMarginRight(), marginTop: "-250px"}}
             onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(24); setShowPitchDropdown(false)}}>
                     <span className="audio-pitch-dropdown-text">+24</span>

@@ -354,7 +354,7 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
                 </div> 
             </div>
             <div className={`gif-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), 
-                marginTop: "-230px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                marginTop: "-280px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(4); setShowSpeedDropdown(false)}}>
                     <span className="gif-speed-dropdown-text">4x</span>
                 </div>

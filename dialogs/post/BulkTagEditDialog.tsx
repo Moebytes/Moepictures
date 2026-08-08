@@ -49,7 +49,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
     const {showBulkTagEditDialog} = usePostDialogSelector()
     const {setShowBulkTagEditDialog} = usePostDialogActions()
     const {selectionMode, selectionItems, selectionPosts} = useSearchSelector()
-    const {setSelectionMode} = useSearchActions()
+    const {setSelectionMode, setSelectionItems, setSelectionPosts} = useSearchActions()
     const {mobile} = useLayoutSelector()
     const [type, setType] = useState("x")
     const [rating, setRating] = useState("x")
@@ -174,6 +174,10 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
         }
         setShowBulkTagEditDialog(false)
         setSelectionMode(false)
+        selectionItems.clear()
+        selectionPosts.clear()
+        setSelectionItems(selectionItems)
+        setSelectionPosts(selectionPosts)
         setTimeout(() => {
             setSelectionMode(true)
         }, 200)

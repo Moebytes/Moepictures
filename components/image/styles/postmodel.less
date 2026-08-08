@@ -159,7 +159,7 @@
 
 .model-slider-track-1 {
     height: 8px;
-    background-color: black;
+    background-color: white;
     border-radius: 0.2;
 }
 
@@ -173,10 +173,10 @@
     cursor: pointer;
     &:active {
         box-shadow: none;
-        filter: hue-rotate(60deg);
+        filter: hue-rotate(30deg);
     }
     &:hover {
-        filter: hue-rotate(60deg);
+        filter: hue-rotate(30deg);
     }
     &:focus {
         outline: none;
@@ -212,7 +212,7 @@
 .model-control-text {
     font-family: "irohamaru mikami", sans-serif;
     color: white;
-    .stroke-black-thin();
+    //.stroke-black-thin();
     margin-left: 10px;
     margin-right: 10px;
     margin-bottom: 0px;
@@ -269,7 +269,7 @@
 
 .model-speed-slider-track-1 {
     width: 6px;
-    background-color: black;
+    background-color: white;
     border-radius: 0.2;
 }
 
@@ -284,10 +284,10 @@
     cursor: pointer;
     &:active {
         box-shadow: none;
-        filter: hue-rotate(60deg);
+        filter: hue-rotate(30deg);
     }
     &:hover {
-        filter: hue-rotate(60deg);
+        filter: hue-rotate(30deg);
     }
     &:focus {
         outline: none;
@@ -312,7 +312,7 @@
     font-family: "irohamaru mikami", sans-serif;
     font-size: 12px;
     color: #2940ff;
-    .stroke-black-thin();
+    //.stroke-black-thin();
 }
 
 .model-dropdown {
@@ -324,7 +324,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: rgba(7, 5, 40, 0.93);
+    background-color: rgba(224, 222, 255, 0.93);
     transform-origin: bottom;
     transition: all 0.3s;
     pointer-events: all;
@@ -361,7 +361,7 @@
     font-size: 16px;
     margin-left: 5px;
     color: #2d1fe8;
-    .stroke-black-thin();
+    //.stroke-black-thin();
 }
 
 .model-slider {
@@ -376,11 +376,11 @@
 .model-slider-track {
     display: flex;
     height: 9px;
-    background-color: #0a063a;
+    background-color: white;
 }
 
 .model-slider-track.model-slider-track-1 {
-    background-color: #0a063a;
+    background-color: white;
 }
 
 .model-slider-thumb {
@@ -408,9 +408,9 @@
 }
 
 .model-button {
-    background-color: #3727e5;
+    background-color: #a59dff;
     color: black;
-    border: 1px solid black;
+    border: none;
     font-family: "irohamaru mikami", sans-serif;
     font-weight: bold;
     font-size: 15px;
@@ -420,7 +420,6 @@
     margin-top: -5px;
     margin-bottom: 3px;
     &:hover {
-        border: 1px solid #c9ceff;
         color: #c8cdff;
     }
 }
@@ -432,6 +431,10 @@
     overflow-y: scroll;
     overflow-y: overlay;
     overscroll-behavior: contain;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
 }
 
 .live2d-dropdown {
@@ -443,7 +446,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: rgba(63, 22, 2, 0.93);
+    background-color: rgba(255, 242, 236, 0.91);
     transform-origin: bottom;
     transition: all 0.3s;
     pointer-events: all;
@@ -480,7 +483,7 @@
     font-size: 16px;
     margin-left: 5px;
     color: #ff6739;
-    .stroke-black-thin();
+    //.stroke-black-thin();
 }
 
 .live2d-slider {
@@ -495,11 +498,11 @@
 .live2d-slider-track {
     display: flex;
     height: 5px;
-    background-color: #220e03;
+    background-color: white;
 }
 
 .live2d-slider-track.live2d-slider-track-1 {
-    background-color: #220e03;
+    background-color: white;
 }
 
 .live2d-slider-thumb {
@@ -529,7 +532,7 @@
 .live2d-button {
     background-color: #ff6739;
     color: black;
-    border: 1px solid black;
+    border: none;
     font-family: "irohamaru mikami", sans-serif;
     font-weight: bold;
     font-size: 15px;
@@ -539,7 +542,6 @@
     margin-top: -5px;
     margin-bottom: 3px;
     &:hover {
-        border: 1px solid #ffddc9;
         color: #ffe0c8;
     }
 }
@@ -551,6 +553,10 @@
     overflow-y: scroll;
     overflow-y: overlay;
     overscroll-behavior: contain;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
 }
 
 @media screen and (max-width: 900px) {
