@@ -155,12 +155,12 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         const rect = formatRef.current?.getBoundingClientRect()
         if (!rect) return "0px"
         const raw = window.innerWidth - rect.right
-        let offset = -20
+        let offset = -22
         if (format === "png") offset += 2
         if (format === "webp") offset += 8
         if (format === "avif") offset += 4
         if (format === "svg") offset += 1
-        if (mobile) offset += 15
+        if (mobile) offset += 0
         return `${raw + offset}px`
     }
 

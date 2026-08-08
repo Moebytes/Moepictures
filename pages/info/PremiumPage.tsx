@@ -177,6 +177,10 @@ const PremiumPage: React.FunctionComponent = () => {
         }
     }
 
+    const lightenColor = (color: string) => {
+        return `color-mix(${color} 70%, transparent)`
+    }
+
     return (
         <>
         <TitleBar/>
@@ -187,13 +191,20 @@ const PremiumPage: React.FunctionComponent = () => {
                 {session.username ? <div className="premium">
                     <div className="premium-nav">
                         <span className="premium-nav-text" onClick={() => setPremiumFeature("premium")}>{i18n.roles.premium}</span>
-                        <span className="premium-nav-text" style={{color: "#2f91ff"}} onClick={() => setPremiumFeature("upscaled-images")}>{i18n.user.upscaledImages}</span>
-                        <span className="premium-nav-text" style={{color: "#ff2792"}} onClick={() => setPremiumFeature("search-history")}>{i18n.history.search}</span>
-                        <span className="premium-nav-text" style={{color: "#e84bff"}} onClick={() => setPremiumFeature("favorite-groups")}>{i18n.help.favoriteGroups.title}</span>
-                        <span className="premium-nav-text" style={{color: "#5b2fff"}} onClick={() => setPremiumFeature("autosearch")}>{i18n.premium.autoSearch.title}</span>
-                        <span className="premium-nav-text" style={{color: "#3a51ff"}} onClick={() => setPremiumFeature("bookmark-sort")}>{i18n.premium.bookmarkSort.title}</span>
-                        <span className="premium-nav-text" style={{color: "#fb1d90"}} onClick={() => setPremiumFeature("animated-avatar")}>{i18n.premium.animatedAvatar.title}</span>
-                        <span className="premium-nav-text" style={{color: "#ff2ca9"}} onClick={() => setPremiumFeature("change-username")}>{i18n.user.changeUsername}</span>
+                        <span className="premium-nav-text" style={mobile ? {backgroundColor: lightenColor("#2f91ff")} : {color: "#2f91ff"}} 
+                            onClick={() => setPremiumFeature("upscaled-images")}>{i18n.user.upscaledImages}</span>
+                        <span className="premium-nav-text" style={mobile ? {backgroundColor: lightenColor("#ff2792")} : {color: "#ff2792"}} 
+                            onClick={() => setPremiumFeature("search-history")}>{i18n.history.search}</span>
+                        <span className="premium-nav-text" style={mobile ? {backgroundColor: lightenColor("#e84bff")} : {color: "#e84bff"}} 
+                            onClick={() => setPremiumFeature("favorite-groups")}>{i18n.help.favoriteGroups.title}</span>
+                        <span className="premium-nav-text" style={mobile ? {backgroundColor: lightenColor("#5b2fff")} : {color: "#5b2fff"}} 
+                            onClick={() => setPremiumFeature("autosearch")}>{i18n.premium.autoSearch.title}</span>
+                        <span className="premium-nav-text" style={mobile ? {backgroundColor: lightenColor("#3a51ff")} : {color: "#3a51ff"}} 
+                            onClick={() => setPremiumFeature("bookmark-sort")}>{i18n.premium.bookmarkSort.title}</span>
+                        <span className="premium-nav-text" style={mobile ? {backgroundColor: lightenColor("#fb1d90")} : {color: "#fb1d90"}} 
+                            onClick={() => setPremiumFeature("animated-avatar")}>{i18n.premium.animatedAvatar.title}</span>
+                        <span className="premium-nav-text" style={mobile ? {backgroundColor: lightenColor("#ff2ca9")} : {color: "#ff2ca9"}} 
+                            onClick={() => setPremiumFeature("change-username")}>{i18n.user.changeUsername}</span>
                         <span className="premium-nav-text" onClick={() => setPremiumFeature("purchase")}>{i18n.premium.purchase.title}</span>
                     </div>
                     <div className="premium-container">

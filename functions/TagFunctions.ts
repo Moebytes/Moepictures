@@ -163,6 +163,20 @@ export default class TagFunctions {
         return "tag-color"
     }
 
+    public static getTagBGColor = (tag: Tag | TagHistory | MiniTag | TagCount) => {
+        if ((tag as Tag).r18) return "r18-tag-bg-color"
+        if (tag.type === "artist") return "artist-tag-bg-color"
+        if (tag.type === "character") return "character-tag-bg-color"
+        if (tag.type === "series") return "series-tag-bg-color"
+        if (tag.type === "meta") return "meta-tag-bg-color"
+        if (tag.type === "appearance") return "appearance-tag-bg-color"
+        if (tag.type === "outfit") return "outfit-tag-bg-color"
+        if (tag.type === "accessory") return "accessory-tag-bg-color"
+        if (tag.type === "action") return "action-tag-bg-color"
+        if (tag.type === "scenery") return "scenery-tag-bg-color"
+        return "tag-bg-color"
+    }
+
     public static tagObject = (tags: string[]) => {
         return tags.map((tag) => ({tag})) as UploadTag[]
     }

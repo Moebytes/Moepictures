@@ -158,10 +158,10 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <img className="mobileinfo-img" src={link}/>
                     </div> : null}
                     <div className="mobileinfo-row">
-                        <span className="tag-hover">
-                            <span className="tag artist-tag-color" onClick={() => tagClick()}>{props.artists[i].tag?.replaceAll("-", " ")}</span>
+                        <span className="mobile-tag-hover artist-tag-bg-color">
+                            <span className="mobile-tag" onClick={() => tagClick()}>{props.artists[i].tag?.replaceAll("-", " ")}</span>
                             {artistSocials()}
-                            <span className={`tag-count ${props.artists[i].count === "1" ? "artist-tag-color" : ""}`}>{props.artists[i].count}</span>
+                            <span className={`mobile-tag-count ${props.artists[i].count === "1" ? "r18-tag-color" : ""}`}>{props.artists[i].count}</span>
                         </span>
                     </div>
                 </>)
@@ -195,10 +195,10 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                     <img className="mobileinfo-img" src={link}/>
                 </div> : null}
                 <div className="mobileinfo-row">
-                    <span className="tag-hover">
-                        <span className="tag character-tag-color" onClick={() => tagClick()}>{props.characters[i].tag?.replaceAll("-", " ")}</span>
+                    <span className="mobile-tag-hover character-tag-bg-color">
+                        <span className="mobile-tag" onClick={() => tagClick()}>{props.characters[i].tag?.replaceAll("-", " ")}</span>
                         {characterSocials()}
-                        <span className={`tag-count ${props.characters[i].count === "1" ? "artist-tag-color" : ""}`}>{props.characters[i].count}</span>
+                        <span className={`mobile-tag-count ${props.characters[i].count === "1" ? "artist-tag-color" : ""}`}>{props.characters[i].count}</span>
                     </span>
                 </div>
                 </>)
@@ -238,10 +238,10 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                     <img className="mobileinfo-img" src={link}/>
                 </div> : null}
                 <div className="mobileinfo-row">
-                    <span className="tag-hover">
-                        <span className="tag series-tag-color" onClick={() => tagClick()}>{props.series[i].tag?.replaceAll("-", " ")}</span>
+                    <span className="mobile-tag-hover series-tag-bg-color">
+                        <span className="mobile-tag" onClick={() => tagClick()}>{props.series[i].tag?.replaceAll("-", " ")}</span>
                         {seriesSocials()}
-                        <span className={`tag-count ${props.series[i].count === "1" ? "artist-tag-color" : ""}`}>{props.series[i].count}</span>
+                        <span className={`mobile-tag-count ${props.series[i].count === "1" ? "artist-tag-color" : ""}`}>{props.series[i].count}</span>
                     </span>
                 </div>
                 </>)
@@ -260,9 +260,9 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             }
             jsx.push(
                 <div className="mobileinfo-row">
-                    <span className="tag-hover">
-                        <span className="tag meta-tag-color" onClick={() => tagClick()}>{props.meta[i].tag?.replaceAll("-", " ")}</span>
-                        <span className={`tag-count ${props.meta[i].count === "1" ? "artist-tag-color" : ""}`}>{props.meta[i].count}</span>
+                    <span className="mobile-tag-hover meta-tag-bg-color">
+                        <span className="mobile-tag" onClick={() => tagClick()}>{props.meta[i].tag?.replaceAll("-", " ")}</span>
+                        <span className={`mobile-tag-count ${props.meta[i].count === "1" ? "artist-tag-color" : ""}`}>{props.meta[i].count}</span>
                     </span>
                 </div>
             )
@@ -305,9 +305,9 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                 }
                 jsx.push(
                     <div className="mobileinfo-row">
-                        <span className="tag-hover" onClick={() => tagClick()}>
-                            <span className={`tag ${functions.tag.getTagColor(currentTags[i])}`}>{currentTags[i].tag?.replaceAll("-", " ")}</span>
-                            <span className={`tag-count ${currentTags[i].count === "1" ? "artist-tag-color" : ""}`}>{currentTags[i].count}</span>
+                        <span className={`mobile-tag-hover ${functions.tag.getTagBGColor(currentTags[i])}`} onClick={() => tagClick()}>
+                            <span className={`mobile-tag`}>{currentTags[i].tag?.replaceAll("-", " ")}</span>
+                            <span className={`mobile-tag-count ${currentTags[i].count === "1" ? "artist-tag-color" : ""}`}>{currentTags[i].count}</span>
                         </span>
                     </div>
                 )
@@ -328,9 +328,9 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             }
             jsx.push(
                 <div className="mobileinfo-row">
-                    <span className="tag-hover" onClick={() => tagClick()}>
-                        <span className={`tag ${functions.tag.getTagColor(currentTags[i])}`}>{currentTags[i].tag?.replaceAll("-", " ")}</span>
-                        <span className={`tag-count ${currentTags[i].count === "1" ? "artist-tag-color" : ""}`}>{currentTags[i].count}</span>
+                    <span className={`mobile-tag-hover ${functions.tag.getTagBGColor(currentTags[i])}`} onClick={() => tagClick()}>
+                        <span className={`mobile-tag`}>{currentTags[i].tag?.replaceAll("-", " ")}</span>
+                        <span className={`mobile-tag-count ${currentTags[i].count === "1" ? "artist-tag-color" : ""}`}>{currentTags[i].count}</span>
                     </span>
                 </div>
             )
@@ -640,9 +640,9 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="mobileinfo-subcontainer-column">
                     <div className="mobileinfo-row">
-                        <span className="tag-hover" onClick={copyTags} onContextMenu={copyTags}>
-                            <TagIcon className="mobileinfo-icon"/>
-                            <span className="tag-red">{i18n.sidebar.copyTags}</span>
+                        <span className="mobile-option-tag-red" onClick={copyTags} onContextMenu={copyTags}>
+                            <TagIcon className="mobile-option-icon"/>
+                            <span className="mobile-option-text">{i18n.sidebar.copyTags}</span>
                         </span>
                     </div>
                 </div>
@@ -661,9 +661,9 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="mobileinfo-subcontainer-column">
                     <div className="mobileinfo-row">
-                        <span className="tag-hover" onClick={toggleCaptcha}>
-                            <TagIcon className="mobileinfo-icon"/>
-                            <span className="tag-red">{i18n.sidebar.unlockPost}</span>
+                        <span className="mobile-option-tag-red" onClick={toggleCaptcha}>
+                            <TagIcon className="mobile-option-icon"/>
+                            <span className="mobile-option-text">{i18n.sidebar.unlockPost}</span>
                         </span>
                     </div>
                 </div>
@@ -866,22 +866,22 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         </div>
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={() => copyHash()} onAuxClick={() => copyHash()} onContextMenu={(event) => {event.preventDefault(); setTimeout(() => copyHash(true), 100)}}>
-                                    <HashIcon className="mobileinfo-icon"/>
-                                    <span className="side-info">{i18n.sidebar.copyHash}</span>
+                                <span className="mobile-option-tag" onClick={() => copyHash()} onAuxClick={() => copyHash()} onContextMenu={(event) => {event.preventDefault(); setTimeout(() => copyHash(true), 100)}}>
+                                    <HashIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.sidebar.copyHash}</span>
                                 </span>
                             </div>
                             <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={getPostInfo}>
-                                    <InfoIcon className="mobileinfo-icon"/>
-                                    <span className="side-info">{i18n.sidebar.getInfo}</span>
+                                <span className="mobile-option-tag" onClick={getPostInfo}>
+                                    <InfoIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.sidebar.getInfo}</span>
                                 </span>
                             </div>
                             {session.username && !props.unverified && !functions.post.isR18(props.post.rating) ? 
                             <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={triggerSetAvatar}>
-                                    <SetAvatarIcon className="mobileinfo-icon"/>
-                                    <span className="side-info">{i18n.sidebar.setAvatar}</span>
+                                <span className="mobile-option-tag" onClick={triggerSetAvatar}>
+                                    <SetAvatarIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.sidebar.setAvatar}</span>
                                 </span>
                             </div> : null}
                         </div>
@@ -892,152 +892,152 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                     <div className="mobileinfo-subcontainer-column">
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={triggerTagEdit}>
-                                    <TagEditIcon className="mobileinfo-icon"/>
-                                    <span className="side-info">{i18n.sidebar.tagEdit}</span>
+                                <span className="mobile-option-tag" onClick={triggerTagEdit}>
+                                    <TagEditIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.sidebar.tagEdit}</span>
                                 </span>
                             </div>
                             <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={triggerSourceEdit}>
-                                    <SourceEditIcon className="mobileinfo-icon"/>
-                                    <span className="side-info">{i18n.sidebar.sourceEdit}</span>
+                                <span className="mobile-option-tag" onClick={triggerSourceEdit}>
+                                    <SourceEditIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.sidebar.sourceEdit}</span>
                                 </span>
                             </div>
                         </div>
                         <div className="mobileinfo-sub-row">
                             {!props.unverified ? <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={triggerParent}>
-                                    <ParentIcon className="mobileinfo-icon"/>
-                                    <span className="side-info">{i18n.sidebar.addParent}</span>
+                                <span className="mobile-option-tag" onClick={triggerParent}>
+                                    <ParentIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.sidebar.addParent}</span>
                                 </span>
                             </div> : null}
                             {!props.unverified ? <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={triggerGroup}>
-                                    <GroupIcon className="mobileinfo-icon"/>
-                                    <span className="side-info">{i18n.sidebar.addGroup}</span>
+                                <span className="mobile-option-tag" onClick={triggerGroup}>
+                                    <GroupIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.sidebar.addGroup}</span>
                                 </span>
                             </div> : null}
                         </div>
                         <div className="mobileinfo-sub-row">
                             {!props.unverified && permissions.isAdmin(session) ? <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={triggerSplit}>
-                                    <SplitIcon className="mobileinfo-icon"/>
-                                    <span className="side-info">{i18n.sidebar.splitVariations}</span>
+                                <span className="mobile-option-tag" onClick={triggerSplit}>
+                                    <SplitIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.sidebar.splitVariations}</span>
                                 </span>
                             </div> : null}
                             {!props.unverified && permissions.isAdmin(session) ? <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={triggerJoin}>
-                                    <JoinIcon className="mobileinfo-icon"/>
-                                    <span className="side-info">{i18n.sidebar.joinChildPosts}</span>
+                                <span className="mobile-option-tag" onClick={triggerJoin}>
+                                    <JoinIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.sidebar.joinChildPosts}</span>
                                 </span>
                             </div> : null}
                         </div>
                         <div className="mobileinfo-sub-row">
                             {!props.unverified && props.post.parentID && permissions.isAdmin(session) ? <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={triggerFlip}>
-                                    <FlipIcon className="mobileinfo-icon"/>
-                                    <span className="side-info">{i18n.sidebar.flipParent}</span>
+                                <span className="mobile-option-tag" onClick={triggerFlip}>
+                                    <FlipIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.sidebar.flipParent}</span>
                                 </span>
                             </div> : null}
                             {permissions.isMod(session) ? 
                             <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={editThumbnail}>
-                                    <SnapshotIcon className="mobileinfo-icon"/>
-                                    <span className="side-info">{i18n.sidebar.editThumbnail}</span>
+                                <span className="mobile-option-tag" onClick={editThumbnail}>
+                                    <SnapshotIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.sidebar.editThumbnail}</span>
                                 </span>
                             </div> : null}
                         </div>
                         <div className="mobileinfo-sub-row">
                             {!props.unverified && permissions.canPrivate(session, props.artists) ? <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={privatePost}>
+                                <span className="mobile-option-tag" onClick={privatePost}>
                                     {props.post.private ?
-                                    <UnprivateIcon className="mobileinfo-icon"/> :
-                                    <PrivateIcon className="mobileinfo-icon"/>}
-                                    <span className="side-info">{props.post.private ? i18n.sidebar.unprivate : i18n.sort.private}</span>
+                                    <UnprivateIcon className="mobile-option-icon"/> :
+                                    <PrivateIcon className="mobile-option-icon"/>}
+                                    <span className="mobile-option-text">{props.post.private ? i18n.sidebar.unprivate : i18n.sort.private}</span>
                                 </span>
                             </div> : null}
                             {!props.unverified && permissions.isMod(session) ? <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={triggerTakedown}>
+                                <span className="mobile-option-tag" onClick={triggerTakedown}>
                                     {props.post.hidden ?
-                                    <RestoreIcon className="mobileinfo-icon"/> :
-                                    <TakedownIcon className="mobileinfo-icon"/>}
-                                    <span className="side-info">{props.post.hidden ? i18n.sidebar.restore : i18n.sidebar.takedown}</span>
+                                    <RestoreIcon className="mobile-option-icon"/> :
+                                    <TakedownIcon className="mobile-option-icon"/>}
+                                    <span className="mobile-option-text">{props.post.hidden ? i18n.sidebar.restore : i18n.sidebar.takedown}</span>
                                 </span>
                             </div> : null}
                         </div>
                         <div className="mobileinfo-sub-row">
                             {props.unverified ? <>
                             <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={compressingDialog}>
-                                    <CompressIcon className="mobileinfo-icon"/>
-                                    <span className="side-info">{i18n.buttons.compress}</span>
+                                <span className="mobile-option-tag" onClick={compressingDialog}>
+                                    <CompressIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.buttons.compress}</span>
                                 </span>
                             </div>
                             <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={upscalingDialog}>
-                                    <UpscaleIcon className="mobileinfo-icon"/>
-                                    <span className="side-info">{i18n.buttons.upscale}</span>
+                                <span className="mobile-option-tag" onClick={upscalingDialog}>
+                                    <UpscaleIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.buttons.upscale}</span>
                                 </span>
                             </div></> : null}
                         </div>
                         <div className="mobileinfo-sub-row">
                             {props.unverified ? <>
                             <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={approvePost}>
-                                    <ApproveIcon className="mobileinfo-icon-green"/>
-                                    <span className="side-info-green">{i18n.buttons.approve}</span>
+                                <span className="mobile-option-tag-green" onClick={approvePost}>
+                                    <ApproveIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.buttons.approve}</span>
                                 </span>
                             </div>
                             <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={rejectPost}>
-                                    <RejectIcon className="mobileinfo-icon-red"/>
-                                    <span className="side-info-red">{i18n.buttons.reject}</span>
+                                <span className="mobile-option-tag-red" onClick={rejectPost}>
+                                    <RejectIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.buttons.reject}</span>
                                 </span>
                             </div>
                             </> : null}
                         </div>
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={editPost}>
-                                    <EditIcon className="mobileinfo-icon-red"/>
-                                    <span className="side-info-red">{i18n.buttons.edit}</span>
+                                <span className="mobile-option-tag-red" onClick={editPost}>
+                                    <EditIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.buttons.edit}</span>
                                 </span>
                             </div>
                             {!props.unverified && permissions.isMod(session) ? <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={lockPost}>
+                                <span className="mobile-option-tag-red" onClick={lockPost}>
                                     {props.post.locked ?
-                                    <UnlockIcon className="mobileinfo-icon-red"/> :
-                                    <LockIcon className="mobileinfo-icon-red"/>}
-                                    <span className="side-info-red">{props.post.locked ? i18n.sidebar.unlock : i18n.sidebar.lock}</span>
+                                    <UnlockIcon className="mobile-option-icon"/> :
+                                    <LockIcon className="mobile-option-icon"/>}
+                                    <span className="mobile-option-text">{props.post.locked ? i18n.sidebar.unlock : i18n.sidebar.lock}</span>
                                 </span>
                             </div> : null}
                             {!props.unverified ? <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={postHistory}>
-                                    <HistoryIcon className="mobileinfo-icon-red"/>
-                                    <span className="side-info-red">{i18n.sidebar.history}</span>
+                                <span className="mobile-option-tag-red" onClick={postHistory}>
+                                    <HistoryIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.sidebar.history}</span>
                                 </span>
                             </div> : null}
                             {!(permissions.isMod(session) && props.unverified) || props.post.deleted ?
                             <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={deletePost}>
-                                    <DeleteIcon className="mobileinfo-icon-red"/>
-                                    <span className="side-info-red">{i18n.buttons.delete}</span>
+                                <span className="mobile-option-tag-red" onClick={deletePost}>
+                                    <DeleteIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.buttons.delete}</span>
                                 </span>
                             </div> : null}
                             {permissions.isMod(session) && props.post.deleted ?
                             <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={undeletePost}>
-                                    <UndeleteIcon className="mobileinfo-icon-red"/>
-                                    <span className="side-info-red">{i18n.buttons.undelete}</span>
+                                <span className="mobile-option-tag-red" onClick={undeletePost}>
+                                    <UndeleteIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.buttons.undelete}</span>
                                 </span>
                             </div> : null}
                         </div>
                         <div className="mobileinfo-sub-row">
                             {props.unverified && props.post.deleted && !(props.post as UnverifiedPost).appealed ?
                             <div className="mobileinfo-row">
-                                <span className="tag-hover" onClick={appealPost}>
-                                    <AppealIcon className="mobileinfo-icon-red"/>
-                                    <span className="side-info-red">{i18n.buttons.appeal}</span>
+                                <span className="mobile-option-tag-red" onClick={appealPost}>
+                                    <AppealIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.buttons.appeal}</span>
                                 </span>
                             </div> : null}
                         </div>

@@ -1395,7 +1395,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         {!props.unverified && permissions.isMod(session) ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={lockPost}>
                                 {props.post.locked ?
-                                <LockIcon className="sidebar-icon-red"/> :
+                                <UnlockIcon className="sidebar-icon-red"/> :
                                 <LockIcon className="sidebar-icon-red"/>}
                                 <span className="side-info-red">{props.post.locked ? i18n.sidebar.unlock : i18n.sidebar.lock}</span>
                             </span>

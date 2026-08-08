@@ -173,3 +173,75 @@
         filter: brightness(130%);
     }
 }
+
+.mobile-tag-hover {
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    border-radius: 10px;
+    padding: 4px 7px;
+    margin-top: 5px;
+    &:hover {
+        transform: scale(0.98);
+        filter: brightness(120%);
+    }
+}
+
+.mobile-tag {
+    font-family: "irohamaru mikami", sans-serif;
+    color: white;
+    font-size: 16px;
+    word-break: break-word;
+    &:hover {
+        color: black;
+    }
+}
+
+.mobile-tag-count {
+    font-family: "Honoka Shin Antique-Kaku", sans-serif;
+    color: black;
+    font-size: 14px;
+    margin-left: 10px;
+}
+
+.mobile-option-tag {
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    border-radius: 10px;
+    padding: 2px 5px;
+    margin-top: 5px;
+    background-color: color-mix(var(--sidebarTextA) 60%, transparent);
+    &:hover {
+        transform: scale(0.98);
+        filter: brightness(120%);
+    }
+}
+
+.mobile-option-tag-green {
+    .mobile-option-tag();
+    background-color: color-mix(#56fdaa 90%, transparent);
+}
+
+.mobile-option-tag-red {
+    .mobile-option-tag();
+    background-color: color-mix(#fd56a9 90%, transparent);
+}
+
+.mobile-option-text {
+    font-family: "Honoka Shin Antique-Kaku", sans-serif;
+    color: white;
+    font-size: 16px;
+    word-break: break-word;
+    white-space: nowrap;
+    &:hover {
+        color: black;
+    }
+}
+
+.mobile-option-icon {
+    width: auto;
+    height: 15px;
+    margin-right: 5px;
+    color: white;
+}

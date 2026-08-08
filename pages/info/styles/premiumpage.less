@@ -149,6 +149,7 @@
 
     .premium-nav {
         width: 100%;
+        flex-direction: row;
         flex-wrap: wrap;    
         justify-content: flex-start;
         margin-left: 10px;
@@ -156,6 +157,13 @@
 
     .premium-nav-text {
         margin-right: 25px;
+        background-color: color-mix(var(--premiumColor) 70%, transparent);
+        color: white;
+        padding: 2px 5px;
+        border-radius: 10px;
+        &:hover {
+            color: black;
+        }
     }
 
     .premium-img {
