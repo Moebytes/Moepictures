@@ -647,7 +647,7 @@ const UserProfilePage: React.FunctionComponent = () => {
                         <input style={permissions.isPremiumEnabled() ? {color: "var(--premiumColor)"} : {}} className="user-input" spellCheck={false} value={interval} onChange={(event) => setInterval(event.target.value)}
                         onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></input>
                     </div>
-                    {permissions.isAdmin(session) ? <div className="user-row">
+                    {permissions.isOwner(session) ? <div className="user-row">
                         <R18Icon className="user-icon-red"/>
                         <span style={{color: "var(--r18Color)"}} className="user-text">{i18n.user.showR18}: <span style={{color: "var(--r18Color)"}} className="user-text-action" onClick={showR18}>{session.showR18 ? i18n.buttons.yes : i18n.buttons.no}</span></span>
                     </div> : null}

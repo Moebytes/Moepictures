@@ -396,6 +396,43 @@ const MessageRoutes = (app: Express) => {
         }
     })
 
+
+    app.delete("/api/message/deleteunread", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
+            const messages = await sql.message.allMessages(req.session.username, "", "date", undefined, 99999)
+            for (const message of messages) {
+                if (req.session.username === message.creator) {
+                    if (!message.read) {
+                        await sql.message.updateMessage(message.messageID, "delete", true)
+                        let allDeleted = true
+                        for (const data of message.recipientData) {
+                            if (!data.delete) {
+                                allDeleted = false
+                                break
+                            }
+                        }
+                        if (allDeleted) await sql.message.deleteMessage(message.messageID)
+                    }
+                } else {
+                    for (const recipient of message.recipientData) {
+                        if (req.session.username === recipient.recipient) {
+                            if (!recipient.read) {
+                                await sql.message.updateRecipient(message.messageID, recipient.recipient, "delete", true)
+                                if (message.delete) await sql.message.deleteMessage(message.messageID)
+                            }
+                        }
+                    }
+                }
+            }
+            
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
     app.get("/api/notifications", messageLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")

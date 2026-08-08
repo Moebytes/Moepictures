@@ -46,7 +46,7 @@ const MailPage: React.FunctionComponent = (props) => {
     const {messageSearchFlag} = useFlagSelector()
     const {setMessageSearchFlag} = useFlagActions()
     const {softDeleteMessageID, softDeleteMessageFlag} = useMessageDialogSelector()
-    const {setSoftDeleteMessageID, setSoftDeleteMessageFlag} = useMessageDialogActions()
+    const {setSoftDeleteMessageID, setSoftDeleteMessageFlag, setDeleteUnreadDialog} = useMessageDialogActions()
     const [sortType, setSortType] = useState("date" as CommentSort)
     const [sortReverse, setSortReverse] = useState(false)
     const [hideSystem, setHideSystem] = useState(false)
@@ -122,7 +122,7 @@ const MailPage: React.FunctionComponent = (props) => {
         usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "messageCount"})
 
     useEffect(() => {
-        if (messageSearchFlag) {
+        if (messageSearchFlag !== null) {
             setTimeout(() => {
                 setSearchQuery(messageSearchFlag)
                 initItems(messageSearchFlag)
@@ -178,6 +178,10 @@ const MailPage: React.FunctionComponent = (props) => {
         return jsx
     }
 
+    const deleteUnread = async () => {
+        setDeleteUnreadDialog(true)
+    }
+
     const readAll = async () => {
         await functions.http.post("/api/message/bulkread", {readStatus: true}, session, setSessionFlag)
         initItems()
@@ -194,14 +198,9 @@ const MailPage: React.FunctionComponent = (props) => {
         const style = {marginLeft: mobile ? "0px" : "15px", marginRight: mobile ? "15px" : "0px", marginTop: mobile ? "10px" : "0px"}
         return (
             <div className="item-button-container" style={{marginLeft: "0px", justifyContent: "flex-start"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <button className="item-button" style={style} onClick={() => deleteUnread()}>{i18n.buttons.deleteUnread}</button>
                 <button className="item-button" style={style} onClick={() => readAll()}>{i18n.buttons.readAll}</button>
                 <button className="item-button" style={style} onClick={() => unreadAll()}>{i18n.buttons.unreadAll}</button>
-                {mobile ? <div className="itemsort-item" onClick={() => setHideSystem((prev: boolean) => !prev)} style={{marginLeft: "0px", marginTop: "7px"}}>
-                    {hideSystem ?
-                    <RadioButtonCheckedIcon className="itemsort-img"/> :
-                    <RadioButtonIcon className="itemsort-img"/>}
-                    <span className="itemsort-text">{i18n.buttons.hideSystem}</span>
-                </div> : null}
             </div> 
         )
     }
@@ -247,6 +246,13 @@ const MailPage: React.FunctionComponent = (props) => {
                         </div>
                     </div>
                     {mobile ? <>{getReadButtons()}</> : null}
+                    {mobile ? <div className="itemsort-item" onClick={() => setHideSystem((prev: boolean) => !prev)} 
+                        style={{marginLeft: "0px", marginTop: "7px"}}>
+                        {hideSystem ?
+                        <RadioButtonCheckedIcon className="itemsort-img"/> :
+                        <RadioButtonIcon className="itemsort-img"/>}
+                        <span className="itemsort-text">{i18n.buttons.hideSystem}</span>
+                    </div> : null}
                     <div className="items-container">
                         {generateMessagesJSX()}
                     </div>

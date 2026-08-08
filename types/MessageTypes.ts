@@ -125,4 +125,5 @@ export type MessagePutEndpoint<T extends string> =
 export type MessageDeleteEndpoint<T extends string> = 
     T extends "/api/message/delete" ? {params: {messageID: string}, response: string} :
     T extends "/api/message/reply/delete" ? {params: {messageID: string, replyID: string}, response: string} :
+    T extends "/api/message/deleteunread" ? {params: null, response: string} :
     never

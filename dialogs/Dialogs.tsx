@@ -25,6 +25,7 @@ import RemapGroupDialog from "./group/RemapGroupDialog"
 import RevertGroupHistoryDialog from "./group/RevertGroupHistoryDialog"
 import DeleteMessageDialog from "./message/DeleteMessageDialog"
 import DeleteMessageReplyDialog from "./message/DeleteMessageReplyDialog"
+import DeleteUnreadDialog from "./message/DeleteUnreadDialog"
 import EditMessageDialog from "./message/EditMessageDialog"
 import EditMessageReplyDialog from "./message/EditMessageReplyDialog"
 import ForwardMessageDialog from "./message/ForwardMessageDialog"
@@ -120,6 +121,7 @@ const Dialogs: React.FunctionComponent = () => {
         <RevertGroupHistoryDialog/>
         <DeleteMessageDialog/>
         <DeleteMessageReplyDialog/>
+        <DeleteUnreadDialog/>
         <EditMessageDialog/>
         <EditMessageReplyDialog/>
         <ForwardMessageDialog/>

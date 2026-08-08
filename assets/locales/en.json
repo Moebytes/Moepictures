@@ -183,6 +183,7 @@
         "old": "Old",
         "readAll": "Read All",
         "unreadAll": "Unread All",
+        "deleteUnread": "Delete Unread",
         "hideSystem": "Hide System",
         "deleteAll": "Delete All",
         "post": "Post",
@@ -211,6 +212,7 @@
         "quote": "Quote",
         "report": "Report",
         "revert": "Revert",
+        "current": "Current",
         "back": "Back",
         "validate": "Validate",
         "cancel": "Cancel",
@@ -1295,6 +1297,9 @@
             "title": "Soft Delete Message",
             "header": "Do you want to soft delete this message? (It will appear again if any other recipient replies)."
         },
+        "deleteUnread": {
+            "header": "Do you want to delete unread messages? (Intended to read them and mark as unread again)."
+        },
         "takedownPost": {
             "title": "Takedown Post",
             "restoreTitle": "Restore Post",
@@ -1928,6 +1933,24 @@
         "moetext": {
             "line1": "MoeText is our custom markup language used to format comments."
         },
+        "tags": {
+            "line1": "In order to improve searching quality, each post should have a decent number of tags. Tags describe features in the image such as the clothing, hair style, and accessories. Different words in tags are separated by a dash \"-\" but for viewing it is shown as a space. Tags are only supported in English.",
+            "tagCategories": {
+                "header": "Tags are color coded into various categories.",
+                "items": {
+                    "artist": "- Twitter/romanized name of the artist.",
+                    "character": "- The character name and series.",
+                    "series": "- Anime/game the character is from.",
+                    "meta": "- Special tags describing metadata.",
+                    "appearance": "- Tags related to appearance.",
+                    "outfit": "- Tags related to outfits.",
+                    "accessory": "- Tags related to accessories.",
+                    "action": "- Tags related to actions.",
+                    "scenery": "- Tags related to scenery.",
+                    "tag": "- Doesn't fit in another category."
+                }
+            }
+        },
         "tagGroups": {
             "line1": "Tag groups are a custom category of tags usually used to group the tags of each respective character together. They make tags more organized and easier to read.",
             "line2": "The syntax to create tag groups while tagging is the following:",
@@ -1971,7 +1994,7 @@
             "avatars": "You can only pick avatars by cropping an image on the site. Cute anime avatars only!"
         },
         "website": {
-            "line1": "Visit our website to access our full list of features not available in the app! This includes notes, history states, and uploading.",
+            "line1": "Visit our website to access our full list of features not available in the app! This includes notes, non-image posts, and uploading.",
             "line2": "On the website you can also setup 2-Factor authentication for your account."
         }
     },
@@ -2016,7 +2039,8 @@
             "yearly": "Yearly",
             "yearlyPrice": "/ year",
             "monthly": "Monthly",
-            "monthlyPrice": "/ month"
+            "monthlyPrice": "/ month",
+            "renewal": "Subscriptions automatically renew until canceled. Manage your subscription in your phone's settings. Benefits will last until the end of your subscription period."
         },
         "upscaledImages": {
             "header": "View the upscaled versions of posts, often restoring sharp details and clarity."

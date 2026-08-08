@@ -667,7 +667,7 @@ const UserRoutes = (app: Express) => {
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
             if (!user) return void res.status(400).send("Bad username")
-            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
+            if (!permissions.isOwner(req.session)) return void res.status(403).end()
             const newR18 = r18 !== undefined ? r18 : !Boolean(user.showR18)
             req.session.showR18 = newR18
             await sql.user.updateUser(req.session.username, "showR18", newR18)

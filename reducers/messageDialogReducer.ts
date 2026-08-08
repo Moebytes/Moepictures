@@ -28,7 +28,8 @@ const messageDialogSlice = createSlice({
         editMsgReplyFlag: false,
         editMsgReplyContent: "",
         editMsgReplyR18: false,
-        forwardMessageObj: null as Message | null
+        forwardMessageObj: null as Message | null,
+        deleteUnreadDialog: false
     },
     reducers: {
         setDMTarget: (state, action) => {state.dmTarget = action.payload},
@@ -47,7 +48,8 @@ const messageDialogSlice = createSlice({
         setEditMsgReplyFlag: (state, action) => {state.editMsgReplyFlag = action.payload},
         setEditMsgReplyContent: (state, action) => {state.editMsgReplyContent = action.payload},
         setEditMsgReplyR18: (state, action) => {state.editMsgReplyR18 = action.payload},
-        setForwardMessageObj: (state, action) => {state.forwardMessageObj = action.payload}
+        setForwardMessageObj: (state, action) => {state.forwardMessageObj = action.payload},
+        setDeleteUnreadDialog: (state, action) => {state.deleteUnreadDialog = action.payload}
     }
 })
 
@@ -55,7 +57,7 @@ const {
     setDMTarget, setDeleteMessageID, setDeleteMessageFlag, setSoftDeleteMessageID, setSoftDeleteMessageFlag,
     setEditMessageID, setEditMessageFlag, setEditMessageTitle, setEditMessageContent, setEditMessageR18,
     setDeleteMsgReplyID, setDeleteMsgReplyFlag, setEditMsgReplyID, setEditMsgReplyFlag, setEditMsgReplyR18,
-    setForwardMessageObj, setEditMsgReplyContent
+    setForwardMessageObj, setEditMsgReplyContent, setDeleteUnreadDialog
 } = messageDialogSlice.actions
 
 export const useMessageDialogSelector = () => {
@@ -77,7 +79,8 @@ export const useMessageDialogSelector = () => {
         editMsgReplyFlag: selector((state) => state.messageDialog.editMsgReplyFlag),
         editMsgReplyContent: selector((state) => state.messageDialog.editMsgReplyContent),
         editMsgReplyR18: selector((state) => state.messageDialog.editMsgReplyR18),
-        forwardMessageObj: selector((state) => state.messageDialog.forwardMessageObj)
+        forwardMessageObj: selector((state) => state.messageDialog.forwardMessageObj),
+        deleteUnreadDialog: selector((state) => state.messageDialog.deleteUnreadDialog)
     }
 }
 
@@ -100,7 +103,8 @@ export const useMessageDialogActions = () => {
         setEditMsgReplyFlag: (state: boolean) => dispatch(setEditMsgReplyFlag(state)),
         setEditMsgReplyContent: (state: string) => dispatch(setEditMsgReplyContent(state)),
         setEditMsgReplyR18: (state: boolean) => dispatch(setEditMsgReplyR18(state)),
-        setForwardMessageObj: (state: Message | null) => dispatch(setForwardMessageObj(state))
+        setForwardMessageObj: (state: Message | null) => dispatch(setForwardMessageObj(state)),
+        setDeleteUnreadDialog: (state: boolean) => dispatch(setDeleteUnreadDialog(state))
     }    
 }
 

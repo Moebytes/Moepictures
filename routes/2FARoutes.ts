@@ -8,6 +8,7 @@ import {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import sql from "../sql/SQLQuery"
 import functions from "../functions/Functions"
+import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server/ServerFunctions"
 import {generateSecret, verifyToken} from "node-2fa"
 
@@ -42,7 +43,7 @@ const $2FARoutes = (app: Express) => {
                 await sql.user.insertLoginHistory(user.username, "2fa disabled", ip, device, region)
 
                 if ((user.role === "admin" || user.role === "mod" || user.role.includes("curator"))
-                    && user.username !== process.env.OWNER_NAME) {
+                    && !permissions.isOwner(req.session)) {
                     await sql.user.updateUser(user.username, "role", "contributor")
                     const message = `You must have 2fa enabled to maintain roles above curator. Your account was auto demoted back to contributor.\n\nEnable 2fa and contact us to consider restoring your role.`
                     await serverFunctions.systemMessage(user.username, `Notice: Your account was demoted due to removing 2fa`, message)

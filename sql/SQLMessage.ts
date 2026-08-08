@@ -287,8 +287,11 @@ export default class SQLMessage {
                 json_agg(DISTINCT "message recipients".*) AS "recipientData"
                 FROM messages
                 JOIN "message recipients" ON messages."messageID" = "message recipients"."messageID"
-                WHERE (messages."creator" = $1 AND (messages."read" = false OR messages."read" IS NULL)) OR 
-                ("message recipients".recipient = $1 AND ("message recipients".read = false OR "message recipients".read IS NULL))
+                 WHERE 
+                (messages."creator" = $1 AND (messages."delete" = false 
+                AND (messages."read" = false OR messages."read" IS NULL))) OR 
+                ("message recipients".recipient = $1 AND ("message recipients".delete = false 
+                AND (("message recipients".read = false OR "message recipients".read IS NULL))))
                 GROUP BY messages."messageID"
             `),
         values: [username]
