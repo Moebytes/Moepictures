@@ -54,13 +54,13 @@ export default class LinkFunctions {
             return this.postImageCache.get(cacheKey)!
         }
 
-        let post = await functions.http.get("/api/post", {postID: partialPost.postID}, session, undefined, true)
-        if (!post) return ""
         let image = partialPost.images[index]
         if (typeof image === "string") {
-            if (image.startsWith("history/post")) return image
+            if (image.startsWith("history/post")) return `${functions.config.getDomain()}/${image}`
             if (new URL(image).searchParams.has("hash")) return image
         }
+        let post = await functions.http.get("/api/post", {postID: partialPost.postID}, session, undefined, true)
+        if (!post) return ""
         const img = this.getImageLink(post.images[index], upscaled)
 
         this.postImageCache.set(cacheKey, img)
@@ -112,13 +112,13 @@ export default class LinkFunctions {
             return this.postThumbnailCache.get(cacheKey)!
         }
 
-        let post = await functions.http.get("/api/post", {postID: partialPost.postID}, session, undefined, true)
-        if (!post) return ""
         let image = partialPost.images[index]
         if (typeof image === "string") {
-            if (image.startsWith("history/post")) return image
+            if (image.startsWith("history/post")) return `${functions.config.getDomain()}/${image}`
             if (new URL(image).searchParams.has("hash")) return image
         }
+        let post = await functions.http.get("/api/post", {postID: partialPost.postID}, session, undefined, true)
+        if (!post) return ""
         const thumb = this.getThumbnailLink(post.images[index], sizeType, session, mobile)
 
         this.postThumbnailCache.set(cacheKey, thumb)
