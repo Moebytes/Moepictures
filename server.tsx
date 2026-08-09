@@ -558,9 +558,6 @@ app.get("/{*page}", async (req: Request, res: Response) => {
     if (/\.\w+$/.test(req.path) && process.env.TESTING !== "yes") {
       return res.status(404).json({message: "Path not found."})
     }
-    if (!req.session.csrfToken) {
-      serverFunctions.generateCSRF(req)
-    }
     const mimeType = mime.getType(req.path)
     if (mimeType) res.setHeader("Content-Type", mimeType)
     //res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
