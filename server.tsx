@@ -559,10 +559,7 @@ app.get("/{*page}", async (req: Request, res: Response) => {
       return res.status(404).json({message: "Path not found."})
     }
     if (!req.session.csrfToken) {
-      const {secret, token} = serverFunctions.generateCSRF()
-      req.session.csrfSecret = secret
-      req.session.csrfToken = token
-      req.session.save()
+      serverFunctions.generateCSRF(req)
     }
     const mimeType = mime.getType(req.path)
     if (mimeType) res.setHeader("Content-Type", mimeType)

@@ -69,10 +69,11 @@ export default class ServerFunctions {
     public static util = ServerUtil
     public static upload = ServerUpload
 
-    public static generateCSRF = () => {
+    public static generateCSRF = (req: Request) => {
         const secret = csrf.secretSync()
         const token = csrf.create(secret)
-        return {secret, token}
+        req.session.csrfSecret = secret
+        req.session.csrfToken = token
     }
 
     public static validateCSRF = (req: Request) => {

@@ -51,9 +51,7 @@ export default class ServerUsers {
         await sql.user.updateUser(user.username, "ips", ips)
         req.session.ips = ips
         
-        const {secret, token} = serverFunctions.generateCSRF()
-        req.session.csrfSecret = secret
-        req.session.csrfToken = token
+        serverFunctions.generateCSRF(req)
     }
 
     public static deleteUser = async (user: User) => {
