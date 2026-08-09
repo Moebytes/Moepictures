@@ -278,7 +278,7 @@ export default class ServerFiles {
             const bucket = r18 ? remoteR18 : remote
             let nextKey = 0
 
-            let prefixes = type === "post"  ?[`${key}/original`, `${key}/upscaled`] : [`${key}/`]
+            let prefixes = type === "post"  ?[`${key}/original/`, `${key}/upscaled/`] : [`${key}/`]
 
             for (const prefix of prefixes) {
                 let isTruncated = true
@@ -287,14 +287,14 @@ export default class ServerFiles {
                 while (isTruncated) {
                     const objects = await s3.listObjectsV2({Bucket: bucket,
                     Prefix: prefix, Delimiter: "/", ContinuationToken: continuationToken})
-    
-                    if (objects.Contents) {
-                        for (const {Key} of objects.Contents) {
-                            const keyMatch = Key?.replace(key + "/", "").match(/\d+/)?.[0]
-                            const keyNumber = Number(keyMatch)
-                            if (keyNumber >= nextKey) nextKey = keyNumber
-                        }
+
+                    for (const commonPrefix of objects.CommonPrefixes ?? []) {
+                        const relative = commonPrefix.Prefix?.slice(prefix.length)
+                        const keyMatch = relative?.split("/")[0]
+                        const keyNumber = Number(keyMatch)
+                        if (keyNumber >= nextKey) nextKey = keyNumber
                     }
+
                     isTruncated = objects.IsTruncated
                     continuationToken = objects.NextContinuationToken
                 }
