@@ -147,13 +147,7 @@ export default class ServerFiles {
                 fs.rmdirSync(`${folder}/${folderPath}`)
             } catch {}
         } else {
-            try {
-                let bucket = r18 ? remoteR18 : remote
-                const objects = await s3.listObjectsV2({Bucket: bucket, Prefix: `${folderPath}/`, Delimiter: "/"})
-                if (objects.Contents?.length === 0) {
-                    await s3.deleteObject({Bucket: bucket, Key: `${folderPath}/`})
-                }
-            } catch {}
+            // empty folders don't exist in S3
         }
     }
 
@@ -185,7 +179,7 @@ export default class ServerFiles {
             let continuationToken: string | undefined = undefined
 
             while (isTruncated) {
-                const objects = await s3.listObjectsV2({Bucket: bucket, Prefix: `${folderPath}/`, Delimiter: "/", ContinuationToken: continuationToken})
+                const objects = await s3.listObjectsV2({Bucket: bucket, Prefix: `${folderPath}/`, ContinuationToken: continuationToken})
                 if (objects.Contents?.length) {
                     const deleteParams = {Bucket: bucket, Delete: {Objects: [] as {Key: string | undefined}[]}}
                     objects.Contents.forEach(({Key}) => {
@@ -195,8 +189,7 @@ export default class ServerFiles {
                 }
                 isTruncated = objects.IsTruncated
                 continuationToken = objects.NextContinuationToken
-            }  
-            await s3.deleteObject({Bucket: bucket, Key: `${folderPath}/`})
+            }
         }
     }
 
@@ -236,7 +229,7 @@ export default class ServerFiles {
 
             while (isTruncated) {
                 const listObjectsResponse = await s3.listObjectsV2({Bucket: bucket, 
-                Prefix: `${oldFolder}/`, Delimiter: "/", ContinuationToken: continuationToken})
+                Prefix: `${oldFolder}/`, ContinuationToken: continuationToken})
 
                 if (listObjectsResponse.Contents) {
                     for (const {Key} of listObjectsResponse.Contents) {
