@@ -70,9 +70,11 @@ export default class ServerFunctions {
     public static upload = ServerUpload
 
     public static generateCSRF = (req: Request) => {
-        const secret = csrf.secretSync()
-        const token = csrf.create(secret)
-        req.session.csrfSecret = secret
+        if (!req.session.csrfSecret) {
+            const secret = csrf.secretSync()
+            req.session.csrfSecret = secret
+        }
+        const token = csrf.create(req.session.csrfSecret)
         req.session.csrfToken = token
     }
 

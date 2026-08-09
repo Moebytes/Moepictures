@@ -325,8 +325,9 @@ const UserRoutes = (app: Express) => {
                 }
             }
             serverFunctions.generateCSRF(req)
-            
+
             const session = structuredClone(req.session)
+            delete session.previousCaptchaAnswer
             delete session.captchaAnswer
             delete session.csrfSecret
             delete session.ips
