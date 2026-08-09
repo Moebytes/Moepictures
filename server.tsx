@@ -562,6 +562,7 @@ app.get("/{*page}", async (req: Request, res: Response) => {
       const {secret, token} = serverFunctions.generateCSRF()
       req.session.csrfSecret = secret
       req.session.csrfToken = token
+      req.session.save()
     }
     const mimeType = mime.getType(req.path)
     if (mimeType) res.setHeader("Content-Type", mimeType)

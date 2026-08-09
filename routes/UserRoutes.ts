@@ -329,7 +329,7 @@ const UserRoutes = (app: Express) => {
             delete session.csrfSecret
             delete session.ips
 
-            res.status(200).send(session)
+            serverFunctions.sendEncrypted(session, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
