@@ -765,6 +765,7 @@ const backupDatabase = async () => {
 
 const runOnce = async () => {
   await sql.createDB()
+  await sql.flushCache()
   await serverFunctions.util.downloadTextDetector()
   await serverFunctions.util.downloadAnimeDetector()
   await serverFunctions.util.downloadWDTagger()

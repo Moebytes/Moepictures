@@ -155,6 +155,11 @@ export default class SQLQuery {
     await redis.del(cacheKey).catch(() => null)
   }
 
+  /** Flush cache */
+  public static flushCache = async () => {
+    await redis.flushdb().catch(() => null)
+  }
+
   /** Invalidate cache */
   public static invalidateCache = async (cacheEndpoint: string) => {
     try {
