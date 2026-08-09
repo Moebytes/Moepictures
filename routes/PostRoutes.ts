@@ -868,6 +868,9 @@ const PostRoutes = (app: Express) => {
                     addedTagGroups, removedTagGroups, imageSources: JSON.stringify(sourceMap), imageLinks: JSON.stringify(linkMap), 
                     imageChanged: false, changes: changes ? JSON.stringify(changes) : null, reason})
             }
+
+            await sql.removeCache(`cached-post/${postID}`)
+
             res.status(200).send("Success")
           } catch (e) {
             console.log(e)
@@ -1387,6 +1390,9 @@ const PostRoutes = (app: Express) => {
                     await sql.post.updateImage(image.imageID, "thumbnail", thumbnailFilename)
                 }
             }
+
+            await sql.removeCache(`cached-post/${postID}`)
+
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -1423,6 +1429,9 @@ const PostRoutes = (app: Express) => {
                 await serverFunctions.files.uploadFile(thumbPath, thumbBuffer, r18)
                 await sql.post.updateImage(image.imageID, "thumbnail", thumbnailFilename)
             }
+
+            await sql.removeCache(`cached-post/${postID}`)
+
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -1516,6 +1525,8 @@ const PostRoutes = (app: Express) => {
                     } catch {}
                 }
             }
+            
+            await sql.removeCache(`cached-post/${postID}`)
             
             res.status(200).send("Success")
         } catch (e) {

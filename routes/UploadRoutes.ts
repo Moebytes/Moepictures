@@ -348,6 +348,8 @@ const CreateRoutes = (app: Express) => {
         upscaledVanillaBuffers, images, upscaledImages, imageFilenames, upscaledImageFilenames, imageOrders, tagGroups,
         addedTagGroups, removedTagGroups, username: req.session.username, reason})
 
+        await sql.removeCache(`cached-post/${postID}`)
+
         res.status(200).send("Success")
       } catch (e) {
         console.log(e)
@@ -670,6 +672,8 @@ const CreateRoutes = (app: Express) => {
         }
         await serverFunctions.systemMessage(updater, subject, message)
         
+        await sql.removeCache(`cached-post/${newPostID}`)
+
         res.status(200).send("Success")
       } catch (e) {
         console.log(e)
@@ -799,6 +803,8 @@ const CreateRoutes = (app: Express) => {
           }
         }
 
+        await sql.removeCache(`cached-post/${postID}`)
+
         res.status(200).send("Success")
       } catch (e) {
         console.log(e)
@@ -854,6 +860,8 @@ const CreateRoutes = (app: Express) => {
 
         await joinChildPosts(childPosts)
 
+        await sql.removeCache(`cached-post/${postID}`)
+
         res.status(200).send("Success")
       } catch (e) {
         console.log(e)
@@ -886,6 +894,8 @@ const CreateRoutes = (app: Express) => {
             await sql.post.updatePost(childPost.postID, "parentID", postID)
           }
         }
+        
+        await sql.removeCache(`cached-post/${postID}`)
         
         res.status(200).send("Success")
       } catch (e) {
