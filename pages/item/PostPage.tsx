@@ -535,9 +535,9 @@ const PostPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         if (revertPostHistoryFlag && historyID === revertPostHistoryID?.historyID) {
+            setRevertPostHistoryID(null)
             revertPostHistory().then(() => {
                 setRevertPostHistoryFlag(false)
-                setRevertPostHistoryID(null)
             }).catch((error) => {
                 setRevertPostHistoryFlag(false)
                 setRevertPostHistoryID({failed: error ? error : true, historyID})

@@ -46,9 +46,9 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (revertAliasHistoryFlag && props.history.historyID === revertAliasHistoryID?.historyID) {
+            setRevertAliasHistoryID(null)
             revertAliasHistory().then(() => {
                 setRevertAliasHistoryFlag(false)
-                setRevertAliasHistoryID(null)
             }).catch(() => {
                 setRevertAliasHistoryFlag(false)
                 setRevertAliasHistoryID({failed: true, historyID: props.history.historyID, type: props.history.type})

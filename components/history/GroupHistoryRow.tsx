@@ -66,9 +66,9 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (revertGroupHistoryFlag && props.groupHistory.historyID === revertGroupHistoryID?.historyID) {
+            setRevertGroupHistoryID(null)
             revertGroupHistory().then(() => {
                 setRevertGroupHistoryFlag(false)
-                setRevertGroupHistoryID(null)
             }).catch(() => {
                 setRevertGroupHistoryFlag(false)
                 setRevertGroupHistoryID({failed: true, historyID: props.groupHistory.historyID})

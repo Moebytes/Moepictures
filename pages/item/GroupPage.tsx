@@ -299,9 +299,9 @@ const GroupPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         if (revertGroupHistoryFlag && historyID === revertGroupHistoryID?.historyID) {
+            setRevertGroupHistoryID(null)
             revertGroupHistory().then(() => {
                 setRevertGroupHistoryFlag(false)
-                setRevertGroupHistoryID(null)
             }).catch(() => {
                 setRevertGroupHistoryFlag(false)
                 setRevertGroupHistoryID({failed: true, historyID})

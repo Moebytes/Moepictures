@@ -105,9 +105,9 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (revertPostHistoryFlag && props.postHistory.historyID === revertPostHistoryID?.historyID) {
+            setRevertPostHistoryID(null)
             revertPostHistory().then(() => {
                 setRevertPostHistoryFlag(false)
-                setRevertPostHistoryID(null)
             }).catch((error) => {
                 setRevertPostHistoryFlag(false)
                 setRevertPostHistoryID({failed: error ? error : true, historyID: props.postHistory.historyID})

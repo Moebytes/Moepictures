@@ -484,9 +484,9 @@ const TagPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         if (revertTagHistoryFlag && historyID === revertTagHistoryID?.historyID) {
+            setRevertTagHistoryID(null)
             revertTagHistory().then(() => {
                 setRevertTagHistoryFlag(false)
-                setRevertTagHistoryID(null)
             }).catch((err) => {
                 setRevertTagHistoryFlag(false)
                 if (err.message.includes("No permission to edit implications")) return setRevertTagHistoryID({failed: "implication", historyID})
