@@ -59,6 +59,11 @@ export const apiKeyLogin = async (req: Request, res: Response, next: NextFunctio
     next()
 }
 
+export const csrfGenerator = async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.session.csrfToken) ServerFunctions.generateCSRF(req)
+    next()
+}
+
 export default class ServerFunctions {
     public static files = ServerFiles
     public static links = ServerLinks

@@ -24,7 +24,7 @@ import store from "./store"
 import permissions from "./structures/Permissions"
 import functions from "./functions/Functions"
 import encryption from "./structures/Encryption"
-import serverFunctions, {keyGenerator, handler, apiKeyLogin, csrfProtection} from "./server/ServerFunctions"
+import serverFunctions, {keyGenerator, handler, apiKeyLogin, csrfGenerator, csrfProtection} from "./server/ServerFunctions"
 import sql from "./sql/SQLQuery"
 import $2FARoutes from "./routes/2FARoutes"
 import CommentRoutes from "./routes/CommentRoutes"
@@ -93,6 +93,7 @@ app.use(express.static(path.join(__dirname, "./dist/client"), {index: false}))
 app.use("/emojis", express.static(path.join(__dirname, "./assets/emojis"), {maxAge: 2678400}))
 
 app.use(apiKeyLogin)
+app.use(csrfGenerator)
 
 let blacklist = null as unknown as Set<string>
 
