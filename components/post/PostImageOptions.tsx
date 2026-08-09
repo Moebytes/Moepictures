@@ -8,7 +8,7 @@ import React, {useEffect, useRef, useState} from "react"
 import {useInteractionActions, useLayoutSelector,  
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, 
 useSessionActions, useCacheSelector, useGroupDialogActions, useMiscDialogActions,
-useCacheActions} from "../../store"
+useCacheActions, useActiveActions} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import StarIcon from "../../assets/svg/star.svg"
@@ -43,6 +43,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {noteMode, format} = useSearchSelector()
+    const {setActionBanner} = useActiveActions()
     const {setFormat} = useSearchActions()
     const {posts} = useCacheSelector()
     const {setPosts} = useCacheActions()
@@ -200,6 +201,18 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         setShowFormatDropdown(false)
     }
 
+    const openFilterDropdown = () => {
+        if (!session.username) {
+            return setActionBanner("login-required")
+        }
+        if (permissions.isPremium(session)) {
+            closeDropdowns()
+            setShowFilterDropdown(true)
+        } else {
+            setPremiumRequired(true)
+        }
+    }
+
     const toggleDropdown = (dropdown: string) => {
         if (dropdown === "format") {
             if (showFormatDropdown) {
@@ -213,8 +226,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
             if (showFilterDropdown) {
                 setShowFilterDropdown(false)
             } else {
-                closeDropdowns()
-                setShowFilterDropdown(true)
+                openFilterDropdown()
             }
         }
     }

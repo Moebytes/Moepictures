@@ -2004,18 +2004,27 @@
             "line1": "You can purchase an account upgrade to unlock more features. Thank you for supporting us!",
             "line2": "All of the premium features are listed on the left."
         },
-        "upscaledImages": {
-            "header": "View images upscaled to a higher resolution. Upscaled images have sharper details and often fix any blurriness."
-        },
         "searchHistory": {
             "header": "View the history of posts you have viewed in the past. This is great if you saw a post you liked but forgot to favorite it."
         },
         "favoriteGroups": {
             "header": "Collect posts into personal favorite groups and edit the privacy level of each. Greatly improves your collection experience."
         },
+        "savedSearches": {
+            "header": "Be able to store search queries containing any number of tags. Quickly come back to your favorite searches!"
+        },
+        "upscaledImages": {
+            "header": "View images upscaled to a higher resolution. Upscaled images have sharper details and often fix any blurriness."
+        },
+        "imageFilters": {
+            "header": "Apply adjustments to images such as brightness/contrast and hue/saturation/lightness, and apply cool effects like pixelate. Also use audio filters on music posts!"
+        },
         "autoSearch": {
             "title": "Autosearch",
             "header": "Use the autosearch, which automatically searches your current tags in a loop. You can configure the time interval between searches."
+        },
+        "autoScroll": {
+            "header": "Automatically scroll the page down when using scroll mode. View lots of posts without expending too much effort."
         },
         "bookmarkSort": {
             "title": "Bookmark Sort",
@@ -2046,17 +2055,28 @@
             "monthlyPrice": "/ month",
             "renewal": "Subscriptions automatically renew until canceled. Manage your subscription in your phone's settings. Benefits will last until the end of your subscription period."
         },
-        "upscaledImages": {
-            "header": "View the upscaled versions of posts, often restoring sharp details and clarity."
-        },
         "searchHistory": {
             "header": "Your search history is now tracked, and you can return to posts you visited but forgot to favorite!"
         },
         "favoriteGroups": {
             "header": "Organize posts into custom personal groups and edit the privacy level of each!"
         },
+        "savedSearches": {
+            "header": "Save custom search queries containing any number of tags for quick access!"
+        },
+        "upscaledImages": {
+            "header": "View the upscaled versions of posts, often restoring sharp details and clarity."
+        },
+        "imageFilters": {
+            "title": "Image Filters",
+            "header": "Adjust images to your liking with filters like brightness/contrast and apply cool effects such as pixelate."
+        },
         "autoSearch": {
             "header": "Unlock the auto search to automatically run your search again after an interval."
+        },
+        "autoScroll": {
+            "title": "Auto Scroll",
+            "header": "Use the auto scroll to automatically scroll down in infinite scroll mode."
         },
         "bookmarkSort": {
             "header": "Sort results by bookmarks/likes, usually bringing the best quality art to the front."

@@ -1046,6 +1046,14 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const toggleSaveSearchDialog = () => {
+        if (permissions.isPremium(session)) {
+            setSaveSearchDialog(!saveSearchDialog)
+        } else {
+            setPremiumRequired(true)
+        }
+    }
+
     const subcontainerHeight = () => {
         if (props.post) return "max-content"
         if (saveSearch) return `${maxHeight - 30}px`
@@ -1141,7 +1149,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 </div> : null}
                 {!props.post && session.username && saveSearch ? 
                 <div className="random-container">
-                    <button className="save-search-button" onClick={() => setSaveSearchDialog(!saveSearchDialog)}>
+                    <button className="save-search-button" onClick={() => toggleSaveSearchDialog()}>
                         <BookmarkIcon className="save-search-button-icon"/>
                         <span>{i18n.sidebar.saveSearch}</span>
                     </button>

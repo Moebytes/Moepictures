@@ -82,7 +82,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {activeDropdown, filterDropActive} = useActiveSelector()
-    const {setActiveDropdown, setFilterDropActive} = useActiveActions()
+    const {setActiveDropdown, setFilterDropActive, setActionBanner} = useActiveActions()
     const {reverse} = usePlaybackSelector()
     const {setReverse, setSpeed} = usePlaybackActions()
     const {scroll, square, imageType, ratingType, styleType, sizeType, sortType, sortReverse, selectionMode, 
@@ -569,9 +569,16 @@ const SortBar: React.FunctionComponent = (props) => {
     }
 
     const toggleFilterDrop = () => {
-        const newValue = activeDropdown === "filters" ? "none" : "filters"
-        setActiveDropdown(newValue)
-        setFilterDropActive(newValue === "filters")
+        if (!session.username) {
+            return setActionBanner("login-required")
+        }
+        if (permissions.isPremium(session)) {
+            const newValue = activeDropdown === "filters" ? "none" : "filters"
+            setActiveDropdown(newValue)
+            setFilterDropActive(newValue === "filters")
+        } else {
+            setPremiumRequired(true)
+        }
     }
 
     const toggleSpeedDrop = () => {
@@ -820,6 +827,17 @@ const SortBar: React.FunctionComponent = (props) => {
             window.removeEventListener("click", stopScroll)
         }
     }, [autoScroll])
+
+    const toggleAutoScroll = () => {
+        if (!session.username) {
+            return setActionBanner("login-required")
+        }
+        if (permissions.isPremium(session)) {
+            setAutoScroll(!autoScroll)
+        } else {
+            setPremiumRequired(true)
+        }
+    }
  
     let sortBarJSX = () => {
         if (mobile) return (
@@ -923,7 +941,7 @@ const SortBar: React.FunctionComponent = (props) => {
                     </div>
                     </> : null}
                     {scroll ? <>
-                    <div className="sortbar-item" onClick={() => setAutoScroll(!autoScroll)}>
+                    <div className="sortbar-item" onClick={() => toggleAutoScroll()}>
                         {autoScroll ?
                         <AutoscrollIcon className="sortbar-img-pink"/> :
                         <AutoscrollIcon className="sortbar-img"/>}

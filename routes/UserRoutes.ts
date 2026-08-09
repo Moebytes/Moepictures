@@ -590,6 +590,7 @@ const UserRoutes = (app: Express) => {
         try {
             const {name, tags} = req.body as SaveSearchParams
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
+            if (!permissions.isPremium(req.session)) return void res.status(402).send("Premium only")
             const user = await sql.user.user(req.session.username)
             if (!user) return void res.status(400).send("Bad username")
             let savedSearches = Object.create(null)
@@ -612,6 +613,7 @@ const UserRoutes = (app: Express) => {
             if (!user) return void res.status(400).send("Bad username")
             let savedSearches = Object.create(null)
             Object.assign(savedSearches, user.savedSearches)
+            if (savedSearches[name] === undefined) return void res.status(400).send("Bad name")
             delete savedSearches[name]
             savedSearches[key] = tags
             req.session.savedSearches = savedSearches 
