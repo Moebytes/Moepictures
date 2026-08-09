@@ -324,9 +324,8 @@ const UserRoutes = (app: Express) => {
                     }
                 }
             }
-            if (!req.session.csrfToken) {
-                serverFunctions.generateCSRF(req)
-            }
+            serverFunctions.generateCSRF(req)
+            
             const session = structuredClone(req.session)
             delete session.captchaAnswer
             delete session.csrfSecret

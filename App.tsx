@@ -127,11 +127,11 @@ const App: React.FunctionComponent = (props) => {
         functions.cache.clearCache()
         cacheEmojis()
         cacheSortedTags()
+        getSessionCookie()
+        if (savedActiveGroup) setActiveGroup(JSON.parse(savedActiveGroup))
+        if (savedActiveFavgroup) setActiveFavgroup(JSON.parse(savedActiveFavgroup))
         const onDOMLoaded = () => {
             setLoaded(true)
-            getSessionCookie()
-            if (savedActiveGroup) setActiveGroup(JSON.parse(savedActiveGroup))
-            if (savedActiveFavgroup) setActiveFavgroup(JSON.parse(savedActiveFavgroup))
         }
         window.addEventListener("load", onDOMLoaded)
         return () => {
