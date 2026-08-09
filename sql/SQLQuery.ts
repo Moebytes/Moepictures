@@ -157,7 +157,7 @@ export default class SQLQuery {
 
   /** Flush cache */
   public static flushCache = async () => {
-    await redis.flushdb().catch(() => null)
+    await redis.flushDb().catch(() => null)
   }
 
   /** Invalidate cache */
