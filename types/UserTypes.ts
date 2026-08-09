@@ -186,6 +186,7 @@ export interface UserCommentsParams {
     query?: string
     sort: CommentSort
     offset?: number
+    limit?: number
 }
 
 export interface BanParams {

@@ -1108,15 +1108,16 @@ const UserRoutes = (app: Express) => {
 
     app.get("/api/user/comments", sessionLimiter, async (req: Request, res: Response) => {
         try {
-            let {query, sort, offset, username} = req.query as unknown as UserCommentsParams
+            let {query, sort, offset, limit, username} = req.query as unknown as UserCommentsParams
             if (!query) query = ""
             if (!offset) offset = 0
+            if (!limit) limit = 100
             let comments = [] as CommentSearch[]
             if (username) {
-                comments = await sql.comment.searchCommentsByUsername([username], query, sort, Number(offset))
+                comments = await sql.comment.searchCommentsByUsername([username], query, sort, Number(offset), Number(limit))
             } else {
                 if (!req.session.username || !req.session.emailVerified) return void res.status(400).send("Bad request")
-                comments = await sql.comment.searchCommentsByUsername([req.session.username], query, sort, Number(offset))
+                comments = await sql.comment.searchCommentsByUsername([req.session.username], query, sort, Number(offset), Number(limit))
             }
             for (let i = comments.length - 1; i >= 0; i--) {
                 const comment = comments[i]
