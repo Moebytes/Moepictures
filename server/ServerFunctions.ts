@@ -72,13 +72,15 @@ export default class ServerFunctions {
     public static generateCSRF = (req: Request) => {
         const secret = csrf.secretSync()
         const token = csrf.create(secret)
+        req.session.previousCsrfSecret = req.session.csrfSecret
         req.session.csrfSecret = secret
         req.session.csrfToken = token
     }
 
     public static validateCSRF = (req: Request) => {
         const csrfToken = req.headers["x-csrf-token"] as string
-        return csrf.verify(req.session.csrfSecret!, csrfToken)
+        return csrf.verify(req.session.csrfSecret!, csrfToken) ||
+            csrf.verify(req.session.previousCsrfSecret!, csrfToken)
     }
 
     public static verifyCaptcha = (req: Request, captchaResponse: string) => {

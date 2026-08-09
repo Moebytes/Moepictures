@@ -90,6 +90,7 @@ export interface ServerSession extends Partial<Omit<User, "password">> {
     captchaAnswer?: string
     $2faNeeded?: boolean
     csrfToken?: string
+    previousCsrfSecret?: string
     csrfSecret?: string
     publicKey?: string
     apiKey?: boolean
