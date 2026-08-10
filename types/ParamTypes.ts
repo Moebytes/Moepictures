@@ -176,6 +176,7 @@ export interface FileFormat {
     png?: boolean
     webp?: boolean
     avif?: boolean
+    jxl?: boolean
     gif?: boolean
     mp4?: boolean
     webm?: boolean

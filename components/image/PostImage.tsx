@@ -56,7 +56,13 @@ const PostImage = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
 
     const decryptImage = async () => {
         if (!props.img) return
-        const decryptedImage = await functions.crypto.decryptItem(props.img, session)
+
+        let decryptedImage = await functions.crypto.decryptItem(props.img, session)
+
+        if (functions.file.isJXL((props.img))) {
+            decryptedImage = await functions.image.decodeJXL(decryptedImage, "jpg")
+        }
+
         setImg(decryptedImage)
     }
 

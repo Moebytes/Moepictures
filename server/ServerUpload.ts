@@ -34,13 +34,15 @@ export default class ServerUpload {
             const mp4 = result?.mime === "video/mp4"
             const mp3 = result?.mime === "audio/mpeg"
             const wav = result?.mime === "audio/x-wav"
+            const jxl = functions.file.isJXL(images[i].link)
             const webm = (path.extname(images[i].link) === ".webm" && result?.typename === "mkv")
-            if (jpg || png || webp || avif || gif) {
+            if (jxl) result.typename = "jxl"
+            if (jpg || png || webp || avif || jxl || gif) {
                 if (!await serverFunctions.util.isAnime(images[i].bytes)) return false
             }
-            if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav) {
+            if (jpg || png || webp || avif || jxl || gif || mp4 || webm || mp3 || wav) {
                 const MB = images[i].size / (1024*1024)
-                const maxSize = functions.validation.maxFileSize({jpg, png, avif, mp3, wav, gif, webp, mp4, webm})
+                const maxSize = functions.validation.maxFileSize({jpg, png, avif, jxl, mp3, wav, gif, webp, mp4, webm})
                 let type = result.typename === "mkv" ? "webm" : result.typename
                 if (images[i].ext !== type) return false
                 if (skipMBCheck || MB <= maxSize) continue
@@ -57,8 +59,8 @@ export default class ServerUpload {
         if (tag.image) {
             const imgPath = functions.link.getTagPath(tag.type, tag.image)
             oldBuffer = await serverFunctions.files.getFile(imgPath, false, false)
-            let oldHash = await phash(oldBuffer!).then((hash: string) => functions.byte.binaryToHex(hash))
-            let newHash = await phash(newBuffer!).then((hash: string) => functions.byte.binaryToHex(hash))
+            let oldHash = await serverFunctions.util.pHash(oldBuffer!)
+            let newHash = await serverFunctions.util.pHash(newBuffer!)
             if (dist(oldHash, newHash) < 6) return
         }
 
@@ -324,17 +326,17 @@ export default class ServerUpload {
                 let hash = ""
                 let pixelHash = ""
                 if (kind === "video" || kind === "audio" || kind === "model" || kind === "live2d" || kind === "animation") {
-                    hash = await phash(thumbBuffer || bufferFallback).then((hash: string) => functions.byte.binaryToHex(hash))
+                    hash = await serverFunctions.util.pHash(thumbBuffer || bufferFallback)
                     pixelHash = await serverFunctions.util.pixelHash(thumbBuffer || bufferFallback)
                     dimensions.width = original.width
                     dimensions.height = original.height
                     upscaledDimensions.width = upscaled.width
                     upscaledDimensions.height = upscaled.height
                 } else {
-                    hash = await phash(bufferFallback).then((hash: string) => functions.byte.binaryToHex(hash))
+                    hash = await serverFunctions.util.pHash(bufferFallback)
                     pixelHash = await serverFunctions.util.pixelHash(bufferFallback)
-                    if (buffer?.byteLength) dimensions = await sharp(buffer).metadata()
-                    if (upscaledBuffer?.byteLength) upscaledDimensions = await sharp(upscaledBuffer).metadata()
+                    if (buffer?.byteLength) dimensions = await serverFunctions.util.metadata(buffer)
+                    if (upscaledBuffer?.byteLength) upscaledDimensions = await serverFunctions.util.metadata(upscaledBuffer)
                 }
                 let width = dimensions?.width || null
                 let height = dimensions?.height || null

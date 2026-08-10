@@ -929,8 +929,8 @@
             "wait": "Wait a few seconds.",
             "noResults": "No results found.",
             "nothingFound": "Nothing found.",
-            "supportedFiletypes": "Supported file types: png, jpg, webp, avif, gif, apng, mp4, webm, mp3, wav, glb, vrm, fbx, obj, zip.",
-            "supportedFiletypesZip": "Supported types in zip: png, jpg, webp, avif, gif, apng, mp4, webm, mp3, wav, glb, vrm, fbx, obj.",
+            "supportedFiletypes": "Supported file types: png, jpg, webp, avif, jxl, gif, apng, mp4, webm, mp3, wav, glb, vrm, fbx, obj, zip.",
+            "supportedFiletypesZip": "Supported types in zip: png, jpg, webp, avif, jxl, gif, apng, mp4, webm, mp3, wav, glb, vrm, fbx, obj.",
             "maxFileSize": "max file size"
         },
         "bulkUpload": {

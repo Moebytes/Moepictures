@@ -127,8 +127,8 @@ export default class ServerPosts {
                 : await serverFunctions.files.getFile(newPath, false, r18, newImage.pixelHash)
             }
             try {
-                let oldHash = await phash(oldBuffer!).then((hash: string) => functions.byte.binaryToHex(hash))
-                let newHash = await phash(newBuffer!).then((hash: string) => functions.byte.binaryToHex(hash))
+                let oldHash = await serverFunctions.util.pHash(oldBuffer!)
+                let newHash = await serverFunctions.util.pHash(newBuffer!)
                 oldHashes.push({hash: oldHash, order: oldImage.order})
                 newHashes.push({hash: newHash, order: (newImage as Image)?.order || i + 1})
 

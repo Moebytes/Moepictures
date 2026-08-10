@@ -25,10 +25,12 @@ export default class ImageFunctions {
         const mp4 = result?.mime === "video/mp4"
         const mp3 = result?.mime === "audio/mpeg"
         const wav = result?.mime === "audio/x-wav"
+        const jxl = functions.file.isJXL(file.name)
         const glb = functions.file.isGLTF(file.name)
         const fbx = functions.file.isFBX(file.name)
         const obj = functions.file.isOBJ(file.name)
         const vrm = functions.file.isVRM(file.name)
+        if (jxl) result.typename = "jxl"
         if (glb) result.typename = "glb"
         if (fbx) result.typename = "fbx"
         if (obj) result.typename = "obj"
@@ -38,11 +40,11 @@ export default class ImageFunctions {
         const zip = result?.mime === "application/zip"
         let allowed = false
         if (inZip) {
-            allowed = jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || vrm
+            allowed = jpg || png || webp || avif || jxl || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || vrm
         } else {
-            allowed = jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || vrm || zip
+            allowed = jpg || png || webp || avif || jxl || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || vrm || zip
         }
-        const maxSize = functions.validation.maxFileSize({jpg, png, avif, mp3, wav, gif, webp, glb, fbx, obj, vrm, mp4, webm, zip})
+        const maxSize = functions.validation.maxFileSize({jpg, png, avif, jxl, mp3, wav, gif, webp, glb, fbx, obj, vrm, mp4, webm, zip})
         return {allowed, maxSize, result}
     }
 
@@ -223,11 +225,17 @@ export default class ImageFunctions {
 
     public static resize = async (image: string, ext = "png", size = 750) => {
         if (!image) return ""
+        let src = image
+
+        if (functions.file.isJXL(image)) {
+            src = await this.decodeJXL(image, "jpg")
+        }
+
         const img = new window.Image()
         await new Promise<void>((resolve, reject) => {
             img.onload = () => resolve()
             img.onerror = (err) => reject(err)
-            img.src = image
+            img.src = src
         })
         const scale = Math.min(size / img.width, size / img.height)
         const canvas = document.createElement("canvas")
@@ -293,12 +301,16 @@ export default class ImageFunctions {
     public static imageDimensions = async (image: string) => {
         return new Promise<{width: number, height: number, size: number, duration?: number}>(async (resolve) => {
             const img = document.createElement("img")
+            let src = image
+            if (functions.file.isJXL(image)) {
+                src = await this.decodeJXL(image, "jpg")
+            }
             img.addEventListener("load", async () => {
                 let width = img.naturalWidth
                 let height = img.naturalHeight
                 try {
-                    let duration = await functions.anim.animationDuration(image)
-                    const r = await functions.http.getBuffer(image)
+                    let duration = await functions.anim.animationDuration(src)
+                    const r = await functions.http.getBuffer(src)
                     const size = r.byteLength 
                     resolve({width, height, size, duration})
                 } catch {
@@ -306,7 +318,7 @@ export default class ImageFunctions {
                 }
             })
             img.crossOrigin = "anonymous"
-            img.src = image
+            img.src = src
         })
     }
 
@@ -324,6 +336,7 @@ export default class ImageFunctions {
                 const mp4 = result?.mime === "video/mp4"
                 const mp3 = result?.mime === "audio/mpeg"
                 const wav = result?.mime === "audio/x-wav"
+                const jxl = functions.file.isJXL(file.name)
                 const glb = functions.file.isGLTF(file.name)
                 const fbx = functions.file.isFBX(file.name)
                 const obj = functions.file.isOBJ(file.name)
@@ -333,7 +346,7 @@ export default class ImageFunctions {
                 if (obj) result.typename = "obj"
                 if (vrm) result.typename = "vrm"
                 const webm = (path.extname(file.name) === ".webm" && result?.typename === "mkv")
-                if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || vrm) {
+                if (jpg || png || webp || avif || jxl || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || vrm) {
                     if (mp4 || webm) {
                         const url = URL.createObjectURL(file)
                         const thumbnail = await functions.video.videoThumbnail(url)
@@ -545,6 +558,33 @@ export default class ImageFunctions {
             return img.data.buffer as T extends true ? ArrayBuffer : string
         }
         return canvas.toDataURL("image/png") as T extends true ? ArrayBuffer : string
+    }
+
+    public static jxlDimensions = async (image: string) => {
+        const jxlJS = await import("../assets/wasm/jxl_dec").then((r) => r.default)
+        const jxl = await jxlJS()
+        const buffer = await functions.http.getBuffer(image)
+        const output = await jxl.decode(buffer) as ImageData
+        return {width: output.width, height: output.height, size: output.data.byteLength}
+    }
+
+    public static decodeJXL = async (image: string, format?: string) => {
+        if (functions.util.isSafari()) return image
+        
+        const jxlJS = await import("../assets/wasm/jxl_dec").then((r) => r.default)
+        const jxl = await jxlJS()
+        const buffer = await functions.http.getBuffer(image)
+        const output = await jxl.decode(buffer) as ImageData
+        const canvas = document.createElement("canvas")
+        canvas.width = output.width
+        canvas.height = output.height
+        const ctx = canvas.getContext("2d")!
+        ctx.putImageData(output, 0, 0)
+        if (format === "jpg") {
+            return canvas.toDataURL("image/jpeg")
+        } else {
+            return canvas.toDataURL("image/png")
+        } 
     }
 
     public static convertToFormat = async (image: string, format: string) => {

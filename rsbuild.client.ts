@@ -75,6 +75,7 @@ export default defineConfig({
             {from: "assets/wasm/webpxmux.wasm", to: "[name][ext]"},
             {from: "assets/wasm/avif_enc.wasm", to: "[name][ext]"},
             {from: "assets/wasm/jxl_enc.wasm", to: "[name][ext]"},
+            {from: "assets/wasm/jxl_dec.wasm", to: "[name][ext]"},
             {from: "assets/live2d/live2dcubismcore.min.js", to: "[name][ext]"},
         ]
     }

@@ -188,7 +188,8 @@ export default class ServerUtil {
     }
 
     public static pixelHash = async (buffer: Buffer) => {
-        const rawBuffer = await sharp(buffer, {limitInputPixels: false})
+        const pngBuffer = await this.pngBuffer(buffer)
+        const rawBuffer = await sharp(pngBuffer, {limitInputPixels: false})
         .ensureAlpha().toColorspace("srgb").raw().toBuffer()
         return crypto.createHash("md5").update(rawBuffer).digest("hex")
     }
@@ -200,7 +201,13 @@ export default class ServerUtil {
     }
 
     public static pHash = async (buffer: Buffer) => {
-        return phash(buffer).then((hash: string) => functions.byte.binaryToHex(hash))
+        const pngBuffer = await this.pngBuffer(buffer)
+        return phash(pngBuffer).then((hash: string) => functions.byte.binaryToHex(hash))
+    }
+
+    public static metadata = async (buffer: Buffer) => {
+        const pngBuffer = await this.pngBuffer(buffer)
+        return sharp(pngBuffer, {limitInputPixels: false}).metadata()
     }
 
     public static processThumbnail = async (buffer: Buffer, ext: string, size = 750) => {
@@ -226,13 +233,29 @@ export default class ServerUtil {
         return canvas.toBuffer("image/png")
     }
 
+    public static pngBuffer = async (buffer: Buffer) => {
+        try {
+            const pngBuffer = await sharp(buffer, {limitInputPixels: false}).png().toBuffer()
+            return pngBuffer
+        } catch {
+            const jxlJS = await import("../assets/wasm/jxl_dec.js").then(r => r.default)
+            const wasmBinary = fs.readFileSync(path.join(__dirname, "../../assets/wasm/jxl_dec.wasm"))
+            const jxl = await jxlJS({wasmBinary})
+            
+            const {width, height, data} = await jxl.decode(buffer) as ImageData
+            const channels = Math.floor(data.length / (width * height)) as 3 | 4
+            return sharp(data, {limitInputPixels: false, raw: {width, height, channels}}).png().toBuffer()
+        }
+    }
+
     public static dumpImage = async (imageBuffer: Buffer) => {
         const folder = path.join(__dirname, "./dump")
         if (!fs.existsSync(folder)) fs.mkdirSync(folder, {recursive: true})
 
-        const filename = `${Math.floor(Math.random() * 100000000)}.png`
-        const imagePath = path.join(folder, filename)
-        let pngBuffer = await sharp(imageBuffer).png().toBuffer()
+        let filename = `${Math.floor(Math.random() * 100000000)}.png`
+        let imagePath = path.join(folder, filename)
+
+        const pngBuffer = await this.pngBuffer(imageBuffer)
         fs.writeFileSync(imagePath, pngBuffer)
         return imagePath
     }

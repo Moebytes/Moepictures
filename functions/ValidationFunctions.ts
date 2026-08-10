@@ -16,9 +16,10 @@ TagType, CommentSort, UserRole, UploadTag, FileFormat} from "../types/Types"
 
 export default class ValidationFunctions {
     public static maxFileSize = (format: FileFormat = {}) => {
-        const {jpg, png, avif, mp3, wav, gif, webp, glb, fbx, obj, vrm, mp4, webm} = format
+        const {jpg, png, avif, jxl, mp3, wav, gif, webp, glb, fbx, obj, vrm, mp4, webm} = format
         const maxSize = jpg ? 10 :
                         avif ? 10 :
+                        jxl ? 10 :
                         mp3 ? 10 :
                         wav ? 10 :
                         png ? 25 :

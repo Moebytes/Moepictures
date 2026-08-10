@@ -172,7 +172,7 @@ const SearchRoutes = (app: Express) => {
             if (useMD5) {
                 hash = crypto.createHash("md5").update(buffer).digest("hex")
             } else {
-                hash = await phash(buffer).then((hash: any) => functions.byte.binaryToHex(hash))
+                hash = await serverFunctions.util.pHash(buffer)
             }
 
             const exactQuery = {

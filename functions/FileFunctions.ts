@@ -10,7 +10,7 @@ import fileType from "magic-bytes.js"
 import {isLive2DZip as verifyLive2DZip} from "live2d-renderer"
 import JSZip from "jszip"
 
-const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".avif"]
+const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".avif", ".jxl"]
 const animationExtensions = [".gif", ".webp", ".apng", ".png", ".zip"]
 const videoExtensions = [".mp4", ".webm", ".mov", ".mkv"]
 const audioExtensions = [".mp3", ".wav", ".ogg", ".flac", ".aac"]
@@ -118,6 +118,17 @@ export default class FileFunctions {
         }
         const ext = file.startsWith(".") ? file : path.extname(file)
         return ext === ".png" || ext === ".apng"
+    }
+
+    public static isJXL = (file?: string) => {
+        if (!file) return false
+        file = file.replace(/\?.*$/, "")
+        if (file?.startsWith("blob:")) {
+            const ext = file.split("#")?.[1] || ""
+            return ext === ".jxl"
+        }
+        const ext = file.startsWith(".") ? file : path.extname(file)
+        return ext === ".jxl"
     }
 
     public static isGLTF = (file?: string) => {

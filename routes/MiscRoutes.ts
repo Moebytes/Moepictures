@@ -333,7 +333,7 @@ const MiscRoutes = (app: Express) => {
         try {
             if (!req.body) return void res.status(400).send("Image data must be provided")
             const buffer = Buffer.from(req.body, "binary")
-            const hash = await phash(buffer).then((hash: any) => functions.byte.binaryToHex(hash))
+            const hash = await serverFunctions.util.pHash(buffer)
             res.status(200).send(hash)
         } catch (e) {
             console.log(e)

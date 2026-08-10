@@ -88,7 +88,7 @@ const populateChunkBytes = async (originalChunks: ImageChunk[], upscaledChunks: 
 
 const clearChunkBytes = async (originalChunks: ImageChunk[], upscaledChunks: ImageChunk[]) => {
   const clearChunkItem = async (chunkItem: ImageChunk[]) => {
-    let username = chunkItem[0].username ?? ""
+    let username = chunkItem[0]?.username ?? ""
     let userItems = userChunks.get(username) || []
     for (const chunk of chunkItem) {
       if (process.env.REDIS === "on") {

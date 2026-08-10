@@ -1111,7 +1111,7 @@ const PostRoutes = (app: Express) => {
                     const basename = path.basename(file, path.extname(file))
 
                     if (buffer.byteLength) {
-                        const meta = await sharp(buffer, {limitInputPixels: false}).metadata()
+                        const meta = await serverFunctions.util.metadata(buffer)
                         let sharpProcess = null as unknown as sharp.Sharp
                         if (maxDimension && (meta.width! > Number(maxDimension) || meta.height! > Number(maxDimension))) {
                             sharpProcess = sharp(buffer, {animated, limitInputPixels: false}).resize(Number(maxDimension), Number(maxDimension), {fit: "inside"})
@@ -1155,7 +1155,7 @@ const PostRoutes = (app: Express) => {
                     const basename = path.basename(file, path.extname(file))
 
                     if (buffer.byteLength) {
-                        const meta = await sharp(buffer, {limitInputPixels: false}).metadata()
+                        const meta = await serverFunctions.util.metadata(buffer)
                         let sharpProcess = null as unknown as sharp.Sharp
                         if (maxUpscaledDimension && (meta.width! > Number(maxUpscaledDimension) || meta.height! > Number(maxUpscaledDimension))) {
                             sharpProcess = sharp(buffer, {animated, limitInputPixels: false}).resize(Number(maxUpscaledDimension), Number(maxUpscaledDimension), {fit: "inside"})
@@ -1286,7 +1286,7 @@ const PostRoutes = (app: Express) => {
                 const rawInfo = await mediainfo.analyzeData(buffer.byteLength, readChunk)
                 let info = rawInfo.media?.track.find((track) => track["@type"] === "Image")
                 if (!info) info = rawInfo.media?.track.find((track) => track["@type"] === "Video") as any
-                let metadata = await sharp(buffer, {limitInputPixels: false}).metadata()
+                let metadata = await serverFunctions.util.metadata(buffer)
                 let format = path.extname(filename).replace(".", "")
                 let subsampling = info?.ChromaSubsampling ? `${info?.ColorSpace} ${info?.ChromaSubsampling}` : metadata.chromaSubsampling
                 result = {
