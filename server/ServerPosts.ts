@@ -103,7 +103,7 @@ export default class ServerPosts {
             }
         }
         if (oldR18 !== newR18) {
-            serverFunctions.files.renameFile(`history/post/${post.postID}`, `history/post/${post.postID}`, oldR18, newR18)
+            serverFunctions.files.renameFolder(`history/post/${post.postID}`, `history/post/${post.postID}`, oldR18, newR18)
         }
     }
 

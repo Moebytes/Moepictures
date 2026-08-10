@@ -211,24 +211,26 @@ export default class ServerFiles {
         }
     }
 
-    public static renameFolder = async (oldFolder: string, newFolder: string, r18: boolean) => {
+    public static renameFolder = async (oldFolder: string, newFolder: string, oldR18: boolean, newR18: boolean) => {
         if (functions.config.useLocalFiles()) {
-            let folder = r18 ? localR18 : local
+            let oldLocation = oldR18 ? localR18 : local
+            let newLocation = newR18 ? localR18 : local
             try {
-                fs.renameSync(`${folder}/${oldFolder}`, `${folder}/${newFolder}`)
+                fs.renameSync(`${oldLocation}/${oldFolder}`, `${newLocation}/${newFolder}`)
             } catch {
                 try {
-                    fs.renameSync(`${folder}/${encodeURI(oldFolder)}`, `${folder}/${encodeURI(newFolder)}`)
+                    fs.renameSync(`${oldLocation}/${encodeURI(oldFolder)}`, `${newLocation}/${encodeURI(newFolder)}`)
                 } catch {}
             }
             return
         } else {
-            const bucket = r18 ? remoteR18 : remote
+            const oldBucket = oldR18 ? remoteR18 : remote
+            const newBucket = newR18 ? remoteR18 : remote
             let isTruncated = true
             let continuationToken: string | undefined = undefined
 
             while (isTruncated) {
-                const listObjectsResponse = await s3.listObjectsV2({Bucket: bucket, 
+                const listObjectsResponse = await s3.listObjectsV2({Bucket: oldBucket, 
                 Prefix: `${oldFolder}/`, ContinuationToken: continuationToken})
 
                 if (listObjectsResponse.Contents) {
@@ -236,8 +238,8 @@ export default class ServerFiles {
                         if (Key) {
                             const newKey = Key.replace(`${oldFolder}/`, `${newFolder}/`)
                             const mimeType = mime.lookup(newKey) || "application/octet-stream"
-                            await s3.copyObject({Bucket: bucket, CopySource: encodeURI(`/${bucket}/${Key}`), Key: newKey, ContentType: mimeType})
-                            await s3.deleteObject({Bucket: bucket, Key: Key})
+                            await s3.copyObject({Bucket: newBucket, CopySource: encodeURI(`/${oldBucket}/${Key}`), Key: newKey, ContentType: mimeType})
+                            await s3.deleteObject({Bucket: oldBucket, Key: Key})
                         }
                     }
                 }

@@ -375,7 +375,7 @@ const TagRoutes = (app: Express) => {
                     }
                 }
                 ServerFunctions.files.renameFolder(`history/tag/${encodeURIComponent(tag)}`, 
-                `history/tag/${encodeURIComponent(key.trim())}`, false)
+                `history/tag/${encodeURIComponent(key.trim())}`, false, false)
                 await sql.tag.updateTag(tag, "tag", key.trim())
                 targetTag = key.trim()
             }
