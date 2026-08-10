@@ -181,6 +181,8 @@ const UserProfilePage: React.FunctionComponent = () => {
         setHeaderText("")
         setSidebarText("")
         document.title = "User Profile"
+
+        setSessionFlag(true)
     }, [])
 
     useEffect(() => {
