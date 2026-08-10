@@ -4,7 +4,7 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect} from "react"
+import React, {useEffect, useRef} from "react"
 import {useThemeSelector, useThemeActions, useSearchSelector, useSearchActions, usePlaybackSelector, 
 usePlaybackActions, useFilterSelector, useFilterActions, useLayoutSelector, useLayoutActions,
 useCacheSelector, useCacheActions, useSessionSelector, useSessionActions, useActiveSelector,
@@ -159,6 +159,36 @@ const LocalStorage: React.FunctionComponent = () => {
     const {setSession, setUserImg} = useSessionActions()
     const {settingsLoaded} = useActiveSelector()
     const {setSettingsLoaded} = useActiveActions()
+    const themeSaveTimeout = useRef<NodeJS.Timeout| null>(null)
+
+    const initThemeSettings = async () => {
+        if (!session.username) return
+
+        if (session.themeSettings) {
+            setTheme(session.themeSettings.theme as Themes)
+            setSiteHue(Number(session.themeSettings.hue))
+            setSiteSaturation(Number(session.themeSettings.saturation))
+            setSiteLightness(Number(session.themeSettings.lightness))
+        }
+    }
+
+    const saveThemeSettings = async () => {
+        if (!session.username) return
+
+        if (themeSaveTimeout.current) {
+            clearTimeout(themeSaveTimeout.current)
+        }
+
+        themeSaveTimeout.current = setTimeout(async () => {
+            await functions.http.post("/api/user/themesettings", 
+                {theme, hue: siteHue, saturation: siteSaturation, 
+                lightness: siteLightness}, session)
+        }, 1000)
+    }
+
+    useEffect(() => {
+        initThemeSettings()
+    }, [session])
 
     useEffect(() => {
         if (typeof window === "undefined") return
@@ -179,7 +209,13 @@ const LocalStorage: React.FunctionComponent = () => {
                 document.documentElement.style.setProperty(key, functions.color.rotateColor(color, siteHue, siteSaturation, targetLightness))
             }
         }
-    }, [theme, siteHue, siteSaturation, siteLightness])
+        saveThemeSettings()
+        return () => {
+            if (themeSaveTimeout.current) {
+                clearTimeout(themeSaveTimeout.current)
+            }
+        }
+    }, [theme, siteHue, siteSaturation, siteLightness, session])
 
     const initLanguage = () => {
         const savedLanguage = localStorage.getItem("language")
@@ -254,7 +290,6 @@ const LocalStorage: React.FunctionComponent = () => {
         const savedHideSortbar = localStorage.getItem("sortbar")
         const savedOrder = localStorage.getItem("order")
         const savedBannerTags = localStorage.getItem("savedBannerTags")
-        const savedSession = localStorage.getItem("savedSession")
         const savedTagCategories = localStorage.getItem("savedTagCategories")
         const savedTagGroupCategories = localStorage.getItem("savedTagGroupCategories")
         const savedShowBigPlayer = localStorage.getItem("showBigPlayer")
@@ -308,7 +343,6 @@ const LocalStorage: React.FunctionComponent = () => {
         if (savedHideSidebar) setHideSidebar(savedHideSidebar === "true")
         if (savedHideSortbar) setHideSortbar(savedHideSortbar === "true")
         if (savedBannerTags) setBannerTags(JSON.parse(savedBannerTags))
-        if (savedSession) setSession(JSON.parse(savedSession))
         if (savedTagCategories) setTagCategories(JSON.parse(savedTagCategories))
         if (savedTagGroupCategories) setTagGroupCategories(JSON.parse(savedTagGroupCategories))
         if (savedOrder) setOrder(Number(savedOrder))
@@ -402,7 +436,6 @@ const LocalStorage: React.FunctionComponent = () => {
         if (navigationPosts.length) localforage.setItem("savedNavigationPosts", JSON.stringify(navigationPosts))
         if (tags.length) localforage.setItem("savedTags", JSON.stringify(tags))
         if (bannerTags.length) localStorage.setItem("savedBannerTags", JSON.stringify(bannerTags))
-        localStorage.setItem("savedSession", JSON.stringify(session))
     }, [navigationPosts, tags, bannerTags, session])
 
     useEffect(() => {

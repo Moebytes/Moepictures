@@ -38,6 +38,7 @@ export default class ServerUsers {
         req.session.liveAnimationPreview = user.liveAnimationPreview
         req.session.liveModelPreview = user.liveModelPreview
         req.session.savedSearches = user.savedSearches
+        req.session.themeSettings = user.themeSettings
         req.session.blacklist = user.blacklist
         req.session.postCount = user.postCount
         req.session.deletedPosts = user.deletedPosts
@@ -108,6 +109,7 @@ export default class ServerUsers {
             await sql.user.updateUser(user.username, "liveAnimationPreview", null)
             await sql.user.updateUser(user.username, "liveModelPreview", null)
             await sql.user.updateUser(user.username, "savedSearches", null)
+            await sql.user.updateUser(user.username, "themeSettings", null)
             await sql.user.updateUser(user.username, "blacklist", null)
             await sql.user.updateUser(user.username, "showR18", null)
             await sql.user.updateUser(user.username, "premium", null)

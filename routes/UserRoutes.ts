@@ -16,9 +16,10 @@ import moepictures from "../assets/images/moepictures.jpg"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server/ServerFunctions"
 import permissions from "../structures/Permissions"
 import path from "path"
-import {SignupParams, LoginParams, UserPfpParams, SaveSearchParams, SaveSearchEditParams, ChangeUsernameParams, SearchHistoryParams,
-ChangePasswordParams, ChangeEmailParams, VerifyEmailParams, ForgotPasswordParams, ResetPasswordParams, UserFavoritesParams,
-PostSearch, Favgroup, CommentSearch, BanParams, UserRole, EditCounts, UserCommentsParams, User, ForumPostSearchParams} from "../types/Types"
+import {SignupParams, LoginParams, UserPfpParams, SaveSearchParams, SaveSearchEditParams, 
+ChangeUsernameParams, SearchHistoryParams, ChangePasswordParams, ChangeEmailParams, VerifyEmailParams, 
+ForgotPasswordParams, ResetPasswordParams, UserFavoritesParams, PostSearch, Favgroup, CommentSearch, 
+BanParams, UserRole, EditCounts, UserCommentsParams, User, ForumPostSearchParams, ThemeSettingParams} from "../types/Types"
 
 const signupLimiter = rateLimit({
 	windowMs: 10 * 60 * 1000,
@@ -95,6 +96,7 @@ const UserRoutes = (app: Express) => {
             delete user.liveAnimationPreview
             delete user.liveModelPreview
             delete user.savedSearches
+            delete user.themeSettings
             delete user.blacklist
             delete user.premiumExpiration
             delete user.showR18
@@ -140,6 +142,7 @@ const UserRoutes = (app: Express) => {
                 await sql.user.updateUser(username, "liveModelPreview", false)
                 await sql.user.updateUser(username, "showR18", false)
                 await sql.user.updateUser(username, "savedSearches", "{}")
+                await sql.user.updateUser(username, "themeSettings", "{}")
                 await sql.user.updateUser(username, "blacklist", "")
                 await sql.user.updateUser(username, "postCount", 0)
                 await sql.user.updateUser(username, "emailVerified", false)
@@ -299,6 +302,7 @@ const UserRoutes = (app: Express) => {
                 req.session.liveAnimationPreview = user.liveAnimationPreview
                 req.session.liveModelPreview = user.liveModelPreview
                 req.session.savedSearches = user.savedSearches
+                req.session.themeSettings = user.themeSettings
                 req.session.blacklist = user.blacklist
                 req.session.showR18 = user.showR18
                 req.session.premium = user.premium
@@ -644,6 +648,29 @@ const UserRoutes = (app: Express) => {
             delete savedSearches[name]
             req.session.savedSearches = savedSearches 
             await sql.user.updateUser(req.session.username, "savedSearches", JSON.stringify(savedSearches))
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/user/themesettings", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            const {theme, hue, saturation, lightness} = req.body as ThemeSettingParams
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
+            const user = await sql.user.user(req.session.username)
+            if (!user) return void res.status(400).send("Bad username")
+            if (theme !== "light" && theme !== "dark") return void res.status(400).send("Invalid theme")
+            if (!Number.isInteger(hue) || !Number.isInteger(saturation) || !Number.isInteger(lightness)) {
+                return void res.status(400).send("Invalid values")
+            }
+            let themeSettings = Object.create(null)
+            themeSettings["theme"] = theme
+            themeSettings["hue"] = hue
+            themeSettings["saturation"] = saturation
+            themeSettings["lightness"] = lightness
+            await sql.user.updateUser(req.session.username, "themeSettings", JSON.stringify(themeSettings))
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

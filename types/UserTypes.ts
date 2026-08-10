@@ -5,7 +5,16 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import {PostRating, UserRole, PostSearch, Favgroup, CommentSort, CommentSearch, Ban, SearchHistory,
-ForumPostSearch} from "./Types"
+ForumPostSearch, Themes} from "./Types"
+
+export type UserUpdateColumns = "username" | "password" | "role" | "ips" | 
+"premium" | "premiumExpiration" | "banExpiration" | "banned" | "bio" | "email" | 
+"upscaledImages" | "showTagBanner" | "downloadPixivID" | "showTagTooltips" | 
+"showTooltips" | "emailVerified" | "$2fa" | "accountToken" | "image" | "imagePost" | 
+"imageHash" | "showR18" | "savedSearches" | "autosearchInterval" | "publicFavorites" | 
+"showRelated" | "lastLogin" | "postCount" | "joinDate" | "forceNoteBubbles" | "globalMusicPlayer" | 
+"blacklist" | "cookieConsent" | "liveModelPreview" | "liveAnimationPreview" | "publicTagFavorites" | 
+"deletedPosts" | "lastNameChange" | "deleted" | "deletionDate" | "themeSettings"
 
 export type Require<T> = {
     [K in keyof T]-?: T[K]
@@ -63,6 +72,7 @@ export interface User extends PrunedUser {
     liveAnimationPreview?: boolean
     liveModelPreview?: boolean
     savedSearches?: {[key: string]: string} | null
+    themeSettings?: {[key: string]: string} | null
     blacklist?: string
     showR18?: boolean
     premiumExpiration?: string | null
@@ -189,6 +199,13 @@ export interface UserCommentsParams {
     limit?: number
 }
 
+export interface ThemeSettingParams {
+    theme: Themes
+    hue: number
+    saturation: number
+    lightness: number
+}
+
 export interface BanParams {
     username: string
     reason: string
@@ -277,6 +294,7 @@ export type UserPostEndpoint<T extends string> =
     T extends "/api/user/unban" ? {params: {username: string}, response: string} :
     T extends "/api/user/promote" ? {params: {username: string, role: UserRole}, response: string} :
     T extends "/api/user/cookieconsent" ? {params: {consent: boolean | null}, response: string} :
+    T extends "/api/user/themesettings" ? {params: ThemeSettingParams, response: string} :
     never
 
 export type UserPutEndpoint<T extends string> = 

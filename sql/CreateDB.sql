@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "liveAnimationPreview" boolean,
     "liveModelPreview" boolean,
     "savedSearches" jsonb,
+    "themeSettings" jsonb,
     "blacklist" text,
     "showR18" boolean,
     "premium" boolean,

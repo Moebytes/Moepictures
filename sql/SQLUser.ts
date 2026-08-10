@@ -7,7 +7,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../functions/Functions"
-import {PostSearch, User, LoginHistory, Banner} from "../types/Types"
+import {PostSearch, User, LoginHistory, Banner, UserUpdateColumns} from "../types/Types"
 
 export default class SQLUser {
     /** Get uploads. */
@@ -47,17 +47,12 @@ export default class SQLUser {
     }
 
     /** Updates a user */
-    public static updateUser = async (username: string, column: "username" | "password" | "role" | "ips" | "premium" | "premiumExpiration" | "banExpiration" | "banned"
-        | "bio" | "email" | "upscaledImages" | "showTagBanner" | "downloadPixivID" | "showTagTooltips" | "showTooltips" | "emailVerified" | "$2fa" | "accountToken"
-        | "image" | "imagePost" | "imageHash" | "showR18" | "savedSearches" | "autosearchInterval" | "publicFavorites" | "showRelated" | "lastLogin"
-        | "postCount" | "joinDate" | "forceNoteBubbles" | "globalMusicPlayer" | "blacklist" | "cookieConsent" | "liveModelPreview" | "liveAnimationPreview" 
-        | "publicTagFavorites" | "deletedPosts" | "lastNameChange" | "deleted" | "deletionDate", value?: string | number | boolean | null | string[]) => {
-
+    public static updateUser = async (username: string, column: UserUpdateColumns, value?: string | number | boolean | null | string[]) => {
         let whitelist = ["username", "password", "role", "ips", "premium", "premiumExpiration", "banExpiration", "banned", "bio", "email",
         "upscaledImages", "showTagBanner", "downloadPixivID", "showTagTooltips", "showTooltips", "emailVerified", "$2fa", "accountToken",
         "image", "imagePost", "imageHash", "showR18", "savedSearches", "autosearchInterval", "publicFavorites", "showRelated", "lastLogin",
         "postCount", "joinDate", "forceNoteBubbles", "globalMusicPlayer", "blacklist", "cookieConsent", "liveModelPreview", "liveAnimationPreview",
-        "publicTagFavorites", "deletedPosts", "lastNameChange", "deleted", "deletionDate"]
+        "publicTagFavorites", "deletedPosts", "lastNameChange", "deleted", "deletionDate", "themeSettings"]
         
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)
