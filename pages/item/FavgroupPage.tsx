@@ -68,9 +68,6 @@ const FavgroupPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         if (!session.cookie) return
-        if (!session.username) {
-            functions.dom.replaceLocation("/401")
-        }
     }, [session])
 
     useEffect(() => {
