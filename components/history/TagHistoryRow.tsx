@@ -313,11 +313,11 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.wikipedia}: </span><span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.wikipedia!, "_blank")}>{props.tagHistory.wikipedia}</span></span>)
         }
         if (!hasChanges || changes.aliases) {
-            let aliases = props.tagHistory.aliases.map((a) => a.replaceAll("-", " "))
+            let aliases = props.tagHistory.aliases.map((a) => a?.replaceAll("-", " ")).filter(Boolean)
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.aliases}: </span>{aliases.length ? aliases.join(", ") : i18n.labels.none}</span>)
         }
         if (!hasChanges || changes.implications) {
-            const implications = props.tagHistory.implications.map((i) => i.replaceAll("-", " "))
+            const implications = props.tagHistory.implications.map((i) => i?.replaceAll("-", " ")).filter(Boolean)
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.implications}: </span>{implications.length ? implications.join(", ") : i18n.labels.none}</span>)
         }
         if (!hasChanges || changes.pixivTags) {
