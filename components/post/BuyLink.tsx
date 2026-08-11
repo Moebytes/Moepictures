@@ -5,7 +5,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import React from "react"
-import {useInteractionActions, useThemeSelector} from "../../store"
+import {useCacheSelector, useInteractionActions, useThemeSelector} from "../../store"
 import BuyLinkIcon from "../../assets/svg/buy-link.svg"
 import moeText from "../../moetext/MoeText"
 import "./styles/commentary.less"
@@ -16,6 +16,7 @@ interface Props {
 
 const BuyLink: React.FunctionComponent<Props> = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
+    const {emojis} = useCacheSelector()
     const {setEnableDrag} = useInteractionActions()
 
     return (
@@ -26,7 +27,7 @@ const BuyLink: React.FunctionComponent<Props> = (props) => {
             </div>
             <div className="commentary-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="commentary-text">
-                    {moeText.renderCommentaryText(props.link)}   
+                    {moeText.renderCommentaryText(props.link, emojis)}   
                 </span>
             </div>
         </div>

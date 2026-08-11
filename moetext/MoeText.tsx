@@ -383,9 +383,10 @@ export default class MoeText {
         return items
     }
 
-    public static renderCommentaryText = (text: string) => {
+    public static renderCommentaryText = (text: string, emojis: any) => {
         let items = this.parseLinks(text)
         items = this.appendChain(items, this.parseEmails)
+        items = this.appendParamChain(items, emojis, this.parseEmojis)
         return this.generateMarkup(items)
     }
 

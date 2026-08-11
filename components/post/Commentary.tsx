@@ -5,7 +5,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import React, {useEffect, useState} from "react"
-import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionActions} from "../../store"
+import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionActions, useCacheSelector} from "../../store"
 import CommentaryTranslateIcon from "../../assets/svg/commentary.svg"
 import functions from "../../functions/Functions"
 import moeText from "../../moetext/MoeText"
@@ -21,6 +21,7 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
     const {setEnableDrag} = useInteractionActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
+    const {emojis} = useCacheSelector()
     const [showTranslated, setShowTranslated] = useState(false)
     const [text, setText] = useState(props.text)
     const [translatedText, setTranslatedText] = useState("")
@@ -60,7 +61,7 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
             </div>
             <div className="commentary-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="commentary-text">
-                    {moeText.renderCommentaryText(text)}   
+                    {moeText.renderCommentaryText(text, emojis)}   
                 </span>
             </div>
         </div>

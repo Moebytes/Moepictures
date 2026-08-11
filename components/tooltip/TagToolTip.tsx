@@ -7,7 +7,7 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useSessionSelector, useSessionActions, useSearchSelector, useInteractionSelector, useFlagActions, 
-useInteractionActions, useSearchActions, useFilterSelector, useLayoutSelector} from "../../store"
+useInteractionActions, useSearchActions, useFilterSelector, useLayoutSelector, useCacheSelector} from "../../store"
 import functions from "../../functions/Functions"
 import moeText from "../../moetext/MoeText"
 import website from "../../assets/icons/website.png"
@@ -27,6 +27,7 @@ const TagToolTip: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
+    const {emojis} = useCacheSelector()
     const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const {selectionMode, ratingType} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
@@ -265,7 +266,7 @@ const TagToolTip: React.FunctionComponent = (props) => {
             {tagAliasJSX()}
             <div className="tag-tooltip-row">
                 <div className="tag-tooltip-text-container">
-                    <span className="tag-tooltip-text">{moeText.renderCommentaryText(tag.description)}</span>
+                    <span className="tag-tooltip-text">{moeText.renderCommentaryText(tag.description, emojis)}</span>
                 </div>
             </div>
             {tagImagesJSX()}

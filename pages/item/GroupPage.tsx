@@ -8,7 +8,7 @@ import React, {useEffect, useState} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, 
 useFlagSelector, useCacheActions, useGroupDialogActions, useSearchActions,
-useGroupDialogSelector, useActiveSelector} from "../../store"
+useGroupDialogSelector, useActiveSelector, useCacheSelector} from "../../store"
 import {useNavigate, useParams, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -48,6 +48,7 @@ const GroupPage: React.FunctionComponent = () => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
+    const {emojis} = useCacheSelector()
     const {setAddGroupPostObj, setDeleteGroupPostObj, setEditGroupObj, setDeleteGroupObj, 
     setRevertGroupHistoryID, setRevertGroupHistoryFlag, setRemapGroupObj} = useGroupDialogActions()
     const {ratingType, scroll} = useSearchSelector()
@@ -346,7 +347,7 @@ const GroupPage: React.FunctionComponent = () => {
                         {groupOptionsJSX()}
                     </div>
                     <div className="group-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <span className="group-text">{group.description ? moeText.renderCommentaryText(group.description) : i18n.labels.noDesc}</span>
+                        <span className="group-text">{group.description ? moeText.renderCommentaryText(group.description, emojis) : i18n.labels.noDesc}</span>
                     </div>
                     <div className="group-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <span><span className="group-label" onClick={searchGroup}>{i18n.sort.posts}</span> <span className="group-label-alt">{group.postCount}</span></span>

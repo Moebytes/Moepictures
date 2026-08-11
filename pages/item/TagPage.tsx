@@ -7,7 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
 useLayoutSelector, useFlagSelector, useCacheActions, useInteractionActions, useSearchActions, useTagDialogActions,
-useTagDialogSelector, useSearchSelector} from "../../store"
+useTagDialogSelector, useSearchSelector, useCacheSelector} from "../../store"
 import {useNavigate, useParams, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -49,6 +49,7 @@ const TagPage: React.FunctionComponent = () => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
+    const {emojis} = useCacheSelector()
     const {setPosts, setNavigationPosts} = useCacheActions()
     const {tagFlag} = useFlagSelector()
     const {setTagFlag, setTagFavoriteFlag} = useFlagActions()
@@ -566,7 +567,7 @@ const TagPage: React.FunctionComponent = () => {
                                 <span className="tag-text strikethrough-color">{i18n.pages.tag.bannedArtist}</span>
                             </div> : null}
                             <div className="tag-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                                <span className="tag-text">{moeText.renderCommentaryText(tag.description)}</span>
+                                <span className="tag-text">{moeText.renderCommentaryText(tag.description, emojis)}</span>
                             </div>
                             {tagImplicationJSX()}
                             {relatedTagJSX()}
