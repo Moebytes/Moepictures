@@ -144,7 +144,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
 
         updatingRef.current = true
 
-        let currentOffset = scroll ? offset + pageAmount : (page - 1) * pageAmount
+        let currentOffset = scroll ? offset : (page - 1) * pageAmount
         const newOffset = forceOffset ?? currentOffset
         let result = await updateOffset?.(newOffset, queryOverride ?? searchQuery) ?? null
         if (!result) result = items.slice(newOffset, newOffset + pageAmount)
@@ -171,12 +171,17 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
             return setEnded(true)
         }
 
-        setOffset(newOffset)
         if (padded) {
             setItems(result)
         } else {
             setItems((prev) => functions.util.removeDuplicates([...prev, ...result]))
-            setVisible((prev) => [...prev, ...result])
+            setVisible((prev) => functions.util.removeDuplicates([...prev, ...result]))
+        }
+
+        if (scroll) { 
+            setOffset(newOffset + result.length) 
+        } else { 
+            setOffset(newOffset) 
         }
 
         if (result.length < limit) setEnded(true)
