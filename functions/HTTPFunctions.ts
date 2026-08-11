@@ -35,6 +35,13 @@ export default class HTTPFunctions {
         return fetch(link, {method: "POST", headers, credentials: "include", body: JSON.stringify(data)}).then((r) => r.arrayBuffer())
     }
 
+    public static refreshKeys = async () => {
+        localStorage.removeItem("publicKey")
+        localStorage.removeItem("privateKey")
+        this.serverPublicKey = ""
+        this.privateKey = ""
+    }
+
     public static updateClientKeys = async (session: Session, setSessionFlag?: (value: boolean) => void) => {
         if (this.privateKey) return this.privateKey
         if (this.clientKeyLock) await functions.timeout(1000 + Math.random() * 1000)
@@ -123,6 +130,7 @@ export default class HTTPFunctions {
             functions.cache.cachedResponses.set(cacheKey, {data: decrypted, expires: Date.now() + functions.cache.cacheDuration})
             return decrypted as GetEndpoint<T>["response"]
         } catch (err: any) {
+            if (err.message.includes("No public key")) this.refreshKeys()
             return Promise.reject(err)
         }
     }
