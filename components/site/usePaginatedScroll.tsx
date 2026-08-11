@@ -101,11 +101,9 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
         setSearchQuery(queryOverride ?? searchQuery)
         const data = await loadInitial(queryOverride ?? searchQuery)
         setItems(data)
-        if (scroll) { 
-            setOffset(data.length) 
-            setVisible(data.slice(0, pageAmount)) 
-        } else { 
-            setOffset(0) 
+        if (scroll) {
+            setOffset(data.slice(0, pageAmount).length)
+            setVisible(data.slice(0, pageAmount))
         }
         if (reset) {
             setPage(1)
@@ -148,14 +146,6 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
         if (ended || updatingRef.current) return
 
         updatingRef.current = true
-
-        if (scroll && forceOffset === undefined) {
-            const nextVisibleLength = visible.length + pageAmount
-            if (nextVisibleLength <= items.length) {
-                setVisible(items.slice(0, nextVisibleLength)) 
-                return
-            }
-        }
 
         let currentOffset = scroll ? offset : (page - 1) * pageAmount
         const newOffset = forceOffset ?? currentOffset
