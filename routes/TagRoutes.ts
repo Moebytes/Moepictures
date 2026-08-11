@@ -209,6 +209,13 @@ const TagRoutes = (app: Express) => {
             if (!updater) updater = req.session.username
             if (!updatedDate) updatedDate = new Date().toISOString()
             if (implications !== undefined) {
+                const posts = await sql.tag.tagPosts(tag)
+                const postIDs = posts.map((p: any) => p.postID)
+
+                if (posts.length >  1000 && !permissions.isMod(req.session)) {
+                    return void res.status(400).send("No permission to edit implications")
+                } 
+
                 let verifiedImplications = [] as string[]
                 for (let i = 0; i < implications.length; i++) {
                     const implication = implications[i]?.trim()
@@ -221,13 +228,7 @@ const TagRoutes = (app: Express) => {
                     const newImplications = implications
                     const toRemove = oldImplications.filter((implication: string) => !newImplications.includes(implication)).filter(Boolean)
                     const toAdd = newImplications.filter((implication: string) => !oldImplications.includes(implication)).filter(Boolean)
-
-                    const posts = await sql.tag.tagPosts(tag)
-                    const postIDs = posts.map((p: any) => p.postID)
-
-                    if (posts.length >  1000 && !permissions.isMod(req.session)) {
-                        return void res.status(400).send("No permission to edit implications")
-                    } 
+                    
                     await sql.tag.bulkDeleteImplications(tag, toRemove)
                     await sql.tag.bulkInsertImplications(tag, toAdd)
 
@@ -240,6 +241,9 @@ const TagRoutes = (app: Express) => {
                     } else {
                         serverFunctions.tags.updateImplications(posts, toAdd)
                     }
+                } else {
+                    const toRemove = tagObj.implications?.filter(Boolean).map((i: any) => i.implication) || []
+                    await sql.tag.bulkDeleteImplications(tag, toRemove)
                 }
             }
             if (aliases !== undefined) {
@@ -258,6 +262,9 @@ const TagRoutes = (app: Express) => {
     
                     await sql.tag.bulkDeleteAliases(tag, toRemove)
                     await sql.tag.bulkInsertAliases(tag, toAdd)
+                } else {
+                    const toRemove = tagObj.aliases?.filter(Boolean).map((a: any) => a.alias) || []
+                    await sql.tag.bulkDeleteAliases(tag, toRemove)
                 }
             }
             if (pixivTags !== undefined) {

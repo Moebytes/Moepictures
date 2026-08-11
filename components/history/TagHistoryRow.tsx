@@ -313,16 +313,12 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.wikipedia}: </span><span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.wikipedia!, "_blank")}>{props.tagHistory.wikipedia}</span></span>)
         }
         if (!hasChanges || changes.aliases) {
-            if (props.tagHistory.aliases?.[0]) {
-                const aliases = props.tagHistory.aliases.map((a) => a.replaceAll("-", " "))
-                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.aliases}: </span>{aliases.join(", ")}</span>)
-            }
+            let aliases = props.tagHistory.aliases.map((a) => a.replaceAll("-", " "))
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.sort.aliases}: </span>{aliases.length ? aliases.join(", ") : i18n.labels.none}</span>)
         }
         if (!hasChanges || changes.implications) {
-            if (props.tagHistory.implications?.[0]) {
-                const implications = props.tagHistory.implications.map((i) => i.replaceAll("-", " "))
-                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.implications}: </span>{implications.join(", ")}</span>)
-            }
+            const implications = props.tagHistory.implications.map((i) => i.replaceAll("-", " "))
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.implications}: </span>{implications.length ? implications.join(", ") : i18n.labels.none}</span>)
         }
         if (!hasChanges || changes.pixivTags) {
             if (props.tagHistory.pixivTags?.[0]) {
