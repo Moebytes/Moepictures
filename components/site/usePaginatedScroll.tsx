@@ -149,6 +149,14 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
 
         updatingRef.current = true
 
+        if (scroll && forceOffset === undefined) {
+            const nextVisibleLength = visible.length + pageAmount
+            if (nextVisibleLength <= items.length) {
+                setVisible(items.slice(0, nextVisibleLength)) 
+                return
+            }
+        }
+
         let currentOffset = scroll ? offset : (page - 1) * pageAmount
         const newOffset = forceOffset ?? currentOffset
         let result = await updateOffset?.(newOffset, queryOverride ?? searchQuery) ?? null
