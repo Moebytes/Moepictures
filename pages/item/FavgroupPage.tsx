@@ -104,9 +104,7 @@ const FavgroupPage: React.FunctionComponent = () => {
     }
 
     useEffect(() => {
-        if (session.username) {
-            favgroupInfo()
-        }
+        favgroupInfo()
     }, [favgroupName, session])
 
     useEffect(() => {
