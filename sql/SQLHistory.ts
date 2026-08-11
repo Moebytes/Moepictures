@@ -384,7 +384,7 @@ export default class SQLHistory {
     }
 
     /** Get note history */
-    public static noteHistory = async (postID?: string, order?: number, offset?: number, search?: string) => {
+    public static noteHistory = async (postID?: string, order?: number, offset?: number, limit?: number, search?: string) => {
         let i = 1
         let values = [] as any
         let searchValue = i
@@ -407,6 +407,11 @@ export default class SQLHistory {
         if (order) {
             values.push(order)
             orderQuery = `"note history"."order" = $${orderValue}`
+            i++
+        }
+        let limitValue = i
+        if (limit) {
+            values.push(limit)
             i++
         }
         if (offset) values.push(offset)
@@ -437,7 +442,7 @@ export default class SQLHistory {
                 GROUP BY "note history"."historyID", users."username", users."role", 
                 users."premium", users."banned", users."deleted", users."imagePost"
                 ORDER BY "note history"."updatedDate" DESC
-                LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
         `),
         values: []
         }

@@ -391,8 +391,9 @@ const NoteRoutes = (app: Express) => {
 
     app.get("/api/note/history", noteLimiter, async (req: Request, res: Response) => {
         try {
-            let {postID, order, historyID, username, query, offset} = req.query as unknown as NoteHistoryParams
+            let {postID, order, historyID, username, query, limit, offset} = req.query as unknown as NoteHistoryParams
             if (!offset) offset = 0
+            if (!limit) limit = 100
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             let result = [] as NoteHistory[]
             if (historyID) {
@@ -401,7 +402,7 @@ const NoteRoutes = (app: Express) => {
             } else if (username) {
                 result = await sql.history.userNoteHistory(username)
             } else {
-                result = await sql.history.noteHistory(postID, order, Number(offset), query)
+                result = await sql.history.noteHistory(postID, order, Number(offset), Number(limit), query)
             }
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {

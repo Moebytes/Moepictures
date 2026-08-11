@@ -124,6 +124,7 @@ export interface NoteHistoryParams {
     historyID?: string
     username?: string
     query?: string
+    limit?: number
     offset?: number
 }
 

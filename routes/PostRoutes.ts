@@ -156,11 +156,12 @@ const PostRoutes = (app: Express) => {
 
     app.get("/api/post/deleted", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            let {query, offset} = req.query as unknown as {query: string, offset: number}
+            let {query, limit, offset} = req.query as unknown as {query?: string, limit?: number, offset?: number}
             if (!offset) offset = 0
+            if (!limit) limit = 100
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return void res.status(403).end()
-            const result = await sql.search.deletedPosts(query, Number(offset))
+            const result = await sql.search.deletedPosts(query, Number(offset), Number(limit))
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)

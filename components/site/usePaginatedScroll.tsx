@@ -101,7 +101,12 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
         setSearchQuery(queryOverride ?? searchQuery)
         const data = await loadInitial(queryOverride ?? searchQuery)
         setItems(data)
-        if (scroll) setVisible(data.slice(0, pageAmount))
+        if (scroll) { 
+            setOffset(data.length) 
+            setVisible(data.slice(0, pageAmount)) 
+        } else { 
+            setOffset(0) 
+        }
         if (reset) {
             setPage(1)
         } else {

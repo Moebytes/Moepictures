@@ -630,7 +630,7 @@ export default class SQLTag {
     }
 
     /** Get alias/implication history */
-    public static aliasImplicationHistory = async (offset?: number, search?: string) => {
+    public static aliasImplicationHistory = async (offset?: number, limit?: number, search?: string) => {
         let i = 1
         let values = [] as any
         let searchValue = i
@@ -640,6 +640,11 @@ export default class SQLTag {
             searchQuery = "(" + `"history"."source" ILIKE '%' || $${searchValue} || '%' OR
             "history"."target" ILIKE '%' || $${searchValue} || '%' OR 
             "history"."type" ILIKE '%' || $${searchValue} || '%' ` + ")"
+            i++
+        }
+        let limitValue = i
+        if (limit) {
+            values.push(limit)
             i++
         }
         if (offset) values.push(offset)
@@ -668,7 +673,7 @@ export default class SQLTag {
                 LEFT JOIN users ON users."username" = "history"."user"
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
                 ORDER BY "history"."date" DESC
-                LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
             `),
             values: []
         }

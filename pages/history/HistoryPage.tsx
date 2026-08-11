@@ -140,25 +140,25 @@ const HistoryPage: React.FunctionComponent = () => {
     const updateOffset = async (offset: number, query?: string) => {
         let result = [] as History[]
         if (historyTab === "post") {
-            result = await functions.http.get("/api/post/history", {query, offset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/post/history", {query, limit, offset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "tag") {
-            result = await functions.http.get("/api/tag/history", {query, offset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/tag/history", {query, limit, offset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "note") {
-            result = await functions.http.get("/api/note/history", {query, offset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/note/history", {query, limit, offset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "group") {
-            result = await functions.http.get("/api/group/history", {query, offset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/group/history", {query, limit, offset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "alias") {
-            result = await functions.http.get("/api/alias/history", {query, offset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/alias/history", {query, limit, offset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "search") {
-            result = await functions.http.get("/api/user/history", {query, offset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/user/history", {query, limit, offset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "delete") {
-            result = await functions.http.get("/api/post/deleted", {query, offset}, session, setSessionFlag).catch(() => [])
+            result = await functions.http.get("/api/post/deleted", {query, limit, offset}, session, setSessionFlag).catch(() => [])
         }
         result = result.map((r) => ({itemType: historyTab, ...r}))
         return result

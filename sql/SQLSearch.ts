@@ -405,11 +405,15 @@ export default class SQLSearch {
     }
 
     /** Get deleted posts. */
-    public static deletedPosts = async (search?: string, offset?: number) => {
+    public static deletedPosts = async (search?: string, offset?: number, limit?: number) => {
         let whereQuery = `posts."deleted" IS TRUE`
         let i = 1
         if (search) {
             whereQuery += `AND (posts.title ILIKE '%' || $${i} || '%' OR posts."englishTitle" ILIKE '%' || $${i} || '%')`
+            i++
+        }
+        let limitValue = i
+        if (limit) {
             i++
         }
         const query: QueryConfig = {
@@ -420,11 +424,12 @@ export default class SQLSearch {
                 JOIN images ON posts."postID" = images."postID"
                 WHERE ${whereQuery}
                 GROUP BY posts."postID"
-                ${offset ? `LIMIT 100 OFFSET $${i}` : ""}
+                ${offset ? `${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} OFFSET $${i}` : ""}
             `),
             values: []
         }
         if (search) query.values?.push(search.toLowerCase())
+        if (limit) query.values?.push(limit)
         if (offset) query.values?.push(offset)
         const result = await SQLQuery.run(query, `search/posts/deleted`)
         return result as Promise<DeletedPost[]>

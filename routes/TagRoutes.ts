@@ -831,10 +831,11 @@ const TagRoutes = (app: Express) => {
 
     app.get("/api/alias/history", tagLimiter, async (req: Request, res: Response) => {
         try {
-            let {query, offset} = req.query as unknown as {query?: string, offset?: number}
+            let {query, limit, offset} = req.query as unknown as {query?: string, limit?: number, offset?: number}
             if (!offset) offset = 0
+            if (!limit) limit = 100
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
-            const result = await sql.tag.aliasImplicationHistory(Number(offset), query)
+            const result = await sql.tag.aliasImplicationHistory(Number(offset), Number(limit), query)
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)

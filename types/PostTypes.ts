@@ -249,7 +249,7 @@ export type PostGetEndpoint<T extends string> =
     T extends "/api/post/parent" ? {params: {postID: string}, response: ChildPost | undefined} :
     T extends "/api/post/unverified" ? {params: {postID: string}, response: UnverifiedPost | undefined} :
     T extends "/api/post/list/unverified" ? {params: {offset?: number} | null, response: UnverifiedPost[]} :
-    T extends "/api/post/deleted" ? {params: {query?: string, offset?: number} | null, response: DeletedPost[]} :
+    T extends "/api/post/deleted" ? {params: {query?: string, limit?: number, offset?: number} | null, response: DeletedPost[]} :
     T extends "/api/post/deleted/unverified" ? {params: {offset?: number} | null, response: UnverifiedPost[]} :
     T extends "/api/post-edits/list/unverified" ? {params: {offset?: number} | null, response: UnverifiedPost[]} :
     T extends "/api/post/children/unverified" ? {params: {postID: string}, response: ChildPost[]} :

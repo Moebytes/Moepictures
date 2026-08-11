@@ -231,7 +231,7 @@ export type TagGetEndpoint<T extends string> =
     T extends "/api/tag/aliasto/request/list" ? {params: {offset?: number} | null, response: AliasRequest[]} :
     T extends "/api/tag/edit/request/list" ? {params: {offset?: number} | null, response: TagEditRequest[]} :
     T extends "/api/tag/history" ? {params: TagHistoryParams | null, response: TagHistory[]} :
-    T extends "/api/alias/history" ? {params: {offset?: number, query?: string} | null, response: AliasHistorySearch[]} :
+    T extends "/api/alias/history" ? {params: {limit?: number, offset?: number, query?: string} | null, response: AliasHistorySearch[]} :
     T extends "/api/tag/blockedtags" ? {params: null, response: string[]} :
     never
 
