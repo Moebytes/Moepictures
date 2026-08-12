@@ -1007,7 +1007,7 @@ const UserRoutes = (app: Express) => {
 
     app.delete("/api/user/delete", csrfProtection, userLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
             if (!user) return void res.status(400).send("Bad username")
 
