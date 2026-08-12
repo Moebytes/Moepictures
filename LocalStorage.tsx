@@ -193,8 +193,6 @@ const LocalStorage: React.FunctionComponent = () => {
     useEffect(() => {
         if (typeof window === "undefined") return
         const colorList = theme.includes("light") ? lightColorList : darkColorList
-        let targetLightness = siteLightness
-        if (theme.includes("light") && siteLightness > 50) targetLightness = 50
         let noRotation = [
             "--buttonBG",
             "--previewBG",
@@ -206,7 +204,7 @@ const LocalStorage: React.FunctionComponent = () => {
             if (noRotation.includes(key)) {
                 document.documentElement.style.setProperty(key, color)
             } else {
-                document.documentElement.style.setProperty(key, functions.color.rotateColor(color, siteHue, siteSaturation, targetLightness))
+                document.documentElement.style.setProperty(key, functions.color.rotateColor(color, siteHue, siteSaturation, siteLightness))
             }
         }
         saveThemeSettings()

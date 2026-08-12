@@ -52,11 +52,11 @@ const HSLDropdown: React.FunctionComponent<Props> = (props) => {
             </div>
             <div className="hsl-dropdown-row">
                 <span className="hsl-dropdown-text">{i18n.filters.saturation}</span>
-                <Slider className="hsl-dropdown-slider" trackClassName="hsl-dropdown-slider-track" thumbClassName="hsl-dropdown-slider-thumb" onChange={(value) => setSiteSaturation(value)} min={50} max={100} step={1} value={siteSaturation}/>
+                <Slider className="hsl-dropdown-slider" trackClassName="hsl-dropdown-slider-track" thumbClassName="hsl-dropdown-slider-thumb" onChange={(value) => setSiteSaturation(value)} min={30} max={100} step={1} value={siteSaturation}/>
             </div>
             <div className="hsl-dropdown-row">
                 <span className="hsl-dropdown-text">{i18n.filters.lightness}</span>
-                <Slider className="hsl-dropdown-slider" trackClassName="hsl-dropdown-slider-track" thumbClassName="hsl-dropdown-slider-thumb" onChange={(value) => setSiteLightness(value)} min={45} max={55} step={1} value={siteLightness}/>
+                <Slider className="hsl-dropdown-slider" trackClassName="hsl-dropdown-slider-track" thumbClassName="hsl-dropdown-slider-thumb" onChange={(value) => setSiteLightness(value)} min={35} max={65} step={1} value={siteLightness}/>
             </div>
             <div className="hsl-dropdown-row" style={{justifyContent: "space-evenly"}}>
                 <button className="hsl-dropdown-button" onClick={() => resetFilters()}>{i18n.filters.reset}</button>

@@ -37,7 +37,10 @@ export default class ColorFunctions {
         // Blue is max
         else
             h = (r - g) / delta + 4
-        h = Math.round(h * 60)
+        h = h * 60
+        if (h < 0) {
+            h += 360
+        }
         // Make negative hues positive behind 360°
         if (h < 0)
             h += 360
@@ -45,13 +48,14 @@ export default class ColorFunctions {
         // Calculate saturation
         s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1))
         // Multiply l and s by 100
-        s = +(s * 100).toFixed(1)
-        l = +(l * 100).toFixed(1)
+        s = s * 100
+        l = l * 100
         return [h, s, l]
     }
 
     public static hslToRgb(h: number, s: number, l: number) {
         // Must be fractions of 1
+        h = ((h % 360) + 360) % 360
         s /= 100.0
         l /= 100.0
         let c = (1 - Math.abs(2 * l - 1)) * s,
@@ -77,7 +81,7 @@ export default class ColorFunctions {
         g = Math.round((g + m) * 255)
         b = Math.round((b + m) * 255)
         return [r, g, b]
-    } 
+    }
 
     public static rgbToHex(r: number, g: number, b: number) {
         let hexR = r.toString(16)
@@ -92,11 +96,12 @@ export default class ColorFunctions {
         return "#" + hexR + hexG + hexB
     }
 
-    public static wrap = (num: number, min: number, max: number) => {
-        let newNum = num 
-        if (newNum < min) newNum += max 
-        if (newNum > max) newNum -= min
-        return newNum
+    public static wrap = (num: number, max: number) => {
+        return ((num % max) + max) % max
+    }
+
+    public static clamp = (num: number, min: number, max: number) => {
+        return Math.min(Math.max(num, min), max)
     }
 
     public static mod = (num: number, mod: number) => {
@@ -115,9 +120,9 @@ export default class ColorFunctions {
             hsl = this.rgbToHsl(Number(matches[0]), Number(matches[1]), Number(matches[2]))
             if (matches[3]) a = Number(matches[3])
         }
-        const newH = this.mod(this.wrap(hsl[0] - 180 + hue, 0, 360), 360)
-        const newS = this.mod(this.wrap(hsl[1] - 100 + saturation, 0 , 100), 100)
-        const newL = this.mod(this.wrap(hsl[2] - 50 + lightness, 0, 100), 100)
+        const newH = this.wrap(hsl[0] - 180 + hue, 360)
+        const newS = this.clamp(hsl[1] - 100 + saturation, 0, 100)
+        const newL = this.clamp(hsl[2] - 50 + lightness, 0, 100)
         const newRGB = this.hslToRgb(newH, newS, newL)
         if (a < 1) {
             return `rgba(${newRGB[0]}, ${newRGB[1]}, ${newRGB[2]}, ${a})`
