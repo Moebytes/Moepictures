@@ -164,7 +164,7 @@ const LocalStorage: React.FunctionComponent = () => {
     const initThemeSettings = async () => {
         if (!session.username) return
 
-        if (session.themeSettings) {
+        if (session.themeSettings && Object.keys(session.themeSettings).length) {
             setTheme(session.themeSettings.theme as Themes)
             setSiteHue(Number(session.themeSettings.hue))
             setSiteSaturation(Number(session.themeSettings.saturation))
