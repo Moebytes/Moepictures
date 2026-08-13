@@ -100,6 +100,11 @@ const PaymentRoutes = (app: Express) => {
                         await sql.user.updateUser(user.username, "premium", true)
                         await sql.user.updateUser(user.username, "premiumExpiration", premiumExpiration)
 
+                        if (!req.session.emailVerified) {
+                            await sql.user.updateUser(user.username, "emailVerified", true)
+                            req.session.emailVerified = true
+                        }
+
                         await sql.token.insertSubscription(user.username, transaction.appAccountToken,
                             transaction.originalTransactionId!, transaction.transactionId!, "ios", 
                             transaction.productId, premiumExpiration)
@@ -138,6 +143,11 @@ const PaymentRoutes = (app: Express) => {
 
                         await sql.user.updateUser(user.username, "premium", true)
                         await sql.user.updateUser(user.username, "premiumExpiration", premiumExpiration)
+
+                        if (!req.session.emailVerified) {
+                            await sql.user.updateUser(user.username, "emailVerified", true)
+                            req.session.emailVerified = true
+                        }
 
                         await sql.token.insertSubscription(user.username, 
                             transaction.externalAccountIdentifiers?.obfuscatedExternalAccountId,

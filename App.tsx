@@ -106,7 +106,7 @@ const App: React.FunctionComponent = (props) => {
     const getSessionCookie = async () => {
         const cookie = await functions.http.get("/api/user/session", null, session, setSessionFlag)
         setSession(cookie)
-        if (cookie.username && !permissions.isPremium(cookie)) {
+        if (cookie.username && cookie.emailVerified && !permissions.isPremium(cookie)) {
             await functions.http.post("/api/user/upscaledimages", {reset: true}, session, setSessionFlag)
         }
     }

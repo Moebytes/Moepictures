@@ -173,7 +173,7 @@ const LocalStorage: React.FunctionComponent = () => {
     }
 
     const saveThemeSettings = async () => {
-        if (!session.username) return
+        if (!session.username || !session.emailVerified) return
 
         if (themeSaveTimeout.current) {
             clearTimeout(themeSaveTimeout.current)
