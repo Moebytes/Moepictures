@@ -32,15 +32,6 @@ const messageUpdateLimiter = rateLimit({
     handler
 })
 
-let connections = [] as {username: string, res: Response}[]
-
-const pushNotification = (username: string) => {
-    const connection = connections.find((c) => c.username === username)
-    if (!connection) return
-    connection.res.write(`event: message\n`)
-    connection.res.write(`data: new message!\n\n`)
-}
-
 const MessageRoutes = (app: Express) => {
     app.post("/api/message/create", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
@@ -63,7 +54,7 @@ const MessageRoutes = (app: Express) => {
             const messageID = await sql.message.insertMessage(req.session.username, title, content, r18)
             await sql.message.bulkInsertRecipients(messageID, recipients)
             for (const recipient of recipients) {
-                pushNotification(recipient)
+                serverFunctions.notifications.pushNotification(recipient)
             }
             res.status(200).send(messageID)
         } catch (e) {
@@ -168,11 +159,11 @@ const MessageRoutes = (app: Express) => {
                 for (const recipient of message.recipients) {
                     if (!recipient) continue
                     await sql.message.updateRecipient(messageID, recipient, "read", false)
-                    pushNotification(recipient)
+                    serverFunctions.notifications.pushNotification(recipient)
                 }
             } else {
                 await sql.message.updateMessage(messageID, "read", false)
-                pushNotification(message.creator)
+                serverFunctions.notifications.pushNotification(message.creator)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -387,7 +378,7 @@ const MessageRoutes = (app: Express) => {
             await sql.message.bulkDeleteRecipients(messageID, functions.util.filterNulls(toRemove))
             await sql.message.bulkInsertRecipients(messageID, toAdd)
             for (const recipient of toAdd) {
-                pushNotification(recipient)
+                serverFunctions.notifications.pushNotification(recipient)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -435,7 +426,7 @@ const MessageRoutes = (app: Express) => {
 
     app.get("/api/notifications", messageLimiter, async (req: Request, res: Response) => {
         try {
-            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
             res.writeHead(200, {
                 "Content-Type": "text/event-stream",
                 "Connection": "keep-alive",
@@ -443,14 +434,9 @@ const MessageRoutes = (app: Express) => {
             })
             res.flushHeaders()
 
-            const index = connections.findIndex((c) => c.username === req.session.username)
-            if (index !== -1) {
-                connections[index].res = res
-            } else {
-                connections.push({username: req.session.username, res})
-            }
+            serverFunctions.notifications.addConnection(req.sessionID, req.session.username, res)
             req.on("close", () => {
-                connections = connections.filter((c) => c.username !== req.session.username)
+                serverFunctions.notifications.removeConnection(req.sessionID)
             })
         } catch (e) {
             console.log(e)

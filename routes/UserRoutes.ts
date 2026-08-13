@@ -875,6 +875,7 @@ const UserRoutes = (app: Express) => {
             if (user && new Date() <= expireDate) {
                 await sql.user.updateUser(user.username, "email", tokenData.email)
                 await sql.user.updateUser(user.username, "emailVerified", true)
+                serverFunctions.notifications.pushMessage(user.username, "email verified")
                 req.session.email = tokenData.email
                 req.session.emailVerified = true
                 await sql.token.deleteEmailToken(tokenData.email)

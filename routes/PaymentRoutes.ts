@@ -102,6 +102,7 @@ const PaymentRoutes = (app: Express) => {
 
                         if (!req.session.emailVerified) {
                             await sql.user.updateUser(user.username, "emailVerified", true)
+                            serverFunctions.notifications.pushMessage(user.username, "email verified")
                             req.session.emailVerified = true
                         }
 
@@ -146,6 +147,7 @@ const PaymentRoutes = (app: Express) => {
 
                         if (!req.session.emailVerified) {
                             await sql.user.updateUser(user.username, "emailVerified", true)
+                            serverFunctions.notifications.pushMessage(user.username, "email verified")
                             req.session.emailVerified = true
                         }
 
