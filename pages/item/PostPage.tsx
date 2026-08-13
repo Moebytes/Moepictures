@@ -4,7 +4,7 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useContext, useState, useReducer} from "react"
+import React, {useEffect, useEffectEvent, useState, useReducer} from "react"
 import {useNavigate, useParams, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -209,23 +209,24 @@ const PostPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         if (!session.cookie) return
-        const updateArtistPosts = async () => {
-            if (!tagCategories?.artists?.[0]?.tag || !post) return
-            try {
-                if (tagCategories.artists[0].tag === "unknown-artist") return
-                let artistPosts = await functions.http.get("/api/search/posts", {query: tagCategories.artists[0].tag, type: "all", 
-                    rating: "all", style: "all", sort: "posted", limit: mobile ? 10 : 100}, session, setSessionFlag, true)
-                artistPosts = artistPosts.filter((p) => p.postID !== postID)
-                if (artistPosts?.length) setArtistPosts(artistPosts)
-            } catch (err) {
-                console.log(err)
-            }
-        }
         if (!session.username || session.showRelated) {
             setArtistPosts([])
             updateArtistPosts()
         }
-    }, [session, post, postID, tagCategories, mobile])
+    }, [tagCategories])
+
+    const updateArtistPosts = useEffectEvent(async () => {
+        if (!tagCategories?.artists?.[0]?.tag || !post) return
+        try {
+            if (tagCategories.artists[0].tag === "unknown-artist") return
+            let artistPosts = await functions.http.get("/api/search/posts", {query: tagCategories.artists[0].tag, type: "all", 
+                rating: "all", style: "all", sort: "posted", limit: mobile ? 10 : 100}, session, setSessionFlag, true)
+            artistPosts = artistPosts.filter((p) => p.postID !== postID)
+            if (artistPosts?.length) setArtistPosts(artistPosts)
+        } catch (err) {
+            console.log(err)
+        }
+    })
 
     useEffect(() => {
         const updateHistory = async () => {
