@@ -144,7 +144,7 @@ export default class ServerUtil {
     }
 
     public static squareCrop = async (buffer: Buffer, resize = -1) => {
-        const metadata = await sharp(buffer).metadata()
+        const metadata = await sharp(buffer, {limitInputPixels: false}).metadata()
         const size = Math.min(metadata.width!, metadata.height!)
         const resizeWidth = resize > 0 ? resize : size
         const centerPosition = Math.max(0, Math.floor((metadata.width! - size) / 2))
@@ -206,8 +206,13 @@ export default class ServerUtil {
     }
 
     public static metadata = async (buffer: Buffer) => {
-        const pngBuffer = await this.pngBuffer(buffer)
-        return sharp(pngBuffer, {limitInputPixels: false}).metadata()
+        try {
+            const meta = await sharp(buffer, {limitInputPixels: false}).metadata()
+            return meta
+        } catch {
+            const pngBuffer = await this.pngBuffer(buffer)
+            return sharp(pngBuffer, {limitInputPixels: false}).metadata()
+        }
     }
 
     public static processThumbnail = async (buffer: Buffer, ext: string, size = 750) => {
