@@ -159,6 +159,14 @@ export default class UtilFunctions {
         if (!userAgent) return "unknown"
         let os = "unknown"
         let browser = "unknown"
+
+        if (/CFNetwork\/.*Darwin\//i.test(userAgent)) {
+            return "iOS App"
+        }
+
+        if (/okhttp\//i.test(userAgent)) {
+            return "Android App"
+        }
     
         const osPatterns = {
             "Windows": /Windows NT (\d+\.\d+)/,
