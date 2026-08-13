@@ -898,7 +898,7 @@ const UserRoutes = (app: Express) => {
     app.post("/api/user/verifyemail", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
             let {email, captchaResponse} = req.body as VerifyEmailParams
-            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
+            if (!req.session.username) return void res.status(403).send("Unauthorized")
             if (!serverFunctions.verifyCaptcha(req, captchaResponse)) return void res.status(400).send("Bad captchaResponse")
             const badEmail = functions.validation.validateEmail(email, enLocale)
             if (badEmail) return void res.status(400).send("Bad email")
