@@ -171,6 +171,7 @@ const App: React.FunctionComponent = (props) => {
         let events = new EventSource("/api/notifications", {withCredentials: true})
         events.onmessage = (event: any) => {
             if (event.data === "new message!") setHasNotification(true)
+            if (event.data === "email verified") setSessionFlag(true)
         }
         return () => {
             events.close()
