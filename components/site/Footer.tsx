@@ -91,14 +91,16 @@ const Footer: React.FunctionComponent<Props> = (props) => {
                     </div>
                 </div>
             </div>
-            {mobile ? <div className="footer-row" style={{justifyContent: "center", marginTop: "3px"}}>
-                <div className="footer-click-container" onClick={() => {navigate("/terms"); setHideMobileNavbar(true)}}>
-                    <TermsIcon className="footer-img"/>
-                    <span className="footer-text" >{i18n.navbar.terms}</span>
-                </div>
-                <div className="footer-click-container" onClick={() => {navigate("/contact"); setHideMobileNavbar(true)}}>
-                    <ContactIcon className="footer-img"/>
-                    <span className="footer-text" >{i18n.navbar.contact}</span>
+            {mobile ? <div className="footer-row" style={{marginTop: "3px"}}>
+                <div className="footer-container">
+                    <div className="footer-click-container" onClick={() => {navigate("/terms"); setHideMobileNavbar(true)}}>
+                        <TermsIcon className="footer-img"/>
+                        <span className="footer-text" >{i18n.navbar.terms}</span>
+                    </div>
+                    <div className="footer-click-container" onClick={() => {navigate("/contact"); setHideMobileNavbar(true)}}>
+                        <ContactIcon className="footer-img"/>
+                        <span className="footer-text" >{i18n.navbar.contact}</span>
+                    </div>
                 </div>
                 <div className="footer-click-container" style={{cursor: "default"}}>
                     <span className="footer-text">- {i18n.footer.bottomMobile} -</span>
