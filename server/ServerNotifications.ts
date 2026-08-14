@@ -28,13 +28,14 @@ export default class ServerNotifications {
     public static addConnection = (sessionID: string, username: string, res: Response) => {
         const index = connections.findIndex((c) => c.sessionID === sessionID)
         if (index !== -1) {
+            connections[index].username = username
             connections[index].res = res
         } else {
             connections.push({sessionID, username, res})
         }
     }
 
-    public static removeConnection = (sessionID?: string) => {
+    public static removeConnection = (sessionID: string) => {
         connections = connections.filter((c) => c.sessionID !== sessionID)
     }
 }

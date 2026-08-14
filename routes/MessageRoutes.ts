@@ -434,6 +434,9 @@ const MessageRoutes = (app: Express) => {
             })
             res.flushHeaders()
 
+            res.write(`event: connected\n`)
+            res.write(`data: connected\n\n`)
+
             serverFunctions.notifications.addConnection(req.sessionID, req.session.username, res)
             req.on("close", () => {
                 serverFunctions.notifications.removeConnection(req.sessionID)
