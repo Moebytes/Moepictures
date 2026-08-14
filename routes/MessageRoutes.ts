@@ -424,13 +424,14 @@ const MessageRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/notifications", messageLimiter, async (req: Request, res: Response) => {
+    app.get("/api/notifications", async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return void res.status(403).send("Unauthorized")
             res.writeHead(200, {
                 "Content-Type": "text/event-stream",
                 "Connection": "keep-alive",
-                "Cache-Control": "no-cache"
+                "Cache-Control": "no-cache",
+                "X-Accel-Buffering": "no"
             })
             res.flushHeaders()
 
