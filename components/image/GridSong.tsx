@@ -37,10 +37,8 @@ const GridSong = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef)
     const loadImage = async () => {
         const decrypted = await functions.crypto.decryptItem(props.audio!, session)
         setSong(decrypted)
-        if (!coverArt) {
-            const decryptedImage = await functions.crypto.decryptThumb(props.img, session, `${props.img}-${sizeType}`)
-            setCoverArt(decryptedImage)
-        }
+        const decryptedImage = await functions.crypto.decryptThumb(props.img, session, `${props.img}-${sizeType}`)
+        setCoverArt(decryptedImage)
     }
 
     useEffect(() => {
