@@ -93,11 +93,11 @@ const Footer: React.FunctionComponent<Props> = (props) => {
             </div>
             {mobile ? <div className="footer-row" style={{marginTop: "3px"}}>
                 <div className="footer-container">
-                    <div className="footer-click-container" onClick={() => {navigate("/terms"); setHideMobileNavbar(true)}}>
+                    <div className="footer-click-container-left" onClick={() => {navigate("/terms"); setHideMobileNavbar(true)}}>
                         <TermsIcon className="footer-img"/>
                         <span className="footer-text" >{i18n.navbar.terms}</span>
                     </div>
-                    <div className="footer-click-container" onClick={() => {navigate("/contact"); setHideMobileNavbar(true)}}>
+                    <div className="footer-click-container-left" onClick={() => {navigate("/contact"); setHideMobileNavbar(true)}}>
                         <ContactIcon className="footer-img"/>
                         <span className="footer-text" >{i18n.navbar.contact}</span>
                     </div>
