@@ -292,7 +292,7 @@ export default class SQLNote {
                         "unverified notes"."noteID", "unverified notes"."postID", "unverified notes"."order", 
                         "unverified notes"."updatedDate", "unverified notes"."updater"
                     FROM "unverified notes"
-                    WHERE "unverified notes"."updater" = ANY ($1)
+                    WHERE "unverified notes"."updater" = $1
                     ORDER BY "unverified notes"."postID", "unverified notes"."order", "unverified notes"."updatedDate" DESC
                 ),
                 post_json AS (
