@@ -562,12 +562,13 @@ export default class SQLPost {
                 WHERE "unverified tag groups"."groupID" = "unverified tag group map"."groupID"
                 GROUP BY "unverified tag groups"."groupID"
             )
-            SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, 
-            json_agg(DISTINCT "unverified tag map".tag) AS tags,
+            SELECT "unverified posts".*, 
+            json_agg(DISTINCT "unverified images".*) FILTER (WHERE "unverified images"."postID" IS NOT NULL) AS images,
+            json_agg(DISTINCT "unverified tag map".tag) FILTER (WHERE "unverified tag map"."postID" IS NOT NULL) AS tags,
             json_agg(DISTINCT tag_groups_json.*) AS "tagGroups"
             FROM "unverified posts"
-            JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
-            JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
+            LEFT JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
+            LEFT JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
             LEFT JOIN tag_groups_json ON "unverified posts"."postID" = tag_groups_json."postID"
             LEFT JOIN "unverified tag group map" ON "unverified tag map"."mapID" = "unverified tag group map"."tagMapID"
             LEFT JOIN "unverified tag groups" ON "unverified tag group map"."groupID" = "unverified tag groups"."groupID"
