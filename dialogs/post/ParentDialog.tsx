@@ -74,7 +74,7 @@ const ParentDialog: React.FunctionComponent = (props) => {
                 parentID,
                 reason
             }
-            await functions.http.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
+            functions.http.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
             setSubmitted(true)
         }
     }

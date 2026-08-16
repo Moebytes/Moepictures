@@ -62,7 +62,6 @@ const RemapGroupDialog: React.FunctionComponent = (props) => {
             await functions.http.post("/api/group/request", {name: remapGroupObj.name, postIDs, reason}, session, setSessionFlag)
             setSubmitted(true)
         }
-        setRemapGroupObj(null)
     }
 
     const click = (button: "accept" | "reject") => {

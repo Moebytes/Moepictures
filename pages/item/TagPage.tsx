@@ -512,14 +512,14 @@ const TagPage: React.FunctionComponent = () => {
             <div className="history-button-container">
                 <button className="history-button" onClick={() => navigate(`/tag/history/${tagName}`)}>
                     <HistoryThinIcon className="history-button-icon"/>
-                    <span>History</span>
+                    <span>{i18n.sidebar.history}</span>
                 </button>
-                {session.username ? <button className="history-button" onClick={revertTagHistoryDialog}>
-                    <span>⌫Revert</span>
+                {permissions.isContributor(session) ? <button className="history-button" onClick={revertTagHistoryDialog}>
+                    <span>⌫{i18n.buttons.revert}</span>
                 </button> : null}
                 <button className="history-button" onClick={() => currentHistory()}>
                     <CurrentIcon className="history-button-icon"/>
-                    <span>Current</span>
+                    <span>{i18n.buttons.current}</span>
                 </button>
             </div>
         )

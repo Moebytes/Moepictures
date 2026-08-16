@@ -78,7 +78,7 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
         } catch {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "Captcha error."
+            errorRef.current!.innerText = i18n.dialogs.captcha.error
             await functions.timeout(3000)
             setError(false)
             updateCaptcha()

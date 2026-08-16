@@ -222,7 +222,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 tagGroups,
                 reason
             }
-            await functions.http.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
+            functions.http.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
             setSubmitted(true)
             functions.cache.clearCache()
         }

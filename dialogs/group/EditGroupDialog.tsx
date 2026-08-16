@@ -78,7 +78,6 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
             await functions.http.post("/api/group/edit/request", {slug: editGroupObj.slug, name, description, reason}, session, setSessionFlag)
             setSubmitted(true)
         }
-        setEditGroupObj(null)
     }
 
     const click = (button: "accept" | "reject") => {

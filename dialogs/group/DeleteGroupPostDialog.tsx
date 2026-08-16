@@ -43,6 +43,7 @@ const DeleteGroupPostDialog: React.FunctionComponent = (props) => {
         if (permissions.isContributor(session)) {
             await functions.http.delete("/api/group/post/delete", {postID: deleteGroupPostObj.postID, name: deleteGroupPostObj.group.name}, session, setSessionFlag)
             setGroupFlag(true)
+            setDeleteGroupPostObj(null)
         } else {
             const badReason = functions.validation.validateReason(reason, i18n)
             if (badReason) {
@@ -57,7 +58,6 @@ const DeleteGroupPostDialog: React.FunctionComponent = (props) => {
             await functions.http.post("/api/group/post/delete/request", {reason, removalItems}, session, setSessionFlag)
             setSubmitted(true)
         }
-        setDeleteGroupPostObj(null)
     }
 
     const click = (button: "accept" | "reject") => {

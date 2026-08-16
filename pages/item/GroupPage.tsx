@@ -32,6 +32,7 @@ import {ReactSortable} from "react-sortablejs"
 import GroupThumbnail from "../../components/search/GroupThumbnail"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
+import permissions from "../../structures/Permissions"
 import {GroupPosts, GroupItem, PostOrdered} from "../../types/Types"
 import "./styles/grouppage.less"
 
@@ -319,14 +320,14 @@ const GroupPage: React.FunctionComponent = () => {
             <div className="history-button-container">
                 <button className="history-button" onClick={() => navigate(`/group/history/${slug}`)}>
                     <HistoryThinIcon className="history-button-icon"/>
-                    <span>History</span>
+                    <span>{i18n.sidebar.history}</span>
                 </button>
-                {session.username ? <button className="history-button" onClick={revertGroupHistoryDialog}>
-                    <span>⌫Revert</span>
+                {permissions.isContributor(session) ? <button className="history-button" onClick={revertGroupHistoryDialog}>
+                    <span>⌫{i18n.buttons.revert}</span>
                 </button> : null}
                 <button className="history-button" onClick={() => currentHistory()}>
                     <CurrentIcon className="history-button-icon"/>
-                    <span>Current</span>
+                    <span>{i18n.buttons.current}</span>
                 </button>
             </div>
         )

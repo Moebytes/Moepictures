@@ -542,14 +542,17 @@
         "imageCount": "画像数",
         "token": "トークン",
         "logout": "ログアウト",
-        "copyID": "コピーID"
+        "copyID": "コピーID",
+        "order": "注文",
+        "reverseOrder": "逆順",
+        "pageMultiplier": "ページ乗数"
     },
     "contextMenu": {
         "openExternal": "外部リンクを開く",
         "saveImage": "画像を保存",
         "share": "共有",
         "saveLocation": "保存先を選択してください",
-        "uploadLocation": "アップロード先を選択してください",
+        "reverseImageLocation": "画像の逆検索",
         "photos": "写真",
         "files": "ファイル",
         "logout": "本当にログアウトしますか？",
@@ -557,7 +560,9 @@
         "enterSearchTags": "この検索のタグを入力してください",
         "enterSearchName": "この検索の名前を入力してください",
         "enterNewName": "新しい名前を入力するか、続行してください",
-        "enterNewTags": "新しいタグを入力するか、続行してください"
+        "enterNewTags": "新しいタグを入力するか、続行してください",
+        "lowPerformance": "パフォーマンスの低下",
+        "lowPerformanceInfo": "ローエンド端末でのパフォーマンスを向上させるため、リキッドグラス／背景ぼかしおよび画像の高速スワイプ機能を無効にします。"
     },
     "options": {
         "searchOptions": "検索オプション",
@@ -729,7 +734,7 @@
             "heading": "アカウントを使用するには、Eメールアドレスの確認が必要です。Eメールアドレスの変更や認証リンクの再送信が必要な場合は、以下から行うことができます。",
             "submitHeading": "確認メールが再送されました。メールを確認してください。",
             "unverifiedEmail": "未確認Eメール",
-            "optionalAddressChange": "住所変更オプション",
+            "optionalAddressChange": "任意の変更",
             "resend": "検証リンクの再送"
         },
         "verifyEmailSuccess": {
@@ -990,7 +995,8 @@
         },
         "captcha": {
             "title": "レートリミット超過",
-            "header": "あなたが人間であることを確認してください。無視してもかまいませんが、コンテンツはロックされます。"
+            "header": "あなたが人間であることを確認してください。無視してもかまいませんが、コンテンツはロックされます。",
+            "error": "キャプチャエラー。"
         },
         "categorizeTag": {
             "title": "タグを分類する",

@@ -541,14 +541,17 @@
         "imageCount": "Image Count",
         "token": "Token",
         "logout": "Logout",
-        "copyID": "Copy ID"
+        "copyID": "Copy ID",
+        "order": "Order",
+        "reverseOrder": "Reverse Order",
+        "pageMultiplier": "Page Multiplier"
     },
     "contextMenu": {
         "openWebsite": "Open Website Link",
         "saveImage": "Save Image",
         "share": "Share",
         "saveLocation": "Pick a save location",
-        "uploadLocation": "Pick an upload location",
+        "reverseImageLocation": "Reverse search an image",
         "photos": "Photos",
         "files": "Files",
         "logout": "Are you sure that you want to logout?",
@@ -556,7 +559,9 @@
         "enterSearchTags": "Enter the tags for this search",
         "enterSearchName": "Enter a name for this search",
         "enterNewName": "Enter a new name or continue",
-        "enterNewTags": "Enter new tags or continue"
+        "enterNewTags": "Enter new tags or continue",
+        "lowPerformance": "Low Performance",
+        "lowPerformanceInfo": "Disables liquid glass / background blur and fast image swiping for better performance on low-end devices."
     },
     "options": {
         "searchOptions": "Search Options",
@@ -728,7 +733,7 @@
             "heading": "You must verify your email address in order to use your account. If you need to change your email and/or resend the verification link, you can do so below.",
             "submitHeading": "Verification email resent. Check your email.",
             "unverifiedEmail": "Unverified Email",
-            "optionalAddressChange": "Optional Address Change",
+            "optionalAddressChange": "Optional Change",
             "resend": "Resend Verification Link"
         },
         "verifyEmailSuccess": {
@@ -989,7 +994,8 @@
         },
         "captcha": {
             "title": "Rate Limit Exceeded",
-            "header": "Please verify that you are a human. You may ignore this, but content will be locked."
+            "header": "Please verify that you are a human. You may ignore this, but content will be locked.",
+            "error": "Captcha error."
         },
         "categorizeTag": {
             "title": "Categorize Tag",

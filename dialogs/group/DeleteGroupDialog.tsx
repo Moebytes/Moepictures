@@ -43,6 +43,7 @@ const DeleteGroupDialog: React.FunctionComponent = (props) => {
         if (permissions.isMod(session)) {
             await functions.http.delete("/api/group/delete", {slug: deleteGroupObj.slug}, session, setSessionFlag)
             navigate("/groups")
+            setDeleteGroupObj(null)
         } else {
             const badReason = functions.validation.validateReason(reason, i18n)
             if (badReason) {
@@ -56,7 +57,6 @@ const DeleteGroupDialog: React.FunctionComponent = (props) => {
             await functions.http.post("/api/group/delete/request", {slug: deleteGroupObj.slug, reason}, session, setSessionFlag)
             setSubmitted(true)
         }
-        setDeleteGroupObj(null)
     }
 
     const click = (button: "accept" | "reject") => {

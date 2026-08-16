@@ -566,14 +566,14 @@ const PostPage: React.FunctionComponent = () => {
                 <div className="note-button-container">
                     <button className="note-button" onClick={() => navigate(`/note/history/${postID}/${slug}/${order}`)}>
                         <HistoryIcon className="note-button-icon"/>
-                        <span>History</span>
+                        <span>{i18n.sidebar.history}</span>
                     </button>
-                    {session.username ? <button className="note-button" onClick={revertNoteHistoryDialog}>
-                        <span>⌫Revert</span>
+                    {permissions.isContributor(session) ? <button className="note-button" onClick={revertNoteHistoryDialog}>
+                        <span>⌫{i18n.buttons.revert}</span>
                     </button> : null}
                     <button className="note-button" onClick={currentHistory}>
                         <CurrentIcon className="note-button-icon"/>
-                        <span>Current</span>
+                        <span>{i18n.buttons.current}</span>
                     </button>
                 </div>
             )
@@ -582,14 +582,14 @@ const PostPage: React.FunctionComponent = () => {
             <div className="history-button-container">
                 <button className="history-button" onClick={() => navigate(`/post/history/${postID}/${slug}`)}>
                     <HistoryIcon className="history-button-icon"/>
-                    <span>History</span>
+                    <span>{i18n.sidebar.history}</span>
                 </button>
-                {session.username ? <button className="history-button" onClick={revertPostHistoryDialog}>
-                    <span>⌫Revert</span>
+                {permissions.isContributor(session) ? <button className="history-button" onClick={revertPostHistoryDialog}>
+                    <span>⌫{i18n.buttons.revert}</span>
                 </button> : null}
                 <button className="history-button" onClick={currentHistory}>
                     <CurrentIcon className="history-button-icon"/>
-                    <span>Current</span>
+                    <span>{i18n.buttons.current}</span>
                 </button>
             </div>
         )

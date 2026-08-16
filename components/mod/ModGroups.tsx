@@ -8,6 +8,7 @@ import React, {useEffect, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, usePageActions,
 useSearchSelector, usePageSelector, useActiveSelector} from "../../store"
+import TinyImage from "../image/TinyImage"
 import ApproveIcon from "../../assets/svg/approve.svg"
 import RejectIcon from "../../assets/svg/reject.svg"
 import functions from "../../functions/Functions"
@@ -20,7 +21,7 @@ let limit = 100
 let pageAmount = 15
 
 const ModGroups: React.FunctionComponent = (props) => {
-    const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
+    const {i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
@@ -30,7 +31,6 @@ const ModGroups: React.FunctionComponent = (props) => {
     const {modState} = useActiveSelector()
     const [hover, setHover] = useState(false)
     const [groups, setGroups] = useState([] as GroupPosts[])
-    const [imagesRef, setImagesRef] = useState([] as React.RefObject<HTMLCanvasElement | null>[])
     const [updateVisibleRequestFlag, setUpdateVisibleRequestFlag] = useState(false)
     const navigate = useNavigate()
 
@@ -61,14 +61,8 @@ const ModGroups: React.FunctionComponent = (props) => {
         setModPage(page)
     }, [page])
 
-    const updateVisibleRequests = () => {
-        const newImagesRef = visibleItems.map(() => React.createRef<HTMLCanvasElement>())
-        setImagesRef(newImagesRef)
-    }
-
     useEffect(() => {
         if (updateVisibleRequestFlag) {
-            updateVisibleRequests()
             setUpdateVisibleRequestFlag(false)
         }
     }, [visibleItems, updateVisibleRequestFlag])
@@ -108,30 +102,6 @@ const ModGroups: React.FunctionComponent = (props) => {
         return {addedPosts, removedPosts}
     }
 
-    const loadImages = async () => {
-        for (let i = 0; i < visibleItems.length; i++) {
-            const request = visibleItems[i]
-            const ref = imagesRef[i]
-            const img = functions.link.getThumbnailLink(request.posts[0].images[0], "tiny", session, mobile)
-            if (!ref.current) continue
-            let src = await functions.crypto.decryptThumb(img, session)
-            const imgElement = document.createElement("img")
-            imgElement.crossOrigin = "anonymous"
-            imgElement.src = src 
-            imgElement.onload = () => {
-                if (!ref.current) return
-                const refCtx = ref.current.getContext("2d")
-                ref.current.width = imgElement.width
-                ref.current.height = imgElement.height
-                refCtx?.drawImage(imgElement, 0, 0, imgElement.width, imgElement.height)
-            }
-        }
-    }
-
-    useEffect(() => {
-        loadImages()
-    }, [visibleItems, session])
-
     const generateGroupsJSX = () => {
         let jsx = [] as React.ReactElement[]
         let visible = visibleItems as GroupRequest[]
@@ -157,14 +127,11 @@ const ModGroups: React.FunctionComponent = (props) => {
                 if (middle) return window.open(`/group/${request.slug}`, "_blank")
                 navigate(`/group/${request.slug}`)
             }
-            const img = functions.link.getThumbnailLink(request.posts[0].images[0], "tiny", session, mobile)
             const {addedPosts, removedPosts} = calcDifference(request)
             jsx.push(
                 <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">
-                        {functions.file.isVideo(img) ? 
-                        <video className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event)}></video> :
-                        <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event)}></canvas>}
+                        <TinyImage className="historyrow-img" post={request.posts[0]} onClick={imgClick} height={mobile ? 70 : 110}/>
                     </div>
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => navigate(`/user/${request.username}`)}>{i18n.labels.requester}: {functions.util.toProperCase(request?.username) || i18n.user.deleted}</span>
