@@ -35,6 +35,7 @@ interface Props {
     post?: PostSearch | PostHistory | null
     count?: number
     fallback?: string[]
+    onLoaded?: () => void
 }
 
 const Related: React.FunctionComponent<Props> = (props) => {
@@ -51,7 +52,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const [related, setRelated] = useState([] as PostSearch[])
     const [searchTerm, setSearchTerm] = useState(props.tag)
     const [sizeDropdown, setSizeDropdown] = useState(false)
-    const [allImagesLoaded, setAllImagesLoaded] = useState(true)
+    const [allImagesLoaded, setAllImagesLoaded] = useState(false)
     const [locationState, setLocationState] = useState<any>({restorePosts: []})
     const sizeRef = useRef<HTMLImageElement>(null)
     const visiblePromisesRef = useRef<TrackablePromise<void>[]>([])
@@ -213,6 +214,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
             }
             await functions.timeout(100)
             setAllImagesLoaded(true)
+            props.onLoaded?.()
         }
         poll()
     }, [scroll, items, relatedPage])

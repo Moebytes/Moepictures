@@ -30,6 +30,7 @@ import {ReactSortable} from "react-sortablejs"
 import TinyImage from "../../components/image/TinyImage"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {GroupItem, Favgroup} from "../../types/Types"
 import "./styles/grouppage.less"
 
@@ -281,7 +282,7 @@ const FavgroupPage: React.FunctionComponent = () => {
                         </div>
                     </div>
                     {favgroupImagesJSX()}
-                </div> : null}
+                </div> : <LoadingSpinner/>}
                 <Footer/>
             </div>
         </div>

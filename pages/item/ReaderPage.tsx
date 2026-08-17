@@ -25,7 +25,6 @@ import FXIcon from "../../assets/svg/filters.svg"
 import EnglishToJapaneseIcon from "../../assets/svg/reader-en-to-ja.svg"
 import JapaneseToEnglishIcon from "../../assets/svg/reader-ja-to-en.svg"
 import ColorIcon from "../../assets/svg/color.svg"
-
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import DragScroll from "../../components/site/DragScroll"
@@ -35,6 +34,7 @@ import TinyImage from "../../components/image/TinyImage"
 import {useInView} from "react-intersection-observer"
 import Filters from "../../ui/Filters"
 import HSLDropdown from "../../ui/HSLDropdown"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {PostFull} from "../../types/Types"
 import "./styles/readerpage.less"
 
@@ -337,6 +337,9 @@ const ReaderPage: React.FunctionComponent = () => {
         let jsx = [] as React.ReactElement[]
         for (let i = 0; i < images.length; i++) {
             jsx.push(<ReaderImage key={i} pageNumber={i + 1} img={images[i]} post={post} order={i + 1} loaded={loaded}/>)
+        }
+        if (!jsx.length) {
+            return <LoadingSpinner/>
         }
         return (
             <div className={`reader-image-container ${readerHorizontal ? "reader-image-container-horizontal" : ""}`}

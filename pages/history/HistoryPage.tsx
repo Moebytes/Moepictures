@@ -4,7 +4,7 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useState, useReducer} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -35,6 +35,7 @@ useMiscDialogActions, useSearchDialogActions, useSearchDialogSelector, usePostDi
 usePostDialogSelector} from "../../store"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {History, PostHistory, TagHistory, NoteHistory, GroupHistory, SearchHistory, AliasHistorySearch, DeletedPost} from "../../types/Types"
 import "./styles/historypage.less"
 
@@ -63,6 +64,9 @@ const HistoryPage: React.FunctionComponent = () => {
     const {setPermaDeleteAllDialog} = usePostDialogActions()
     const {setPremiumRequired} = useMiscDialogActions()
     const [historyTab, setHistoryTab] = useState("")
+    const [afterFirstLoad, setAfterFirstLoad] = useState(false)
+    const [noResults, setNoResults] = useState(false)
+    const loadingRef = useRef(true)
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -134,6 +138,8 @@ const HistoryPage: React.FunctionComponent = () => {
             result = await functions.http.get("/api/post/deleted", {query}, session, setSessionFlag).catch(() => [])
         }
         result = result.map((r) => ({itemType: historyTab, ...r}))
+        if (result.length) setAfterFirstLoad(true)
+        setNoResults(result.length === 0)
         return result
     }
 
@@ -286,7 +292,11 @@ const HistoryPage: React.FunctionComponent = () => {
                 jsx.push(<DeletedPostRow key={i} post={visible[i] as DeletedPost} onDelete={initItems}/>)
             }
         }
-        if (!scroll) {
+        loadingRef.current = false
+        if (!jsx.length && (!noResults || !afterFirstLoad)) {
+            loadingRef.current = true
+        }
+        if (!scroll && !loadingRef.current) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage} scrollToTop={true}/>)
         }
         return jsx
@@ -497,6 +507,7 @@ const HistoryPage: React.FunctionComponent = () => {
                         <DeleteIcon className="history-icon" onClick={() => setHistoryTab("delete")}/>) : null}
                     </div>
                     {generateHeaderJSX()}
+                    {loadingRef.current && <LoadingSpinner/>}
                     <div className="history-container">
                         {generateHistoryJSX()}
                     </div>

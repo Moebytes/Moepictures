@@ -20,6 +20,7 @@ import moeText from "../../moetext/MoeText"
 import permissions from "../../structures/Permissions"
 import Carousel from "../../components/site/Carousel"
 import VerticalCarousel from "../../components/site/VerticalCarousel"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import BanIcon from "../../assets/svg/ban.svg"
 import UnbanIcon from "../../assets/svg/unban.svg"
 import PromoteIcon from "../../assets/svg/promote.svg"
@@ -442,7 +443,7 @@ const UserPage: React.FunctionComponent = () => {
                         <span className="user-title" onClick={viewForumPosts}>{i18n.user.forumPosts} <span className="user-text-alt">{forumPosts.length}</span></span>
                         <VerticalCarousel items={forumPosts} type="forumpost"/>
                     </div> : null*/}
-                </div> : null}
+                </div> : <LoadingSpinner/>}
                 <Footer/>
             </div>
         </div>

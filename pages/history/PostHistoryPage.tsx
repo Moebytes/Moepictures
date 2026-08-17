@@ -4,7 +4,7 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useState} from "react"
+import React, {useEffect, useRef} from "react"
 import {useNavigate, useParams} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -16,6 +16,7 @@ import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutA
 useSearchSelector, useActiveActions, useFlagActions, useLayoutSelector, useThemeSelector} from "../../store"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {PostHistory} from "../../types/Types"
 import "./styles/historypage.less"
 
@@ -37,6 +38,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
     const navigate = useNavigate()
+    const loadingRef = useRef(true)
     const {id: postID, slug, username} = useParams() as {id: string, slug: string, username?: string}
 
     useEffect(() => {
@@ -131,6 +133,10 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
                 previousHistory={previous} currentHistory={current} current={i === currentIndex}
                 onDelete={initItems} onEdit={initItems} imageHeight={username ? undefined : 300}/>)
         }
+        loadingRef.current = false
+        if (!jsx.length) {
+            loadingRef.current = true
+        }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage} scrollToTop={true}/>)
         }
@@ -146,6 +152,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="history-page">
                     <span className="history-heading">{username ? `${functions.util.toProperCase(username)}'s ${i18n.history.post}` : i18n.history.post}</span>
+                    {loadingRef.current && <LoadingSpinner/>}
                     <div className="history-container">
                         {generateRevisionsJSX()}
                     </div>

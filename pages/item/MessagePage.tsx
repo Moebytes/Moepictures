@@ -26,6 +26,7 @@ import ForwardIcon from "../../assets/svg/forward.svg"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import TextBox, {TextBoxRef} from "../../ui/TextBox"
 import PageControls from "../../components/site/PageControls"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {MessageUser, MessageUserReply} from "../../types/Types"
 import "./styles/threadpage.less"
 
@@ -376,7 +377,7 @@ const MessagePage: React.FunctionComponent = () => {
                     </div>
                     <TextBox ref={textBoxRef} type="message" onPost={reply} r18Toggle={true} manualWidth={true}/>
                     {!scroll ? <PageControls page={page} maxPage={maxPage} setPage={setPage} scrollToTop={true}/> : null}
-                </div> : null}
+                </div> : <LoadingSpinner/>}
                 <Footer/>
             </div>
         </div>

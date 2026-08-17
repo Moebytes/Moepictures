@@ -32,6 +32,7 @@ import {ReactSortable} from "react-sortablejs"
 import GroupThumbnail from "../../components/search/GroupThumbnail"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import permissions from "../../structures/Permissions"
 import {GroupPosts, GroupItem, PostOrdered} from "../../types/Types"
 import "./styles/grouppage.less"
@@ -360,7 +361,7 @@ const GroupPage: React.FunctionComponent = () => {
                         </div>
                     </div>
                     {groupImagesJSX()}
-                </div> : null}
+                </div> : <LoadingSpinner/>}
                 <Footer/>
             </div>
         </div>

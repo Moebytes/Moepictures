@@ -132,7 +132,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         if (!rect) return 0
         const raw = window.innerWidth - rect.right
         let offset = -120
-        if (mobile) offset += 80
+        if (mobile) offset += 110
         if (noteMode) offset += 10
         return raw + offset
     }
@@ -161,7 +161,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         if (format === "webp") offset += 8
         if (format === "avif") offset += 4
         if (format === "svg") offset += 1
-        if (mobile) offset += 0
+        if (mobile) offset += 10
         return `${raw + offset}px`
     }
 

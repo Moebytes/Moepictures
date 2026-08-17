@@ -11,7 +11,7 @@ import type {StoreState, StoreDispatch} from "../store"
 const layoutSlice = createSlice({
     name: "layout",
     initialState: {
-        mobile: false,
+        mobile: true,
         tablet: false,
         relative: false,
         hideSortbar: false,

@@ -25,6 +25,7 @@ import R18Icon from "../../assets/svg/lewd.svg"
 import DangerIcon from "../../assets/svg/danger.svg"
 import LockIcon from "../../assets/svg/lock.svg"
 import EmojiSelectIcon from "../../assets/svg/emoji-select.svg"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import MiniTextBox, {MiniTextBoxRef} from "../../ui/MiniTextBox"
 import {EditCounts, CommentSearch, Favgroup, PostSearch, UnverifiedPost, TagCount, ForumPostSearch} from "../../types/Types"
 import "./styles/userpage.less"
@@ -582,7 +583,7 @@ const UserProfilePage: React.FunctionComponent = () => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <div className="user">
+                {session.username ? <div className="user">
                     <div className="user-top-container">
                         <img className="user-img" src={userImg} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: session.image ? "" : filter}}/>
                         {generateUsernameJSX()}
@@ -753,7 +754,7 @@ const UserProfilePage: React.FunctionComponent = () => {
                         <DangerIcon className="user-icon"/>
                         <span className="user-link" onClick={deleteAccountDialog}>{i18n.buttons.deleteAccount}</span>
                     </div>
-                </div>
+                </div> : <LoadingSpinner/>}
                 <Footer/>
             </div>
         </div>

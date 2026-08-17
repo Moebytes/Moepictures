@@ -40,8 +40,11 @@ const HSLDropdown: React.FunctionComponent<Props> = (props) => {
         setSiteLightness(50)
     }
 
-    let style = mobile ? {top: "500px"} : {top: "30px"}
-    if (typeof window !== "undefined") style = {top: `${functions.dom.navbarHeight()}px`}
+    let style = mobile ? {top: "428px"} : {top: "30px"}
+    if (typeof window !== "undefined") {
+        let navbarHeight = functions.dom.navbarHeight()
+        if (navbarHeight) style = {top: `${navbarHeight}px`}
+    }
     if (props.top) style = {top: `${props.top}px`}
 
     return (

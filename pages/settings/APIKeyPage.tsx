@@ -85,6 +85,7 @@ const APIKeyPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
+                {permissions.isAdmin(session) ?
                 <div className="sitepage">
                     <span className="sitepage-title">{i18n.user.apiKey}</span>
                     <span className="sitepage-link">{i18n.pages.apiKey.header}</span>
@@ -106,7 +107,7 @@ const APIKeyPage: React.FunctionComponent = (props) => {
                         <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => deleteKey()}>{i18n.pages.apiKey.deleteKey}</button>
                         <button className="sitepage-button" onClick={() => generateKey()}>{i18n.pages.apiKey.generateKey}</button>
                     </div>
-                </div>
+                </div> : null}
                 <Footer/>
             </div>
         </div>

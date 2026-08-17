@@ -204,8 +204,11 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const getParticleDropdownJSX = () => {
-        let style = mobile ? {top: "500px"} : {top: "30px"}
-        if (typeof window !== "undefined") style = {top: `${functions.dom.navbarHeight()}px`}
+        let style = mobile ? {top: "428px"} : {top: "30px"}
+        if (typeof window !== "undefined") {
+            let navbarHeight = functions.dom.navbarHeight()
+            if (navbarHeight) style = {top: `${navbarHeight}px`}
+        }
         return (
             <div className={`title-dropdown ${activeParticleDropdown ? "" : "hide-title-dropdown"}`} style={style} onMouseEnter={() => setHideNavbar(false)} onMouseLeave={() => setHideNavbar(true)}>
                 <div className="title-dropdown-row">
@@ -241,6 +244,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
 
     if (mobile) {
         const getMobileMargin = () => {
+            if (typeof window === "undefined") return "0px"
             return hideMobileNavbar ? `-${document.querySelector(".mobile-navbar")?.clientHeight || 500}px` : "0px"
         }
         return (

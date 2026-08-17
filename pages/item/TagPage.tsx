@@ -16,7 +16,6 @@ import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
 import moeText from "../../moetext/MoeText"
 import permissions from "../../structures/Permissions"
-
 import HeartIcon from "../../assets/svg/heart.svg"
 import HistoryIcon from "../../assets/svg/history.svg"
 import CategorizeIcon from "../../assets/svg/category.svg"
@@ -26,7 +25,6 @@ import TakedownIcon from "../../assets/svg/takedown.svg"
 import RestoreIcon from "../../assets/svg/restore.svg"
 import HistoryThinIcon from "../../assets/svg/history-thin.svg"
 import CurrentIcon from "../../assets/svg/current.svg"
-
 import website from "../../assets/icons/website.png"
 import fandom from "../../assets/icons/fandom.png"
 import wikipedia from "../../assets/icons/wikipedia.png"
@@ -36,6 +34,7 @@ import sketchfab from "../../assets/icons/sketchfab.png"
 import twitter from "../../assets/icons/twitter.png"
 import Carousel from "../../components/site/Carousel"
 import Related from "../../components/post/Related"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {Tag, TagHistory, PostSearch, Alias, Implication} from "../../types/Types"
 import "./styles/tagpage.less"
 
@@ -69,6 +68,7 @@ const TagPage: React.FunctionComponent = () => {
     const [count, setCount] = useState(0)
     const navigate = useNavigate()
     const location = useLocation()
+    const loadingRef = useRef(true)
     let {tag: tagName} = useParams() as {tag: string}
 
     tagName = decodeURIComponent(tagName)
@@ -536,6 +536,10 @@ const TagPage: React.FunctionComponent = () => {
         functions.post.openPost(tag.featuredPost, event, navigate, session, setSessionFlag)
     }
 
+    const onLoaded = () => {
+        loadingRef.current = false
+    }
+
     return (
         <>
         <TitleBar historyID={historyID}/>
@@ -573,9 +577,10 @@ const TagPage: React.FunctionComponent = () => {
                             {relatedTagJSX()}
                         </div>
                     </div>
-                    <Related tag={tag.tag} count={count}/>
+                    <Related tag={tag.tag} count={count} onLoaded={onLoaded}/>
                     {/* {postsJSX()} */}
                 </div> : null}
+                {loadingRef.current && <LoadingSpinner/>}
                 <Footer/>
             </div>
         </div>

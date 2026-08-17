@@ -128,6 +128,7 @@ const LoginHistoryPage: React.FunctionComponent = () => {
         <div className="body">
             <SideBar/>
             <div className="content">
+                {session.username ?
                 <div className="sitepage" style={{width: mobile || tablet ? "100%" : "70%", height: "max-content"}}>
                     <div className="sitepage-title-container">
                         <span className="sitepage-title">{i18n.user.loginHistory}</span>
@@ -138,7 +139,7 @@ const LoginHistoryPage: React.FunctionComponent = () => {
                         <button className="sitepage-button" onClick={logoutOtherSessions}>{i18n.pages.loginHistory.logoutSessions}</button>
                     </div>
                     {loginHistoryJSX()}
-                </div>
+                </div> : null}
                 <Footer/>
             </div>
         </div>

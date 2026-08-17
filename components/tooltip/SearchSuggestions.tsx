@@ -152,7 +152,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     const getX = () => {
         if (props.x) return `${props.x}px`
         if (mobile) {
-            return "14px"
+            return "0px"
         } else {
             if (typeof document === "undefined") return "15px"
             const element = document.querySelector(".search")
@@ -165,7 +165,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     const getY = () => {
         if (props.y) return `${props.y}px`
         if (mobile) {
-            return hideMobileNavbar ? "132px" : `${document.querySelector(".mobile-navbar")?.clientHeight || 500 + 432}px`
+            return hideMobileNavbar ? "128px" : `${document.querySelector(".mobile-navbar")?.clientHeight || 500 + 432}px`
         } else {
             if (typeof document === "undefined") return "177px"
             const element = document.querySelector(".search")
@@ -178,7 +178,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     const getWidth = () => {
         if (props.width) return `${props.width}px`
         if (mobile) {
-            return "380px"
+            return "100%"
         } else {
             return "195px"
         }

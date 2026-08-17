@@ -28,6 +28,7 @@ import MobileInfo from "../../components/site/MobileInfo"
 import {useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions,  useThemeSelector,
 useLayoutSelector, useFlagSelector, useCacheActions, useCacheSelector, useInteractionActions} from "../../store"
 import permissions from "../../structures/Permissions"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {TagCategories, UnverifiedPost, ChildPost, TagGroupCategory} from "../../types/Types"
 import "./styles/postpage.less"
 
@@ -233,7 +234,7 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
     }
 
     const getPostJSX = () => {
-        if (!post) return
+        if (!post || !image) return <LoadingSpinner/>
         let img = image
         if (post.type === "model") {
             return (
@@ -307,7 +308,7 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
                     <div className="carousel-container">
                         <Carousel images={images} set={set} index={order-1} unverified={true} unlimited={true}/>
                     </div> : null}
-                    {post ? getPostJSX() : null}
+                    {getPostJSX()}
                     {generatePixivTagsJSX()}
                     {mobile && post && tagCategories ? <MobileInfo post={post} order={order} 
                     artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} 

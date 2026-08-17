@@ -30,6 +30,7 @@ import ReportIcon from "../../assets/svg/report.svg"
 import TextBox, {TextBoxRef} from "../../ui/TextBox"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {ThreadReply, ThreadUser} from "../../types/Types"
 import "./styles/threadpage.less"
 
@@ -370,7 +371,7 @@ const ThreadPage: React.FunctionComponent = () => {
                     </div>
                     <TextBox ref={textBoxRef} type="reply" onPost={reply} r18Toggle={true} manualWidth={true}/>
                     {!scroll ? <PageControls page={page} maxPage={maxPage} setPage={setPage} scrollToTop={true}/> : null}
-                </div> : null}
+                </div> : <LoadingSpinner/>}
                 <Footer/>
             </div>
         </div>
