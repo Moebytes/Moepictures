@@ -683,14 +683,14 @@ const CreateRoutes = (app: Express) => {
 
     app.post("/api/post/reject", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        let postID = req.body.postID as string
+        let {postID, edit} = req.body as {postID: string, edit?: boolean}
         if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
         if (!permissions.isMod(req.session)) return void res.status(403).end()
         const unverified = await sql.post.unverifiedPost(postID)
         if (!unverified) return void res.status(400).send("Bad postID")
 
         const targetUser = await sql.user.user(unverified.uploader)
-        if (targetUser) {
+        if (targetUser && !edit) {
           const deletedPosts = functions.util.removeDuplicates([postID, ...(targetUser.deletedPosts || [])].filter(Boolean))
           await sql.user.updateUser(targetUser.username, "deletedPosts", deletedPosts)
         }

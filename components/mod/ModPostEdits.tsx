@@ -84,7 +84,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
     }
 
     const rejectPost = async (postID: string) => {
-        await functions.http.post("/api/post/reject", {postID}, session, setSessionFlag)
+        await functions.http.post("/api/post/reject", {postID, edit: true}, session, setSessionFlag)
         await initItems()
         setUpdateVisiblePostFlag(true)
     }

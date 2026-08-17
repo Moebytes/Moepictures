@@ -126,7 +126,7 @@ export type UploadPostEndpoint<T extends string> =
     T extends "/api/post/upload" ? {params: UploadParams, response: string} :
     T extends "/api/post/upload/unverified" ? {params: UnverifiedUploadParams, response: string} :
     T extends "/api/post/approve" ? {params: ApproveParams, response: string} :
-    T extends "/api/post/reject" ? {params: {postID: string}, response: string} :
+    T extends "/api/post/reject" ? {params: {postID: string, edit?: boolean}, response: string} :
     T extends "/api/post/split" ? {params: {postID: string, order: number | null, mergeSubsequent?: boolean}, response: string} :
     T extends "/api/post/join" ? {params: {postID: string, nested: boolean}, response: string} :
     T extends "/api/post/flip" ? {params: {postID: string}, response: string} :
