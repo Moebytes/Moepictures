@@ -14,7 +14,7 @@ import store from "./store"
 import App from "./App"
 import pace from "pace-js"
 
-pace.start({document: false, eventLag: false, restartOnRequestAfter: false})
+//pace.start({document: false, eventLag: false, restartOnRequestAfter: false})
 
 if (process.env.SCAN === "yes") {
     scan({enabled: true})

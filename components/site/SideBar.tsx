@@ -935,23 +935,6 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         setActionBanner("copy-hash")
     }
 
-    const copyTagsJSX = () => {
-        if (!session) return
-        if (session.captchaNeeded) return null
-        if (props.artists && props.characters && props.series && props.tags) {
-            return (
-                <div className="sidebar-subcontainer">
-                    <div className="sidebar-row">
-                        <span className="tag-hover" onClick={copyTags} onContextMenu={copyTags}>
-                            <TagIcon className="sidebar-icon"/>
-                            <span className="tag-red" style={{filter}}>{i18n.sidebar.copyTags}</span>
-                        </span>
-                    </div>
-                </div>
-            )
-        }
-    }
-
     const tagCaptchaJSX = () => {
         if (!session) return
         if (session.captchaNeeded) {
@@ -1156,7 +1139,6 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     <DeleteIcon className="autosearch-purple" onClick={() => setDeleteAllSaveSearchDialog(!deleteAllSaveSearchDialog)}/>
                 </div> : null}
 
-                {copyTagsJSX()}
                 {tagCaptchaJSX()}
                 {filetypeJSX()}
 
@@ -1280,9 +1262,16 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             <span className="side-info-alt">{(props.post as PostSearch).cuteness || 500}</span>
                         </div>
                         <div className="sidebar-row">
-                            <span className="tag-hover" onClick={() => copyHash()} onAuxClick={() => copyHash()} onContextMenu={(event) => {event.preventDefault(); setTimeout(() => copyHash(true), 100)}}>
+                            <span className="tag-hover" onClick={() => copyHash()} onAuxClick={() => copyHash()} 
+                            onContextMenu={(event) => {event.preventDefault(); setTimeout(() => copyHash(true), 100)}}>
                                 <HashIcon className="sidebar-icon"/>
                                 <span className="side-info">{i18n.sidebar.copyHash}</span>
+                            </span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag-hover" onClick={copyTags} onContextMenu={copyTags}>
+                                <TagIcon className="sidebar-icon"/>
+                                <span className="side-info">{i18n.sidebar.copyTags}</span>
                             </span>
                         </div>
                         <div className="sidebar-row">

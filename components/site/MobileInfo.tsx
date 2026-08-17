@@ -633,23 +633,6 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         }, i18n, navigate)
     }
 
-    const copyTagsJSX = () => {
-        if (!session) return
-        if (session.captchaNeeded) return null
-        if (props.artists && props.characters && props.series && props.tags) {
-            return (
-                <div className="mobileinfo-subcontainer-column">
-                    <div className="mobileinfo-row">
-                        <span className="mobile-option-tag-red" onClick={copyTags} onContextMenu={copyTags}>
-                            <TagIcon className="mobile-option-icon"/>
-                            <span className="mobile-option-text">{i18n.sidebar.copyTags}</span>
-                        </span>
-                    </div>
-                </div>
-            )
-        }
-    }
-
     const tagCaptchaJSX = () => {
         if (!session) return
         if (session.captchaNeeded) {
@@ -726,7 +709,6 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             <div className="mobileinfo-container">
             <div className="mobileinfo-content">
 
-                {copyTagsJSX()}
                 {tagCaptchaJSX()}
                 {filetypeJSX()}
 
@@ -866,9 +848,16 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         </div>
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
-                                <span className="mobile-option-tag" onClick={() => copyHash()} onAuxClick={() => copyHash()} onContextMenu={(event) => {event.preventDefault(); setTimeout(() => copyHash(true), 100)}}>
+                                <span className="mobile-option-tag" onClick={() => copyHash()} onAuxClick={() => copyHash()} 
+                                onContextMenu={(event) => {event.preventDefault(); setTimeout(() => copyHash(true), 100)}}>
                                     <HashIcon className="mobile-option-icon"/>
                                     <span className="mobile-option-text">{i18n.sidebar.copyHash}</span>
+                                </span>
+                            </div>
+                            <div className="mobileinfo-row">
+                                <span className="mobile-option-tag" onClick={copyTags} onContextMenu={copyTags}>
+                                    <TagIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.sidebar.copyTags}</span>
                                 </span>
                             </div>
                             <div className="mobileinfo-row">
@@ -877,13 +866,6 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                     <span className="mobile-option-text">{i18n.sidebar.getInfo}</span>
                                 </span>
                             </div>
-                            {session.username && !props.unverified && !functions.post.isR18(props.post.rating) ? 
-                            <div className="mobileinfo-row">
-                                <span className="mobile-option-tag" onClick={triggerSetAvatar}>
-                                    <SetAvatarIcon className="mobile-option-icon"/>
-                                    <span className="mobile-option-text">{i18n.sidebar.setAvatar}</span>
-                                </span>
-                            </div> : null}
                         </div>
                     </div></>
                 : null}
@@ -891,6 +873,13 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                 {props.post && session.username ? 
                     <div className="mobileinfo-subcontainer-column">
                         <div className="mobileinfo-sub-row">
+                            {!props.unverified && !functions.post.isR18(props.post.rating) ? 
+                            <div className="mobileinfo-row">
+                                <span className="mobile-option-tag" onClick={triggerSetAvatar}>
+                                    <SetAvatarIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.sidebar.setAvatar}</span>
+                                </span>
+                            </div> : null}
                             <div className="mobileinfo-row">
                                 <span className="mobile-option-tag" onClick={triggerTagEdit}>
                                     <TagEditIcon className="mobile-option-icon"/>
