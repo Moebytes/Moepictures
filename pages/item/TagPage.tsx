@@ -68,7 +68,7 @@ const TagPage: React.FunctionComponent = () => {
     const [count, setCount] = useState(0)
     const navigate = useNavigate()
     const location = useLocation()
-    const loadingRef = useRef(true)
+    const [loading, setLoading] = useState(true)
     let {tag: tagName} = useParams() as {tag: string}
 
     tagName = decodeURIComponent(tagName)
@@ -537,7 +537,7 @@ const TagPage: React.FunctionComponent = () => {
     }
 
     const onLoaded = () => {
-        loadingRef.current = false
+        setLoading(false)
     }
 
     return (
@@ -551,7 +551,7 @@ const TagPage: React.FunctionComponent = () => {
                 <div className="tag-page">
                     {historyID ? getHistoryButtons() : null}
                     <div className="tag-row-container">
-                        {featuredImage ?
+                        {featuredImage && !mobile ?
                         <div className="tag-container" style={{justifyContent: "center", alignItems: "center"}}>
                             <img className="tag-featured-img" src={featuredImage} onClick={featuredClick} onAuxClick={featuredClick}/>
                         </div> : null}
@@ -580,7 +580,7 @@ const TagPage: React.FunctionComponent = () => {
                     <Related tag={tag.tag} count={count} onLoaded={onLoaded}/>
                     {/* {postsJSX()} */}
                 </div> : null}
-                {loadingRef.current && <LoadingSpinner/>}
+                {loading && <LoadingSpinner/>}
                 <Footer/>
             </div>
         </div>
