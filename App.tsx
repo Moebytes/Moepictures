@@ -4,7 +4,7 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useState, useRef} from "react"
+import React, {useEffect, useEffectEvent, useState, useRef} from "react"
 import {Routes, Route, Navigate, useNavigate, useLocation} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useLayoutActions, 
 useSessionSelector, useSessionActions, useInteractionSelector,
@@ -134,10 +134,15 @@ const App: React.FunctionComponent = (props) => {
             setLoaded(true)
         }
         window.addEventListener("load", onDOMLoaded)
+        setTimeout(() => forceLoad(), 3000)
         return () => {
             window.removeEventListener("load", onDOMLoaded)
         }
     }, [])
+
+    const forceLoad = useEffectEvent(() => {
+        if (!loaded) setLoaded(true)
+    })
 
     useEffect(() => {
         if (activeGroup) {
