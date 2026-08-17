@@ -16,6 +16,7 @@ import SortReverseIcon from "../../assets/svg/sort-reverse.svg"
 import ScrollIcon from "../../assets/svg/scroll.svg"
 import PagesIcon from "../../assets/svg/pages.svg"
 import SeriesRow from "../../components/search/SeriesRow"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchSelector, usePageSelector, useCacheSelector, useCacheActions} from "../../store"
@@ -44,6 +45,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
     const {setSeries} = useCacheActions()
     const [sortType, setSortType] = useState("posts" as CategorySort)
     const [sortReverse, setSortReverse] = useState(false)
+    const loadingRef = useRef(true)
     const sortRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -133,6 +135,9 @@ const SeriesPage: React.FunctionComponent = (props) => {
             if (visible[i].tag === "unknown-series") continue
             jsx.push(<SeriesRow key={visible[i].tag} series={visible[i]}/>)
         }
+        if (jsx.length) {
+            loadingRef.current = false
+        }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
         }
@@ -178,6 +183,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
+                    {loadingRef.current && <LoadingSpinner/>}
                     <div className="items-container">
                         {generateSeriesJSX()}
                     </div>

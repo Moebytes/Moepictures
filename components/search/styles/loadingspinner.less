@@ -1,0 +1,27 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Moepictures - A cute and moe anime image board ❤          *
+ * Copyright © 2026 Moebytes <moebytes.com>                  *
+ * Licensed under CC BY-NC 4.0. See license.txt for details. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+ 
+@import "../../../index.less";
+
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    margin-top: @footer-height;
+}
+
+.loading-img {
+    width: auto;
+    max-height: 400px;
+}
+
+@media screen and (max-width: 900px) {
+    .loading-spinner {
+        min-height: 100vh;
+    }
+}

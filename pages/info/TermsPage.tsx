@@ -97,8 +97,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                             {i18n.terms.tos.spam.title}
                             </span><br/><br/>
 
-                            {i18n.terms.tos.spam.line1}{" "}
-                            {i18n.terms.tos.spam.line2}<br/><br/>
+                            {i18n.terms.tos.spam.line1}<br/><br/>
 
                             <span className="terms-text-alt">
                             {i18n.terms.tos.harassment.title}

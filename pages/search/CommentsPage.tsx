@@ -16,6 +16,7 @@ import SortReverseIcon from "../../assets/svg/sort-reverse.svg"
 import ScrollIcon from "../../assets/svg/scroll.svg"
 import PagesIcon from "../../assets/svg/pages.svg"
 import CommentRow from "../../components/search/CommentRow"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchSelector, usePageSelector, useFlagSelector} from "../../store"
@@ -46,6 +47,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const {commentID, commentJumpFlag, commentSearchFlag} = useFlagSelector()
     const {setCommentID, setCommentJumpFlag, setCommentSearchFlag} = useFlagActions()
     const {ratingType} = useSearchSelector()
+    const loadingRef = useRef(true)
     const sortRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -169,6 +171,9 @@ const CommentsPage: React.FunctionComponent = (props) => {
             if (!functions.post.isR18(ratingType)) if (functions.post.isR18(comment.post.rating)) continue
             jsx.push(<CommentRow comment={comment} onDelete={initItems} onEdit={initItems} onCommentJump={onCommentJump}/>)
         }
+        if (jsx.length) {
+            loadingRef.current = false
+        }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
         }
@@ -208,6 +213,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
+                    {loadingRef.current && <LoadingSpinner/>}
                     <div className="items-container">
                         {generateCommentsJSX()}
                     </div>

@@ -17,6 +17,7 @@ import SortReverseIcon from "../../assets/svg/sort-reverse.svg"
 import ScrollIcon from "../../assets/svg/scroll.svg"
 import PagesIcon from "../../assets/svg/pages.svg"
 import CharacterRow from "../../components/search/CharacterRow"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchSelector, usePageSelector, useCacheSelector, useCacheActions} from "../../store"
@@ -45,6 +46,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
     const {setCharacters} = useCacheActions()
     const [sortType, setSortType] = useState("posts" as CategorySort)
     const [sortReverse, setSortReverse] = useState(false)
+    const loadingRef = useRef(true)
     const sortRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -133,6 +135,9 @@ const CharactersPage: React.FunctionComponent = (props) => {
             if (visible[i].tag === "unknown-character") continue
             jsx.push(<CharacterRow character={visible[i]}/>)
         }
+        if (jsx.length) {
+            loadingRef.current = false
+        }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
         }
@@ -178,6 +183,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
+                    {loadingRef.current && <LoadingSpinner/>}
                     <div className="items-container">
                         {generateCharactersJSX()}
                     </div>

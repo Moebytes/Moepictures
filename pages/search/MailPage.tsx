@@ -18,6 +18,7 @@ import PagesIcon from "../../assets/svg/pages.svg"
 import RadioButtonIcon from "../../assets/svg/radiobutton.svg"
 import RadioButtonCheckedIcon from "../../assets/svg/radiobutton-checked.svg"
 import MessageRow from "../../components/search/MessageRow"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchSelector, usePageSelector, useFlagSelector,
@@ -50,6 +51,7 @@ const MailPage: React.FunctionComponent = (props) => {
     const [sortType, setSortType] = useState("date" as CommentSort)
     const [sortReverse, setSortReverse] = useState(false)
     const [hideSystem, setHideSystem] = useState(false)
+    const loadingRef = useRef(true)
     const sortRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -172,6 +174,9 @@ const MailPage: React.FunctionComponent = (props) => {
             if (visible[i].fake) continue
             jsx.push(<MessageRow message={visible[i]} onDelete={initItems} onEdit={initItems}/>)
         }
+        if (jsx.length) {
+            loadingRef.current = false
+        }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
         }
@@ -253,6 +258,7 @@ const MailPage: React.FunctionComponent = (props) => {
                         <RadioButtonIcon className="itemsort-img"/>}
                         <span className="itemsort-text">{i18n.buttons.hideSystem}</span>
                     </div> : null}
+                    {loadingRef.current && <LoadingSpinner/>}
                     <div className="items-container">
                         {generateMessagesJSX()}
                     </div>

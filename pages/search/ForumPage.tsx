@@ -16,6 +16,7 @@ import SortReverseIcon from "../../assets/svg/sort-reverse.svg"
 import ScrollIcon from "../../assets/svg/scroll.svg"
 import PagesIcon from "../../assets/svg/pages.svg"
 import ThreadRow from "../../components/search/ThreadRow"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchSelector, usePageSelector, useFlagSelector,
@@ -47,6 +48,7 @@ const ForumPage: React.FunctionComponent = (props) => {
     const {setShowNewThreadDialog} = useThreadDialogActions()
     const [sortType, setSortType] = useState("date" as CommentSort)
     const [sortReverse, setSortReverse] = useState(false)
+    const loadingRef = useRef(true)
     const sortRef = useRef<HTMLDivElement>(null)
 
     const getFilterSearch = functions.color.filter({theme, siteHue, siteSaturation, siteLightness})
@@ -139,6 +141,9 @@ const ForumPage: React.FunctionComponent = (props) => {
             if (visible[i].fake) continue
             jsx.push(<ThreadRow thread={visible[i]} onDelete={initItems} onEdit={initItems}/>)
         }
+        if (jsx.length) {
+            loadingRef.current = false
+        }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
         }
@@ -192,6 +197,7 @@ const ForumPage: React.FunctionComponent = (props) => {
                         </div>
                     </div>
                     {mobile ? <div className="item-row">{getNewThreadButton()}</div> : null}
+                    {loadingRef.current && <LoadingSpinner/>}
                     <div className="items-container">
                         {generateThreadsJSX()}
                     </div>

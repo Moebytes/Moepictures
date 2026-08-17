@@ -2112,8 +2112,7 @@
             },
             "spam": {
                 "title": "Spam",
-                "line1": "Our services are not the right place for you to spam gibberish or useless messages, or for you to self-advertise unrelated content.",
-                "line2": "If you are a moe artist then it would be more appropriate to self-promote your content, but keep it under a reasonable limit."
+                "line1": "Our services are not the right place for you to spam gibberish or useless messages, or for you to self-advertise unrelated content."
             },
             "harassment": {
                 "title": "Harassment",
@@ -2163,7 +2162,7 @@
             },
             "liability": {
                 "title": "Limitation of Liability",
-                "line1": "OUR SERVICES ARE PROVIDED “AS IS”, WITHOUT ANY EXPRESSED OR IMPLIED WARRANTY OF ANY KIND. IN NO EVENT SHALL MOEPICS BE LIABLE FOR ANY DAMAGES ARISING FROM OR IN CONNECTION TO THE USAGE OF OUR SERVICES. MOEPICS IS NOT RESPONSIBLE FOR ANY CONTENT APPEARING ON OUR SERVICES ALLEGED TO BE OFFENSIVE OR ILLEGAL."
+                "line1": "OUR SERVICES ARE PROVIDED “AS IS”, WITHOUT ANY EXPRESSED OR IMPLIED WARRANTY OF ANY KIND. IN NO EVENT SHALL MOEPICTURES BE LIABLE FOR ANY DAMAGES ARISING FROM OR IN CONNECTION TO THE USAGE OF OUR SERVICES. MOEPICTURES IS NOT RESPONSIBLE FOR ANY CONTENT APPEARING ON OUR SERVICES ALLEGED TO BE OFFENSIVE OR ILLEGAL."
             },
             "changes": {
                 "title": "Changes to our Terms",

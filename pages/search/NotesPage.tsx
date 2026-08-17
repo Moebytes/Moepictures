@@ -17,6 +17,7 @@ import SortReverseIcon from "../../assets/svg/sort-reverse.svg"
 import ScrollIcon from "../../assets/svg/scroll.svg"
 import PagesIcon from "../../assets/svg/pages.svg"
 import NoteRow from "../../components/search/NoteRow"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector} from "../../store"
@@ -48,6 +49,7 @@ const NotesPage: React.FunctionComponent = (props) => {
     const {setNoteSearchFlag} = useFlagActions()
     const {ratingType} = useSearchSelector()
     const sortRef = useRef<HTMLDivElement>(null)
+    const loadingRef = useRef(true)
     const navigate = useNavigate()
 
     const getFilterSearch = functions.color.filter({theme, siteHue, siteSaturation, siteLightness})
@@ -138,6 +140,9 @@ const NotesPage: React.FunctionComponent = (props) => {
             if (!functions.post.isR18(ratingType)) if (functions.post.isR18(noteGroup.post.rating)) continue
             jsx.push(<NoteRow note={noteGroup} onDelete={initItems} onEdit={initItems}/>)
         }
+        if (jsx.length) {
+            loadingRef.current = false
+        }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
         }
@@ -196,6 +201,7 @@ const NotesPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
+                    {loadingRef.current && <LoadingSpinner/>}
                     {mobile ? <div className="item-row">{getUntranslatedButton()}</div> : null}
                     <div className="items-container">
                         {generateNotesJSX()}

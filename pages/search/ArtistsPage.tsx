@@ -16,6 +16,7 @@ import SortReverseIcon from "../../assets/svg/sort-reverse.svg"
 import ScrollIcon from "../../assets/svg/scroll.svg"
 import PagesIcon from "../../assets/svg/pages.svg"
 import ArtistRow from "../../components/search/ArtistRow"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useLayoutSelector, usePageActions, useActiveSelector, 
 useSearchSelector, usePageSelector, useCacheSelector, useCacheActions} from "../../store"
@@ -44,6 +45,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     const {setArtists} = useCacheActions()
     const [sortType, setSortType] = useState("posts" as CategorySort)
     const [sortReverse, setSortReverse] = useState(false)
+    const loadingRef = useRef(true)
     const sortRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -130,6 +132,9 @@ const ArtistsPage: React.FunctionComponent = (props) => {
             if (visible[i].tag === "unknown-artist") continue
             jsx.push(<ArtistRow artist={visible[i]}/>)
         }
+        if (jsx.length) {
+            loadingRef.current = false
+        }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
         }
@@ -175,6 +180,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
+                    {loadingRef.current && <LoadingSpinner/>}
                     <div className="items-container">
                         {generateArtistsJSX()}
                     </div>

@@ -18,6 +18,7 @@ import ScrollIcon from "../../assets/svg/scroll.svg"
 import PagesIcon from "../../assets/svg/pages.svg"
 import TypeIcon from "../../assets/svg/all.svg"
 import TagRow from "../../components/search/TagRow"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchSelector, usePageSelector, useFlagSelector, useTagDialogActions} from "../../store"
@@ -48,6 +49,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     const [sortType, setSortType] = useState("posts" as TagSort)
     const [sortReverse, setSortReverse] = useState(false)
     const [typeType, setTypeType] = useState("all" as TagType)
+    const loadingRef = useRef(true)
     const sortRef = useRef<HTMLDivElement>(null)
     const typeRef = useRef<HTMLDivElement>(null)
 
@@ -162,6 +164,9 @@ const TagsPage: React.FunctionComponent = (props) => {
             if (!session.username) if (visible[i].r18) continue
             if (!functions.post.isR18(ratingType)) if (visible[i].r18) continue
             jsx.push(<TagRow tag={visible[i]} onDelete={initItems} onEdit={initItems}/>)
+        }
+        if (jsx.length) {
+            loadingRef.current = false
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
@@ -292,6 +297,7 @@ const TagsPage: React.FunctionComponent = (props) => {
                         {getMassImplyButton()}
                         {getBlockedTagsButton()}
                     </div> : null}
+                    {loadingRef.current && <LoadingSpinner/>}
                     <div className="items-container" style={{marginTop: "15px"}}>
                         {generateTagsJSX()}
                     </div>

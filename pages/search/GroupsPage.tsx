@@ -15,6 +15,7 @@ import SortIcon from "../../assets/svg/sort.svg"
 import SortReverseIcon from "../../assets/svg/sort-reverse.svg"
 import ScrollIcon from "../../assets/svg/scroll.svg"
 import PagesIcon from "../../assets/svg/pages.svg"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
 useActiveSelector, useSearchSelector, usePageSelector, useFlagSelector} from "../../store"
@@ -45,6 +46,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
     const [sortType, setSortType] = useState("date" as GroupSort)
     const [sortReverse, setSortReverse] = useState(false)
     const {ratingType} = useSearchSelector()
+    const loadingRef = useRef(true)
     const sortRef = useRef<HTMLDivElement>(null)
 
     const getFilterSearch = functions.color.filter({theme, siteHue, siteSaturation, siteLightness})
@@ -139,6 +141,9 @@ const GroupsPage: React.FunctionComponent = (props) => {
             if (!functions.post.isR18(ratingType)) if (functions.post.isR18(group.rating)) continue
             jsx.push(<GroupThumbnail group={group}/>)
         }
+        if (jsx.length) {
+            loadingRef.current = false
+        }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
         }
@@ -181,6 +186,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
+                    {loadingRef.current && <LoadingSpinner/>}
                     <div className="items-row-container" style={{justifyContent: "space-evenly"}}>
                         {generateGroupsJSX()}
                     </div>

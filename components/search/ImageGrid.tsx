@@ -21,6 +21,7 @@ import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
+import LoadingSpinner from "./LoadingSpinner"
 import {PostSearch} from "../../types/Types"
 import "./styles/imagegrid.less"
 
@@ -65,6 +66,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const [reupdateFlag, setReupdateFlag] = useState(false)
     const [removeSaveSearchFlag, setRemoveSaveSearchFlag] = useState(false)
     const visiblePromisesRef = useRef<TrackablePromise<void>[]>([])
+    const loadingRef = useRef(true)
     const location = useLocation()
     const navigate = useNavigate()
 
@@ -150,6 +152,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             sort: functions.validation.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch, offset}, session, setSessionFlag)
         }
         skipRender = true
+
         return result
     })
 
@@ -196,7 +199,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         setPosts(items)
         setPostPage(page)
-    }, [items, page])
+    }, [items, page, scroll])
 
     useEffect(() => {
         const onDOMLoaded = async () => {
@@ -338,7 +341,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     }, [items, sizeType, session, mobile])
 
     useEffect(() => {
-        if (scroll) return
+        if (scroll) return props.setImagesLoaded(true)
         if (!visiblePromisesRef.current.length) return
         if (skipRender) {
             skipRender = false
@@ -403,6 +406,10 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
                     comicPages={comicPages} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             }
         }
+        loadingRef.current = false
+        if (!jsx.length && !noResults) {
+            loadingRef.current = true
+        }
         if (!jsx.length && noResults && afterFirstLoad) {
             jsx.push(
                 <div className="noresults-container">
@@ -418,9 +425,12 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="imagegrid" onMouseEnter={() => setEnableDrag(true)}
-            style={{marginTop: mobile ? "10px" : "0px", maxWidth: hideSidebar ? "" : `calc(100vw - ${functions.dom.sidebarWidth()})`}} >
-            <div className="image-container" style={{visibility: props.imagesLoaded ? "visible" : "hidden"}}>
+            style={{marginTop: mobile ? "10px" : "0px", maxWidth: hideSidebar ? "" : `calc(100vw - ${functions.dom.sidebarWidth()})`}}>
+            <div className="image-outer-container">
+                {loadingRef.current && <LoadingSpinner/>}
+                <div className="image-container" style={{visibility: props.imagesLoaded ? "visible" : "hidden"}}>
                 {generateImagesJSX()}
+                </div>
             </div>
         </div>
     )

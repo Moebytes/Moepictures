@@ -4,7 +4,7 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useEffectEvent, useState, useReducer} from "react"
+import React, {useEffect, useEffectEvent, useState, useRef} from "react"
 import {useNavigate, useParams, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -30,6 +30,7 @@ import Related from "../../components/post/Related"
 import MobileInfo from "../../components/site/MobileInfo"
 import HistoryIcon from "../../assets/svg/history-thin.svg"
 import CurrentIcon from "../../assets/svg/current.svg"
+import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
 useLayoutSelector, useSearchSelector, useFlagSelector, useCacheActions, usePostDialogActions, 
 useNoteDialogSelector, useNoteDialogActions, useActiveSelector, usePostDialogSelector,
@@ -661,7 +662,7 @@ const PostPage: React.FunctionComponent = () => {
     }
 
     const getPostJSX = () => {
-        if (!post) return
+        if (!post || !image) return <LoadingSpinner/>
         let img = image
         if (session.cookie) {
             if (img) img = functions.util.appendURLParams(img, {upscaled: session.upscaledImages})
@@ -726,7 +727,7 @@ const PostPage: React.FunctionComponent = () => {
                     <div className="carousel-container">
                         <Carousel images={images} set={set} index={order-1} unlimited={true}/>
                     </div> : null}
-                    {post ? getPostJSX() : null}
+                    {getPostJSX()}
                     {generatePixivTagsJSX()}
                     {generateActiveFavgroupJSX()}
                     {post && parentPost ? <Parent post={parentPost}/>: null}
