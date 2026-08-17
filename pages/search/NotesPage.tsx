@@ -201,8 +201,8 @@ const NotesPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
-                    {loadingRef.current && <LoadingSpinner/>}
                     {mobile ? <div className="item-row">{getUntranslatedButton()}</div> : null}
+                    {loadingRef.current && <LoadingSpinner/>}
                     <div className="items-container">
                         {generateNotesJSX()}
                     </div>
