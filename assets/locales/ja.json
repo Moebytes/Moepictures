@@ -548,7 +548,7 @@
         "pageMultiplier": "ページ乗数"
     },
     "contextMenu": {
-        "openExternal": "外部リンクを開く",
+        "openWebsite": "外部リンクを開く",
         "saveImage": "画像を保存",
         "share": "共有",
         "saveLocation": "保存先を選択してください",

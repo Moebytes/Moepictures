@@ -204,8 +204,6 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
         } finally {
             updatingRef.current = false
         }
-
-        
     })
 
     useEffect(() => {
