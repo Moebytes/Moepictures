@@ -98,18 +98,27 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
     const initItems = async (queryOverride?: string, reset?: boolean) => {
         setEnded(false)
         setOffset(0)
-        setSearchQuery(queryOverride ?? searchQuery)
-        const data = await loadInitial(queryOverride ?? searchQuery)
+
+        const query = queryOverride ?? searchQuery
+        setSearchQuery(query)
+
+        const data = await loadInitial(query)
         setItems(data)
+
+        const initialPage = reset ? 1 : page
         if (scroll) {
-            setOffset(data.slice(0, pageAmount).length)
-            setVisible(data.slice(0, pageAmount))
+            const initialVisible = data.slice(0, pageAmount)
+
+            setOffset(initialVisible.length)
+            setVisible(initialVisible)
+        } else if (initialPage !== 1) {
+            await updateItems((initialPage - 1) * pageAmount, query, data)
         }
+
         if (reset) {
             setPage(1)
-        } else {
-            if (page !== 1) updateItems()
         }
+
         loadedRef.current = true
     }
 
@@ -142,53 +151,61 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
         if (managedQuery !== null) setSearchQuery(managedQuery)
     }, [managedPage, managedQuery])
 
-    const updateItems = useEffectEvent(async (forceOffset?: number, queryOverride?: string) => {
+    const updateItems = useEffectEvent(async (forceOffset?: number, queryOverride?: string, itemsOverride?: T[]) => {
         if (ended || updatingRef.current) return
 
         updatingRef.current = true
 
-        let currentOffset = scroll ? offset : (page - 1) * pageAmount
-        const newOffset = forceOffset ?? currentOffset
-        let result = await updateOffset?.(newOffset, queryOverride ?? searchQuery) ?? null
-        if (!result) result = items.slice(newOffset, newOffset + pageAmount)
+        try {
+            const currentItems = itemsOverride ?? items
+            const query = queryOverride ?? searchQuery
 
-        const totalCount = result.length ? (getTotalCount?.(result[0]) || result.length) : 0
+            let currentOffset = scroll ? offset : (page - 1) * pageAmount
+            const newOffset = forceOffset ?? currentOffset
 
-        let padded = false
-        if (!scroll) {
-            if (newOffset === 0 && (items[newOffset] as any)?.fake) {
-                padded = true
+            let result = await updateOffset?.(newOffset, query) ?? null
+            if (!result) result = items.slice(newOffset, newOffset + pageAmount)
+
+            const totalCount = result.length ? (getTotalCount?.(result[0]) || result.length) : 0
+
+            let padded = false
+            if (!scroll) {
+                if (newOffset === 0 && (currentItems[newOffset] as any)?.fake) {
+                    padded = true
+                }
+                const cleanItems = currentItems.filter((i: any) => !i?.fake)
+                if (cleanItems.length <= newOffset) {
+                    const fake = {fake: true} as any
+                    fake[countKey ?? "tagCount"] = totalCount
+                    const fakePadding = Array.from({length: newOffset}, () => fake)
+                    result = [...fakePadding, ...result]
+                    padded = true
+                }
             }
-            const cleanItems = items.filter((i: any) => !i?.fake)
-            if (cleanItems.length <= newOffset) {
-                const fake = {fake: true} as any
-                fake[countKey ?? "tagCount"] = totalCount
-                const fakePadding = Array.from({length: newOffset}, () => fake)
-                result = [...fakePadding, ...result]
-                padded = true
-            }
-        }
 
-        if (!result.length) {
+            if (!result.length) {
+                return setEnded(true)
+            }
+
+            if (padded) {
+                setItems(result)
+            } else {
+                setItems((prev) => functions.util.removeDuplicates([...prev, ...result]))
+                setVisible((prev) => functions.util.removeDuplicates([...prev, ...result]))
+            }
+
+            if (scroll) { 
+                setOffset(newOffset + result.length) 
+            } else { 
+                setOffset(newOffset) 
+            }
+
+            if (result.length < limit) setEnded(true)
+        } finally {
             updatingRef.current = false
-            return setEnded(true)
         }
 
-        if (padded) {
-            setItems(result)
-        } else {
-            setItems((prev) => functions.util.removeDuplicates([...prev, ...result]))
-            setVisible((prev) => functions.util.removeDuplicates([...prev, ...result]))
-        }
-
-        if (scroll) { 
-            setOffset(newOffset + result.length) 
-        } else { 
-            setOffset(newOffset) 
-        }
-
-        if (result.length < limit) setEnded(true)
-        updatingRef.current = false
+        
     })
 
     useEffect(() => {
