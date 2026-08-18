@@ -565,8 +565,8 @@ app.get("/{*page}", async (req: Request, res: Response) => {
     //res.setHeader("Cross-Origin-Embedder-Policy", "require-corp")
     const document = fs.readFileSync(path.join(__dirname, "./dist/client/index.html"), {encoding: "utf-8"})
 
-    let title = "Moepictures: Cute Anime Girl Art"
-    let description = "Search for super cute and moe anime girl art! With our detailed tagging system you can find your favorite characters and artists easily. Create an account to manage your favorites and leave comments with cute emojis and MoeText."
+    let title = "Moepictures: Cute & Moe Anime Art"
+    let description = "Search for cute & moe anime girl art! With our detailed tagging system you can easily find your favorite characters and artists. Create an account to manage your favorites and leave comments with emojis and MoeText formatting."
     let image = "/assets/images/mainimg.png"
     let url = "https://moepictures.com"
 
