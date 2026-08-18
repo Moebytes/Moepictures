@@ -272,7 +272,7 @@ const App: React.FunctionComponent = (props) => {
     }, [selectionMode, filterDropActive, hideTitlebar, activeDropdown, sidebarHover])
 
     useEffect(() => {
-        functions.dom.changeFavicon(theme)
+        //functions.dom.changeFavicon(theme)
     }, [theme])
 
     useEffect(() => {
