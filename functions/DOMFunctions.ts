@@ -5,6 +5,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import functions from "./Functions"
+import enLocale from "../assets/locales/en.json"
 
 export default class DOMFunctions {
     public static download = (filename: string, url: string) => {
@@ -132,5 +133,10 @@ export default class DOMFunctions {
             document.getElementsByTagName("head")[0].appendChild(link)
         }
         if (link.href !== url) link.href = url
+    }
+
+    public static changeTitle = (title: string | undefined, i18n: typeof enLocale) => {
+        if (!title) document.title = i18n.title
+        document.title = `${title} | ${i18n.title}`
     }
 }

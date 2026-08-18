@@ -99,7 +99,7 @@ const ReaderPage: React.FunctionComponent = () => {
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     useEffect(() => {
-        document.title = "Post"
+        functions.dom.changeTitle("Post", i18n)
     }, [])
 
     const loadImages = async () => {
@@ -150,7 +150,7 @@ const ReaderPage: React.FunctionComponent = () => {
                 title = post.englishTitle ? functions.util.toProperCase(post.englishTitle) : 
                 post.title ? post.title : "Post"
             }
-            document.title = `${title}`
+            functions.dom.changeTitle(title, i18n)
         }
         updateTitle()
     }, [post, language])

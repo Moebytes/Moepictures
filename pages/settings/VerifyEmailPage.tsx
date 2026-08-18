@@ -60,7 +60,7 @@ const VerifyEmailPage: React.FunctionComponent = () => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.pages.verifyEmail.title
+        functions.dom.changeTitle(i18n.pages.verifyEmail.title, i18n)
     }, [i18n])
 
     useEffect(() => {

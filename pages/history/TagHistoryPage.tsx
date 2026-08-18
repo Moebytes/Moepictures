@@ -61,7 +61,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.history.tag
+        functions.dom.changeTitle(i18n.history.tag, i18n)
     }, [i18n])
 
     useEffect(() => {

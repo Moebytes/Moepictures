@@ -102,7 +102,7 @@ const ThreadPage: React.FunctionComponent = () => {
             if (!session.showR18) return functions.dom.replaceLocation("/404")
         }
         setThread(thread)
-        document.title = `${thread.title}`
+        functions.dom.changeTitle(thread.title, i18n)
         setDefaultIcon(thread.image ? false : true)
     }
 

@@ -67,7 +67,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.pages.signup.title
+        functions.dom.changeTitle(i18n.pages.signup.title, i18n)
     }, [i18n])
 
     useEffect(() => {

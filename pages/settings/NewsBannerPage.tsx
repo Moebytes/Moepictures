@@ -41,7 +41,7 @@ const NewsBannerPage: React.FunctionComponent = () => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.user.newsBanner
+        functions.dom.changeTitle(i18n.user.newsBanner, i18n)
     }, [i18n])
 
     useEffect(() => {

@@ -181,7 +181,7 @@ const UserProfilePage: React.FunctionComponent = () => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "User Profile"
+        functions.dom.changeTitle("User Profile", i18n)
 
         setSessionFlag(true)
     }, [])

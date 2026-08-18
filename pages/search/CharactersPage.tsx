@@ -66,7 +66,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.navbar.characters
+        functions.dom.changeTitle(i18n.navbar.characters, i18n)
     }, [i18n])
 
     useEffect(() => {

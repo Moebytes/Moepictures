@@ -33,7 +33,7 @@ import {TagCategories, UnverifiedPost, ChildPost, TagGroupCategory} from "../../
 import "./styles/postpage.less"
 
 const UnverifiedPostPage: React.FunctionComponent = () => {
-    const {language} = useThemeSelector()
+    const {i18n, language} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
@@ -61,7 +61,7 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
         setHideSidebar(false)
         setRelative(true)
         setSidebarText("")
-        document.title = "Unverified Post"
+        functions.dom.changeTitle("Unverified Post", i18n)
     }, [])
 
     useEffect(() => {
@@ -114,7 +114,7 @@ const UnverifiedPostPage: React.FunctionComponent = () => {
                 title = post.englishTitle ? functions.util.toProperCase(post.englishTitle) : 
                 post.title ? post.title : "Post"
             }
-            document.title = `${title}`
+            functions.dom.changeTitle(title, i18n)
             if (title !== "Post") setHeaderText(title.replaceAll("-", " "))
         }
         updateTitle()

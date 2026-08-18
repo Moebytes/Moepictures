@@ -61,7 +61,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.history.group
+        functions.dom.changeTitle(i18n.history.group, i18n)
     }, [i18n])
 
     useEffect(() => {

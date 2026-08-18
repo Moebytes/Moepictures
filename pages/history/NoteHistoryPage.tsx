@@ -61,7 +61,7 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.history.note
+        functions.dom.changeTitle(i18n.history.note, i18n)
     }, [i18n])
 
     useEffect(() => {

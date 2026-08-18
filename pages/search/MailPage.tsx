@@ -94,7 +94,7 @@ const MailPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.navbar.mail
+        functions.dom.changeTitle(i18n.navbar.mail, i18n)
     }, [i18n])
 
     useEffect(() => {

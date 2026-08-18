@@ -26,7 +26,7 @@ const DeleteAliasHistoryDialog: React.FunctionComponent = (props) => {
         if (deleteAliasHistoryID) {
             document.body.style.pointerEvents = "none"
             document.body.style.userSelect = "none"
-            document.title = getTitle() || ""
+            functions.dom.changeTitle(getTitle(), i18n)
         } else {
             document.body.style.pointerEvents = "all"
             document.body.style.userSelect = "auto"

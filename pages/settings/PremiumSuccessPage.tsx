@@ -51,7 +51,7 @@ const PremiumSuccessPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.pages.premiumSuccess.pageTitle
+        functions.dom.changeTitle(i18n.pages.premiumSuccess.pageTitle, i18n)
     }, [i18n])
 
     useEffect(() => {

@@ -62,7 +62,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.user.changeUsername
+        functions.dom.changeTitle(i18n.user.changeUsername, i18n)
     }, [i18n])
 
     useEffect(() => {

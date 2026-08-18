@@ -97,7 +97,7 @@ const HistoryPage: React.FunctionComponent = () => {
 
 
     useEffect(() => {
-        document.title = i18n.history[historyTab]
+        functions.dom.changeTitle(i18n.history[historyTab], i18n)
     }, [historyTab, i18n])
 
     useEffect(() => {

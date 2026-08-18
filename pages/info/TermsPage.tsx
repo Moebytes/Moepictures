@@ -45,9 +45,9 @@ const TermsPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (onPrivacy) {
-            document.title = i18n.terms.privacy.title
+            functions.dom.changeTitle(i18n.terms.privacy.title, i18n)
         } else {
-            document.title = i18n.terms.tos.title
+            functions.dom.changeTitle(i18n.terms.tos.title, i18n)
         }
     }, [onPrivacy, i18n])
     

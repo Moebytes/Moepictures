@@ -12,6 +12,7 @@ import Footer from "../../components/site/Footer"
 import {useThemeSelector, useInteractionActions,
 useLayoutActions, useActiveActions, useLayoutSelector} from "../../store"
 import betaImg from "../../assets/images/beta.png"
+import functions from "../../functions/Functions"
 import "./styles/helppage.less"
 
 const BetaTestPage: React.FunctionComponent = () => {
@@ -32,7 +33,7 @@ const BetaTestPage: React.FunctionComponent = () => {
     }, [])
 
     useEffect(() => {
-        document.title = "Beta Test"
+        functions.dom.changeTitle("Beta Test", i18n)
     }, [i18n])
 
     useEffect(() => {

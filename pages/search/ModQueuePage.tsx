@@ -126,7 +126,7 @@ const ModQueuePage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.navbar.modQueue
+        functions.dom.changeTitle(i18n.navbar.modQueue, i18n)
     }, [i18n])
 
     useEffect(() => {

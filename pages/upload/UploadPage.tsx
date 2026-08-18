@@ -371,12 +371,12 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (props.edit) {
             if (props.unverified) {
-                document.title = i18n.pages.edit.unverifiedTitle
+                functions.dom.changeTitle(i18n.pages.edit.unverifiedTitle, i18n)
             } else {
-                document.title = i18n.pages.edit.title
+                functions.dom.changeTitle(i18n.pages.edit.title, i18n)
             }
         } else {
-            document.title = i18n.buttons.upload
+            functions.dom.changeTitle(i18n.buttons.upload, i18n)
         }
     }, [i18n])
 

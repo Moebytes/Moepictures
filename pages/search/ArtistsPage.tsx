@@ -65,7 +65,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.navbar.artists
+        functions.dom.changeTitle(i18n.navbar.artists, i18n)
     }, [i18n])
 
     useEffect(() => {

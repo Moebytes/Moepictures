@@ -67,7 +67,7 @@ const LoginPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (sidebarText !== i18n.sidebar.loginRequired) setSidebarText("")
-        document.title = i18n.navbar.login
+        functions.dom.changeTitle(i18n.navbar.login, i18n)
     }, [i18n])
 
     useEffect(() => {

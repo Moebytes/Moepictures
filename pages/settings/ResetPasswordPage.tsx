@@ -51,7 +51,7 @@ const ResetPasswordPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.pages.resetPassword.title
+        functions.dom.changeTitle(i18n.pages.resetPassword.title, i18n)
     }, [i18n])
 
     useEffect(() => {

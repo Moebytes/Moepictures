@@ -61,7 +61,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.history.post
+        functions.dom.changeTitle(i18n.history.post, i18n)
     }, [i18n])
 
     useEffect(() => {

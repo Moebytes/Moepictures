@@ -146,7 +146,7 @@ const UserPage: React.FunctionComponent = () => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = `${functions.util.toProperCase(username)}`
+        functions.dom.changeTitle(`${functions.util.toProperCase(username)}`, i18n)
     }, [])
 
     useEffect(() => {

@@ -44,7 +44,7 @@ const LoginHistoryPage: React.FunctionComponent = () => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.user.loginHistory
+        functions.dom.changeTitle(i18n.user.loginHistory, i18n)
     }, [i18n])
 
     useEffect(() => {

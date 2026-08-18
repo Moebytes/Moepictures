@@ -64,7 +64,7 @@ const ForumPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.navbar.forum
+        functions.dom.changeTitle(i18n.navbar.forum, i18n)
     }, [i18n])
 
     useEffect(() => {

@@ -12,6 +12,7 @@ import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useLayoutActions, 
 useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
+import functions from "../../functions/Functions"
 import "./styles/sitepage.less"
 
 const ChangeEmailSuccessPage: React.FunctionComponent = (props) => {
@@ -39,7 +40,7 @@ const ChangeEmailSuccessPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.pages.changeEmailSuccess.pageTitle
+        functions.dom.changeTitle(i18n.pages.changeEmailSuccess.pageTitle, i18n)
     }, [i18n])
 
     useEffect(() => {

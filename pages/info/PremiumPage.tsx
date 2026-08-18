@@ -72,7 +72,7 @@ const PremiumPage: React.FunctionComponent = () => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.roles.premium
+        functions.dom.changeTitle(i18n.roles.premium, i18n)
     }, [i18n])
 
     useEffect(() => {

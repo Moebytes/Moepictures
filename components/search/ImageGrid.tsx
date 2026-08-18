@@ -130,7 +130,6 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         setIsRandomSearch(false)
         setNoResults(result.length === 0)
         if (result.length) setAfterFirstLoad(true)
-        if (!query) document.title = i18n.title
 
         return result
     })
@@ -184,7 +183,6 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         sort: "random", showChildren, limit, favoriteMode: favSearch}, session, setSessionFlag)
         setIsRandomSearch(true)
         restructureItems(result)
-        document.title = "Random"
     }
 
     useEffect(() => {
@@ -265,7 +263,6 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         if (imageSearchFlag) {
             reloadedPost = true
             restructureItems(imageSearchFlag as PostSearch[])
-            document.title = "Image Search"
             setImageSearchFlag(null)
         }
     }, [imageSearchFlag])

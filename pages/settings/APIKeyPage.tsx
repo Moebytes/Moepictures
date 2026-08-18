@@ -47,7 +47,7 @@ const APIKeyPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.user.apiKey
+        functions.dom.changeTitle(i18n.user.apiKey, i18n)
     }, [i18n])
 
     useEffect(() => {

@@ -272,10 +272,6 @@ const App: React.FunctionComponent = (props) => {
     }, [selectionMode, filterDropActive, hideTitlebar, activeDropdown, sidebarHover])
 
     useEffect(() => {
-        //functions.dom.changeFavicon(theme)
-    }, [theme])
-
-    useEffect(() => {
         const resize = () => {
             const isMobile = window.matchMedia("(max-width: 900px)").matches
             const isTablet = window.matchMedia("(min-width: 901px) and (max-width: 1300px)").matches

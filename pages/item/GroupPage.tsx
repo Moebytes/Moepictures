@@ -134,7 +134,7 @@ const GroupPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         if (group) {
-            document.title = group.name
+            functions.dom.changeTitle(group.name, i18n)
             setHeaderText(group.name)
             initItems()
         }

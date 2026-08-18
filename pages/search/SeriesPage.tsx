@@ -65,7 +65,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.tag.series
+        functions.dom.changeTitle(i18n.tag.series, i18n)
     }, [i18n])
 
     useEffect(() => {

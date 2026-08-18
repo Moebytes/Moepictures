@@ -33,7 +33,7 @@ const VerifyEmailSuccessPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.pages.verifyEmailSuccess.pageTitle
+        functions.dom.changeTitle(i18n.pages.verifyEmailSuccess.pageTitle, i18n)
     }, [i18n])
 
     useEffect(() => {

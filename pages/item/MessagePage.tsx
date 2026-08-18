@@ -100,7 +100,7 @@ const MessagePage: React.FunctionComponent = () => {
             if (!session.showR18) return functions.dom.replaceLocation("/404")
         }
         setMessage(message)
-        document.title = `${message.title}`
+        functions.dom.changeTitle(message.title, i18n)
         setDefaultIcon(message.image ? false : true)
     }
 

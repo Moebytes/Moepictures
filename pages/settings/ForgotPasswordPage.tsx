@@ -57,7 +57,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.pages.forgotPassword.title
+        functions.dom.changeTitle(i18n.pages.forgotPassword.title, i18n)
     }, [i18n])
 
     useEffect(() => {

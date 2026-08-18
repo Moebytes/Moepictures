@@ -13,6 +13,7 @@ import $404 from "../../assets/images/404.png"
 import {useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
 import {useThemeSelector} from "../../store"
+import functions from "../../functions/Functions"
 import "./styles/404page.less"
 
 const $404Page: React.FunctionComponent = (props) => {
@@ -32,7 +33,7 @@ const $404Page: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText(i18n.sidebar.$404)
-        document.title = i18n.errors.$404
+        functions.dom.changeTitle(i18n.errors.$404, i18n)
     }, [])
 
     useEffect(() => {

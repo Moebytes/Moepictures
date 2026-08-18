@@ -53,7 +53,7 @@ const ForumPostsPage: React.FunctionComponent = () => {
     }, [])
 
     useEffect(() => {
-        document.title = `${functions.util.toProperCase(username)}'s ${i18n.user.forumPosts}`
+        functions.dom.changeTitle(`${functions.util.toProperCase(username)}'s ${i18n.user.forumPosts}`, i18n)
     }, [i18n, username])
 
     useEffect(() => {

@@ -62,7 +62,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.sort.groups
+        functions.dom.changeTitle(i18n.sort.groups, i18n)
     }, [i18n])
 
     useEffect(() => {

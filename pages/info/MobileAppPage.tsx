@@ -34,7 +34,7 @@ const MobileAppPage: React.FunctionComponent = () => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.mobileApp.title
+        functions.dom.changeTitle(i18n.mobileApp.title, i18n)
     }, [i18n])
 
     useEffect(() => {

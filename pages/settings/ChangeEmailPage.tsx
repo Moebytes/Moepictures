@@ -60,7 +60,7 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.user.changeEmail
+        functions.dom.changeTitle(i18n.user.changeEmail, i18n)
     }, [i18n])
 
     useEffect(() => {

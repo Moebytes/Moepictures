@@ -48,7 +48,7 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.user.changePassword
+        functions.dom.changeTitle(i18n.user.changePassword, i18n)
     }, [i18n])
 
     useEffect(() => {

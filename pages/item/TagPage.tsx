@@ -80,7 +80,7 @@ const TagPage: React.FunctionComponent = () => {
         setRelative(false)
         setActiveDropdown("none")
         setSidebarText("")
-        document.title = `${functions.util.toProperCase(tagName.replaceAll("-", " "))}`
+        functions.dom.changeTitle(`${functions.util.toProperCase(tagName.replaceAll("-", " "))}`, i18n)
         setHeaderText(`${functions.util.toProperCase(tagName.replaceAll("-", " "))}`)
         const historyParam = new URLSearchParams(window.location.search).get("history")
         setHistoryID(historyParam)

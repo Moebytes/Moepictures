@@ -43,7 +43,7 @@ const ContactPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.navbar.contact
+        functions.dom.changeTitle(i18n.navbar.contact, i18n)
     }, [i18n])
 
     useEffect(() => {

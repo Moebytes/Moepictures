@@ -81,7 +81,7 @@ const PostPage: React.FunctionComponent = () => {
         setRelative(true)
         setSidebarText("")
         setReloadPostFlag(true)
-        document.title = "Post"
+        functions.dom.changeTitle("Post", i18n)
         const historyParam = new URLSearchParams(window.location.search).get("history")
         setHistoryID(historyParam)
         const noteParam = new URLSearchParams(window.location.search).get("note")
@@ -202,7 +202,7 @@ const PostPage: React.FunctionComponent = () => {
                 title = post.englishTitle ? functions.util.toProperCase(post.englishTitle) : 
                 post.title ? post.title : "Post"
             }
-            document.title = `${title}`
+            functions.dom.changeTitle(title, i18n)
             if (title !== "Post") setHeaderText(title.replaceAll("-", " "))
         }
         updateTitle()

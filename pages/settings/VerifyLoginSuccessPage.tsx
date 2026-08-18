@@ -33,7 +33,7 @@ const VerifyLoginSuccessPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.pages.verifyLoginSuccess.pageTitle
+        functions.dom.changeTitle(i18n.pages.verifyLoginSuccess.pageTitle, i18n)
     }, [i18n])
 
     useEffect(() => {

@@ -44,7 +44,7 @@ const IPBlacklistPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.user.ipBlacklist
+        functions.dom.changeTitle(i18n.user.ipBlacklist, i18n)
     }, [i18n])
 
     useEffect(() => {

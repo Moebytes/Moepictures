@@ -12,6 +12,7 @@ import SortBar from "../../components/site/SortBar"
 import ImageGrid from "../../components/search/ImageGrid"
 import Footer from "../../components/site/Footer"
 import TagBanner from "../../components/banner/TagBanner"
+import functions from "../../functions/Functions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useLayoutActions, 
 useActiveActions, useLayoutSelector} from "../../store"
 
@@ -38,7 +39,7 @@ const PostsPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.title
+        functions.dom.changeTitle("", i18n)
     }, [i18n])
 
     useEffect(() => {

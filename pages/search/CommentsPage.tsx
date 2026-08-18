@@ -72,7 +72,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.navbar.comments
+        functions.dom.changeTitle(i18n.navbar.comments, i18n)
     }, [i18n])
 
     useEffect(() => {

@@ -51,7 +51,7 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.pages.copyrightRemoval.title
+        functions.dom.changeTitle(i18n.pages.copyrightRemoval.title, i18n)
     }, [i18n])
 
     useEffect(() => {

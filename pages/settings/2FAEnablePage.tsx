@@ -45,7 +45,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        document.title = i18n.user.$2fa
+        functions.dom.changeTitle(i18n.user.$2fa, i18n)
     }, [i18n])
 
     useEffect(() => {

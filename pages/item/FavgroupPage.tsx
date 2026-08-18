@@ -117,7 +117,7 @@ const FavgroupPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         if (favgroup) {
-            document.title = favgroup.name
+            functions.dom.changeTitle(favgroup.name, i18n)
             setHeaderText(favgroup.name)
             if (favgroup.private) {
                 if (session.username !== username) return functions.dom.replaceLocation("/403")

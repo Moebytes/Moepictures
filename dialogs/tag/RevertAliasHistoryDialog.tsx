@@ -25,7 +25,7 @@ const RevertAliasHistoryDialog: React.FunctionComponent = (props) => {
         if (revertAliasHistoryID) {
             document.body.style.pointerEvents = "none"
             document.body.style.userSelect = "none"
-            document.title = getTitle() || ""
+            functions.dom.changeTitle(getTitle(), i18n)
         } else {
             document.body.style.pointerEvents = "all"
             document.body.style.userSelect = "auto"
