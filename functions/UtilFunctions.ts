@@ -74,6 +74,14 @@ export default class UtilFunctions {
         })
     }
 
+    public static encodeEntities = (string: string) => {
+        return string
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;")
+    }
+
     public static cleanHTML = (str: string) => {
         return this.decodeEntities(str).replace(/<\/?[a-z][^>]*>/gi, "").replace(/\r?\n|\r/g, "")
     }

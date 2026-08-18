@@ -593,6 +593,9 @@ app.get("/{*page}", async (req: Request, res: Response) => {
         }
     }
 
+    title = functions.util.encodeEntities(title)
+    description = functions.util.encodeEntities(description)
+
     const newDocument = document
       .replace(/<title>.*?<\/title>/, `<title>${title}</title>`)
       .replace(/<meta name="description" content=".*?">/, `<meta name="description" content="${description}">`)

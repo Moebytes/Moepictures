@@ -592,7 +592,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                     <NoteToggleOffIcon className="note-editor-button" onClick={() => setNoteMode(false)}/>
                 </div>
                 {bubbleJSX()}
-                <ShapeEditor vectorWidth={targetWidth} vectorHeight={targetHeight} scale={scale} style={{pointerEvents: noteDrawingEnabled ? "all" : "none"}}>
+                <ShapeEditor vectorWidth={targetWidth} vectorHeight={targetHeight} scale={scale} 
+                style={{pointerEvents: noteDrawingEnabled ? "all" : "none"}} focusOnAdd={!props.reader} focusOnDelete={false}>
                     <DrawLayer onAddShape={({x, y, width, height}) => {
                         if (!noteDrawingEnabled) return
                         setItems((prev) => {

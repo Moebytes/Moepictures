@@ -38,12 +38,15 @@ import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {PostFull} from "../../types/Types"
 import "./styles/readerpage.less"
 
-const ReaderImage = ({pageNumber, img, post, order, loaded}) => {
+const ReaderImage = ({rootRef, pageNumber, img, post, order, loaded}) => {
     const {mobile} = useLayoutSelector()
     const {readerPage} = usePageSelector()
     const {setReaderPage} = usePageActions()
     const {readerHorizontal, readerThumbnails, readerInvert} = useSearchSelector()
-    const {ref, inView} = useInView()
+    const {ref, inView} = useInView({
+        root: rootRef?.current || null,
+        threshold: 0.2
+    })
 
     useEffect(() => {
         if (!loaded) return
@@ -336,10 +339,10 @@ const ReaderPage: React.FunctionComponent = () => {
     const generateImages = () => {
         let jsx = [] as React.ReactElement[]
         for (let i = 0; i < images.length; i++) {
-            jsx.push(<ReaderImage key={i} pageNumber={i + 1} img={images[i]} post={post} order={i + 1} loaded={loaded}/>)
+            jsx.push(<ReaderImage rootRef={rootRef} key={i} pageNumber={i + 1} img={images[i]} post={post} order={i + 1} loaded={loaded}/>)
         }
         if (!jsx.length) {
-            return <LoadingSpinner/>
+            jsx.push(<LoadingSpinner/>)
         }
         return (
             <div className={`reader-image-container ${readerHorizontal ? "reader-image-container-horizontal" : ""}`}
@@ -350,7 +353,6 @@ const ReaderPage: React.FunctionComponent = () => {
     return (
         <>
         <LocalStorage/>
-        <DragScroll/>
         <div className="reader-page">
             <div className="reader-controls" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <div className="reader-controls-box">

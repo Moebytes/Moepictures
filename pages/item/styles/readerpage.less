@@ -9,9 +9,10 @@
 .reader-page {
     display: flex;
     flex-direction: column;
-    background-color: var(--background);  
+    background-color: var(--background);
     width: 100vw;
-    overflow-y: auto;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .reader-controls {
@@ -224,10 +225,10 @@
     display: flex;
     justify-content: center;
     width: 100%;
+    height: 100%;
     background-color: transparent;
-    flex-grow: 1;
-    flex-shrink: 0;
-    overflow-y: auto;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .reader-renderer-horizontal {
@@ -240,6 +241,7 @@
     align-items: center;
     width: 100%;
     height: 100%;
+    transition: margin 0.2s;
 }
 
 .reader-image-container-horizontal {
@@ -276,13 +278,16 @@
     align-items: center;
     width: 10%;
     max-height: 800px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: auto;
     background-color: var(--background);
     transform-origin: left;
     margin-left: 10px;
     transform: translateX(0px);
     transition: transform 0.3s;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
 }
 
 .reader-thumbnail-hidden {
@@ -306,12 +311,15 @@
     justify-content: flex-start;
     width: 100%;
     margin-left: 0px;
-    overflow-y: hidden;
-    overflow-x: auto;
+    overflow: auto;
     background-color: var(--background);
     transform-origin: top;
     transform: translateY(0px);
     transition: transform 0.3s;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
 }
 
 .reader-thumbnail-hidden-horizontal {
@@ -328,6 +336,8 @@
     margin: 10px;
     width: auto;
     height: auto;
+    border: 3px solid transparent;
+
     &:hover {
         cursor: pointer;
         filter: brightness(120%);
