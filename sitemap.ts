@@ -65,23 +65,23 @@ const posts = await run(`SELECT * FROM posts WHERE posts.rating = 'cute'`) as Po
 ssh.close()
 
 let urls = [
-    "https://moepictures.net/",
-    "https://moepictures.net/posts",
-    "https://moepictures.net/comments",
-    "https://moepictures.net/artists",
-    "https://moepictures.net/characters",
-    "https://moepictures.net/series",
-    "https://moepictures.net/tags",
-    "https://moepictures.net/help",
-    "https://moepictures.net/terms",
-    "https://moepictures.net/contact",
-    "https://moepictures.net/upload",
-    "https://moepictures.net/signup",
-    "https://moepictures.net/login"
+    "https://moepictures.com/",
+    "https://moepictures.com/posts",
+    "https://moepictures.com/comments",
+    "https://moepictures.com/artists",
+    "https://moepictures.com/characters",
+    "https://moepictures.com/series",
+    "https://moepictures.com/tags",
+    "https://moepictures.com/help",
+    "https://moepictures.com/terms",
+    "https://moepictures.com/contact",
+    "https://moepictures.com/upload",
+    "https://moepictures.com/signup",
+    "https://moepictures.com/login"
 ]
 
 for (const post of posts) {
-    urls.push(`https://moepictures.net/post/${post.postID}/${post.slug}`)
+    urls.push(`https://moepictures.com/post/${post.postID}/${post.slug}`)
 }
 
 fs.writeFileSync("public/sitemap.txt", urls.join("\n"))

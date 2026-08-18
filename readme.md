@@ -32,7 +32,7 @@ Tags support custom grouping, useful to separate each characters specific tags i
 ### MoeText
 
 MoeText is our custom language used to format styling in comments and replies. It also handles linking to items such as posts. 
-See https://moepictures.net/help#moetext for the list of formatting replacements. 
+See https://moepictures.com/help#moetext for the list of formatting replacements. 
 
 ### Design
 

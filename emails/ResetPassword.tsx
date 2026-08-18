@@ -73,7 +73,7 @@ const ResetPassword = (props: Props) => {
             <Preview>Moepictures Password Reset</Preview>
             <Body style={{width: "80%"}}>
                 <Container className="logo-container">
-                    <Link href="https://moepictures.net"><Img className="logo" src="https://i.imgur.com/RjiDNHk.png"/></Link>
+                    <Link href="https://moepictures.com"><Img className="logo" src="https://i.imgur.com/RjiDNHk.png"/></Link>
                 </Container>
                 <Container className="text-container">
                     <Text className="text">

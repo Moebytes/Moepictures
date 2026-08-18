@@ -408,7 +408,7 @@ export default class ServerUtil {
     }
 
     public static isAllowedReferer = async (referer: string) => {
-        const ourDomains = ["moepictures.net", "moepictures.moe"]
+        const ourDomains = ["moepictures.com", "moepictures.net", "moepictures.moe"]
         if (!referer) return true
 
         try {

@@ -262,7 +262,7 @@ const PaymentRoutes = (app: Express) => {
             if (!token) return void res.status(401).end()
 
             const ticket = await googleAuthClient.verifyIdToken({idToken: token, 
-                audience: "https://moepictures.net/api/google/notifications"})
+                audience: "https://moepictures.com/api/google/notifications"})
 
             const payload = ticket.getPayload()
             if (payload?.email !== process.env.GOOGLE_CLIENT_EMAIL) return void res.status(401).end()

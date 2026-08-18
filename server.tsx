@@ -566,9 +566,9 @@ app.get("/{*page}", async (req: Request, res: Response) => {
     const document = fs.readFileSync(path.join(__dirname, "./dist/client/index.html"), {encoding: "utf-8"})
 
     let title = "Moepictures: Cute Anime Girl Art"
-    let description = "Search for cute and moe anime girl artwork. With our detailed tagging system you can easily find your favorite characters and artists."
+    let description = "Search for super cute and moe anime girl art! With our detailed tagging system you can find your favorite characters and artists easily. Create an account to manage your favorites and leave comments with cute emojis and MoeText."
     let image = "/assets/images/mainimg.png"
-    let url = "https://moepictures.net"
+    let url = "https://moepictures.com"
 
     const key = decodeURIComponent(req.path.slice(1))
     const postID = key.match(/(?<=post\/)\d+(?=\/)/)?.[0]

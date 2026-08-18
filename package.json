@@ -1,7 +1,7 @@
 {
   "name": "moepictures",
   "version": "1.0.0",
-  "description": "Moepictures is an anime image board for cute/moe art.",
+  "description": "Moepictures is an image board for cute/moe anime girl art.",
   "main": "dist/server/server.js",
   "scripts": {
     "start": "npm run build && node --max-old-space-size=8192 dist/server/server.js",
