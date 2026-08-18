@@ -37,6 +37,7 @@ interface Props {
 }
 
 let interval = null as any
+let restoreTimer = null as any
 let reloadedPost = false
 let skipRender = false
 let limit = 100
@@ -163,7 +164,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         const state = location.state
 
         if (state?.restorePosts?.length) {
-            setTimeout(() => {
+            restoreTimer = setTimeout(() => {
                 const searchParams = new URLSearchParams(location.search)
                 let pathString = `${location.pathname}?${searchParams.toString()}`
                 navigate(pathString, {replace: true, state: {}})
@@ -361,6 +362,10 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         poll()
     }, [scroll, visibleItems, page])
 
+    const onClick = () => {
+        clearTimeout(restoreTimer)
+    }
+
     const generateImagesJSX = () => {
         const jsx = [] as React.ReactElement[]
         let visible = visibleItems as PostSearch[]
@@ -384,22 +389,22 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             if (!img) img = thumbnail
             if (post.type === "model") {
                 jsx.push(<GridModel id={post.postID} img={img} model={original} post={post} ref={postsRef[i]} 
-                    reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
+                    reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve} onClick={onClick}/>)
             } else if (post.type === "live2d") {
                 jsx.push(<GridLive2D id={post.postID} img={img} live2d={original} post={post} ref={postsRef[i]} 
-                    reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
+                    reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve} onClick={onClick}/>)
             } else if (post.type === "audio") {
                 jsx.push(<GridSong id={post.postID} img={img} cached={cached} audio={original} post={post} 
-                    ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
+                    ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve} onClick={onClick}/>)
             } else if (post.type === "video") {
                 jsx.push(<GridVideo id={post.postID} img={img} cached={cached} video={original} live={liveThumbnail} 
-                    post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
+                    post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve} onClick={onClick}/>)
             } else if (post.type === "animation") {
                 jsx.push(<GridAnimation id={post.postID} img={img} cached={cached} anim={original} live={liveThumbnail} 
-                    post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
+                    post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve} onClick={onClick}/>)
             } else {
                 const comicPages = post.type === "comic" ? post.images.map((image) => functions.link.getImageLink(image, session.upscaledImages)) : null
-                jsx.push(<GridImage id={post.postID} img={img} cached={cached} original={original} live={liveThumbnail} 
+                jsx.push(<GridImage id={post.postID} img={img} cached={cached} original={original} live={liveThumbnail}  onClick={onClick}
                     comicPages={comicPages} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} onLoad={promise.resolve}/>)
             }
         }

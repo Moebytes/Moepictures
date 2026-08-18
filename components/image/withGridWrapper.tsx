@@ -39,6 +39,7 @@ interface Props {
     autoLoad?: boolean
     reupdate?: () => void
     onLoad?: () => void
+    onClick?: () => void
 }
 
 interface Ref {
@@ -387,6 +388,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         }, [downloadFlag, session, format])
     
         const onClick = (event: React.MouseEvent<HTMLElement>) => {
+            props.onClick?.()
             if (event.metaKey || event.ctrlKey || event.button === 1) {
                 if (!location.pathname.includes("/post/")) setPost(null)
                 event.preventDefault()
