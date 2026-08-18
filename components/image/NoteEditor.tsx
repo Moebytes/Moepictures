@@ -6,6 +6,7 @@
 
 import React, {useReducer, useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
+import {createPortal} from "react-dom"
 import {useFilterSelector, useInteractionActions, useLayoutSelector,  
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, 
 useSessionActions, useActiveActions, useFlagActions, useNoteDialogSelector, 
@@ -551,29 +552,27 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     }
 
     const bubbleJSX = () => {
-        if (bubbleToggle) {
-            if (bubbleData.character) {
-                return (
-                    <div className="note-character-bubble" ref={bubbleRef} style={{width: `${bubbleWidth}px`, 
-                    minHeight: "25px", left: `${bubbleData.x}px`, top: `${bubbleData.y}px`}}>
-                        {bubbleData.characterTag?.replaceAll("-", " ")}
-                    </div>
-                )
-            } else {
-                return (
-                    <div className="note-bubble" ref={bubbleRef} style={{width: `${bubbleWidth}px`, minHeight: "25px", left: `${bubbleData.x}px`, 
-                        top: `${bubbleData.y}px`, fontFamily: bubbleData.fontFamily || "Tahoma", fontSize: `${(bubbleData.fontSize || 100) / 5}px`,
-                        fontWeight: bubbleData.bold ? "bold" : "normal", fontStyle: bubbleData.italic ? "italic" : "normal"}}>
-                        {getBubbleText()}
-                    </div>
-                )
-            }
-        }
+        if (!bubbleToggle) return null
+        const bubble = bubbleData.character ? (
+            <div className="note-character-bubble" ref={bubbleRef} style={{width: `${bubbleWidth}px`, 
+            minHeight: "25px", left: `${bubbleData.x}px`, top: `${bubbleData.y}px`}}>
+                {bubbleData.characterTag?.replaceAll("-", " ")}
+            </div>
+        ) : (
+            <div className="note-bubble" ref={bubbleRef} style={{width: `${bubbleWidth}px`, minHeight: "25px", left: `${bubbleData.x}px`, 
+                top: `${bubbleData.y}px`, fontFamily: bubbleData.fontFamily || "Tahoma", fontSize: `${(bubbleData.fontSize || 100) / 5}px`,
+                fontWeight: bubbleData.bold ? "bold" : "normal", fontStyle: bubbleData.italic ? "italic" : "normal"}}>
+                {getBubbleText()}
+            </div>
+        )
+        return createPortal(bubble, document.body)
     }
 
     if (!targetWidth || !targetHeight) return null
 
     return (
+        <>
+        {bubbleJSX()}
         <div className="note-editor" style={{display: noteMode ? "flex" : "none", marginTop: props.reader ? "0px" : "20px", marginBottom: props.reader ? "0px" : "20px"}}>
             <div className="note-editor-filters" ref={filtersRef} onMouseDown={() => {if (enableDrag) setEnableDrag(false)}}>
                 <div className={`note-editor-buttons ${buttonHover ? "show-note-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
@@ -591,7 +590,6 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                     <NoteViewIcon className="note-editor-button" onClick={() => setNoteDrawingEnabled(!noteDrawingEnabled)}/>}
                     <NoteToggleOffIcon className="note-editor-button" onClick={() => setNoteMode(false)}/>
                 </div>
-                {bubbleJSX()}
                 <ShapeEditor vectorWidth={targetWidth} vectorHeight={targetHeight} scale={scale} 
                 style={{pointerEvents: noteDrawingEnabled ? "all" : "none"}} focusOnAdd={!props.reader} focusOnDelete={false}>
                     <DrawLayer onAddShape={({x, y, width, height}) => {
@@ -780,6 +778,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                 </ShapeEditor>
             </div>
         </div>
+        </>
     )
 }
 
