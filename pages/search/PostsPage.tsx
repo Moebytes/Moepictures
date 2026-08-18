@@ -40,7 +40,7 @@ const PostsPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         functions.dom.changeTitle("", i18n)
-    }, [i18n])
+    }, [])
 
     useEffect(() => {
         const scrollHandler = () => {

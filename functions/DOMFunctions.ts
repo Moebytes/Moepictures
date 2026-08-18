@@ -136,7 +136,7 @@ export default class DOMFunctions {
     }
 
     public static changeTitle = (title: string | undefined, i18n: typeof enLocale) => {
-        if (!title?.trim()) {
+        if (!title) {
             document.title = i18n.title
         } else {
             document.title = `${title} | ${i18n.title}`

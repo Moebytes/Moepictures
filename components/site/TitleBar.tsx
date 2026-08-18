@@ -55,7 +55,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                 if (t.startsWith("-")) return `-${t.replaceAll("-", " ").trim()}`
                 return t.replaceAll("-", " ")
             }).join(", "))
-            functions.dom.changeTitle(text, i18n)
+            functions.dom.changeTitle(text.trim(), i18n)
             setHeaderText(text)
         }
     }, [headerFlag])
