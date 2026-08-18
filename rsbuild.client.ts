@@ -58,8 +58,7 @@ export default defineConfig({
         entry: {index: "./index.tsx"}
     },
     html: {
-        template: "./index.html",
-        favicon: "./assets/icons/favicon.png"
+        template: "./index.html"
     },
     output: {
         target: "web",
