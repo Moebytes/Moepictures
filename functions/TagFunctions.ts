@@ -37,9 +37,10 @@ export default class TagFunctions {
                 image: "", imageHash: "", hidden: false, r18: false, social: "", twitter: "",
                 website: "", fandom: "", wikipedia: ""})
         }
+        let artistTags = result.filter((t: any) => t.type === "artist")
         let characterTags = result.filter((t: any) => t.type === "character")
         let seriesTags = result.filter((t: any) => t.type === "series")
-        return isBanner ? [...seriesTags, ...characterTags] : result
+        return isBanner ? [...artistTags, ...seriesTags, ...characterTags] : result
     }
 
     public static parseTagsUnverified = async (posts: UnverifiedPost[]) => {

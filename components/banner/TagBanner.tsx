@@ -4,7 +4,7 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useRef, useState} from "react"
+import React, {useEffect, useEffectEvent, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useLayoutSelector, useSessionSelector, useSessionActions, 
 useSearchSelector, useSearchActions, useCacheSelector, usePageSelector,
@@ -22,7 +22,7 @@ const TagBanner: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
-    const {sizeType, scroll} = useSearchSelector()
+    const {search, sizeType, scroll} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
     const {bannerTags, posts, visiblePosts} = useCacheSelector()
     const {setBannerTags} = useCacheActions()
@@ -128,9 +128,11 @@ const TagBanner: React.FunctionComponent = (props) => {
         return visible
     }
 
-    const updateBannerTags = async () => {
+    const updateBannerTags = useEffectEvent(async () => {
         const visibleSlice = getVisibleSlice()
         const visibleTags = await functions.tag.parseTags(visibleSlice, session, setSessionFlag, true)
+        const searchTags = search.split(/ +/g).map((s) => s.toLowerCase())
+        const artistTags = [] as TagCount[]
         const characterTags = [] as TagCount[]
         const characterTagsImg = [] as TagCount[]
         const seriesTags = [] as TagCount[]
@@ -138,14 +140,16 @@ const TagBanner: React.FunctionComponent = (props) => {
         for (const tag of visibleTags) {
             if (tag.tag === "original") continue
             if (tag.tag === "no-series") continue
+            if (tag.tag === "unknown-artist") continue
             if (tag.tag === "unknown-series") continue
             if (tag.tag === "unknown-character") continue
+            if (tag.type === "artist" && searchTags.includes(tag.tag)) artistTags.push(tag)
             if (tag.type === "character") tag.image ? characterTagsImg.push(tag) : characterTags.push(tag)
             if (tag.type === "series") tag.image ? seriesTagsImg.push(tag) : seriesTags.push(tag)
         }
-        let bannerTags = [...characterTagsImg, ...seriesTagsImg, ...characterTags, ...seriesTags]
+        let bannerTags = [...artistTags, ...characterTagsImg, ...seriesTagsImg, ...characterTags, ...seriesTags]
         if (bannerTags.length) setBannerTags(bannerTags)
-    }
+    })
 
     useEffect(() => {
         clearTimeout(timer)
