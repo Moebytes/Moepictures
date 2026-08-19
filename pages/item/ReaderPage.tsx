@@ -291,7 +291,7 @@ const ReaderPage: React.FunctionComponent = () => {
             })
         } else {
             document.querySelectorAll(".reader-image-container").forEach((e: any) => {
-                e.style.marginTop = `0px`
+                e.style.marginTop = `150px`
             })
         }
         scrollHandler()
