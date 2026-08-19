@@ -286,10 +286,8 @@ const ReaderPage: React.FunctionComponent = () => {
             }
         }
         if (readerThumbnails && readerHorizontal) {
-            const thumbnailHeight = Array.from(document.querySelectorAll(".reader-thumbnail-container")).reduce((p, c) => p.clientHeight > c.clientHeight ? p : c)?.clientHeight
-            if (!thumbnailHeight) return 
             document.querySelectorAll(".reader-image-container").forEach((e: any) => {
-                e.style.marginTop = `${thumbnailHeight}px`
+                e.style.marginTop = `300px`
             })
         } else {
             document.querySelectorAll(".reader-image-container").forEach((e: any) => {
