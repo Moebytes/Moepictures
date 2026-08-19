@@ -715,7 +715,7 @@ const PostPage: React.FunctionComponent = () => {
     return (
         <>
         <TitleBar post={post} goBack={true} historyID={historyID} noteID={noteID}/>
-        <NavBar goBack={true}/>
+        <NavBar/>
         <div className="body">
             <SideBar post={post} order={order} artists={tagCategories?.artists} 
             characters={tagCategories?.characters} series={tagCategories?.series} 

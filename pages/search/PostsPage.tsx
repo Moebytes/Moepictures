@@ -89,7 +89,7 @@ const PostsPage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <TitleBar reset={true}/>
+        <TitleBar/>
         <NavBar/>
         <div className="body">
             <SideBar/>

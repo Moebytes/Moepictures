@@ -20,7 +20,6 @@ import {PostFull, PostHistory, UnverifiedPost, Themes} from "../../types/Types"
 import "./styles/titlebar.less"
 
 interface Props {
-    reset?: boolean
     goBack?: boolean
     post?: PostFull | PostHistory | UnverifiedPost | null
     historyID?: string | null
@@ -68,21 +67,10 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
 
     const titleClick = async (event: React.MouseEvent) => {
         if (mobile && (location.pathname === "/" || location.pathname === "/posts")) if (event.clientY < 180) return
-        if (props.reset) {
-            setSearch("")
-            setImageType("all")
-            setRatingType("all")
-            setStyleType("all")
-            setSortType("date")
-            setSearchFlag(true)
-            navigate("/posts")
-            window.scrollTo(0, 0)
-        } else {
-            let pageText = page > 1 ? `?page=${page}` : ""
-            navigate(`/posts${pageText}`, {
-                state: {restorePosts: posts, restoreScrollY: scrollY, restorePage: page}
-            })
-        }
+        let pageText = page > 1 ? `?page=${page}` : ""
+        navigate(`/posts${pageText}`, {
+            state: {restorePosts: posts, restoreScrollY: scrollY, restorePage: page}
+        })
     }
 
     useEffect(() => {

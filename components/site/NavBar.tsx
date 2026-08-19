@@ -30,11 +30,7 @@ usePlaybackActions, useInteractionSelector, useCacheSelector, usePageSelector} f
 import HSLDropdown from "../../ui/HSLDropdown"
 import "./styles/navbar.less"
 
-interface Props {
-    goBack?: boolean
-}
-
-const NavBar: React.FunctionComponent<Props> = (props) => {
+const NavBar: React.FunctionComponent = () => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {i18n, siteHue, siteSaturation, siteLightness, particles, particleAmount, particleSize, particleSpeed} = useThemeSelector()
     const {setParticles, setParticleAmount, setParticleSize, setParticleSpeed} = useThemeActions()
@@ -137,15 +133,10 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
 
     const postsClick = () => {
         setHideMobileNavbar(true)
-        if (props.goBack) {
-            let pageText = page > 1 ? `?page=${page}` : ""
-            navigate(`/posts${pageText}`, {
-                state: {restorePosts: posts, restoreScrollY: scrollY, restorePage: page}
-            })
-        } else {
-            navigate("/posts")
-            setSearchFlag(true)
-        }
+        let pageText = page > 1 ? `?page=${page}` : ""
+        navigate(`/posts${pageText}`, {
+            state: {restorePosts: posts, restoreScrollY: scrollY, restorePage: page}
+        })
     }
 
     useEffect(() => {
