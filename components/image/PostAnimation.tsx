@@ -6,6 +6,7 @@
 
 import React, {useEffect, useState, useRef, forwardRef, useImperativeHandle} from "react"
 import {useNavigate} from "react-router-dom"
+import {createPortal} from "react-dom"
 import withPostWrapper, {PostWrapperProps, PostWrapperRef} from "./withPostWrapper"
 import {useSessionSelector, useFilterSelector, usePlaybackSelector, usePlaybackActions, useSearchSelector, useInteractionActions} from "../../store"
 import Slider from "react-slider"
@@ -36,7 +37,7 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
     const [img, setImg] = useState("")
     const [zip, setZip] = useState("")
     const [encodingOverlay, setEncodingOverlay] = useState(false)
-    const {toggleFullscreen, getCurrentBuffer, updateProgressText, seek, reset, changeReverse} = props
+    const {toggleFullscreen, containerRef, getCurrentBuffer, updateProgressText, seek, reset, changeReverse} = props
     const {naturalWidth, setNaturalWidth} = props
     const {naturalHeight, setNaturalHeight} = props
     const {imageLoaded, setImageLoaded} = props
@@ -320,69 +321,76 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
         if (gifControls.current) gifControls.current.style.opacity = "0"
     }
 
+    const animationControlsJSX = () => {
+        const controls = (
+            <div className="gif-controls" ref={gifControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
+                {duration >= 0.1 ?
+                <div className="gif-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <p className="gif-control-text">{dragging ? functions.date.formatSeconds(dragProgress || 0) : functions.date.formatSeconds(secondsProgress)}</p>
+                    <Slider ref={gifSliderRef} className="gif-slider" trackClassName="gif-slider-track" thumbClassName="gif-slider-thumb" min={0} max={100} 
+                    value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(reverse ? 100 - value : value)}/>
+                    <p className="gif-control-text">{functions.date.formatSeconds(duration)}</p>
+                </div> : null}
+                <div className="gif-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="gif-control-row-container">
+                        <ReverseIcon className="gif-control-img" onClick={() => changeReverse()}/>
+                        <SpeedIcon className="gif-control-img" ref={gifSpeedRef} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
+                    </div> 
+                    <div className="gif-control-row-container">
+                        {/* <img className="control-img" src={gifRewindIcon}/> */}
+                        {paused ?
+                        <PlayIcon className="gif-control-img" onClick={() => setPaused(!paused)}/> :
+                        <PauseIcon className="gif-control-img" onClick={() => setPaused(!paused)}/>}
+                        {/* <img className="control-img" src={gifFastforwardIcon}/> */}
+                    </div>    
+                    <div className="gif-control-row-container">
+                        <ClearIcon className="gif-control-img" onClick={() => reset()}/>
+                    </div> 
+                    <div className="gif-control-row-container">
+                        <FullscreenIcon className="gif-control-img" onClick={() => toggleFullscreen()}/>
+                    </div> 
+                </div>
+                <div className={`gif-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), 
+                    marginTop: "-280px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(4); setShowSpeedDropdown(false)}}>
+                        <span className="gif-speed-dropdown-text">4x</span>
+                    </div>
+                    <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(2); setShowSpeedDropdown(false)}}>
+                        <span className="gif-speed-dropdown-text">2x</span>
+                    </div>
+                    <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(1.75); setShowSpeedDropdown(false)}}>
+                        <span className="gif-speed-dropdown-text">1.75x</span>
+                    </div>
+                    <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(1.5); setShowSpeedDropdown(false)}}>
+                        <span className="gif-speed-dropdown-text">1.5x</span>
+                    </div>
+                    <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(1.25); setShowSpeedDropdown(false)}}>
+                        <span className="gif-speed-dropdown-text">1.25x</span>
+                    </div>
+                    <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(1); setShowSpeedDropdown(false)}}>
+                        <span className="gif-speed-dropdown-text">1x</span>
+                    </div>
+                    <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(0.75); setShowSpeedDropdown(false)}}>
+                        <span className="gif-speed-dropdown-text">0.75x</span>
+                    </div>
+                    <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(0.5); setShowSpeedDropdown(false)}}>
+                        <span className="gif-speed-dropdown-text">0.5x</span>
+                    </div>
+                    <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(0.25); setShowSpeedDropdown(false)}}>
+                        <span className="gif-speed-dropdown-text">0.25x</span>
+                    </div>
+                </div>
+            </div>
+        )
+        return containerRef.current ? createPortal(controls, containerRef.current) : null
+    }
+
     return (
         <>
+        {animationControlsJSX()}
         <img draggable={false} className="dummy-post-image" src={img}/>
         <div className="encoding-overlay" style={{display: encodingOverlay ? "flex" : "none"}}>
             <span className="encoding-overlay-text">{`Rendering GIF...`}</span>
-        </div>
-        <div className="gif-controls" ref={gifControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
-            {duration >= 0.1 ?
-            <div className="gif-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <p className="gif-control-text">{dragging ? functions.date.formatSeconds(dragProgress || 0) : functions.date.formatSeconds(secondsProgress)}</p>
-                <Slider ref={gifSliderRef} className="gif-slider" trackClassName="gif-slider-track" thumbClassName="gif-slider-thumb" min={0} max={100} 
-                value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(reverse ? 100 - value : value)}/>
-                <p className="gif-control-text">{functions.date.formatSeconds(duration)}</p>
-            </div> : null}
-            <div className="gif-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <div className="gif-control-row-container">
-                    <ReverseIcon className="gif-control-img" onClick={() => changeReverse()}/>
-                    <SpeedIcon className="gif-control-img" ref={gifSpeedRef} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
-                </div> 
-                <div className="gif-control-row-container">
-                    {/* <img className="control-img" src={gifRewindIcon}/> */}
-                    {paused ?
-                    <PlayIcon className="gif-control-img" onClick={() => setPaused(!paused)}/> :
-                    <PauseIcon className="gif-control-img" onClick={() => setPaused(!paused)}/>}
-                    {/* <img className="control-img" src={gifFastforwardIcon}/> */}
-                </div>    
-                <div className="gif-control-row-container">
-                    <ClearIcon className="gif-control-img" onClick={() => reset()}/>
-                </div> 
-                <div className="gif-control-row-container">
-                    <FullscreenIcon className="gif-control-img" onClick={() => toggleFullscreen()}/>
-                </div> 
-            </div>
-            <div className={`gif-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), 
-                marginTop: "-280px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(4); setShowSpeedDropdown(false)}}>
-                    <span className="gif-speed-dropdown-text">4x</span>
-                </div>
-                <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(2); setShowSpeedDropdown(false)}}>
-                    <span className="gif-speed-dropdown-text">2x</span>
-                </div>
-                <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(1.75); setShowSpeedDropdown(false)}}>
-                    <span className="gif-speed-dropdown-text">1.75x</span>
-                </div>
-                <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(1.5); setShowSpeedDropdown(false)}}>
-                    <span className="gif-speed-dropdown-text">1.5x</span>
-                </div>
-                <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(1.25); setShowSpeedDropdown(false)}}>
-                    <span className="gif-speed-dropdown-text">1.25x</span>
-                </div>
-                <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(1); setShowSpeedDropdown(false)}}>
-                    <span className="gif-speed-dropdown-text">1x</span>
-                </div>
-                <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(0.75); setShowSpeedDropdown(false)}}>
-                    <span className="gif-speed-dropdown-text">0.75x</span>
-                </div>
-                <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(0.5); setShowSpeedDropdown(false)}}>
-                    <span className="gif-speed-dropdown-text">0.5x</span>
-                </div>
-                <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(0.25); setShowSpeedDropdown(false)}}>
-                    <span className="gif-speed-dropdown-text">0.25x</span>
-                </div>
-            </div>
         </div>
         <img draggable={false} className="post-lightness-overlay" ref={lightnessRef} src={img}/>
         <img draggable={false} className="post-sharpen-overlay" ref={overlayRef} src={img}/>

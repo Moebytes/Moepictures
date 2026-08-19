@@ -6,6 +6,7 @@
 
 import React, {useEffect, useState, useRef, forwardRef, useImperativeHandle} from "react"
 import {useNavigate} from "react-router-dom"
+import {createPortal} from "react-dom"
 import withPostWrapper, {PostWrapperProps, PostWrapperRef} from "./withPostWrapper"
 import {useSessionSelector, useFilterSelector, usePlaybackSelector, usePlaybackActions, useSearchSelector, useInteractionActions,
 useMiscDialogActions, useMiscDialogSelector} from "../../store"
@@ -35,7 +36,7 @@ const PostImage = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
     const [lineart, setLineart] = useState("")
     const [showSegmentate, setShowSegmentate] = useState(false)
     const [showLineart, setShowLineart] = useState(false)
-    const {toggleFullscreen} = props
+    const {toggleFullscreen, containerRef} = props
     const {imageLoaded, setImageLoaded} = props
     const {tempLink, setTempLink, getCurrentLink} = props
     const {imageRef, lightnessRef, overlayRef, effectRef, pixelateRef, onLoaded} = props
@@ -144,22 +145,29 @@ const PostImage = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
         return result
     }
 
+    const imageControlsJSX = () => {
+        const controls = (
+            <div className="image-controls" ref={imageControls} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
+                <div className="image-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="image-control-row-container">
+                        {disableZoom ?
+                        <ZoomOffIcon className="image-control-img-purple" onClick={() => setDisableZoom(!disableZoom)}/> :
+                        <ZoomOffIcon className="image-control-img" onClick={() => setDisableZoom(!disableZoom)}/>}
+                        <ZoomOutIcon className="image-control-img" onClick={zoomOut}/>
+                        <ZoomInIcon className="image-control-img" onClick={zoomIn}/>
+                        <FullscreenIcon className="image-control-img" onClick={() => toggleFullscreen()}/>
+                        <ReaderIcon className="image-control-img" onClick={() => navigate(`/post/${props.post?.postID}/${props.post?.slug}/reader`)}/>
+                    </div> 
+                </div>
+            </div>
+        )
+        return containerRef.current ? createPortal(controls, containerRef.current) : null
+    }
+
     return (
         <>
+        {imageControlsJSX()}
         <img draggable={false} className="dummy-post-image" src={getImg()}/>
-        <div className="image-controls" ref={imageControls} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
-            <div className="image-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <div className="image-control-row-container">
-                    {disableZoom ?
-                    <ZoomOffIcon className="image-control-img-purple" onClick={() => setDisableZoom(!disableZoom)}/> :
-                    <ZoomOffIcon className="image-control-img" onClick={() => setDisableZoom(!disableZoom)}/>}
-                    <ZoomOutIcon className="image-control-img" onClick={zoomOut}/>
-                    <ZoomInIcon className="image-control-img" onClick={zoomIn}/>
-                    <FullscreenIcon className="image-control-img" onClick={() => toggleFullscreen()}/>
-                    <ReaderIcon className="image-control-img" onClick={() => navigate(`/post/${props.post?.postID}/${props.post?.slug}/reader`)}/>
-                </div> 
-            </div>
-        </div>
         <TransformWrapper disabled={disableZoom} ref={zoomRef} minScale={1} maxScale={8} onZoomStop={(ref) => setZoom(ref.state.scale)} 
         wheel={{step: 0.1, touchPadDisabled: true}} zoomAnimation={{size: 0, disabled: true}} alignmentAnimation={{disabled: true}} 
         doubleClick={{mode: "reset", animationTime: 0}} panning={{disabled: zoom === 1}}>

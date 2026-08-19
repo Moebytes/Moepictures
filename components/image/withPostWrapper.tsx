@@ -377,7 +377,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
                 setFullscreen(false)
             } else {
                 try {
-                    await fullscreenRef.current?.requestFullscreen?.()
+                    await containerRef.current?.requestFullscreen?.()
                 } catch {
                     // ignore
                 }
@@ -684,51 +684,57 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
             }
         }
 
+        const topButtonsJSX = () => {
+            return (
+                <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={buttonMouseEnter} onMouseLeave={() => setButtonHover(false)}>
+                    <div className={`post-image-special-buttons ${showSpecialIcons ? "show-post-image-special-buttons" : ""}`}>
+                        {showSpecialIcons ? <>
+                        <SegmentateIcon className="post-image-top-button" onClick={toggleSegmentate}/>
+                        <LineartIcon className="post-image-top-button" onClick={toggleLineart}/>
+                        </> : null}
+                    </div>
+
+                    <div className={`post-image-share-buttons ${showShareIcons ? "show-post-image-share-buttons" : ""}`}>
+                        {showShareIcons ? <>
+                        <QrcodeIcon className="post-image-top-button" onClick={() => generateQRCode()}/>
+                        <PinterestIcon className="post-image-top-button" onClick={() => sharePost("pinterest")}/>
+                        <TwitterIcon className="post-image-top-button" onClick={() => sharePost("twitter")}/>
+                        <RedditIcon className="post-image-top-button" onClick={() => sharePost("reddit")}/>
+                        </> : null}
+                    </div>
+
+                    <div className={`post-image-reverse-buttons ${showReverseIcons ? "show-post-image-reverse-buttons" : ""}`}>
+                        {showReverseIcons ? <>
+                        <GoogleIcon className="post-image-top-button" onClick={() => reverseSearch("google")}/>
+                        <BingIcon className="post-image-top-button" onClick={() => reverseSearch("bing")}/>
+                        <YandexIcon className="post-image-top-button" onClick={() => reverseSearch("yandex")}/>
+                        <SaucenaoIcon className="post-image-top-button" onClick={() => reverseSearch("saucenao")}/>
+                        <Ascii2dIcon className="post-image-top-button" onClick={() => reverseSearch("ascii2d")}/>
+                        </> : null}
+                    </div>
+
+                    {getSourceIcon()}
+                    
+                    {!props.noNotes ? <ShareIcon className="post-image-top-button" onClick={() => showAdditionalIcons("share")}/> : null}
+                    {!props.noNotes ? <ReverseSearchIcon className="post-image-top-button" onClick={() => showAdditionalIcons("reverse")}/> : null}
+                    {permissions.isAdmin(session) && !props.noNotes && (props.post?.type === "image" || props.post?.type === "comic") ? 
+                        <WandIcon className="post-image-top-button" onClick={() => showAdditionalIcons("special")}/> : null}
+                    {!props.noNotes ? <Waifu2xIcon className="post-image-top-button" onClick={() => toggleUpscale()}/> : null}
+                    {!props.noNotes ? <NoteToggleOnIcon className="post-image-top-button" 
+                        onClick={() => {setNoteMode(true); setNoteDrawingEnabled(true)}}/> : null}
+                    {!mobile ? (imageExpand ? 
+                        <ContractIcon className="post-image-top-button" onClick={() => setImageExpand(!imageExpand)}/> :
+                        <ExpandIcon className="post-image-top-button" onClick={() => setImageExpand(!imageExpand)}/>) : null}
+                </div>
+            )
+        }
+
         return (
             <div className="post-image-container" style={{zoom: props.scale ? props.scale : 1}}>
                 {!props.noNotes ? <NoteEditor post={props.post} img={getImg()!} order={props.order} unverified={props.unverified} noteID={props.noteID} imageWidth={naturalWidth} imageHeight={naturalHeight} reader={props.reader}/> : null}
                 <div className="post-image-box" ref={containerRef}>
                     <div className="post-image-filters" ref={fullscreenRef}>
-                        <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={buttonMouseEnter} onMouseLeave={() => setButtonHover(false)}>
-                            <div className={`post-image-special-buttons ${showSpecialIcons ? "show-post-image-special-buttons" : ""}`}>
-                                {showSpecialIcons ? <>
-                                <SegmentateIcon className="post-image-top-button" onClick={toggleSegmentate}/>
-                                <LineartIcon className="post-image-top-button" onClick={toggleLineart}/>
-                                </> : null}
-                            </div>
-
-                            <div className={`post-image-share-buttons ${showShareIcons ? "show-post-image-share-buttons" : ""}`}>
-                                {showShareIcons ? <>
-                                <QrcodeIcon className="post-image-top-button" onClick={() => generateQRCode()}/>
-                                <PinterestIcon className="post-image-top-button" onClick={() => sharePost("pinterest")}/>
-                                <TwitterIcon className="post-image-top-button" onClick={() => sharePost("twitter")}/>
-                                <RedditIcon className="post-image-top-button" onClick={() => sharePost("reddit")}/>
-                                </> : null}
-                            </div>
-
-                            <div className={`post-image-reverse-buttons ${showReverseIcons ? "show-post-image-reverse-buttons" : ""}`}>
-                                {showReverseIcons ? <>
-                                <GoogleIcon className="post-image-top-button" onClick={() => reverseSearch("google")}/>
-                                <BingIcon className="post-image-top-button" onClick={() => reverseSearch("bing")}/>
-                                <YandexIcon className="post-image-top-button" onClick={() => reverseSearch("yandex")}/>
-                                <SaucenaoIcon className="post-image-top-button" onClick={() => reverseSearch("saucenao")}/>
-                                <Ascii2dIcon className="post-image-top-button" onClick={() => reverseSearch("ascii2d")}/>
-                                </> : null}
-                            </div>
-
-                            {getSourceIcon()}
-                            
-                            {!props.noNotes ? <ShareIcon className="post-image-top-button" onClick={() => showAdditionalIcons("share")}/> : null}
-                            {!props.noNotes ? <ReverseSearchIcon className="post-image-top-button" onClick={() => showAdditionalIcons("reverse")}/> : null}
-                            {permissions.isAdmin(session) && !props.noNotes && (props.post?.type === "image" || props.post?.type === "comic") ? 
-                                <WandIcon className="post-image-top-button" onClick={() => showAdditionalIcons("special")}/> : null}
-                            {!props.noNotes ? <Waifu2xIcon className="post-image-top-button" onClick={() => toggleUpscale()}/> : null}
-                            {!props.noNotes ? <NoteToggleOnIcon className="post-image-top-button" 
-                                onClick={() => {setNoteMode(true); setNoteDrawingEnabled(true)}}/> : null}
-                            {!mobile ? (imageExpand ? 
-                                <ContractIcon className="post-image-top-button" onClick={() => setImageExpand(!imageExpand)}/> :
-                                <ExpandIcon className="post-image-top-button" onClick={() => setImageExpand(!imageExpand)}/>) : null}
-                        </div>
+                        {topButtonsJSX()}
                         <div className={`post-image-previous-button ${previousButtonHover ? "show-post-image-mid-buttons" : ""}`} 
                             onMouseEnter={() => setPreviousButtonHover(true)} onMouseLeave={() => setPreviousButtonHover(false)}>
                             <PrevIcon className="post-image-mid-button" onClick={() => props.previous?.()}/>

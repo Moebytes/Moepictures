@@ -7,7 +7,7 @@
 import React, {useReducer, useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {createPortal} from "react-dom"
-import {useFilterSelector, useInteractionActions, useLayoutSelector,  
+import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector,
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, 
 useSessionActions, useActiveActions, useFlagActions, useNoteDialogSelector, 
 useNoteDialogActions, useInteractionSelector, useFlagSelector} from "../../store"
@@ -233,6 +233,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
     const {noteMode, noteDrawingEnabled, imageExpand, showTranscript} = useSearchSelector()
     const {setNoteMode, setNoteDrawingEnabled, setShowTranscript} = useSearchActions()
+    const {zoom} = usePlaybackSelector()
     const {pasteNoteFlag} = useFlagSelector()
     const {setRedirect, setPasteNoteFlag} = useFlagActions()
     const {editNoteFlag, editNoteID, editNoteData, saveNoteID, noteOCRDialog, noteOCRFlag} = useNoteDialogSelector()
@@ -339,6 +340,17 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     let scale = targetWidth > targetHeight ? maxWidth / targetWidth : maxHeight / targetHeight
     if (mobile && targetWidth > maxWidth) scale =  maxWidth / targetWidth
     if (targetWidth * scale > maxWidth) scale = maxWidth / targetWidth
+
+    let noteWidth = items[0]?.imageWidth
+    let noteHeight = items[0]?.imageHeight
+
+    if  (noteWidth === targetWidth && noteHeight === targetHeight 
+        && targetWidth < maxWidth && targetHeight < maxHeight) {
+        // workaround scaling issues?
+        scale = 1
+    }
+
+    scale *= zoom
 
     const clearNotes = () => {
         if (!noteDrawingEnabled) return

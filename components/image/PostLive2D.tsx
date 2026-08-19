@@ -6,6 +6,7 @@
 
 import React, {useEffect, useState, useRef, forwardRef, useImperativeHandle, useReducer} from "react"
 import {useNavigate} from "react-router-dom"
+import {createPortal} from "react-dom"
 import withPostWrapper, {PostWrapperProps, PostWrapperRef} from "./withPostWrapper"
 import {useSessionSelector, usePlaybackSelector, usePlaybackActions, useInteractionActions} from "../../store"
 import Slider from "react-slider"
@@ -41,7 +42,7 @@ const PostLive2D = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRe
     const [modelHeight, setModelHeight] = useState(0)
     const [modelSpeed, setModelSpeed] = useState(1)
     const [live2d, setLive2D] = useState("")
-    const {toggleFullscreen} = props
+    const {toggleFullscreen, containerRef} = props
     const {live2DRef, lightnessRef, overlayRef, effectRef, pixelateRef, onLoaded} = props
     const navigate = useNavigate()
 
@@ -268,32 +269,39 @@ const PostLive2D = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRe
         )
     }
 
+    const live2dControlsJSX = () => {
+        const controls = (
+            <div className="image-controls" ref={live2dControls} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
+                <div className="image-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="image-control-row-container">
+                        {disableZoom ?
+                        <ZoomOffIcon className="image-control-img-red" onClick={() => setDisableZoom(!disableZoom)}/> :
+                        <ZoomOffIcon className="image-control-img-orange" onClick={() => setDisableZoom(!disableZoom)}/>}
+                        <ZoomOutIcon className="image-control-img-orange" onClick={zoomOut}/>
+                        <ZoomInIcon className="image-control-img-orange" onClick={zoomIn}/>
+                        {paused ?
+                        <PlayIcon className="image-control-img-orange" onClick={() => setPaused(!paused)}/> :
+                        <PauseIcon className="image-control-img-orange" onClick={() => setPaused(!paused)}/>}
+                        {modelSpeed === 2 ?
+                        <DoubleSpeedIcon className="image-control-img-orange" onClick={() => changeFPS()}/> :
+                        modelSpeed === 1 ? 
+                        <NormalSpeedIcon className="image-control-img-orange" onClick={() => changeFPS()}/> :
+                        <HalfSpeedIcon className="image-control-img-orange" onClick={() => changeFPS()}/>}
+                        <ParameterIcon className="image-control-img-orange" ref={live2dParameterRef} onClick={() => toggleDropdown("parameter")}/>
+                        <PartIcon className="image-control-img-orange" ref={live2dPartRef} onClick={() => toggleDropdown("part")}/>
+                        <FullscreenIcon className="image-control-img-orange" ref={live2dPartRef} onClick={() => toggleFullscreen()}/>
+                    </div> 
+                </div>
+                {parameterDropdownJSX()}
+                {partDropdownJSX()}
+            </div>
+        )
+        return containerRef.current ? createPortal(controls, containerRef.current) : null
+    }
+
     return (
         <>
-        <div className="image-controls" ref={live2dControls} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
-            <div className="image-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <div className="image-control-row-container">
-                    {disableZoom ?
-                    <ZoomOffIcon className="image-control-img-red" onClick={() => setDisableZoom(!disableZoom)}/> :
-                    <ZoomOffIcon className="image-control-img-orange" onClick={() => setDisableZoom(!disableZoom)}/>}
-                    <ZoomOutIcon className="image-control-img-orange" onClick={zoomOut}/>
-                    <ZoomInIcon className="image-control-img-orange" onClick={zoomIn}/>
-                    {paused ?
-                    <PlayIcon className="image-control-img-orange" onClick={() => setPaused(!paused)}/> :
-                    <PauseIcon className="image-control-img-orange" onClick={() => setPaused(!paused)}/>}
-                    {modelSpeed === 2 ?
-                    <DoubleSpeedIcon className="image-control-img-orange" onClick={() => changeFPS()}/> :
-                    modelSpeed === 1 ? 
-                    <NormalSpeedIcon className="image-control-img-orange" onClick={() => changeFPS()}/> :
-                    <HalfSpeedIcon className="image-control-img-orange" onClick={() => changeFPS()}/>}
-                    <ParameterIcon className="image-control-img-orange" ref={live2dParameterRef} onClick={() => toggleDropdown("parameter")}/>
-                    <PartIcon className="image-control-img-orange" ref={live2dPartRef} onClick={() => toggleDropdown("part")}/>
-                    <FullscreenIcon className="image-control-img-orange" ref={live2dPartRef} onClick={() => toggleFullscreen()}/>
-                </div> 
-            </div>
-            {parameterDropdownJSX()}
-            {partDropdownJSX()}
-        </div>
+        {live2dControlsJSX()}
         <img draggable={false} className="post-lightness-overlay" ref={lightnessRef}/>
         <img draggable={false} className="post-sharpen-overlay" ref={overlayRef}/>
         <canvas draggable={false} className="post-effect-canvas" ref={effectRef}></canvas>

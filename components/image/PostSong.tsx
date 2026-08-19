@@ -6,6 +6,7 @@
 
 import React, {useEffect, useState, useRef, forwardRef, useImperativeHandle} from "react"
 import {useNavigate} from "react-router-dom"
+import {createPortal} from "react-dom"
 import withPostWrapper, {PostWrapperProps, PostWrapperRef} from "./withPostWrapper"
 import {useSessionSelector, useFilterSelector, usePlaybackSelector, usePlaybackActions, useSearchSelector, useInteractionActions} from "../../store"
 import Slider from "react-slider"
@@ -43,7 +44,7 @@ const PostSong = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef)
     const audioVolumeSliderRef = useRef<Slider>(null)
     const [song, setSong] = useState("")
     const [coverImg, setCoverImg] = useState("")
-    const {toggleFullscreen} = props
+    const {toggleFullscreen, containerRef} = props
     const {tempLink, setTempLink} = props
     const {audioTempLink, setAudioTempLink} = props
     const {showSpeedDropdown, setShowSpeedDropdown} = props
@@ -222,110 +223,117 @@ const PostSong = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef)
         if (audioControls.current) audioControls.current.style.opacity = "0"
     }
 
+    const audioControlsJSX = () => {
+        const controls = (
+            <div className="audio-controls" ref={audioControls} onMouseUp={() => setAudioDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
+                <div className="audio-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <p className="audio-control-text">{audioDragging ? functions.date.formatSeconds(audioDragProgress || 0) : functions.date.formatSeconds(audioSecondsProgress)}</p>
+                    <Slider ref={audioSliderRef} className="audio-slider" trackClassName="audio-slider-track" thumbClassName="audio-slider-thumb" min={0} max={100} 
+                    value={audioDragging ? ((audioDragProgress || 0) / audioDuration) * 100 : audioProgress} onBeforeChange={() => setAudioDragging(true)} 
+                    onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
+                    <p className="audio-control-text">{functions.date.formatSeconds(audioDuration)}</p>
+                </div>
+                <div className="audio-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="audio-control-row-container">
+                        <ReverseIcon className="audio-control-img" onClick={() => changeReverse()}/>
+                        <SpeedIcon className="audio-control-img" ref={audioSpeedRef} onClick={() => toggleDropdown("speed")}/>
+                        <PreservePitchIcon className="audio-control-img" ref={audioPitchRef} onClick={() => toggleDropdown("pitch")}/>
+                    </div> 
+                    <div className="audio-control-row-container">
+                        <RewindIcon className="audio-control-img" onClick={() => setAudioRewindFlag(true)}/>
+                        {audioPaused ?
+                        <PlayIcon className="audio-control-img" onClick={() => updatePlay()}/> :
+                        <PauseIcon className="audio-control-img" onClick={() => updatePlay()}/>}
+                        <FastforwardIcon className="audio-control-img" onClick={() => setAudioFastForwardFlag(true)}/>
+                    </div>    
+                    <div className="audio-control-row-container">
+                        <ClearIcon className="audio-control-img" onClick={() => setResetFlag(true)}/>
+                    </div>  
+                    <div className="audio-control-row-container">
+                        <FullscreenIcon className="audio-control-img" onClick={() => toggleFullscreen()}/>
+                    </div> 
+                    <div className="audio-control-row-container" onMouseEnter={() => setShowVolumeSlider(true)} onMouseLeave={() => setShowVolumeSlider(false)}>
+                        {audioVolume > 0.5 ?
+                        <VolumeIcon className="audio-control-img" ref={audioVolumeRef} onClick={updateMute}/> :
+                        audioVolume > 0 ?
+                        <VolumeLowIcon className="audio-control-img" ref={audioVolumeRef} onClick={updateMute}/> :
+                        <VolumeMuteIcon className="audio-control-img" ref={audioVolumeRef} onClick={updateMute}/>}
+                    </div> 
+                </div>
+                <div className={`audio-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), marginTop: "-250px"}}
+                onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(4); setShowSpeedDropdown(false)}}>
+                        <span className="audio-speed-dropdown-text">4x</span>
+                    </div>
+                    <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(2); setShowSpeedDropdown(false)}}>
+                        <span className="audio-speed-dropdown-text">2x</span>
+                    </div>
+                    <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(1.75); setShowSpeedDropdown(false)}}>
+                        <span className="audio-speed-dropdown-text">1.75x</span>
+                    </div>
+                    <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(1.5); setShowSpeedDropdown(false)}}>
+                        <span className="audio-speed-dropdown-text">1.5x</span>
+                    </div>
+                    <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(1.25); setShowSpeedDropdown(false)}}>
+                        <span className="audio-speed-dropdown-text">1.25x</span>
+                    </div>
+                    <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(1); setShowSpeedDropdown(false)}}>
+                        <span className="audio-speed-dropdown-text">1x</span>
+                    </div>
+                    <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(0.75); setShowSpeedDropdown(false)}}>
+                        <span className="audio-speed-dropdown-text">0.75x</span>
+                    </div>
+                    <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(0.5); setShowSpeedDropdown(false)}}>
+                        <span className="audio-speed-dropdown-text">0.5x</span>
+                    </div>
+                    <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(0.25); setShowSpeedDropdown(false)}}>
+                        <span className="audio-speed-dropdown-text">0.25x</span>
+                    </div>
+                </div>
+                <div className={`audio-pitch-dropdown ${showPitchDropdown ? "" : "hide-pitch-dropdown"}`} style={{marginRight: getPitchMarginRight(), marginTop: "-250px"}}
+                onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(24); setShowPitchDropdown(false)}}>
+                        <span className="audio-pitch-dropdown-text">+24</span>
+                    </div>
+                    <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(19); setShowPitchDropdown(false)}}>
+                        <span className="audio-pitch-dropdown-text">+19</span>
+                    </div>
+                    <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(12); setShowPitchDropdown(false)}}>
+                        <span className="audio-pitch-dropdown-text">+12</span>
+                    </div>
+                    <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(7); setShowPitchDropdown(false)}}>
+                        <span className="audio-pitch-dropdown-text">+7</span>
+                    </div>
+                    <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(0); setShowPitchDropdown(false)}}>
+                        <span className="audio-pitch-dropdown-text">0</span>
+                    </div>
+                    <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(-7); setShowPitchDropdown(false)}}>
+                        <span className="audio-pitch-dropdown-text">-7</span>
+                    </div>
+                    <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(-12); setShowPitchDropdown(false)}}>
+                        <span className="audio-pitch-dropdown-text">-12</span>
+                    </div>
+                    <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(-19); setShowPitchDropdown(false)}}>
+                        <span className="audio-pitch-dropdown-text">-19</span>
+                    </div>
+                    <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(-24); setShowPitchDropdown(false)}}>
+                        <span className="audio-pitch-dropdown-text">-24</span>
+                    </div>
+                </div>
+                <div className={`audio-volume-dropdown ${showVolumeSlider ? "" : "hide-volume-dropdown"}`} style={{marginRight: getVolumeMarginRight(), marginTop: "-110px"}}
+                onMouseEnter={() => {setShowVolumeSlider(true); setEnableDrag(false)}} onMouseLeave={() => {setShowVolumeSlider(false); setEnableDrag(true)}}>
+                    <Slider ref={audioVolumeSliderRef} invert orientation="vertical" className="audio-volume-slider" trackClassName="audio-volume-slider-track" thumbClassName="audio-volume-slider-thumb"
+                    value={audioVolume} min={0} max={1} step={0.05} onChange={(value) => updateVolume(value)}/>
+                </div>
+            </div>
+        )
+        return containerRef.current ? createPortal(controls, containerRef.current) : null
+    }
+
     return (
         <>
+        {audioControlsJSX()}
         <img draggable={false} className="dummy-post-image" src={coverImg}/>
-        <div className="audio-controls" ref={audioControls} onMouseUp={() => setAudioDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
-            <div className="audio-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <p className="audio-control-text">{audioDragging ? functions.date.formatSeconds(audioDragProgress || 0) : functions.date.formatSeconds(audioSecondsProgress)}</p>
-                <Slider ref={audioSliderRef} className="audio-slider" trackClassName="audio-slider-track" thumbClassName="audio-slider-thumb" min={0} max={100} 
-                value={audioDragging ? ((audioDragProgress || 0) / audioDuration) * 100 : audioProgress} onBeforeChange={() => setAudioDragging(true)} 
-                onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
-                <p className="audio-control-text">{functions.date.formatSeconds(audioDuration)}</p>
-            </div>
-            <div className="audio-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <div className="audio-control-row-container">
-                    <ReverseIcon className="audio-control-img" onClick={() => changeReverse()}/>
-                    <SpeedIcon className="audio-control-img" ref={audioSpeedRef} onClick={() => toggleDropdown("speed")}/>
-                    <PreservePitchIcon className="audio-control-img" ref={audioPitchRef} onClick={() => toggleDropdown("pitch")}/>
-                </div> 
-                <div className="audio-control-row-container">
-                    <RewindIcon className="audio-control-img" onClick={() => setAudioRewindFlag(true)}/>
-                    {audioPaused ?
-                    <PlayIcon className="audio-control-img" onClick={() => updatePlay()}/> :
-                    <PauseIcon className="audio-control-img" onClick={() => updatePlay()}/>}
-                    <FastforwardIcon className="audio-control-img" onClick={() => setAudioFastForwardFlag(true)}/>
-                </div>    
-                <div className="audio-control-row-container">
-                    <ClearIcon className="audio-control-img" onClick={() => setResetFlag(true)}/>
-                </div>  
-                <div className="audio-control-row-container">
-                    <FullscreenIcon className="audio-control-img" onClick={() => toggleFullscreen()}/>
-                </div> 
-                <div className="audio-control-row-container" onMouseEnter={() => setShowVolumeSlider(true)} onMouseLeave={() => setShowVolumeSlider(false)}>
-                    {audioVolume > 0.5 ?
-                    <VolumeIcon className="audio-control-img" ref={audioVolumeRef} onClick={updateMute}/> :
-                    audioVolume > 0 ?
-                    <VolumeLowIcon className="audio-control-img" ref={audioVolumeRef} onClick={updateMute}/> :
-                    <VolumeMuteIcon className="audio-control-img" ref={audioVolumeRef} onClick={updateMute}/>}
-                </div> 
-            </div>
-            <div className={`audio-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), marginTop: "-250px"}}
-            onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(4); setShowSpeedDropdown(false)}}>
-                    <span className="audio-speed-dropdown-text">4x</span>
-                </div>
-                <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(2); setShowSpeedDropdown(false)}}>
-                    <span className="audio-speed-dropdown-text">2x</span>
-                </div>
-                <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(1.75); setShowSpeedDropdown(false)}}>
-                    <span className="audio-speed-dropdown-text">1.75x</span>
-                </div>
-                <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(1.5); setShowSpeedDropdown(false)}}>
-                    <span className="audio-speed-dropdown-text">1.5x</span>
-                </div>
-                <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(1.25); setShowSpeedDropdown(false)}}>
-                    <span className="audio-speed-dropdown-text">1.25x</span>
-                </div>
-                <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(1); setShowSpeedDropdown(false)}}>
-                    <span className="audio-speed-dropdown-text">1x</span>
-                </div>
-                <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(0.75); setShowSpeedDropdown(false)}}>
-                    <span className="audio-speed-dropdown-text">0.75x</span>
-                </div>
-                <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(0.5); setShowSpeedDropdown(false)}}>
-                    <span className="audio-speed-dropdown-text">0.5x</span>
-                </div>
-                <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(0.25); setShowSpeedDropdown(false)}}>
-                    <span className="audio-speed-dropdown-text">0.25x</span>
-                </div>
-            </div>
-            <div className={`audio-pitch-dropdown ${showPitchDropdown ? "" : "hide-pitch-dropdown"}`} style={{marginRight: getPitchMarginRight(), marginTop: "-250px"}}
-            onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(24); setShowPitchDropdown(false)}}>
-                    <span className="audio-pitch-dropdown-text">+24</span>
-                </div>
-                <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(19); setShowPitchDropdown(false)}}>
-                    <span className="audio-pitch-dropdown-text">+19</span>
-                </div>
-                <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(12); setShowPitchDropdown(false)}}>
-                    <span className="audio-pitch-dropdown-text">+12</span>
-                </div>
-                <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(7); setShowPitchDropdown(false)}}>
-                    <span className="audio-pitch-dropdown-text">+7</span>
-                </div>
-                <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(0); setShowPitchDropdown(false)}}>
-                    <span className="audio-pitch-dropdown-text">0</span>
-                </div>
-                <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(-7); setShowPitchDropdown(false)}}>
-                    <span className="audio-pitch-dropdown-text">-7</span>
-                </div>
-                <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(-12); setShowPitchDropdown(false)}}>
-                    <span className="audio-pitch-dropdown-text">-12</span>
-                </div>
-                <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(-19); setShowPitchDropdown(false)}}>
-                    <span className="audio-pitch-dropdown-text">-19</span>
-                </div>
-                <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(-24); setShowPitchDropdown(false)}}>
-                    <span className="audio-pitch-dropdown-text">-24</span>
-                </div>
-            </div>
-            <div className={`audio-volume-dropdown ${showVolumeSlider ? "" : "hide-volume-dropdown"}`} style={{marginRight: getVolumeMarginRight(), marginTop: "-110px"}}
-            onMouseEnter={() => {setShowVolumeSlider(true); setEnableDrag(false)}} onMouseLeave={() => {setShowVolumeSlider(false); setEnableDrag(true)}}>
-                <Slider ref={audioVolumeSliderRef} invert orientation="vertical" className="audio-volume-slider" trackClassName="audio-volume-slider-track" thumbClassName="audio-volume-slider-thumb"
-                value={audioVolume} min={0} max={1} step={0.05} onChange={(value) => updateVolume(value)}/>
-            </div>
-        </div>
         <img draggable={false} className="post-lightness-overlay" ref={lightnessRef}/>
         <img draggable={false} className="post-sharpen-overlay" ref={overlayRef}/>
         <canvas draggable={false} className="post-effect-canvas" ref={effectRef}></canvas>

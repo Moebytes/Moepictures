@@ -6,6 +6,7 @@
 
 import React, {useEffect, useState, useRef, forwardRef, useImperativeHandle} from "react"
 import {useNavigate} from "react-router-dom"
+import {createPortal} from "react-dom"
 import withPostWrapper, {PostWrapperProps, PostWrapperRef} from "./withPostWrapper"
 import {useSessionSelector, useLayoutSelector, usePlaybackSelector, usePlaybackActions, useSearchSelector, 
 useInteractionActions} from "../../store"
@@ -69,7 +70,7 @@ const PostModel = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
     const [scene, setScene] = useState(null as THREE.Scene | null)
     const [objMaterials, setObjMaterials] = useState([] as THREE.Material[])
     const [modelLink, setModelLink] = useState("")
-    const {toggleFullscreen, changeReverse, seek, updateProgressText, updateEffects} = props
+    const {toggleFullscreen, changeReverse, seek, updateProgressText, updateEffects, containerRef} = props
     const {showSpeedDropdown, setShowSpeedDropdown} = props
     const {modelRef, rendererRef, fullscreenRef, lightnessRef, overlayRef, effectRef, pixelateRef, onLoaded} = props
     const navigate = useNavigate()
@@ -509,96 +510,102 @@ const PostModel = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
         }
     }
 
+    const modelControlsJSX = () => {
+        const controls = (
+            <div className="model-controls" ref={modelControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
+                {animations ? <div className="model-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <p className="model-control-text">{dragging ? functions.date.formatSeconds(dragProgress || 0) : functions.date.formatSeconds(secondsProgress)}</p>
+                    <Slider ref={modelSliderRef} className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" min={0} max={100} value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(reverse ? 100 - value : value)}/>
+                    <p className="model-control-text">{functions.date.formatSeconds(duration)}</p>
+                </div> : null}
+                <div className="model-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    {animations ? <>
+                    <div className="model-control-row-container">
+                        <ReverseIcon className="image-control-img-dark-blue" onClick={() => changeReverse()}/>
+                        <SpeedIcon className="image-control-img-dark-blue" ref={modelSpeedRef} onClick={() => toggleDropdown("speed")}/>
+                    </div> 
+                    <div className="model-control-row-container">
+                        <ClearIcon className="image-control-img-dark-blue" onClick={() => reset()}/>
+                        {/* <img className="control-img" src={modelRewindIcon}/> */}
+                        {paused ?
+                        <PlayIcon className="image-control-img-dark-blue" onClick={() => setPaused(!paused)}/> :
+                        <PauseIcon className="image-control-img-dark-blue" onClick={() => setPaused(!paused)}/>}
+                        {/* <img className="control-img" src={modelFastforwardIcon}/> */}
+                    </div></> : null}
+                    <div className="model-control-row-container">
+                        {wireframe ? 
+                        <RenderedIcon className="image-control-img-dark-blue" onClick={() => setWireframe((prev) => !prev)}/> :
+                        <WireframeIcon className="image-control-img-dark-blue" onClick={() => setWireframe((prev) => !prev)}/>}
+                        {matcap ?
+                        <TexturedIcon className="image-control-img-dark-blue" onClick={() => setMatcap((prev) => !prev)}/> :
+                        <MatcapIcon className="image-control-img-dark-blue" onClick={() => setMatcap((prev) => !prev)}/>}
+                        <ShapeKeysIcon className="image-control-img-dark-blue" ref={modelMorphRef} onClick={() => toggleDropdown("morph")}/>
+                        <LightIcon className="image-control-img-dark-blue" ref={modelLightRef} onClick={() => toggleDropdown("light")}/>
+                    </div> 
+                    <div className="model-control-row-container">
+                        <FullscreenIcon className="image-control-img-dark-blue" onClick={() => toggleFullscreen()}/>
+                    </div> 
+                </div>
+                <div className={`model-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), marginTop: "-240px"}}
+                onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="model-speed-dropdown-item" onClick={() => {setSpeed(4); setShowSpeedDropdown(false)}}>
+                        <span className="model-speed-dropdown-text">4x</span>
+                    </div>
+                    <div className="model-speed-dropdown-item" onClick={() => {setSpeed(2); setShowSpeedDropdown(false)}}>
+                        <span className="model-speed-dropdown-text">2x</span>
+                    </div>
+                    <div className="model-speed-dropdown-item" onClick={() => {setSpeed(1.75); setShowSpeedDropdown(false)}}>
+                        <span className="model-speed-dropdown-text">1.75x</span>
+                    </div>
+                    <div className="model-speed-dropdown-item" onClick={() => {setSpeed(1.5); setShowSpeedDropdown(false)}}>
+                        <span className="model-speed-dropdown-text">1.5x</span>
+                    </div>
+                    <div className="model-speed-dropdown-item" onClick={() => {setSpeed(1.25); setShowSpeedDropdown(false)}}>
+                        <span className="model-speed-dropdown-text">1.25x</span>
+                    </div>
+                    <div className="model-speed-dropdown-item" onClick={() => {setSpeed(1); setShowSpeedDropdown(false)}}>
+                        <span className="model-speed-dropdown-text">1x</span>
+                    </div>
+                    <div className="model-speed-dropdown-item" onClick={() => {setSpeed(0.75); setShowSpeedDropdown(false)}}>
+                        <span className="model-speed-dropdown-text">0.75x</span>
+                    </div>
+                    <div className="model-speed-dropdown-item" onClick={() => {setSpeed(0.5); setShowSpeedDropdown(false)}}>
+                        <span className="model-speed-dropdown-text">0.5x</span>
+                    </div>
+                    <div className="model-speed-dropdown-item" onClick={() => {setSpeed(0.25); setShowSpeedDropdown(false)}}>
+                        <span className="model-speed-dropdown-text">0.25x</span>
+                    </div>
+                </div>
+                {shapeKeysDropdownJSX()}
+                <div className={`model-dropdown ${showLightDropdown ? "" : "hide-model-dropdown"}`}
+                style={{marginRight: getLightMarginRight(), top: `-140px`}}>
+                    <div className="model-dropdown-row model-row">
+                        <AmbientLightIcon className="model-dropdown-img"/>
+                        <span className="model-dropdown-text">Ambient</span>
+                        <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" onChange={(value) => setAmbient(value)} min={0.05} max={1} step={0.05} value={ambient}/>
+                    </div>
+                    <div className="model-dropdown-row model-row">
+                        <DirectionalLightIcon className="model-dropdown-img"/>
+                        <span className="model-dropdown-text">Directional Front</span>
+                        <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" onChange={(value) => setDirectionalFront(value)} min={0.05} max={1} step={0.05} value={directionalFront}/>
+                    </div>
+                    <div className="model-dropdown-row model-row">
+                        <DirectionalLightIcon className="model-dropdown-img"/>
+                        <span className="model-dropdown-text">Directional Back</span>
+                        <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" onChange={(value) => setDirectionalBack(value)} min={0.05} max={1} step={0.05} value={directionalBack}/>
+                    </div>
+                    <div className="model-dropdown-row model-row">
+                        <button className="model-button" onClick={() => resetLights()}>Reset</button>
+                    </div>
+                </div>
+            </div>
+        )
+        return containerRef.current ? createPortal(controls, containerRef.current) : null
+    }
 
     return (
         <>
-        <div className="model-controls" ref={modelControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
-            {animations ? <div className="model-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <p className="model-control-text">{dragging ? functions.date.formatSeconds(dragProgress || 0) : functions.date.formatSeconds(secondsProgress)}</p>
-                <Slider ref={modelSliderRef} className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" min={0} max={100} value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(reverse ? 100 - value : value)}/>
-                <p className="model-control-text">{functions.date.formatSeconds(duration)}</p>
-            </div> : null}
-            <div className="model-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                {animations ? <>
-                <div className="model-control-row-container">
-                    <ReverseIcon className="image-control-img-dark-blue" onClick={() => changeReverse()}/>
-                    <SpeedIcon className="image-control-img-dark-blue" ref={modelSpeedRef} onClick={() => toggleDropdown("speed")}/>
-                </div> 
-                <div className="model-control-row-container">
-                    <ClearIcon className="image-control-img-dark-blue" onClick={() => reset()}/>
-                    {/* <img className="control-img" src={modelRewindIcon}/> */}
-                    {paused ?
-                    <PlayIcon className="image-control-img-dark-blue" onClick={() => setPaused(!paused)}/> :
-                    <PauseIcon className="image-control-img-dark-blue" onClick={() => setPaused(!paused)}/>}
-                    {/* <img className="control-img" src={modelFastforwardIcon}/> */}
-                </div></> : null}
-                <div className="model-control-row-container">
-                    {wireframe ? 
-                    <RenderedIcon className="image-control-img-dark-blue" onClick={() => setWireframe((prev) => !prev)}/> :
-                    <WireframeIcon className="image-control-img-dark-blue" onClick={() => setWireframe((prev) => !prev)}/>}
-                    {matcap ?
-                    <TexturedIcon className="image-control-img-dark-blue" onClick={() => setMatcap((prev) => !prev)}/> :
-                    <MatcapIcon className="image-control-img-dark-blue" onClick={() => setMatcap((prev) => !prev)}/>}
-                    <ShapeKeysIcon className="image-control-img-dark-blue" ref={modelMorphRef} onClick={() => toggleDropdown("morph")}/>
-                    <LightIcon className="image-control-img-dark-blue" ref={modelLightRef} onClick={() => toggleDropdown("light")}/>
-                </div> 
-                <div className="model-control-row-container">
-                    <FullscreenIcon className="image-control-img-dark-blue" onClick={() => toggleFullscreen()}/>
-                </div> 
-            </div>
-            <div className={`model-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), marginTop: "-240px"}}
-            onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(4); setShowSpeedDropdown(false)}}>
-                    <span className="model-speed-dropdown-text">4x</span>
-                </div>
-                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(2); setShowSpeedDropdown(false)}}>
-                    <span className="model-speed-dropdown-text">2x</span>
-                </div>
-                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(1.75); setShowSpeedDropdown(false)}}>
-                    <span className="model-speed-dropdown-text">1.75x</span>
-                </div>
-                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(1.5); setShowSpeedDropdown(false)}}>
-                    <span className="model-speed-dropdown-text">1.5x</span>
-                </div>
-                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(1.25); setShowSpeedDropdown(false)}}>
-                    <span className="model-speed-dropdown-text">1.25x</span>
-                </div>
-                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(1); setShowSpeedDropdown(false)}}>
-                    <span className="model-speed-dropdown-text">1x</span>
-                </div>
-                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(0.75); setShowSpeedDropdown(false)}}>
-                    <span className="model-speed-dropdown-text">0.75x</span>
-                </div>
-                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(0.5); setShowSpeedDropdown(false)}}>
-                    <span className="model-speed-dropdown-text">0.5x</span>
-                </div>
-                <div className="model-speed-dropdown-item" onClick={() => {setSpeed(0.25); setShowSpeedDropdown(false)}}>
-                    <span className="model-speed-dropdown-text">0.25x</span>
-                </div>
-            </div>
-            {shapeKeysDropdownJSX()}
-            <div className={`model-dropdown ${showLightDropdown ? "" : "hide-model-dropdown"}`}
-            style={{marginRight: getLightMarginRight(), top: `-140px`}}>
-                <div className="model-dropdown-row model-row">
-                    <AmbientLightIcon className="model-dropdown-img"/>
-                    <span className="model-dropdown-text">Ambient</span>
-                    <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" onChange={(value) => setAmbient(value)} min={0.05} max={1} step={0.05} value={ambient}/>
-                </div>
-                <div className="model-dropdown-row model-row">
-                    <DirectionalLightIcon className="model-dropdown-img"/>
-                    <span className="model-dropdown-text">Directional Front</span>
-                    <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" onChange={(value) => setDirectionalFront(value)} min={0.05} max={1} step={0.05} value={directionalFront}/>
-                </div>
-                <div className="model-dropdown-row model-row">
-                    <DirectionalLightIcon className="model-dropdown-img"/>
-                    <span className="model-dropdown-text">Directional Back</span>
-                    <Slider className="model-slider" trackClassName="model-slider-track" thumbClassName="model-slider-thumb" onChange={(value) => setDirectionalBack(value)} min={0.05} max={1} step={0.05} value={directionalBack}/>
-                </div>
-                <div className="model-dropdown-row model-row">
-                    <button className="model-button" onClick={() => resetLights()}>Reset</button>
-                </div>
-            </div>
-        </div>
+        {modelControlsJSX()}
         <img draggable={false} className="post-lightness-overlay" ref={lightnessRef}/>
         <img draggable={false} className="post-sharpen-overlay" ref={overlayRef}/>
         <canvas draggable={false} className="post-effect-canvas" ref={effectRef}></canvas>

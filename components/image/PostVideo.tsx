@@ -6,6 +6,7 @@
 
 import React, {useEffect, useState, useRef, forwardRef, useImperativeHandle} from "react"
 import {useNavigate} from "react-router-dom"
+import {createPortal} from "react-dom"
 import withPostWrapper, {PostWrapperProps, PostWrapperRef} from "./withPostWrapper"
 import {useSessionSelector, useLayoutSelector, useFilterSelector, usePlaybackSelector, usePlaybackActions, 
 useSearchSelector, useInteractionActions} from "../../store"
@@ -48,7 +49,8 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
     const videoVolumeSliderRef = useRef<Slider>(null)
     const [video, setVideo] = useState("")
     const [encodingOverlay, setEncodingOverlay] = useState(false)
-    const {toggleFullscreen, getCurrentBuffer, getCurrentLink, updateProgressText, seek, reset, changeReverse} = props
+    const {toggleFullscreen, containerRef, getCurrentBuffer, getCurrentLink, 
+    updateProgressText, seek, reset, changeReverse} = props
     const {naturalWidth, setNaturalWidth} = props
     const {naturalHeight, setNaturalHeight} = props
     const {imageLoaded, setImageLoaded} = props
@@ -485,95 +487,102 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
         if (videoControls.current) videoControls.current.style.opacity = "0"
     }
 
+    const videoControlsJSX = () => {
+        const controls = (
+            <div className="video-controls" ref={videoControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
+                {duration >= 1 ?
+                <div className="video-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <p className="video-control-text">{dragging ? functions.date.formatSeconds(dragProgress || 0) : functions.date.formatSeconds(secondsProgress)}</p>
+                    <Slider ref={videoSliderRef} className="video-slider" trackClassName="video-slider-track" thumbClassName="video-slider-thumb" min={0} max={100} 
+                    value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(reverse ? 100 - value : value)}/>
+                    <p className="video-control-text">{functions.date.formatSeconds(duration)}</p>
+                </div> : null}
+                <div className="video-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="video-control-row-container">
+                        <ReverseIcon className="video-control-img" onClick={() => changeReverse()}/>
+                        <SpeedIcon className="video-control-img" ref={videoSpeedRef} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
+                        {!preservePitch ?
+                        <PreservePitchIcon className="video-control-img-blue" onClick={() => changePreservesPitch()}/> :
+                        <PreservePitchIcon className="video-control-img" onClick={() => changePreservesPitch()}/>}
+                    </div> 
+                    <div className="video-ontrol-row-container">
+                        <RewindIcon className="video-control-img" onClick={() => rewind()}/>
+                        {paused ?
+                        <PlayIcon className="video-control-img" onClick={() => setPaused(!paused)}/> :
+                        <PauseIcon className="video-control-img" onClick={() => setPaused(!paused)}/>}
+                        <FastforwardIcon className="video-control-img" onClick={() => fastforward()}/>
+                    </div>    
+                    <div className="video-control-row-container">
+                        <ClearIcon className="video-control-img" onClick={() => reset()}/>
+                    </div>  
+                    <div className="video-control-row-container">
+                        <FullscreenIcon className="video-control-img" onClick={() => toggleFullscreen()}/>
+                    </div> 
+                    <div className="video-control-row-container" onMouseEnter={() => setShowVolumeSlider(true)} onMouseLeave={() => setShowVolumeSlider(false)}>
+                        {volume > 0.5 ?
+                        <VolumeIcon className="video-control-img" ref={videoVolumeRef} onClick={mute}/> :
+                        volume > 0 ?
+                        <VolumeLowIcon className="video-control-img" ref={videoVolumeRef} onClick={mute}/> :
+                        <VolumeMuteIcon className="video-control-img" ref={videoVolumeRef} onClick={mute}/>}
+                    </div> 
+                </div>
+                <div className={`video-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), marginTop: "-240px"}}
+                onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="video-speed-dropdown-item" onClick={() => {setSpeed(4); setShowSpeedDropdown(false)}}>
+                        <span className="video-speed-dropdown-text">4x</span>
+                    </div>
+                    <div className="video-speed-dropdown-item" onClick={() => {setSpeed(2); setShowSpeedDropdown(false)}}>
+                        <span className="video-speed-dropdown-text">2x</span>
+                    </div>
+                    <div className="video-speed-dropdown-item" onClick={() => {setSpeed(1.75); setShowSpeedDropdown(false)}}>
+                        <span className="video-speed-dropdown-text">1.75x</span>
+                    </div>
+                    <div className="video-speed-dropdown-item" onClick={() => {setSpeed(1.5); setShowSpeedDropdown(false)}}>
+                        <span className="video-speed-dropdown-text">1.5x</span>
+                    </div>
+                    <div className="video-speed-dropdown-item" onClick={() => {setSpeed(1.25); setShowSpeedDropdown(false)}}>
+                        <span className="video-speed-dropdown-text">1.25x</span>
+                    </div>
+                    <div className="video-speed-dropdown-item" onClick={() => {setSpeed(1); setShowSpeedDropdown(false)}}>
+                        <span className="video-speed-dropdown-text">1x</span>
+                    </div>
+                    <div className="video-speed-dropdown-item" onClick={() => {setSpeed(0.75); setShowSpeedDropdown(false)}}>
+                        <span className="video-speed-dropdown-text">0.75x</span>
+                    </div>
+                    <div className="video-speed-dropdown-item" onClick={() => {setSpeed(0.5); setShowSpeedDropdown(false)}}>
+                        <span className="video-speed-dropdown-text">0.5x</span>
+                    </div>
+                    <div className="video-speed-dropdown-item" onClick={() => {setSpeed(0.25); setShowSpeedDropdown(false)}}>
+                        <span className="video-speed-dropdown-text">0.25x</span>
+                    </div>
+                </div>
+                <div className={`video-volume-dropdown ${showVolumeSlider ? "" : "hide-volume-dropdown"}`} style={{marginRight: getVolumeMarginRight(), marginTop: "-110px"}}
+                onMouseEnter={() => {setShowVolumeSlider(true); setEnableDrag(false)}} onMouseLeave={() => {setShowVolumeSlider(false); setEnableDrag(true)}}>
+                    <Slider ref={videoVolumeSliderRef} invert orientation="vertical" className="volume-slider" trackClassName="volume-slider-track" thumbClassName="volume-slider-thumb"
+                    value={volume} min={0} max={1} step={0.01} onChange={(value) => changeVolume(value)}/>
+                </div>
+            </div>
+        )
+        return containerRef.current ? createPortal(controls, containerRef.current) : null
+    }
+    
     return (
         <>
+        {videoControlsJSX()}
         <video draggable={false} loop muted disablePictureInPicture playsInline className="dummy-post-video" src={video}></video>
         <div className="encoding-overlay" style={{display: encodingOverlay ? "flex" : "none"}}>
             <span className="encoding-overlay-text">{`Rendering Video...`}</span>
         </div>
-        <div className="video-controls" ref={videoControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
-        {duration >= 1 ?
-        <div className="video-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-            <p className="video-control-text">{dragging ? functions.date.formatSeconds(dragProgress || 0) : functions.date.formatSeconds(secondsProgress)}</p>
-            <Slider ref={videoSliderRef} className="video-slider" trackClassName="video-slider-track" thumbClassName="video-slider-thumb" min={0} max={100} 
-            value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(reverse ? 100 - value : value)}/>
-            <p className="video-control-text">{functions.date.formatSeconds(duration)}</p>
-        </div> : null}
-        <div className="video-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-            <div className="video-control-row-container">
-                <ReverseIcon className="video-control-img" onClick={() => changeReverse()}/>
-                <SpeedIcon className="video-control-img" ref={videoSpeedRef} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
-                {!preservePitch ?
-                <PreservePitchIcon className="video-control-img-blue" onClick={() => changePreservesPitch()}/> :
-                <PreservePitchIcon className="video-control-img" onClick={() => changePreservesPitch()}/>}
-            </div> 
-            <div className="video-ontrol-row-container">
-                <RewindIcon className="video-control-img" onClick={() => rewind()}/>
-                {paused ?
-                <PlayIcon className="video-control-img" onClick={() => setPaused(!paused)}/> :
-                <PauseIcon className="video-control-img" onClick={() => setPaused(!paused)}/>}
-                <FastforwardIcon className="video-control-img" onClick={() => fastforward()}/>
-            </div>    
-            <div className="video-control-row-container">
-                <ClearIcon className="video-control-img" onClick={() => reset()}/>
-            </div>  
-            <div className="video-control-row-container">
-                <FullscreenIcon className="video-control-img" onClick={() => toggleFullscreen()}/>
-            </div> 
-            <div className="video-control-row-container" onMouseEnter={() => setShowVolumeSlider(true)} onMouseLeave={() => setShowVolumeSlider(false)}>
-                {volume > 0.5 ?
-                <VolumeIcon className="video-control-img" ref={videoVolumeRef} onClick={mute}/> :
-                volume > 0 ?
-                <VolumeLowIcon className="video-control-img" ref={videoVolumeRef} onClick={mute}/> :
-                <VolumeMuteIcon className="video-control-img" ref={videoVolumeRef} onClick={mute}/>}
-            </div> 
-        </div>
-        <div className={`video-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), marginTop: "-240px"}}
-        onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-            <div className="video-speed-dropdown-item" onClick={() => {setSpeed(4); setShowSpeedDropdown(false)}}>
-                <span className="video-speed-dropdown-text">4x</span>
-            </div>
-            <div className="video-speed-dropdown-item" onClick={() => {setSpeed(2); setShowSpeedDropdown(false)}}>
-                <span className="video-speed-dropdown-text">2x</span>
-            </div>
-            <div className="video-speed-dropdown-item" onClick={() => {setSpeed(1.75); setShowSpeedDropdown(false)}}>
-                <span className="video-speed-dropdown-text">1.75x</span>
-            </div>
-            <div className="video-speed-dropdown-item" onClick={() => {setSpeed(1.5); setShowSpeedDropdown(false)}}>
-                <span className="video-speed-dropdown-text">1.5x</span>
-            </div>
-            <div className="video-speed-dropdown-item" onClick={() => {setSpeed(1.25); setShowSpeedDropdown(false)}}>
-                <span className="video-speed-dropdown-text">1.25x</span>
-            </div>
-            <div className="video-speed-dropdown-item" onClick={() => {setSpeed(1); setShowSpeedDropdown(false)}}>
-                <span className="video-speed-dropdown-text">1x</span>
-            </div>
-            <div className="video-speed-dropdown-item" onClick={() => {setSpeed(0.75); setShowSpeedDropdown(false)}}>
-                <span className="video-speed-dropdown-text">0.75x</span>
-            </div>
-            <div className="video-speed-dropdown-item" onClick={() => {setSpeed(0.5); setShowSpeedDropdown(false)}}>
-                <span className="video-speed-dropdown-text">0.5x</span>
-            </div>
-            <div className="video-speed-dropdown-item" onClick={() => {setSpeed(0.25); setShowSpeedDropdown(false)}}>
-                <span className="video-speed-dropdown-text">0.25x</span>
-            </div>
-        </div>
-        <div className={`video-volume-dropdown ${showVolumeSlider ? "" : "hide-volume-dropdown"}`} style={{marginRight: getVolumeMarginRight(), marginTop: "-110px"}}
-        onMouseEnter={() => {setShowVolumeSlider(true); setEnableDrag(false)}} onMouseLeave={() => {setShowVolumeSlider(false); setEnableDrag(true)}}>
-            <Slider ref={videoVolumeSliderRef} invert orientation="vertical" className="volume-slider" trackClassName="volume-slider-track" thumbClassName="volume-slider-thumb"
-            value={volume} min={0} max={1} step={0.01} onChange={(value) => changeVolume(value)}/>
-        </div>
-    </div>
-    <img draggable={false} className="video-lightness-overlay" ref={lightnessRef} src={backFrame}/>
-    <img draggable={false} className="video-sharpen-overlay" ref={overlayRef} src={backFrame}/>
+        <img draggable={false} className="video-lightness-overlay" ref={lightnessRef} src={backFrame}/>
+        <img draggable={false} className="video-sharpen-overlay" ref={overlayRef} src={backFrame}/>
 
-    <canvas draggable={false} className="post-effect-canvas" ref={effectRef}></canvas>
-    <canvas draggable={false} className="post-video-canvas" ref={pixelateRef}></canvas>
+        <canvas draggable={false} className="post-effect-canvas" ref={effectRef}></canvas>
+        <canvas draggable={false} className="post-video-canvas" ref={pixelateRef}></canvas>
 
-    <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline src={video} 
-    className={`${imageExpand? "post-video-expand" : "post-video"}`} ref={videoRef} onLoadedData={(event) => onLoaded(event)}></video>
-    <img draggable={false} ref={backFrameRef} src={backFrame} className={`${imageExpand? "back-frame-expand" : "back-frame"}`} fetchPriority="high"/>
-    </>
+        <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline src={video} 
+        className={`${imageExpand? "post-video-expand" : "post-video"}`} ref={videoRef} onLoadedData={(event) => onLoaded(event)}></video>
+        <img draggable={false} ref={backFrameRef} src={backFrame} className={`${imageExpand? "back-frame-expand" : "back-frame"}`} fetchPriority="high"/>
+        </>
     )
 })
 
