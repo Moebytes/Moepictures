@@ -173,7 +173,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
 
         if (state?.restoreScrollY) {
             setTimeout(() => {
-                window.scrollTo(0, state.restoreScrollY)
+                //window.scrollTo(0, state.restoreScrollY)
             }, 2000)
         }
     }, [])
