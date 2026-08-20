@@ -31,6 +31,7 @@ assets/live2d/*
 # Models
 assets/python/comictextdetector.pt
 assets/python/wdtagger
+assets/python/charactersplit
 assets/python/imagerater
 assets/python/segmentator
 assets/python/sketchextractor

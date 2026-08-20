@@ -39,6 +39,7 @@ import PremiumRequiredDialog from "./misc/PremiumRequiredDialog"
 import QRCodeDialog from "./misc/QRCodeDialog"
 import R18Dialog from "./misc/R18Dialog"
 import SegmentateDialog from "./misc/SegmentateDialog"
+import CharSplitDialog from "./note/CharSplitDialog"
 import DeleteNoteHistoryDialog from "./note/DeleteNoteHistoryDialog"
 import EditNoteDialog from "./note/EditNoteDialog"
 import OCRDialog from "./note/OCRDialog"
@@ -135,6 +136,7 @@ const Dialogs: React.FunctionComponent = () => {
         <QRCodeDialog/>
         <R18Dialog/>
         <SegmentateDialog/>
+        <CharSplitDialog/>
         <DeleteNoteHistoryDialog/>
         <EditNoteDialog/>
         <OCRDialog/>

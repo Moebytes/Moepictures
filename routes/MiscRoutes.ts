@@ -20,7 +20,7 @@ import sql from "../sql/SQLQuery"
 import dotline from "../assets/fonts/Dotline.ttf"
 import enLocale from "../assets/locales/en.json"
 import source from "../sources/Source"
-import {OCRResponse, PurchaseParams, SourceLookupParams, TagLookupParams} from "../types/Types"
+import {OCRResponse, CharSplitEntry, SourceLookupParams, TagLookupParams} from "../types/Types"
 
 svgCaptcha.loadFont(path.join(__dirname, dotline))
 
@@ -213,6 +213,38 @@ const MiscRoutes = (app: Express) => {
             fs.unlinkSync(imagePath)
             processingQueue.delete(req.session.username)
             res.status(200).json(json)
+        } catch (e) {
+            console.log(e)
+            if (req.session.username) processingQueue.delete(req.session.username)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.post("/api/misc/charactersplit", csrfProtection, contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const {postID, bytes} = req.body as {postID: string, bytes: number[]}
+            if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
+            if (processingQueue.has(req.session.username)) return void res.status(429).send("Processing in progress")
+            if (!bytes) return void res.status(400).send("Image data must be provided")
+            const post = await sql.post.post(postID)
+            if (!post) return void res.status(400).send("Invalid postID")
+            processingQueue.add(req.session.username)
+            const buffer = Buffer.from(bytes as any, "binary")
+            const imagePath = await serverFunctions.util.dumpImage(buffer)
+
+            const scriptPath = path.join(__dirname, "../../assets/python/charactersplit.py")
+            let command = `python3.11 "${scriptPath}" -i "${imagePath}"`
+            const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
+            const json = JSON.parse(str.match(/(?<=>>>JSON<<<)([\s\S]*?)(?=>>>ENDJSON<<<)/gm)?.[0]) as CharSplitEntry[]
+
+            const tagCategories = await serverFunctions.tags.tagCategories(post.tags)
+            const tags = tagCategories.tags.map((t) => t.tag)
+            const characters = tagCategories.characters.map((t) => t.tag)
+            const data = await serverFunctions.tags.splitTagGroups(json, tags, characters)
+            
+            fs.unlinkSync(imagePath)
+            processingQueue.delete(req.session.username)
+            res.status(200).json(data)
         } catch (e) {
             console.log(e)
             if (req.session.username) processingQueue.delete(req.session.username)

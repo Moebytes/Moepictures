@@ -1211,9 +1211,15 @@
         },
         "ocr": {
             "title": "OCR Page",
-            "header": "Run OCR on this page? (This will replace the current notes).",
+            "header": "Run OCR on this page? (This will replace all bubble and overlay notes).",
             "banText": "You are banned. Can't use this function.",
             "running": "Running OCR..."
+        },
+        "characterSplit": {
+            "title": "Character Split",
+            "header": "Run character separation? (This will replace all character notes).",
+            "tagGroups": "Generated character notes! You may copy the generated tag groups below:",
+            "running": "Running character splitter..."
         },
         "lineart": {
             "title": "Extract Lineart",

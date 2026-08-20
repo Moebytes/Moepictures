@@ -47,7 +47,9 @@ const noteDialogSlice = createSlice({
         revertNoteHistoryID: null as HistoryID | null,
         revertNoteHistoryFlag: false,
         noteOCRDialog: false,
-        noteOCRFlag: false
+        noteOCRFlag: false,
+        noteCharSplitDialog: false,
+        noteCharSplitFlag: false as string | boolean
     },
     reducers: {
         setEditNoteID: (state, action) => {state.editNoteID = action.payload},
@@ -61,7 +63,9 @@ const noteDialogSlice = createSlice({
         setRevertNoteHistoryID: (state, action) => {state.revertNoteHistoryID = action.payload},
         setRevertNoteHistoryFlag: (state, action) => {state.revertNoteHistoryFlag = action.payload},
         setNoteOCRDialog: (state, action) => {state.noteOCRDialog = action.payload},
-        setNoteOCRFlag: (state, action) => {state.noteOCRFlag = action.payload}
+        setNoteOCRFlag: (state, action) => {state.noteOCRFlag = action.payload},
+        setNoteCharSplitDialog: (state, action) => {state.noteCharSplitDialog = action.payload},
+        setNoteCharSplitFlag: (state, action) => {state.noteCharSplitFlag = action.payload}
     }
 })
 
@@ -69,7 +73,8 @@ const {
     setEditNoteID, setEditNoteFlag, setEditNoteData, 
     setSaveNoteID, setSaveNoteData, setSaveNoteOrder,
     setDeleteNoteHistoryID, setDeleteNoteHistoryFlag, setRevertNoteHistoryID,
-    setRevertNoteHistoryFlag, setNoteOCRDialog, setNoteOCRFlag
+    setRevertNoteHistoryFlag, setNoteOCRDialog, setNoteOCRFlag, 
+    setNoteCharSplitDialog, setNoteCharSplitFlag
 } = noteDialogSlice.actions
 
 export const useNoteDialogSelector = () => {
@@ -86,7 +91,9 @@ export const useNoteDialogSelector = () => {
         revertNoteHistoryID: selector((state) => state.noteDialog.revertNoteHistoryID),
         revertNoteHistoryFlag: selector((state) => state.noteDialog.revertNoteHistoryFlag),
         noteOCRDialog: selector((state) => state.noteDialog.noteOCRDialog),
-        noteOCRFlag: selector((state) => state.noteDialog.noteOCRFlag)
+        noteOCRFlag: selector((state) => state.noteDialog.noteOCRFlag),
+        noteCharSplitDialog: selector((state) => state.noteDialog.noteCharSplitDialog),
+        noteCharSplitFlag: selector((state) => state.noteDialog.noteCharSplitFlag)
     }
 }
 
@@ -104,7 +111,9 @@ export const useNoteDialogActions = () => {
         setRevertNoteHistoryID: (state: HistoryID | null) => dispatch(setRevertNoteHistoryID(state)),
         setRevertNoteHistoryFlag: (state: boolean) => dispatch(setRevertNoteHistoryFlag(state)),
         setNoteOCRDialog: (state: boolean) => dispatch(setNoteOCRDialog(state)),
-        setNoteOCRFlag: (state: boolean) => dispatch(setNoteOCRFlag(state))
+        setNoteOCRFlag: (state: boolean) => dispatch(setNoteOCRFlag(state)),
+        setNoteCharSplitDialog: (state: boolean) => dispatch(setNoteCharSplitDialog(state)),
+        setNoteCharSplitFlag: (state: string | boolean) => dispatch(setNoteCharSplitFlag(state))
     }    
 }
 

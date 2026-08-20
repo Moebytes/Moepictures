@@ -345,26 +345,31 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         const characters = props.characters.map((c) => c.tag)
         const series = props.series.map((s) => s.tag)
         const tags = props.tags.map((t) => t.tag)
-        let combined = [...artists, ...characters, ...series, ...tags]
+        let specialTags = [...artists, ...characters, ...series]
+        let combined = [...specialTags, ...tags]
         let commas = false
         let replaceDash = false 
         let danbooru = false
-        if (event.shiftKey) {
-            commas = false
-            replaceDash = true
-            danbooru = true
-        } else if (event.button === 2) {
-            commas = true
-            replaceDash = true
+        if (permissions.isAdmin(session)) {
+            if (event.shiftKey) {
+                commas = false
+                replaceDash = true
+                danbooru = true
+            } else if (event.button === 2) {
+                commas = true
+                replaceDash = true
+            }
         }
         let outTags = ""
         if (danbooru) {
             if (combined.includes("solo")) combined.push("1girl")
             outTags = await functions.http.post("/api/misc/danboorutags", 
             {tags: combined.join(" ")}, session, setSessionFlag).then((r) => r.tags)
-        } else {
+        } else if (commas || replaceDash) {
             if (replaceDash) combined = combined.map((c: string) => c.replaceAll("-", " "))
-            outTags = commas ? combined.join(", ") : combined.join(" ")
+            outTags = combined.join(commas ? ", " : " ")
+        } else {
+            outTags = [specialTags.join(" "), functions.tag.parseTagGroupsField(tags, props.tagGroups)].join(" ")
         }
         navigator.clipboard.writeText(outTags)
         setActionBanner("copy-tags")

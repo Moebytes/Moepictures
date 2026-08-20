@@ -203,6 +203,14 @@
     white-space: preserve;
 }
 
+.dialog-textarea-static {
+    .dialog-textarea();
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
 .dialog-textarea-small {
     background-color: var(--inputBG);
     border: 1px solid var(--inputBorder);

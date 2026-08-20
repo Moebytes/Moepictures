@@ -5,7 +5,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import {PixivIllust} from "pixiv.ts"
-import {Banner, PostRating, PostStyle, PostType, UploadImage, UploadTag} from "./Types"
+import {Banner, PostRating, PostStyle, PostType, UploadImage, UploadTag, MiniTagGroup} from "./Types"
 
 export interface GIFFrame {
     frame: HTMLCanvasElement
@@ -77,6 +77,34 @@ export interface OCRResponse {
     height: number
     imageWidth: number 
     imageHeight: number
+}
+
+export interface CharSplitEntry {
+    imageWidth: number
+    imageHeight: number
+    x: number
+    y: number
+    width: number
+    height: number
+    tags: string
+    characterTags: string[]
+}
+
+export interface CharSplitNote {
+    x: number
+    y: number
+    width: number
+    height: number
+    imageWidth: number 
+    imageHeight: number
+    imageHash: string
+    character: boolean
+    characterTag: string
+}
+
+export interface CharSplitResponse {
+    characterNotes: CharSplitNote[]
+    tagGroups: MiniTagGroup[]
 }
 
 export interface SourceLookupParams {
@@ -170,6 +198,7 @@ export type MiscPostEndpoint<T extends string> =
     T extends "/api/misc/romajinize" ? {params: string[], response: string[]} :
     T extends "/api/misc/wdtagger" ? {params: number[], response: WDTaggerResponse} :
     T extends "/api/misc/ocr" ? {params: number[], response: OCRResponse[]} :
+    T extends "/api/misc/charactersplit" ? {params: {postID: string, bytes: number[]}, response: CharSplitResponse} :
     T extends "/api/misc/segmentate" ? {params: number[], response: ArrayBuffer} :
     T extends "/api/misc/lineart" ? {params: number[], response: ArrayBuffer} :
     T extends "/api/misc/setbanner" ? {params: {text: string, link: string}, response: string} :

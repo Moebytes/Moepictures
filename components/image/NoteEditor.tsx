@@ -15,6 +15,7 @@ import functions from "../../functions/Functions"
 import {ShapeEditor, DrawLayer, wrapShape} from "react-shape-editor"
 import NoteHistoryIcon from "../../assets/svg/history.svg"
 import NoteOCRIcon from "../../assets/svg/ocr.svg"
+import NoteCharSplitIcon from "../../assets/svg/charactersplit.svg"
 import NoteSaveIcon from "../../assets/svg/save.svg"
 import NoteClearIcon from "../../assets/svg/clear-all.svg"
 import NoteCopyIcon from "../../assets/svg/copy-notes.svg"
@@ -236,9 +237,10 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const {zoom} = usePlaybackSelector()
     const {pasteNoteFlag} = useFlagSelector()
     const {setRedirect, setPasteNoteFlag} = useFlagActions()
-    const {editNoteFlag, editNoteID, editNoteData, saveNoteID, noteOCRDialog, noteOCRFlag} = useNoteDialogSelector()
-    const {setEditNoteFlag, setEditNoteID, setEditNoteData, setSaveNoteID,
-    setSaveNoteData, setSaveNoteOrder, setNoteOCRDialog, setNoteOCRFlag} = useNoteDialogActions()
+    const {editNoteFlag, editNoteID, editNoteData, saveNoteID, noteOCRDialog, 
+    noteOCRFlag, noteCharSplitDialog, noteCharSplitFlag} = useNoteDialogSelector()
+    const {setEditNoteFlag, setEditNoteID, setEditNoteData, setSaveNoteID, setNoteCharSplitDialog, 
+    setNoteCharSplitFlag, setSaveNoteData, setSaveNoteOrder, setNoteOCRDialog, setNoteOCRFlag} = useNoteDialogActions()
     const [targetHash, setTargetHash] = useState("")
     const [img, setImg] = useState("")
     const [id, setID] = useState(0)
@@ -484,23 +486,24 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         const arrayBuffer = await functions.http.getBuffer(jpgURL)
         const bytes = new Uint8Array(arrayBuffer)
         let result = await functions.http.post(`/api/misc/ocr`, Object.values(bytes), session, setSessionFlag).catch(() => null)
-        if (Array.isArray(result)) {
+        if (result) {
             const copy = structuredClone(result)
-            setItems(() => {
+            setItems((prev) => {
                 let currentID = id
                 const notes = copy.map((item) => {
                     currentID += 1
                     return {...item, id: currentID, imageHash: targetHash} as Note
                 })
                 setID(currentID)
-                return notes
+                const characterNotes = prev.filter((p) => p.character)
+                return [...characterNotes, ...notes]
             })
         }
     }
 
     useEffect(() => {
         if (noteOCRFlag) {
-            ocrPage().then(() => {
+            ocrPage().finally(() => {
                 setNoteOCRFlag(false)
                 setNoteOCRDialog(false)
             })
@@ -515,6 +518,49 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
             return setActionBanner("verification-required")
         }
         setNoteOCRDialog(!noteOCRDialog)
+    }
+
+    const characterSplit = async () => {
+        if (!props.post) return
+        const img = await getCurrentLink()
+        const jpgURL = await functions.image.convertToFormat(img, "jpg")
+        const arrayBuffer = await functions.http.getBuffer(jpgURL)
+        const bytes = new Uint8Array(arrayBuffer)
+        let result = await functions.http.post(`/api/misc/charactersplit`, {postID: props.post.postID, bytes: Object.values(bytes)}, session, setSessionFlag).catch(() => null)
+        if (result) {
+            const copy = structuredClone(result.characterNotes)
+            let tagGroupsStr = functions.tag.parseTagGroupsField([], result.tagGroups)
+            setNoteCharSplitFlag(tagGroupsStr)
+            setItems((prev) => {
+                let currentID = id
+                const characterNotes = copy.map((item) => {
+                    currentID += 1
+                    return {...item, id: currentID, imageHash: targetHash} as Note
+                })
+                setID(currentID)
+                const notes = prev.filter((p) => !p.character)
+                return [...notes, ...characterNotes]
+            })
+        } else {
+            setNoteCharSplitDialog(false)
+            setNoteCharSplitFlag(false)
+        }
+    }
+
+    useEffect(() => {
+        if (noteCharSplitFlag && typeof noteCharSplitFlag !== "string") {
+            characterSplit()
+        }
+    }, [noteCharSplitFlag])
+    
+    const characterSplitDialog = () => {
+        if (!session.username) {
+            return setActionBanner("login-required")
+        }
+        if (!session.emailVerified) {
+            return setActionBanner("verification-required")
+        }
+        setNoteCharSplitDialog(!noteCharSplitDialog)
     }
 
     const showHistory = () => {
@@ -590,6 +636,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                 <div className={`note-editor-buttons ${buttonHover ? "show-note-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
                     {!props.unverified ? <NoteHistoryIcon className="note-editor-button" onClick={() => showHistory()}/> : null}
                     <NoteOCRIcon className="note-editor-button" onClick={() => ocrDialog()}/>
+                    <NoteCharSplitIcon className="note-editor-button" onClick={() => characterSplitDialog()}/>
                     <NoteSaveIcon className="note-editor-button" onClick={() => saveTextDialog()}/>
                     <NoteClearIcon className="note-editor-button" onClick={() => clearNotes()}/>
                     <NoteCopyIcon className="note-editor-button" onClick={() => copyNotes()}/>

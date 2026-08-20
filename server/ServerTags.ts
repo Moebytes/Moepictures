@@ -13,7 +13,7 @@ import sharp from "sharp"
 import functions from "../functions/Functions"
 import serverFunctions from "./ServerFunctions"
 import {UploadImage, PostRating, UploadTag, MiniTag, PostTagged, Tag, WDTaggerResponse, 
-PostType, PostStyle, BulkTag} from "../types/Types"
+PostType, PostStyle, BulkTag, MiniTagGroup, CharSplitEntry, CharSplitNote} from "../types/Types"
 
 const exec = util.promisify(child_process.exec)
 
@@ -525,6 +525,63 @@ export default class ServerTags {
             .filter((tag): tag is string => tag !== undefined)
 
         return functions.util.removeDuplicates([...tags, ...appendTags])
+    }
+
+    public static splitTagGroups = async (data: CharSplitEntry[], tags: string[], characters: string[]) => {
+        let characterNotes = [] as CharSplitNote[]
+        let tagGroups = [] as MiniTagGroup[]
+        const tagGroupTags: Set<string> = new Set()
+
+        let cleaned = [] as (Omit<CharSplitEntry, "tags"> & {tags: string[]})[]
+        for (const entry of data) {
+            let filteredTags = entry.tags.split(" ").filter(tag => !entry.characterTags.includes(tag)).join(" ")
+            let tags = await serverFunctions.tags.convertFromDanbooru(filteredTags).then((r) => r.split(/\s+/))
+            let characterTags = await serverFunctions.tags.convertFromDanbooru(entry.characterTags.join(" ")).then((r) => r.split(/\s+/))
+            characterTags = characterTags.filter((c) => c !== "unknown-artist")
+            if (!characterTags.length) characterTags = characters
+            cleaned.push({...entry, tags, characterTags})
+        }
+
+        cleaned.sort((a, b) => a.characterTags.length - b.characterTags.length)
+        const seenTags = new Set<string>()
+        for (const entry of cleaned) {
+            entry.characterTags = entry.characterTags.filter((tag) => !seenTags.has(tag))
+            entry.characterTags.forEach((tag) => seenTags.add(tag))
+        }
+
+        for (const entry of cleaned) {
+            let characterTag = entry.characterTags[0]
+            if (!characterTag) characterTag = "unknown-character"
+
+            let note = {} as CharSplitNote
+            note.imageWidth = entry.imageWidth
+            note.imageHeight = entry.imageHeight
+            note.x = entry.x
+            note.y = entry.y
+            note.width = entry.width
+            note.height = entry.height
+            note.character = true
+            note.characterTag = characterTag
+            characterNotes.push(note)
+
+            let name = functions.util.toProperCase(characterTag.split("-")[0])
+            let baseName = name.replace(/\d+$/, "")
+            let exists = tagGroups.find((g) => g.name === name)
+            let i = 2
+            while (exists) {
+                name = `${baseName}${i}`
+                exists = tagGroups.find((g) => g.name === name)
+                i++
+            }
+            let groupTags = entry.tags.filter((tag) => tags.includes(tag))
+            tagGroups.push({name, tags: groupTags})
+            groupTags.forEach((tag) => tagGroupTags.add(tag))
+        }
+
+        const soloTags = tags.filter((tag) => !tagGroupTags.has(tag))
+        if (tagGroups.length && soloTags.length) tagGroups.push({name: "Tags", tags: soloTags})
+
+        return {characterNotes, tagGroups}
     }
 
 }

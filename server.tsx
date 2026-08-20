@@ -768,6 +768,7 @@ const runOnce = async () => {
   await serverFunctions.util.downloadTextDetector()
   await serverFunctions.util.downloadAnimeDetector()
   await serverFunctions.util.downloadWDTagger()
+  await serverFunctions.util.downloadCharacterSplitter()
   await serverFunctions.util.downloadImageRater()
   await serverFunctions.util.downloadSegmentator()
   await serverFunctions.util.downloadLineartExtractor()

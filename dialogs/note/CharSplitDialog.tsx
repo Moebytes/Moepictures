@@ -5,15 +5,16 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import React, {useEffect, useState, useRef} from "react"
-import {useThemeSelector, useInteractionActions, useNoteDialogSelector, useNoteDialogActions, useSessionSelector} from "../../store"
+import {useThemeSelector, useInteractionActions, useNoteDialogSelector, 
+useNoteDialogActions, useSessionSelector} from "../../store"
 import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
 
-const OCRDialog: React.FunctionComponent = (props) => {
+const CharSplitDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
-    const {noteOCRDialog} = useNoteDialogSelector()
-    const {setNoteOCRDialog, setNoteOCRFlag} = useNoteDialogActions()
+    const {noteCharSplitDialog, noteCharSplitFlag} = useNoteDialogSelector()
+    const {setNoteCharSplitDialog, setNoteCharSplitFlag} = useNoteDialogActions()
     const {session} = useSessionSelector()
     const [running, setRunning] = useState(false)
     const [error, setError] = useState(false)
@@ -21,7 +22,7 @@ const OCRDialog: React.FunctionComponent = (props) => {
     const controls = useDragControls()
 
     useEffect(() => {
-        if (noteOCRDialog) {
+        if (noteCharSplitDialog) {
             document.body.style.pointerEvents = "none"
             document.body.style.userSelect = "none"
             setRunning(false)
@@ -30,25 +31,56 @@ const OCRDialog: React.FunctionComponent = (props) => {
             document.body.style.userSelect = "auto"
             setEnableDrag(true)
         }
-    }, [noteOCRDialog])
+    }, [noteCharSplitDialog])
 
     const click = async (button: "accept" | "reject") => {
         if (button === "accept") {
-            setNoteOCRFlag(true)
+            setNoteCharSplitFlag(true)
             setRunning(true)
         } else {
-            setNoteOCRDialog(false)
+            setNoteCharSplitDialog(false)
         }
     }
 
-    if (noteOCRDialog) {
+    const close = () => {
+        setRunning(false)
+        setNoteCharSplitFlag(false)
+        setNoteCharSplitDialog(false)
+    }
+
+    if (typeof noteCharSplitFlag === "string") {
+        return (
+            <div className="dialog">
+                <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
+                className="dialog-box" style={{width: "400px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
+                            <span className="dialog-title">{i18n.dialogs.characterSplit.title}</span>
+                        </div>
+                        <div className="dialog-row">
+                            <span className="dialog-text">{i18n.dialogs.characterSplit.tagGroups}</span>
+                        </div>
+                        <div className="dialog-row">
+                            <textarea className="dialog-textarea-static" contentEditable={false}
+                            style={{resize: "vertical"}} value={noteCharSplitFlag.trim()}></textarea>
+                        </div>
+                        <div className="dialog-row">
+                            <button onClick={() => close()} className="dialog-button">{i18n.buttons.ok}</button>
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
+        )
+    }
+
+    if (noteCharSplitDialog) {
         if (session.banned) {
             return (
                 <div className="dialog">
                     <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
                     className="dialog-box" style={{width: "300px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
-                                <span className="dialog-title">{i18n.dialogs.ocr.title}</span>
+                                <span className="dialog-title">{i18n.dialogs.characterSplit.title}</span>
                             </div>
                             <span className="dialog-ban-text">{i18n.dialogs.ocr.banText}</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
@@ -66,10 +98,10 @@ const OCRDialog: React.FunctionComponent = (props) => {
                     className="dialog-box" style={{width: "300px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
-                                <span className="dialog-title">{i18n.dialogs.ocr.title}</span>
+                                <span className="dialog-title">{i18n.dialogs.characterSplit.title}</span>
                             </div>
                             <div className="dialog-row" style={{justifyContent: "center", alignItems: "center", height: "100%"}}>
-                                <span className="dialog-text">{i18n.dialogs.ocr.running}</span>
+                                <span className="dialog-text">{i18n.dialogs.characterSplit.running}</span>
                             </div>
                         </div>
                     </motion.div>
@@ -80,13 +112,13 @@ const OCRDialog: React.FunctionComponent = (props) => {
         return (
             <div className="dialog">
                 <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
-                className="dialog-box" style={{width: "260px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                className="dialog-box" style={{width: "300px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
-                            <span className="dialog-title">{i18n.dialogs.ocr.title}</span>
+                            <span className="dialog-title">{i18n.dialogs.characterSplit.title}</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">{i18n.dialogs.ocr.header}</span>
+                            <span className="dialog-text">{i18n.dialogs.characterSplit.header}</span>
                         </div>
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.no}</button>
@@ -100,4 +132,4 @@ const OCRDialog: React.FunctionComponent = (props) => {
     return null
 }
 
-export default OCRDialog
+export default CharSplitDialog

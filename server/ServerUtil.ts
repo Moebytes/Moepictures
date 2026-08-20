@@ -310,6 +310,7 @@ export default class ServerUtil {
         if (!fs.existsSync(wdTaggerPath)) fs.mkdirSync(wdTaggerPath, {recursive: true})
         const configPath = path.join(wdTaggerPath, "config.json")
         const modelPath = path.join(wdTaggerPath, "model.safetensors")
+        const modelPath2 = path.join(wdTaggerPath, "model.onnx")
         const csvPath = path.join(wdTaggerPath, "selected_tags.csv")
         if (!fs.existsSync(configPath)) {
             const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/wdtagger/config.json`, {responseType: "json"}).then((r) => r.data)
@@ -323,6 +324,31 @@ export default class ServerUtil {
             console.log("Downloading waifu diffusion tagger...")
             const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/wdtagger/model.safetensors`, {responseType: "arraybuffer"}).then((r) => r.data)
             fs.writeFileSync(modelPath, Buffer.from(data))
+            console.log("Done!")
+        }
+        if (!fs.existsSync(modelPath2)) {
+            console.log("Downloading waifu diffusion tagger...")
+            const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/wdtagger/model.onnx`, {responseType: "arraybuffer"}).then((r) => r.data)
+            fs.writeFileSync(modelPath2, Buffer.from(data))
+            console.log("Done!")
+        }
+    }
+
+    public static downloadCharacterSplitter = async () => {
+        const characterSplitPath = path.join(__dirname, "../../assets/python/charactersplit")
+        if (!fs.existsSync(characterSplitPath)) fs.mkdirSync(characterSplitPath, {recursive: true})
+        const refinerPath = path.join(characterSplitPath, "refine_last.ckpt")
+        const modelPath = path.join(characterSplitPath, "rtmdetl_e60.ckpt")
+        if (!fs.existsSync(modelPath)) {
+            console.log("Downloading character splitter...")
+            const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/charactersplit/rtmdetl_e60.ckpt`, {responseType: "arraybuffer"}).then((r) => r.data)
+            fs.writeFileSync(modelPath, Buffer.from(data))
+            console.log("Done!")
+        }
+        if (!fs.existsSync(refinerPath)) {
+            console.log("Downloading character splitter refiner...")
+            const data = await axios.get(`https://huggingface.co/Moebits/anime-models/resolve/main/charactersplit/refine_last.ckpt`, {responseType: "arraybuffer"}).then((r) => r.data)
+            fs.writeFileSync(refinerPath, Buffer.from(data))
             console.log("Done!")
         }
     }
