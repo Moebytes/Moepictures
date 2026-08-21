@@ -137,8 +137,9 @@ const DragAndDrop: React.FunctionComponent = (props) => {
             result.push(...await functions.image.imageSearch(files[i], session, setSessionFlag))
         }
         if (!location.pathname.includes("posts")) {
-            await navigate("/posts")
-            await functions.timeout(3000)
+            navigate(`/posts`, {
+                state: {restorePosts: [result]}
+            })
         }
         setImageSearchFlag(result)
     }
