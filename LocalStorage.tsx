@@ -34,6 +34,8 @@ const lightColorList = {
     "--sidebarText": "#000000",
     "--sidebarSearchBG": "#FFFFFF",
     "--sidebarSearchFocus": "#ff81c4",
+    "--sidebarSearchButtonBG": "#FF579D",
+    "--sidebarRandomButtonBG": "#FF549B",
     "--sidebarTitleText": "#FF2194",
     "--sidebarTextA": "#FF328B",
     "--sidebarTextB": "#ff4bb9",

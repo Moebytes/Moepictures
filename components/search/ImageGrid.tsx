@@ -38,6 +38,7 @@ interface Props {
 
 let interval = null as any
 let restoreTimer = null as any
+let reloadTimer = null as any
 let reloadedPost = false
 let skipRender = false
 let limit = 100
@@ -201,13 +202,12 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     }, [items, page, scroll])
 
     useEffect(() => {
-        let timeout = null as any
         const onDOMLoaded = async () => {
             const state = location.state
             if (state?.restorePosts?.length) return
             if (reloadedPost) return
 
-            timeout = setTimeout(() => {
+            reloadTimer = setTimeout(() => {
                 if (reloadedPost) return
                 const img = document.querySelector(".image")
                 if (!img) initItems(search)
@@ -215,7 +215,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         }
         window.addEventListener("load", onDOMLoaded)
         return () => {
-            clearTimeout(timeout)
+            clearTimeout(reloadTimer)
             window.removeEventListener("load", onDOMLoaded)
         }
     }, [])
@@ -249,7 +249,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         if (reloadedPost) {
             setTimeout(() => {
                 reloadedPost = false
-            }, 500)
+            }, 1000)
             //return
         }
         initItems(search, true)
