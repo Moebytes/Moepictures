@@ -205,10 +205,8 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         const onDOMLoaded = async () => {
             const state = location.state
             if (state?.restorePosts?.length) return
-            if (reloadedPost) return
 
             reloadTimer = setTimeout(() => {
-                if (reloadedPost) return
                 const img = document.querySelector(".image")
                 if (!img) initItems(search)
             }, 3000)
@@ -249,7 +247,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         if (reloadedPost) {
             setTimeout(() => {
                 reloadedPost = false
-            }, 1000)
+            }, 500)
             //return
         }
         initItems(search, true)
@@ -267,8 +265,10 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (imageSearchFlag) {
             reloadedPost = true
-            restructureItems(imageSearchFlag as PostSearch[])
-            setImageSearchFlag(null)
+            setTimeout(() => {
+                restructureItems(imageSearchFlag as PostSearch[])
+                setImageSearchFlag(null)
+            }, 1000)
         }
     }, [imageSearchFlag])
 
