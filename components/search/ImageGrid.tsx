@@ -201,17 +201,21 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     }, [items, page, scroll])
 
     useEffect(() => {
+        let timeout = null as any
         const onDOMLoaded = async () => {
             const state = location.state
             if (state?.restorePosts?.length) return
+            if (reloadedPost) return
 
-            setTimeout(() => {
+            timeout = setTimeout(() => {
+                if (reloadedPost) return
                 const img = document.querySelector(".image")
                 if (!img) initItems(search)
             }, 3000)
         }
         window.addEventListener("load", onDOMLoaded)
         return () => {
+            clearTimeout(timeout)
             window.removeEventListener("load", onDOMLoaded)
         }
     }, [])
@@ -246,7 +250,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             setTimeout(() => {
                 reloadedPost = false
             }, 500)
-            return
+            //return
         }
         initItems(search, true)
     }, [settingsLoaded, imageType, ratingType, styleType, 
