@@ -246,14 +246,14 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             setTimeout(() => {
                 reloadedPost = false
             }, 500)
-            //return
+            return
         }
         initItems(search, true)
     }, [settingsLoaded, imageType, ratingType, styleType, 
         sortType, sortReverse, showChildren, favSearch])
 
     useEffect(() => {
-        if (reloadPostFlag) reloadedPost = true
+        //if (reloadPostFlag) reloadedPost = true
     }, [reloadPostFlag])
 
     useEffect(() => {
