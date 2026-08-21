@@ -98,6 +98,8 @@ const darkColorList = {
     "--sidebarText": "#ff54bc",
     "--sidebarSearchBG": "#2D0D1A",
     "--sidebarSearchFocus": "#e00882",
+    "--sidebarSearchButtonBG": "#FF579D",
+    "--sidebarRandomButtonBG": "#FF549B",
     "--sidebarTitleText": "#FF0CB2",
     "--sidebarTextA": "#FF3281",
     "--sidebarTextB": "#ff32b9",
