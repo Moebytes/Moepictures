@@ -255,7 +255,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         sortType, sortReverse, showChildren, favSearch])
 
     useEffect(() => {
-        //if (reloadPostFlag) reloadedPost = true
+        if (reloadPostFlag) reloadedPost = true
     }, [reloadPostFlag])
 
     useEffect(() => {
@@ -265,10 +265,8 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (imageSearchFlag) {
             reloadedPost = true
-            setTimeout(() => {
-                restructureItems(imageSearchFlag as PostSearch[])
-                setImageSearchFlag(null)
-            }, 1000)
+            restructureItems(imageSearchFlag as PostSearch[])
+            setImageSearchFlag(null)
         }
     }, [imageSearchFlag])
 

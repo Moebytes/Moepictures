@@ -136,8 +136,10 @@ const DragAndDrop: React.FunctionComponent = (props) => {
         for (let i = 0; i < files.length; i++) {
             result.push(...await functions.image.imageSearch(files[i], session, setSessionFlag))
         }
-        setImageSearchFlag(result)
         navigate("/posts")
+        setTimeout(() => {
+            setImageSearchFlag(result)
+        }, 1000)
     }
 
     const uploadFiles = async (files: File[]) => {
