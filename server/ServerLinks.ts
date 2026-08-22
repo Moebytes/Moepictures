@@ -27,7 +27,7 @@ export default class ServerLinks {
         const buffer = await fetch(original, {headers: {"user-agent": `${process.env.DANBOORU_USERNAME}`}}).then((r) => r.arrayBuffer())
         const hash = await serverFunctions.util.pHash(Buffer.from(buffer))
         if (dist(hash, oldHash) < 7) {
-            return `https://danbooru.donmai.us/posts/${result[0].post.id}.json`
+            return `https://danbooru.donmai.us/posts/${result[0].post.id}`
         } else {
             return ""
         }
