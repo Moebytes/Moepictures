@@ -4,8 +4,7 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import functions from "../functions/Functions"
-import {ProxyAgent, fetch} from "undici"
+import serverFunctions from "../server/ServerFunctions"
 
 export abstract class AbstractSource {
     public constructor(public url: string) {}
@@ -27,12 +26,12 @@ export abstract class AbstractSource {
     public abstract extractImages(url: string): Promise<Buffer[]>
 
     public fetchBuffer = async (url: string) => {
-        const arrayBuffer = await functions.http.proxyFetch(url, this.headers).then((r) => r.arrayBuffer())
+        const arrayBuffer = await serverFunctions.proxyFetch(url, this.headers).then((r) => r.arrayBuffer())
         return Buffer.from(arrayBuffer)
     }
 
     public fetchJSON = async (url: string) => {
-        return functions.http.proxyFetch(url, this.headers).then((r) => r.json())
+        return serverFunctions.proxyFetch(url, this.headers).then((r) => r.json()) as any
     }
 
     public fetchText = async (url: string) => {

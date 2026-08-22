@@ -5,7 +5,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import path from "path"
-import {ProxyAgent, fetch as proxyFetch} from "undici"
 import localforage from "localforage"
 import functions from "./Functions"
 import decryption from "../structures/Decryption"
@@ -17,20 +16,6 @@ export default class HTTPFunctions {
     public static serverPublicKey = ""
     public static serverKeyLock = false
     public static lockManager = {} as {[key: string]: Promise<any> | null}
-
-    public static getProxy = async () => {
-        const proxies = await fetch("https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/http/data.txt")
-            .then((r) => r.text()).then((text) => text.split("\n").filter(Boolean))
-        return proxies[Math.floor(Math.random() * proxies.length)]
-    }
-
-    public static proxyFetch = async (link: string, headers: any = {}) => {
-        const proxy = await this.getProxy()
-        const proxyAgent = new ProxyAgent(proxy)
-        if (link.includes("danbooru")) headers["user-agent"] = "user #576533"
-
-        return proxyFetch(link, {headers, dispatcher: proxyAgent})
-    }
 
     public static getBuffer = async (link: string, headers?: any) => {
         try {
