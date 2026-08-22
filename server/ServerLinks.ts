@@ -46,7 +46,7 @@ export default class ServerLinks {
         let promises = [] as Promise<any>[]
         const appendExtraLinks = async (link: string) => {
             try {
-                const post = await serverFunctions.http.proxyFetch(`${link}.json`).then((r) => r.json()) as any
+                const post = await serverFunctions.http.proxyFetch(`${link}.json${process.env.DANBOORU_API_KEY}`).then((r) => r.json()) as any
                 const mediaId = post.media_asset.id
                 const html = await serverFunctions.http.proxyFetch(`https://danbooru.donmai.us/media_assets/${mediaId}`).then((r) => r.text())
                 const links = html.match(/(?<=Source<\/th>\s*<td class="break-all"><a [^>]*href=").*?(?=")/gm) || []
@@ -113,7 +113,7 @@ export default class ServerLinks {
         let danbooruLink = booruLinks.find((link) => link.includes("danbooru.donmai.us"))
         if (danbooruLink) {
             try {
-            const json = await serverFunctions.http.proxyFetch(`${danbooruLink}.json`).then((r) => r.json()) as any
+            const json = await serverFunctions.http.proxyFetch(`${danbooruLink}.json${process.env.DANBOORU_API_KEY}`).then((r) => r.json()) as any
             if (json.rating === "q") rating = functions.highestRating(rating, functions.r17())
             if (json.rating === "e") rating = functions.highestRating(rating, functions.r18())
             tagData.tags = json.tag_string_general
