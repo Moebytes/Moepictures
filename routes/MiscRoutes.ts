@@ -433,34 +433,24 @@ const MiscRoutes = (app: Express) => {
     })
 
     app.post("/api/misc/sourcelookup", csrfProtection, captchaLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        let ip = serverFunctions.util.ip(req)
         try {
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const {current, rating} = req.body as SourceLookupParams
-            if (processingQueue.has(ip)) return void res.status(429).send("Processing in progress")
-            processingQueue.add(ip)
             const sourceLookup = await serverFunctions.sources.sourceLookup(current, rating)
-            processingQueue.delete(ip)
             res.status(200).json(sourceLookup)
         } catch (e) {
             console.log(e)
-            if (ip) processingQueue.delete(ip)
             res.status(400).end()
         }
     })
 
     app.post("/api/misc/taglookup", csrfProtection, captchaLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        let ip = serverFunctions.util.ip(req)
         try {
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const {current, type, rating, style, hasUpscaled} = req.body as TagLookupParams
-            if (processingQueue.has(ip)) return void res.status(429).send("Processing in progress")
-            processingQueue.add(ip)
             const tagLookup = await serverFunctions.tags.tagLookup(current, type, rating, style, hasUpscaled)
-            processingQueue.delete(ip)
             res.status(200).json(tagLookup)
         } catch {
-            if (ip) processingQueue.delete(ip)
             res.status(400).end()
         }
     })
