@@ -6,7 +6,6 @@
 
 import nodemailer from "nodemailer"
 import {Request, Response, NextFunction} from "express"
-import {ProxyAgent, fetch as proxyFetch} from "undici"
 import sql from "../sql/SQLQuery"
 import {ipKeyGenerator} from "express-rate-limit"
 import encryption from "../structures/Encryption"
@@ -14,6 +13,7 @@ import permissions from "../structures/Permissions"
 import {render} from "@react-email/components"
 import CSRF from "csrf"
 import ServerFiles from "./ServerFiles"
+import ServerHTTP from "./ServerHTTP"
 import ServerLinks from "./ServerLinks"
 import ServerNotifications from "./ServerNotifications"
 import ServerPosts from "./ServerPosts"
@@ -68,6 +68,7 @@ export const csrfGenerator = async (req: Request, res: Response, next: NextFunct
 
 export default class ServerFunctions {
     public static files = ServerFiles
+    public static http = ServerHTTP
     public static links = ServerLinks
     public static notifications = ServerNotifications
     public static posts = ServerPosts
@@ -102,20 +103,6 @@ export default class ServerFunctions {
         if (!req.session.publicKey) return res.status(401).send("No public key")
         const encrypted = encryption.encryptAPI(data, req.session.publicKey, req.session)
         return res.status(200).send(encrypted)
-    }
-
-    public static getProxy = async () => {
-        const proxies = await fetch("https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/http/data.txt")
-            .then((r) => r.text()).then((text) => text.split("\n").filter(Boolean))
-        return proxies[Math.floor(Math.random() * proxies.length)]
-    }
-
-    public static proxyFetch = async (link: string, headers: any = {}) => {
-        const proxy = await this.getProxy()
-        const proxyAgent = new ProxyAgent(proxy)
-        if (link.includes("danbooru")) headers["user-agent"] = "user #576533"
-
-        return proxyFetch(link, {headers, dispatcher: proxyAgent})
     }
 
     public static email = async (email: string, subject: string, jsx: React.ReactElement) => {

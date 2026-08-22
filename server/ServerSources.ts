@@ -68,7 +68,7 @@ export default class ServerSources {
         const pixivID = pixivLink.match(/\d{5,}/gm)?.[0] ?? ""
         source = `https://www.pixiv.net/artworks/${pixivID}`
         try {
-            const result = await serverFunctions.proxyFetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`).then((r) => r.json()) as any
+            const result = await serverFunctions.http.proxyFetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`).then((r) => r.json()) as any
             if (result.length) {
                 if (result[0].rating === "q") rating = functions.highestRating(rating, functions.r17())
                 if (result[0].rating === "e") rating = functions.highestRating(rating, functions.r18())
@@ -157,7 +157,7 @@ export default class ServerSources {
             if (redirect.includes("t.co")) continue
             try {
                 let cleaned = redirect.replace("/photo/1", "")
-                const result = await serverFunctions.proxyFetch(`https://danbooru.donmai.us/posts.json?tags=source%3A${cleaned}`).then((r) => r.json()) as any
+                const result = await serverFunctions.http.proxyFetch(`https://danbooru.donmai.us/posts.json?tags=source%3A${cleaned}`).then((r) => r.json()) as any
                 if (result.length) {
                     if (result[0].rating === "q") rating = functions.highestRating(rating, functions.r17())
                     if (result[0].rating === "e") rating = functions.highestRating(rating, functions.r18())
@@ -264,7 +264,7 @@ export default class ServerSources {
         let sourceLinks = [] as {link: string, hash: string}[]
 
         let id = danbooruLink.match(/\d+/)?.[0]
-        let danbooruPost = await serverFunctions.proxyFetch(`https://danbooru.donmai.us/posts/${id}.json`).then((r) => r.json()) as any
+        let danbooruPost = await serverFunctions.http.proxyFetch(`https://danbooru.donmai.us/posts/${id}.json`).then((r) => r.json()) as any
         if (danbooruPost.rating === "q") rating = functions.highestRating(rating, functions.r17())
         if (danbooruPost.rating === "e") rating = functions.highestRating(rating, functions.r18())
 
@@ -281,7 +281,7 @@ export default class ServerSources {
             if (regexCheck !== "i/web") artist = regexCheck
         }
 
-        let commentaries = await serverFunctions.proxyFetch(`https://danbooru.donmai.us/artist_commentaries.json?commit=Search&search[post_id]=${id}`).then((r) => r.json()) as any
+        let commentaries = await serverFunctions.http.proxyFetch(`https://danbooru.donmai.us/artist_commentaries.json?commit=Search&search[post_id]=${id}`).then((r) => r.json()) as any
         if (commentaries[0]) {
             title = commentaries[0].original_title
             commentary = commentaries[0].original_description

@@ -1100,16 +1100,16 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
             setArtists(artists)
             setSourceLinks(sourceLookup.sourceLinks)
             forceUpdate()
-            setSourceError(false)
         } catch (e) {
             console.log(e)
             sourceErrorRef.current!.innerText = i18n.pages.upload.noResults
             await functions.timeout(3000)
+        } finally {
             setSourceError(false)
+            setTimeout(async () => {
+                saucenaoTimeout = false
+            }, 3000)
         }
-        setTimeout(async () => {
-            saucenaoTimeout = false
-        }, 3000)
     }
 
     const tagLookup = async () => {
@@ -1175,11 +1175,11 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
             setMetaTags(tagLookup.meta.join(" "))
             setRawTags(tagLookup.tags.join(" "))
             setRating(tagLookup.rating)
-            setTagError(false)
         } catch (e) {
             console.log(e)
             tagErrorRef.current!.innerText = i18n.pages.upload.nothingFound
             await functions.timeout(3000)
+        } finally {
             setTagError(false)
         }
     }
@@ -1810,7 +1810,7 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
             </div>
             <span className="upload-heading">{i18n.labels.source}</span>
             <div className="upload-container">
-                {sourceErrorRef ? <span ref={sourceErrorRef} className="submit-error-text"></span> : null}
+                {sourceError ? <span ref={sourceErrorRef} className="submit-error-text"></span> : null}
                 <span className="upload-link" onClick={sourceLookup}>{i18n.pages.upload.fetchFromPixiv}</span>
                 <div className="upload-container-row">
                     <span className="upload-text">{i18n.labels.title}: </span>
@@ -1917,7 +1917,7 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
                     </button>
                 </div>
             </div>
-            {tagErrorRef ? <span ref={tagErrorRef} className="submit-error-text"></span> : null}
+            {tagError ? <span ref={tagErrorRef} className="submit-error-text"></span> : null}
             <span className="upload-link" onClick={tagLookup} style={{marginBottom: "5px"}}>{i18n.pages.upload.fetchFromDanbooru}</span>
             <span className="upload-text-alt">{i18n.pages.upload.enterTags}
             <Link className="upload-bold-link" target="_blank" to="/help#tagging">{i18n.pages.upload.taggingGuide}</Link>

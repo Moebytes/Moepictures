@@ -26,12 +26,12 @@ export abstract class AbstractSource {
     public abstract extractImages(url: string): Promise<Buffer[]>
 
     public fetchBuffer = async (url: string) => {
-        const arrayBuffer = await serverFunctions.proxyFetch(url, this.headers).then((r) => r.arrayBuffer())
+        const arrayBuffer = await serverFunctions.http.proxyFetch(url, this.headers).then((r) => r.arrayBuffer())
         return Buffer.from(arrayBuffer)
     }
 
     public fetchJSON = async (url: string) => {
-        return serverFunctions.proxyFetch(url, this.headers).then((r) => r.json()) as any
+        return serverFunctions.http.proxyFetch(url, this.headers).then((r) => r.json()) as any
     }
 
     public fetchText = async (url: string) => {
