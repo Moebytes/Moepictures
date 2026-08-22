@@ -52,7 +52,7 @@ export default class ServerHTTP {
     public static proxyFetch = async (link: string, headers: any = {}) => {
         try {
             const proxyAgent = await this.getProxy()
-            if (link.includes("danbooru")) headers["user-agent"] = "user #875544"
+            if (link.includes("danbooru")) headers["user-agent"] = process.env.DANBOORU_USERNAME
 
             // disable for now
             // return proxyFetch(link, {headers, dispatcher: proxyAgent})

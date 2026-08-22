@@ -123,9 +123,7 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/revdanbooru", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!req.body) return void res.status(400).send("Image data must be provided")
-            const booruLinks = await serverFunctions.links.booruLinks(req.body)
-            let result = booruLinks.find((link) => link.includes("danbooru.donmai.us"))
-            if (result) result += ".json"
+            const result = await serverFunctions.links.revDanbooru(req.body)
             res.status(200).send(result)
         } catch (e) {
             console.log(e)

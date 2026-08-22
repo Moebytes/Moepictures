@@ -7,11 +7,32 @@
 import FormData from "form-data"
 import * as cheerio from "cheerio"
 import axios from "axios"
+import dist from "sharp-phash/distance"
 import functions from "../functions/Functions"
 import serverFunctions from "./ServerFunctions"
 import {PostRating} from "../types/Types"
+import path from "path"
 
 export default class ServerLinks {
+    public static revDanbooru = async (bytes: number[]) => {
+        const oldBuffer = Buffer.from(bytes)
+        const oldHash = await serverFunctions.util.pHash(oldBuffer)
+        const form = new FormData()
+        form.append("search[file]", oldBuffer, {filename: "image.png"})
+        const result = await axios.post(`https://danbooru.donmai.us/iqdb_queries.json${process.env.DANBOORU_API_KEY}`, 
+            form, {headers: {...form.getHeaders()}}).then((r) => r.data)
+        if (result[0]?.score < 70) return ""
+        const original = result[0].post.file_url
+        if (!original || path.extname(original) === ".zip" || path.extname(original) === ".mp4") return ""
+        const buffer = await fetch(original, {headers: {"user-agent": `${process.env.DANBOORU_USERNAME}`}}).then((r) => r.arrayBuffer())
+        const hash = await serverFunctions.util.pHash(Buffer.from(buffer))
+        if (dist(hash, oldHash) < 7) {
+            return `https://danbooru.donmai.us/posts/${result[0].post.id}.json`
+        } else {
+            return ""
+        }
+    }
+
     public static booruLinks = async (bytes: number[]) => {
         if (!bytes) return Promise.reject("Image bytes must be provided")
         const buffer = Buffer.from(bytes)

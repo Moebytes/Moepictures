@@ -185,8 +185,8 @@ export default class ServerTags {
             pngBytes = Object.values(new Uint8Array(buffer))
         }
 
-        let booruLinks = await serverFunctions.links.booruLinks(pngBytes)
-        let {tagData, newRating} = await serverFunctions.links.testBooruLinks(booruLinks, rating)
+        let danbooruLink = await serverFunctions.links.revDanbooru(pngBytes)
+        let {tagData, newRating} = await serverFunctions.links.testBooruLinks([danbooruLink], rating)
         rating = functions.highestRating(rating, newRating)
         let predictedRating = await this.rateImage(pngBytes).catch(() => null)
         if (predictedRating) rating = functions.highestRating(rating, predictedRating)
