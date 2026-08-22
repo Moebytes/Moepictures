@@ -24,9 +24,9 @@ export default class ServerLinks {
         let promises = [] as Promise<any>[]
         const appendExtraLinks = async (link: string) => {
             try {
-                const post = await axios.get(`${link}.json`).then((r) => r.data)
+                const post = await functions.http.proxyFetch(`${link}.json`).then((r) => r.json()) as any
                 const mediaId = post.media_asset.id
-                const html = await axios.get(`https://danbooru.donmai.us/media_assets/${mediaId}`).then((r) => r.data)
+                const html = await functions.http.proxyFetch(`https://danbooru.donmai.us/media_assets/${mediaId}`).then((r) => r.text())
                 const links = html.match(/(?<=Source<\/th>\s*<td class="break-all"><a [^>]*href=").*?(?=")/gm) || []
                 for (let link of links) {
                     link = link.replaceAll("&amp;", "&")
@@ -90,7 +90,7 @@ export default class ServerLinks {
 
         let danbooruLink = booruLinks.find((link) => link.includes("danbooru.donmai.us"))
         if (danbooruLink) {
-            const json = await functions.http.getJSON(`${danbooruLink}.json`)
+            const json = await functions.http.proxyFetch(`${danbooruLink}.json`).then((r) => r.json()) as any
             if (json.rating === "q") rating = functions.highestRating(rating, functions.r17())
             if (json.rating === "e") rating = functions.highestRating(rating, functions.r18())
             tagData.tags = json.tag_string_general
@@ -103,7 +103,7 @@ export default class ServerLinks {
         if (!Object.keys(tagData).length && gelbooruLink) {
             let id = gelbooruLink.match(/\d+/g)?.[0]
             let url = `https://gelbooru.com/index.php?page=dapi&s=post&q=index&id=${id}&json=1${process.env.GELBOORU_API_KEY}`
-            const json = await functions.http.getJSON(url)
+            const json = await functions.http.proxyFetch(url).then((r) => r.json()) as any
             let post = json.post[0]
             if (post) {
                 if (post.rating === "questionable") rating = functions.highestRating(rating, functions.r17())
@@ -119,7 +119,7 @@ export default class ServerLinks {
         if (!Object.keys(tagData).length && safebooruLink) {
             let id = safebooruLink.match(/\d+/g)?.[0]
             let url = `https://safebooru.org/index.php?page=dapi&s=post&q=index&json=1&id=${id}`
-            const json = await functions.http.getJSON(url)
+            const json = await functions.http.proxyFetch(url).then((r) => r.json()) as any
             let post = json[0]
             if (post) {
                 if (post.rating === "questionable") rating = functions.highestRating(rating, functions.r17())
