@@ -52,9 +52,11 @@ export default class ServerHTTP {
     public static proxyFetch = async (link: string, headers: any = {}) => {
         try {
             const proxyAgent = await this.getProxy()
-            if (link.includes("danbooru")) headers["user-agent"] = `user #${Math.floor(100000 + Math.random() * 900000)}`
+            if (link.includes("danbooru")) headers["user-agent"] = "user #875544"
 
-            return proxyFetch(link, {headers, dispatcher: proxyAgent})
+            // disable for now
+            // return proxyFetch(link, {headers, dispatcher: proxyAgent})
+            return fetch(link, {headers})
         } catch (e) {
             console.log(e)
             this.proxyExpiration = 0
