@@ -194,8 +194,6 @@ let noCache = ["artist", "character", "series", "pfp", "tag", "history"]
 let folders = [...originalFolders, ...originalFolders.map((folder) => `${folder}-upscaled`), ...noCache]
 let encrypted = [...originalEncrypted, ...originalEncrypted.map((folder) => `${folder}-upscaled`)]
 
-const lastModified = new Date().toUTCString()
-
 for (let i = 0; i < folders.length; i++) {
   app.get(`/${folders[i]}/{*page}`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -210,8 +208,7 @@ for (let i = 0; i < folders.length; i++) {
         if (!url.endsWith(".png") && !url.endsWith(".jpg") && !url.endsWith(".jpeg") &&
         !url.endsWith(".webp") && !url.endsWith(".gif")) return next()
       }
-      res.setHeader("Last-Modified", lastModified)
-      res.setHeader("Cache-Control", "public, max-age=2678400")
+      res.setHeader("Cache-Control", "no-store")
       const key = decodeURIComponent(req.path.slice(1))
       let upscaled = req.session.upscaledImages ?? false
       if (upscaleParam) upscaled = upscaleParam === "true"
@@ -245,7 +242,6 @@ for (let i = 0; i < folders.length; i++) {
       let contentLength = body.byteLength
       if (!contentLength) return res.status(404).end()
       if (!noCache.includes(folders[i]) && req.session.captchaNeeded) {
-        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
         body = await imageLock(body, false)
         return res.status(200).send(body)
       }
@@ -279,8 +275,7 @@ for (let i = 0; i < folders.length; i++) {
       const pixelHash = new URL(`${functions.config.getDomain()}${req.originalUrl}`).searchParams.get("hash") ?? ""
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
-      res.setHeader("Last-Modified", lastModified)
-      res.setHeader("Cache-Control", "public, max-age=2678400")
+      res.setHeader("Cache-Control", "no-store")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/`, ""))
       let r18 = false
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
@@ -312,7 +307,6 @@ for (let i = 0; i < folders.length; i++) {
       let contentLength = body.byteLength
       if (!contentLength) return res.status(404).end()
       if (!noCache.includes(folders[i]) && req.session.captchaNeeded) {
-        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
         body = await imageLock(body)
         return res.status(200).send(body)
       }
@@ -347,7 +341,7 @@ for (let i = 0; i < folders.length; i++) {
       const upscaleParam = new URL(`${functions.config.getDomain()}${req.originalUrl}`).searchParams.get("upscaled") ?? ""
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
-      res.setHeader("Cache-Control", "public, max-age=2678400")
+      res.setHeader("Cache-Control", "no-store")
       const key = decodeURIComponent(req.path.replace("/unverified/", ""))
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (!noCache.includes(folders[i]) && postID) {
@@ -365,7 +359,6 @@ for (let i = 0; i < folders.length; i++) {
       const body = await serverFunctions.files.getUnverifiedFile(key, upscaled)
       const contentLength = body.byteLength
       if (!contentLength) {
-        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
         const noImg = await imageMissing()
         return res.status(200).send(noImg)
       }
@@ -395,7 +388,7 @@ for (let i = 0; i < folders.length; i++) {
       if (!serverFunctions.util.isAllowedReferer(referer)) return res.status(403).end()
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
-      res.setHeader("Cache-Control", "public, max-age=2678400")
+      res.setHeader("Cache-Control", "no-store")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/unverified/`, ""))
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (!noCache.includes(folders[i]) && postID) {
@@ -410,7 +403,6 @@ for (let i = 0; i < folders.length; i++) {
       if (!body.byteLength) body = await serverFunctions.files.getUnverifiedFile(key, false)
       let contentLength = body.byteLength
       if (!contentLength) {
-        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
         const noImg = await imageMissing()
         return res.status(200).send(noImg)
       }
