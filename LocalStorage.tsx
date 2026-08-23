@@ -232,22 +232,8 @@ const LocalStorage: React.FunctionComponent = () => {
         }
     }
 
-    const initAsync = async () => {
-        const savedNavigationPosts = await localforage.getItem("savedNavigationPosts") as string
-        const savedTags = await localforage.getItem("savedTags") as string
-        const savedArtists = await localforage.getItem("savedArtists") as string
-        const savedCharacters = await localforage.getItem("savedCharacters") as string
-        const savedSeries = await localforage.getItem("savedSeries") as string
-        if (savedNavigationPosts) setNavigationPosts(JSON.parse(savedNavigationPosts))
-        if (savedTags) setTags(JSON.parse(savedTags))
-        if (savedArtists) setArtists(JSON.parse(savedArtists))
-        if (savedCharacters) setCharacters(JSON.parse(savedCharacters))
-        if (savedSeries) setSeries(JSON.parse(savedSeries))
-    }
-
     useEffect(() => {
         initLanguage()
-        initAsync()
         const savedTheme = localStorage.getItem("theme")
         const savedSiteHue = localStorage.getItem("siteHue")
         const savedSiteSaturation = localStorage.getItem("siteSaturation")
@@ -437,23 +423,14 @@ const LocalStorage: React.FunctionComponent = () => {
     }, [hideSidebar, hideTitlebar, hideNavbar, hideSortbar])
 
     useEffect(() => {
-        if (navigationPosts.length) localforage.setItem("savedNavigationPosts", JSON.stringify(navigationPosts))
-        if (tags.length) localforage.setItem("savedTags", JSON.stringify(tags))
         if (bannerTags.length) localStorage.setItem("savedBannerTags", JSON.stringify(bannerTags))
-    }, [navigationPosts, tags, bannerTags, session])
+    }, [tags, bannerTags, session])
 
     useEffect(() => {
         localStorage.setItem("order", String(order))
         localStorage.setItem("savedTagCategories", JSON.stringify(tagCategories))
         localStorage.setItem("savedTagGroupCategories", JSON.stringify(tagGroupCategories))
     }, [order, tagCategories, tagGroupCategories])
-
-
-    useEffect(() => {
-        localforage.setItem("savedArtists", JSON.stringify(artists))
-        localforage.setItem("savedCharacters", JSON.stringify(characters))
-        localforage.setItem("savedSeries", JSON.stringify(series))
-    }, [artists, characters, series])
 
     return null
 }

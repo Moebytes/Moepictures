@@ -60,7 +60,6 @@ export default class PostFunctions {
         if (postIndex === -1) return
         posts = structuredClone(posts);
         (posts[postIndex] as PostSearch).favorited = favorited
-        localStorage.setItem("savedPosts", JSON.stringify(posts))
     }
 
     public static generateSlug = (name: string) => {

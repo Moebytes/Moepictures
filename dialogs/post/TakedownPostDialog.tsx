@@ -43,7 +43,6 @@ const TakedownPostDialog: React.FunctionComponent = (props) => {
             await functions.http.post("/api/post/takedown",  {postID: takedownPostID.post.postID}, session, setSessionFlag)
             setPostFlag(takedownPostID.post.postID)
             localStorage.removeItem("savedPost")
-            localStorage.removeItem("savedPosts")
             localStorage.removeItem("savedTagCategories")
         }
     }

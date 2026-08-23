@@ -40,7 +40,6 @@ const LockPostDialog: React.FunctionComponent = (props) => {
             await functions.http.post("/api/post/lock",  {postID: lockPostID.post.postID}, session, setSessionFlag)
             setPostFlag(lockPostID.post.postID)
             localStorage.removeItem("savedPost")
-            localStorage.removeItem("savedPosts")
             localStorage.removeItem("savedTagCategories")
         }
     }

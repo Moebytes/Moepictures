@@ -40,7 +40,6 @@ const PrivatePostDialog: React.FunctionComponent = (props) => {
             await functions.http.post("/api/post/private",  {postID: privatePostID.post.postID}, session, setSessionFlag)
             setPostFlag(privatePostID.post.postID)
             localStorage.removeItem("savedPost")
-            localStorage.removeItem("savedPosts")
             localStorage.removeItem("savedTagCategories")
         }
     }
