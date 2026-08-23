@@ -98,7 +98,7 @@ export default class CacheFunctions {
             return cache as Alias[]
         } else {
             let aliasMap = await functions.http.get("/api/tag/aliases", {aliases: []}, session, setSessionFlag)
-            localforage.setItem("aliases", aliasMap)
+            //localforage.setItem("aliases", aliasMap)
             return aliasMap
         }
     }
@@ -109,13 +109,13 @@ export default class CacheFunctions {
             return cache as {[key: string]: string}
         } else {
             let emojis = await functions.http.get("/api/misc/emojis", null, session, setSessionFlag)
-            localforage.setItem("emojis", cache)
+            //localforage.setItem("emojis", cache)
             return emojis
         }
     }
 
     public static clearCache = () => {
-        localforage.removeItem("tags")
+        localforage.removeItem("aliases")
         localforage.removeItem("tagCounts")
         localforage.removeItem("emojis")
     }
