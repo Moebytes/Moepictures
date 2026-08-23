@@ -17,6 +17,7 @@ import DownloadIcon from "../../assets/svg/download.svg"
 import FiltersIcon from "../../assets/svg/filters.svg"
 import NextIcon from "../../assets/svg/next.svg"
 import PrevIcon from "../../assets/svg/prev.svg"
+import DeepLinkIcon from "../../assets/svg/deeplink.svg"
 import Filters from "../../ui/Filters"
 import {PostFull, PostHistory, UnverifiedPost} from "../../types/Types"
 import "./styles/postimageoptions.less"
@@ -264,7 +265,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                 </div>
             </div>
             <div className="post-image-options">
-                <div className="post-image-options-box" onClick={() => props.download?.()} style={{marginRight: "25px"}}
+                <div className="post-image-options-box" onClick={() => props.download?.()} style={{marginRight: "15px"}}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <DownloadIcon className="post-image-icon"/>
                     <div className="post-image-text">{i18n.buttons.download}</div>
@@ -272,7 +273,12 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                 {props.post?.type === "image" || props.post?.type === "comic" ? 
                 <button className="post-image-button" ref={formatRef} onClick={() => toggleDropdown("format")}>
                 {String(format).toUpperCase()}</button> : null}
-                <div className="post-image-options-box" ref={filterRef} onClick={() => toggleDropdown("filter")} style={{marginLeft: "25px"}}
+                <div className="post-image-options-box" style={{marginLeft: "15px"}} onClick={() => {
+                    window.location.href = `moepics://post/${props.post?.postID}`
+                }}>
+                    <DeepLinkIcon className="post-image-icon"/>
+                </div>
+                <div className="post-image-options-box" ref={filterRef} onClick={() => toggleDropdown("filter")}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <FiltersIcon className="post-image-icon"/>
                     <div className="post-image-text">{i18n.filters.filters}</div>
