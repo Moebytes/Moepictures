@@ -59,8 +59,6 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         }
     }, [headerFlag])
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     const toggleMobileNavbar = () => {
         setHideMobileNavbar(!hideMobileNavbar)
     }
@@ -171,7 +169,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
             {!mobile ? 
             <div className="titlebar-login-container">
                 {session.username ? <>
-                <img className="titlebar-user-img" src={userImg} style={{filter: session.image ? "" : filter}}/>
+                <img className="titlebar-user-img" src={userImg}/>
                 {generateUsernameJSX()}
                 </> : <>
                 <KeyIcon className="titlebar-login-icon"/>

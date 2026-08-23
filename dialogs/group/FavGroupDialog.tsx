@@ -32,8 +32,6 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     const updateFavGroups = async () => {
         if (!favGroupID) return
         const favgroups = await functions.http.get("/api/favgroups", {postID: favGroupID}, session, setSessionFlag)

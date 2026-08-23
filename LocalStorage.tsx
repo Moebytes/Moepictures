@@ -26,6 +26,7 @@ const lightColorList = {
     "--moeTextA": "#FF5099",
     "--moeTextB": "#FF307F",
     "--titleText": "#FF579D",
+    "--loginText": "#ff3ca4",
 
     "--navbarBG": "#FFD6EB",
     "--navbarText": "#FF579D",
@@ -90,6 +91,7 @@ const darkColorList = {
     "--moeTextA": "#FF5099",
     "--moeTextB": "#FF307F",
     "--titleText": "#FF5099",
+    "--loginText": "#fe2391",
 
     "--navbarBG": "#1C0713",
     "--navbarText": "#FF3CA4",

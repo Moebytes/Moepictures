@@ -35,8 +35,6 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
     const [showOldGroups, setShowOldGroups] = useState([] as boolean[])
     const navigate = useNavigate()
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     const loadInitial = async () => {
         const requests = await functions.http.get("/api/group/edit/request/list", null, session, setSessionFlag, true)
         const groups = await functions.http.get("/api/groups/list", {slugs: requests.map((r) => r.group)}, session, setSessionFlag, true)

@@ -30,8 +30,6 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
     const [tagY, setTagY] = useState(0)
     const controls = useDragControls()
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     useEffect(() => {
         const logPosition = (event: MouseEvent) => {
             const element = document.querySelector(".edit-note-dialog-box")

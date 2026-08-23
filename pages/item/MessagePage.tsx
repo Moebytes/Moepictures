@@ -60,8 +60,6 @@ const MessagePage: React.FunctionComponent = () => {
     const textBoxRef = useRef<TextBoxRef>(null)
     const {id: messageID} = useParams() as {id: string}
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     useEffect(() => {
         const replyParam = new URLSearchParams(window.location.search).get("reply")
         const onDOMLoaded = () => {
@@ -366,7 +364,7 @@ const MessagePage: React.FunctionComponent = () => {
                         <div className="thread-page-user-container">
                             {getCreatorJSX()}
                             <span className="thread-page-date-text">{functions.date.timeAgo(message.createDate, i18n)}</span>
-                            <img draggable={false} className="thread-page-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: defaultIcon ? filter : ""}}/>
+                            <img draggable={false} className="thread-page-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick}/>
                         </div>
                         <div className="thread-page-text-container">
                             <p className="thread-page-text">{moeText.renderMessageText(message.content, emojis)}</p>

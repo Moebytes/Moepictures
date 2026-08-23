@@ -29,8 +29,6 @@ const EditFavgroupDialog: React.FunctionComponent = (props) => {
     const navigate = useNavigate()
     const controls = useDragControls()
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     useEffect(() => {
         if (editFavGroupObj) {
             document.body.style.pointerEvents = "none"

@@ -96,8 +96,6 @@ const ReaderPage: React.FunctionComponent = () => {
     const navigate = useNavigate()
     const {id: postID, slug} = useParams() as {id: string, slug: string}
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     useEffect(() => {
         functions.dom.changeTitle("Post", i18n)
     }, [])
@@ -360,10 +358,10 @@ const ReaderPage: React.FunctionComponent = () => {
                 <div className="reader-controls-box">
                     {!mobile ? <HamburgerIcon className="reader-controls-icon-small" onClick={() => setReaderThumbnails(!readerThumbnails)}/> : null}
                     <div className="reader-controls-page-container">
-                        {!mobile ? <span className="reader-controls-page-text" style={{filter}}>{i18n.labels.page}:</span> : null}
+                        {!mobile ? <span className="reader-controls-page-text">{i18n.labels.page}:</span> : null}
                         <input className="reader-controls-page-input" type="number" spellCheck={false} value={readerPage} onChange={(event) => setReaderPage(Number(event.target.value))} onBlur={() => updatePage()}
-                        onMouseEnter={() => setEnableDrag(false)} style={{filter, marginLeft: mobile ? "0px" : ""}}/>
-                        <span className="reader-controls-page-text" style={{filter}}>/ {images.length}</span>
+                        onMouseEnter={() => setEnableDrag(false)} style={{marginLeft: mobile ? "0px" : ""}}/>
+                        <span className="reader-controls-page-text">/ {images.length}</span>
                     </div>
                     
                     {!mobile ? <RightToLeftIcon className="reader-controls-icon-mid" onClick={() => changeHorizontal(true)}/> : null}
@@ -373,7 +371,7 @@ const ReaderPage: React.FunctionComponent = () => {
                 <div className="reader-controls-box">
                     <ZoomOutIcon className="reader-controls-icon-small-alt" onClick={triggerZoomOut}/>
                     <ZoomInIcon className="reader-controls-icon-small" onClick={triggerZoomIn}/>
-                    <input className="reader-controls-zoom-input" type="number" spellCheck={false} value={readerZoom} onChange={(event) => setReaderZoom(Number(event.target.value))} onBlur={() => updateZoom()} style={{filter}}/>
+                    <input className="reader-controls-zoom-input" type="number" spellCheck={false} value={readerZoom} onChange={(event) => setReaderZoom(Number(event.target.value))} onBlur={() => updateZoom()}/>
                     <ResetIcon className="reader-controls-icon-small" onClick={() => setReaderZoom(100)} style={{height: "13px"}}/>
                     <PrevPageIcon className="reader-controls-icon-small" onClick={triggerPrev}/>
                     <NextPageIcon className="reader-controls-icon-small" onClick={triggerNext}/>

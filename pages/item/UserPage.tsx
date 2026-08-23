@@ -69,8 +69,6 @@ const UserPage: React.FunctionComponent = () => {
         limit = mobile ? 5 : 25
     }, [mobile])
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     const fetchUser = async () => {
         const user = await functions.http.get("/api/user", {username}, session, setSessionFlag)
         if (!user) return functions.dom.replaceLocation("/404")
@@ -383,7 +381,7 @@ const UserPage: React.FunctionComponent = () => {
                 {user ?
                 <div className="user">
                     <div className="user-top-container">
-                        <img className="user-img" src={getUserImg()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? filter : ""}}/>
+                        <img className="user-img" src={getUserImg()} onClick={userImgClick} onAuxClick={userImgClick}/>
                         {generateUsernameJSX()}
                         {session.username && (session.username !== username) && user.role !== "system" && !session.banned ? 
                             <DMIcon className="user-opt-icon" onClick={dmDialog}/> : null}

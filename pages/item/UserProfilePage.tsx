@@ -98,8 +98,6 @@ const UserProfilePage: React.FunctionComponent = () => {
         }
     }
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     const updateUploads = async () => {
         let rating = functions.post.isR18(ratingType) ? functions.r18() : "all"
         const uploads = await functions.http.get("/api/user/uploads", {limit, rating}, session, setSessionFlag)
@@ -585,7 +583,7 @@ const UserProfilePage: React.FunctionComponent = () => {
             <div className="content">
                 {session.username ? <div className="user">
                     <div className="user-top-container">
-                        <img className="user-img" src={userImg} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: session.image ? "" : filter}}/>
+                        <img className="user-img" src={userImg} onClick={userImgClick} onAuxClick={userImgClick}/>
                         {generateUsernameJSX()}
                     </div>
                     {session.banned ? <span className="user-ban-text">{getBanText()}</span> : null}

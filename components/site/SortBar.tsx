@@ -114,8 +114,6 @@ const SortBar: React.FunctionComponent = (props) => {
     const pageMultiplierRef = useRef<HTMLDivElement>(null)
     const navigate = useNavigate()
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     useEffect(() => {
         const clickHandler = () => {
             if (activeDropdown !== "filters") {

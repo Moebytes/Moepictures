@@ -39,8 +39,6 @@ const LoginPage: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     const getCaptchaColor = () => {
         if (theme.includes("light")) return "#ffffff"
         return "#09071c"
@@ -150,7 +148,7 @@ const LoginPage: React.FunctionComponent = (props) => {
                         <span className="sitepage-link-clickable">{i18n.pages.login.forgotText}</span>
                     </Link>
                     <div className="sitepage-row" style={{justifyContent: "center"}}>
-                        <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter}}/>
+                        <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`}/>
                         <input className="sitepage-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null}/>
                     </div>
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}

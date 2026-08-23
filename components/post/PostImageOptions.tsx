@@ -57,8 +57,6 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const filterRef = useRef<HTMLDivElement>(null)
     const formatRef = useRef<HTMLButtonElement>(null)
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     useEffect(() => {
         getFavorite()
         const savedDownloadText = localStorage.getItem("downloadText")

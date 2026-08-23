@@ -28,8 +28,6 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
     const {brightness, contrast, hue, saturation, blur} = useFilterSelector()
     const navigate = useNavigate()
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     const defaultIcon = props.note?.image ? false : true
 
     const getNotePFP = () => {
@@ -112,7 +110,7 @@ const NoteRow: React.FunctionComponent<Props> = (props) => {
             <div className="commentrow-container-row">
                 <div className="commentrow-container" style={{borderLeft: "none", borderRight: "none"}}>
                     <div className="commentrow-user-container" onClick={userClick} onAuxClick={userClick}>
-                        <img className="commentrow-user-img" src={getNotePFP()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? filter : ""}}/>
+                        <img className="commentrow-user-img" src={getNotePFP()} onClick={userImgClick} onAuxClick={userImgClick}/>
                         {generateUsernameJSX()}
                     </div>
                 </div>

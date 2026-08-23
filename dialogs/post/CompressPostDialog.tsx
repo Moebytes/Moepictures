@@ -34,8 +34,6 @@ const CompressPostDialog: React.FunctionComponent = (props) => {
     const [upscaled, setUpscaled] = useState(true)
     const controls = useDragControls()
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     useEffect(() => {
         if (compressPostID) {
             document.body.style.pointerEvents = "none"

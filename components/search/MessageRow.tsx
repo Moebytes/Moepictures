@@ -33,8 +33,6 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
     const [creatorDefaultIcon, setCreatorDefaultIcon] = useState(false)
     const [recipientDefaultIcon, setRecipientDefaultIcon] = useState(false)
     const navigate = useNavigate()
-    
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
     const updateRecipient = async () => {
         if (!props.message?.recipients[0]) return
@@ -90,7 +88,6 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
             imageClass: "message-user-label",
             profilePictureClass: "message-user-img",
             profilePicture: getCreatorPFP(),
-            filter: creatorDefaultIcon ? filter : "",
             session, setSessionFlag
         }, i18n, navigate)
     }
@@ -105,7 +102,6 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
             recipientClass: "message-recipients-text",
             profilePicture: getRecipientPFP(),
             recipientAmount: props.message.recipients.length,
-            filter: recipientDefaultIcon ? filter : ""
         }, i18n, navigate)
     }
 

@@ -33,8 +33,6 @@ const BanDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     useEffect(() => {
         if (banName) {
             document.body.style.pointerEvents = "none"

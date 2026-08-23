@@ -185,8 +185,6 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
                 props.audio || props.model || props.live2d
         }
 
-        const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
         const resizeOverlays = () => {
             const currentRef = getRef()
             if (!currentRef) return

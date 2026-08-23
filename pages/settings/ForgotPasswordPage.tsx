@@ -29,8 +29,6 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
     const [email, setEmail] = useState("")
     const errorRef = useRef<HTMLSpanElement>(null)
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     const getCaptchaColor = () => {
         if (theme.includes("light")) return "#ffffff"
         return "#09071c"
@@ -108,7 +106,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
                         <input className="sitepage-input" type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     <div className="sitepage-row" style={{justifyContent: "center"}}>
-                        <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter}}/>
+                        <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`}/>
                         <input className="sitepage-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}

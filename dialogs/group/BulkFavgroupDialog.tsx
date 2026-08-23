@@ -29,8 +29,6 @@ const BulkFavgroupDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     useEffect(() => {
         const savedFavgroupName = localStorage.getItem("favgroupName")
         if (savedFavgroupName) setName(savedFavgroupName)

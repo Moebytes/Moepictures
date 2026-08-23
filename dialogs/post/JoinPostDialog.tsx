@@ -25,8 +25,6 @@ const JoinPostDialog: React.FunctionComponent = (props) => {
     const [nestedChildren, setNestedChildren] = useState(false)
     const controls = useDragControls()
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     useEffect(() => {
         if (joinPostID) {
             document.body.style.pointerEvents = "all"

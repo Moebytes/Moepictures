@@ -33,8 +33,6 @@ const ModGroupDeletions: React.FunctionComponent = (props) => {
     const [updateVisibleRequestFlag, setUpdateVisibleRequestFlag] = useState(false)
     const navigate = useNavigate()
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     const loadInitial = async () => {
         const requests = await functions.http.get("/api/group/delete/request/list", null, session, setSessionFlag, true)
         return requests

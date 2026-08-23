@@ -127,8 +127,6 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const navigate = useNavigate()
     const location = useLocation()
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     const updateTags = async () => {
         let tags = await functions.tag.parseTags(posts, session, setSessionFlag)
         if (!tags.length && !props.post) tags = await functions.cache.sortedTagCounts("all", session, setSessionFlag)
@@ -953,7 +951,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     <div className="sidebar-row">
                         <span className="tag-hover" onClick={toggleCaptcha}>
                             <TagIcon className="sidebar-icon"/>
-                            <span className="tag-red" style={{filter}}>{i18n.sidebar.unlockPost}</span>
+                            <span className="tag-red">{i18n.sidebar.unlockPost}</span>
                         </span>
                     </div>
                 </div>

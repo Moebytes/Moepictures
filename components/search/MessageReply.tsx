@@ -39,8 +39,6 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
 
     const defaultIcon = props.reply?.image ? false : true
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     const getReplyPFP = () => {
         if (props.reply?.image) {
             return functions.link.getFolderLink("pfp", props.reply.image, props.reply.imageHash)
@@ -165,7 +163,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
                 <div className="reply-user-container">
                     {generateUsernameJSX()}
                     <span className="reply-date-text">{functions.date.timeAgo(props.reply?.createDate, i18n)}</span>
-                    <img className="reply-user-img" src={getReplyPFP()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? filter : ""}}/>
+                    <img className="reply-user-img" src={getReplyPFP()} onClick={userImgClick} onAuxClick={userImgClick}/>
                 </div>
             </div>
             <div className="reply-text-container" onMouseEnter={() => setEnableDrag(false)}>

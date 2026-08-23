@@ -34,8 +34,6 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     const [updaterDefaultIcon, setUpdaterDefaultIcon] = useState(false)
     const navigate = useNavigate()
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     const updateUpdater = async () => {
         if (!props.thread) return
         const updater = await functions.http.get("/api/user", {username: props.thread.updater}, session, setSessionFlag, true)
@@ -96,7 +94,6 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             imageClass: "thread-user-label",
             profilePictureClass: "thread-user-img",
             profilePicture: getCreatorPFP(),
-            filter: creatorDefaultIcon ? filter : "",
             session, setSessionFlag
         }, i18n, navigate)
     }
@@ -109,7 +106,6 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
             imageClass: "thread-user-label",
             profilePictureClass: "thread-user-img",
             profilePicture: getUpdaterPFP(),
-            filter: updaterDefaultIcon ? filter : ""
         }, i18n, navigate)
     }
 

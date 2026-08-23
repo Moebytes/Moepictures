@@ -32,8 +32,6 @@ const UpscalePostDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     useEffect(() => {
         if (upscalePostID) {
             document.body.style.pointerEvents = "none"

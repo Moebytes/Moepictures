@@ -53,8 +53,6 @@ const NavBar: React.FunctionComponent = () => {
     const [activeParticleDropdown, setActiveParticleDropdown] = useState(false)
     const navigate = useNavigate()
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     useEffect(() => {
         setShowMiniTitle(false)
 
@@ -243,7 +241,7 @@ const NavBar: React.FunctionComponent = () => {
                 <div className="mobile-nav-text-container">
                     {session.username ? 
                     <div className="mobile-nav-user-container">
-                        <img className="mobile-nav-user-img" src={userImg} style={{filter: session.image ? "" : filter}}/>
+                        <img className="mobile-nav-user-img" src={userImg}/>
                         {generateMobileUsernameJSX()}
                     </div> :
                     <span className="mobile-nav-text mobile-nav-login-text" onClick={() => {navigate("/login"); setHideMobileNavbar(true)}}>{i18n.navbar.login}</span>}

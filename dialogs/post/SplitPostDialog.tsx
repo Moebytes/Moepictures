@@ -26,8 +26,6 @@ const SplitPostDialog: React.FunctionComponent = (props) => {
     const [mergeSubsequent, setMergeSubsequent] = useState(false)
     const controls = useDragControls()
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     useEffect(() => {
         if (splitPostID) {
             document.body.style.pointerEvents = "all"

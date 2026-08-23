@@ -52,8 +52,6 @@ const SeriesPage: React.FunctionComponent = (props) => {
         limit = mobile ? 5 : 25
     }, [mobile])
 
-    const getFilterSearch = functions.color.filter({theme, siteHue, siteSaturation, siteLightness})
-
     useEffect(() => {
         setHideNavbar(true)
         setHideTitlebar(true)
@@ -156,7 +154,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
-                            <button className="item-search-button" style={{filter: getFilterSearch}} onClick={() => initItems()}>
+                            <button className="item-search-button" onClick={() => initItems()}>
                                 <SearchIcon className="item-search-button-icon"/>
                             </button>
                         </div>

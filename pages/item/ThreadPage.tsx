@@ -62,8 +62,6 @@ const ThreadPage: React.FunctionComponent = () => {
     const navigate = useNavigate()
     const {id: threadID} = useParams() as {id: string}
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     useEffect(() => {
         const replyParam = new URLSearchParams(window.location.search).get("reply")
         const onDOMLoaded = () => {
@@ -358,7 +356,7 @@ const ThreadPage: React.FunctionComponent = () => {
                         <div className="thread-page-user-container">
                             {getCreatorJSX()}
                             <span className="thread-page-date-text">{functions.date.timeAgo(thread.createDate, i18n)}</span>
-                            <img draggable={false} className="thread-page-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: defaultIcon ? filter : ""}}/>
+                            <img draggable={false} className="thread-page-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick}/>
                             <span className="thread-page-mini-link" onClick={viewThreads}>{thread.postCount} {Number(thread.postCount) === 1 ? i18n.buttons.post : i18n.sort.posts}</span>
                             <span className="thread-page-mini-text">{i18n.labels.joined} {functions.date.prettyDate(thread.joinDate, i18n, true)}</span>
                         </div>

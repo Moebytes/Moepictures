@@ -82,8 +82,6 @@ const HistoryPage: React.FunctionComponent = () => {
         }
     }, [])
 
-    const getFilterSearch = functions.color.filter({theme, siteHue, siteSaturation, siteLightness})
-
     useEffect(() => {
         if (!session.cookie) return
         if (!session.username) {
@@ -311,7 +309,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
-                        <button className="history-search-button" style={{filter: getFilterSearch}} onClick={() => initItems()}>
+                        <button className="history-search-button" onClick={() => initItems()}>
                             <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>
@@ -332,7 +330,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
-                        <button className="history-search-button" style={{filter: getFilterSearch}} onClick={() => initItems()}>
+                        <button className="history-search-button" onClick={() => initItems()}>
                             <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>
@@ -353,7 +351,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
-                        <button className="history-search-button" style={{filter: getFilterSearch}} onClick={() => initItems()}>
+                        <button className="history-search-button" onClick={() => initItems()}>
                             <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>
@@ -374,7 +372,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
-                        <button className="history-search-button" style={{filter: getFilterSearch}} onClick={() => initItems()}>
+                        <button className="history-search-button" onClick={() => initItems()}>
                             <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>
@@ -395,7 +393,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
-                        <button className="history-search-button" style={{filter: getFilterSearch}} onClick={() => initItems()}>
+                        <button className="history-search-button" onClick={() => initItems()}>
                             <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>
@@ -416,7 +414,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
-                        <button className="history-search-button" style={{filter: getFilterSearch}} onClick={() => initItems()}>
+                        <button className="history-search-button" onClick={() => initItems()}>
                             <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>
@@ -441,7 +439,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
-                        <button className="history-search-button" style={{filter: getFilterSearch}} onClick={() => initItems()}>
+                        <button className="history-search-button" onClick={() => initItems()}>
                             <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>

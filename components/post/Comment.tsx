@@ -37,8 +37,6 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     const {setDeleteCommentID, setDeleteCommentFlag, setEditCommentFlag, setEditCommentID, setEditCommentText, setReportCommentID} = useCommentDialogActions()
     const navigate = useNavigate()
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     const defaultIcon = props.comment?.image ? false : true
 
     const getCommentPFP = () => {
@@ -174,7 +172,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
         <div className="comment" comment-id={props.comment?.commentID}>
             <div className="comment-container">
                 <div className="comment-user-container" onClick={userClick} onAuxClick={userClick}>
-                    <img className="comment-user-img" src={getCommentPFP()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? filter : ""}}/>
+                    <img className="comment-user-img" src={getCommentPFP()} onClick={userImgClick} onAuxClick={userImgClick}/>
                     {generateUsernameJSX()}
                 </div>
             </div>

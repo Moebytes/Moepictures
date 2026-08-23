@@ -43,8 +43,6 @@ const Reply: React.FunctionComponent<Props> = (props) => {
 
     const defaultIcon = props.reply.image ? false : true
 
-    const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
-
     const getReplyPFP = () => {
         if (props.reply.image) {
             return functions.link.getFolderLink("pfp", props.reply.image, props.reply.imageHash)
@@ -192,7 +190,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
                 <div className="reply-user-container">
                     {generateUsernameJSX()}
                     <span className="reply-date-text">{functions.date.timeAgo(props.reply.createDate, i18n)}</span>
-                    <img className="reply-user-img" src={getReplyPFP()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? filter : ""}}/>
+                    <img className="reply-user-img" src={getReplyPFP()} onClick={userImgClick} onAuxClick={userImgClick}/>
                     <span className="reply-mini-link" onClick={viewThreads}>{props.reply.postCount} {Number(props.reply.postCount) === 1 ? i18n.buttons.post : i18n.sort.posts}</span>
                     <span className="reply-mini-text">{i18n.labels.joined} {functions.date.prettyDate(props.reply.joinDate, i18n, true)}</span>
                 </div>

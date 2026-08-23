@@ -139,8 +139,6 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
             return props.img || props.anim || props.video || 
                 props.audio || props.model || props.live2d
         }
-
-        let filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
     
         const handleIntersection = (entries: IntersectionObserverEntry[]) => {
             const entry = entries[0]

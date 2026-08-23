@@ -42,11 +42,11 @@ export default class JSXFunctions {
     public static usernameJSX = (userData: {username: string, role: string, premium: boolean | null, banned: boolean | null, 
         deleted: boolean | null, imagePost?: string | null}, classNames: {containerClass: string, textClass: string, imageClass: string, 
         profilePictureClass?: string, recipientClass?: string, editText?: string, date?: string, profilePicture?: string, 
-        filter?: string, recipientAmount?: number, session?: Session, setSessionFlag?: (value: boolean) => void}, 
+        recipientAmount?: number, session?: Session, setSessionFlag?: (value: boolean) => void}, 
         i18n: typeof enLocale, navigate: NavigateFunction) => {
 
         let {containerClass, textClass, imageClass, profilePictureClass, recipientClass, editText, date, 
-            profilePicture, filter, recipientAmount, session, setSessionFlag} = classNames
+            profilePicture, recipientAmount, session, setSessionFlag} = classNames
         let timeString = editText && date ? `${editText} ${functions.date.timeAgo(date, i18n)} ${i18n.time.by} `  : ""
 
         const openProfile = (event: React.MouseEvent) => {
@@ -66,7 +66,7 @@ export default class JSXFunctions {
         if (userData.role === "admin") {
             return (
                 <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
-                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
+                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost}/> : null}
                     <span className={`${textClass} admin-color`}>
                         {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
@@ -77,7 +77,7 @@ export default class JSXFunctions {
         } else if (userData.role === "mod") {
             return (
                 <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
-                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
+                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost}/> : null}
                     <span className={`${textClass} mod-color`}>
                         {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
@@ -88,7 +88,7 @@ export default class JSXFunctions {
         } else if (userData.role === "system") {
             return (
                 <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
-                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
+                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost}/> : null}
                     <span className={`${textClass} system-color`}>
                         {timeString}{functions.util.toProperCase(userData.username)}</span>
                     <CrownIcon className={imageClass} style={{color: "var(--systemColor)"}}/>
@@ -98,7 +98,7 @@ export default class JSXFunctions {
         } else if (userData.premium && userData.role === "curator") {
             return (
                 <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
-                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
+                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost}/> : null}
                     <span className={`${textClass} curator-color`}>
                         {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
@@ -109,7 +109,7 @@ export default class JSXFunctions {
         } else if (userData.role === "curator") {
             return (
                 <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
-                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
+                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost}/> : null}
                     <span className={`${textClass} curator-color`}>
                         {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
@@ -120,7 +120,7 @@ export default class JSXFunctions {
         } else if (userData.premium && userData.role === "contributor") {
             return (
                 <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
-                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
+                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost}/> : null}
                     <span className={`${textClass} premium-color`}>
                         {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
@@ -131,7 +131,7 @@ export default class JSXFunctions {
         } else if (userData.role === "contributor") {
             return (
                 <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
-                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
+                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost}/> : null}
                     <span className={`${textClass} contributor-color`}>
                         {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
@@ -142,7 +142,7 @@ export default class JSXFunctions {
         } else if (userData.premium) {
             return (
                 <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
-                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
+                    {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost}/> : null}
                     <span className={`${textClass} premium-color`}>
                         {timeString}{functions.util.toProperCase(userData.username)}
                     </span>
@@ -153,7 +153,7 @@ export default class JSXFunctions {
         }
         return (
             <div className={containerClass} onClick={openProfile} onAuxClick={openProfile}>
-                {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost} style={{filter}}/> : null}
+                {profilePicture ? <img draggable={false} src={profilePicture} className={profilePictureClass} onClick={openProfilePost} onAuxClick={openProfilePost}/> : null}
                 <span className={`${textClass} ${userData.banned ? "banned" : ""} ${userData.deleted ? "deleted" : ""}`}>
                     {timeString}{userData.deleted ? i18n.user.deleted : functions.util.toProperCase(userData.username)}
                 </span>
