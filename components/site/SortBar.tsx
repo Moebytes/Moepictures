@@ -846,7 +846,12 @@ const SortBar: React.FunctionComponent = (props) => {
                 {getMobileImageJSX()}
                 {getMobileRatingJSX()}
                 {getMobileStyleJSX()}
-                <span className="sortbar-text-alt" onClick={() => togglePageMultiplierDrop()}>{pageMultiplier}x</span>
+                {scroll ? <>
+                {autoScroll ?
+                <AutoscrollIcon className="sortbar-img-pink" onClick={() => toggleAutoScroll()}/> :
+                <AutoscrollIcon className="sortbar-img" onClick={() => toggleAutoScroll()}/>}
+                </> : 
+                <span className="sortbar-text-alt" onClick={() => togglePageMultiplierDrop()}>{pageMultiplier}x</span>}
                 {scroll ? 
                 <ScrollIcon className="sortbar-img" style={{height: "30px"}} onClick={() => toggleScroll()}/> :
                 <PagesIcon className="sortbar-img" style={{height: "30px"}} onClick={() => toggleScroll()}/>}
