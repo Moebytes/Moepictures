@@ -267,6 +267,7 @@ const SortBar: React.FunctionComponent = (props) => {
         if (imageType === "audio") offset = -25
         if (imageType === "model") offset = -25
         if (imageType === "live2d") offset = -25
+        if (!session.username) offset += 20
         return `${raw + offset}px`
     }
 
@@ -347,7 +348,7 @@ const SortBar: React.FunctionComponent = (props) => {
         if (ratingType === "sexy") offset = -10
         if (ratingType === "erotic") offset = -5
         if (ratingType === "lewd") offset = -10
-        if (!session.username) offset += 0
+        if (!session.username) offset += 10
         return `${raw + offset}px`
     }
 
@@ -992,6 +993,11 @@ const SortBar: React.FunctionComponent = (props) => {
                     <ImageIcon className="sortbar-dropdown-img"/>
                     <span className="sortbar-dropdown-text">{i18n.sortbar.type.image}</span>
                 </div>
+                <div className="sortbar-dropdown-row" onClick={() => setImageType("comic")}>
+                    <ComicIcon className="sortbar-dropdown-img"/>
+                    <span className="sortbar-dropdown-text">{i18n.sortbar.type.comic}</span>
+                </div>
+                {session.username ? <>
                 <div className="sortbar-dropdown-row" onClick={() => setImageType("animation")}>
                     <AnimationIcon className="sortbar-dropdown-img"/>
                     <span className="sortbar-dropdown-text">{i18n.sortbar.type.animation}</span>
@@ -999,10 +1005,6 @@ const SortBar: React.FunctionComponent = (props) => {
                 <div className="sortbar-dropdown-row" onClick={() => setImageType("video")}>
                     <VideoIcon className="sortbar-dropdown-img"/>
                     <span className="sortbar-dropdown-text">{i18n.sortbar.type.video}</span>
-                </div>
-                <div className="sortbar-dropdown-row" onClick={() => setImageType("comic")}>
-                    <ComicIcon className="sortbar-dropdown-img"/>
-                    <span className="sortbar-dropdown-text">{i18n.sortbar.type.comic}</span>
                 </div>
                 <div className="sortbar-dropdown-row" onClick={() => setImageType("audio")}>
                     <AudioIcon className="sortbar-dropdown-img"/>
@@ -1016,6 +1018,7 @@ const SortBar: React.FunctionComponent = (props) => {
                     <ModelIcon className="sortbar-dropdown-img"/>
                     <span className="sortbar-dropdown-text">{i18n.sortbar.type.model}</span>
                 </div>
+                </> : null}
             </div>
             <div className={`dropdown ${activeDropdown === "rating" ? "" : "hide-dropdown"}`} 
             style={{marginLeft: getRatingMargin(), left: `${dropLeft}px`, top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
