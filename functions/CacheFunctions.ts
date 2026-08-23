@@ -74,7 +74,7 @@ export default class CacheFunctions {
             for (const tagCount of tagCounts) {
                 tagCountMap[tagCount.tag] = tagCount
             }
-            localforage.setItem("tagCounts", tagCountMap)
+            //localforage.setItem("tagCounts", tagCountMap)
             return tagCountMap
         }
     }
