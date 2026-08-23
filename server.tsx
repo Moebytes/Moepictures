@@ -90,7 +90,7 @@ app.use(session({
 
 app.use(express.static(path.join(__dirname, "./public")))
 app.use(express.static(path.join(__dirname, "./dist/client"), {index: false}))
-app.use("/emojis", express.static(path.join(__dirname, "./assets/emojis"), {maxAge: 2678400}))
+app.use("/emojis", express.static(path.join(__dirname, "./assets/emojis"), {maxAge: 86400}))
 
 app.use(apiKeyLogin)
 app.use(csrfGenerator)
@@ -208,7 +208,7 @@ for (let i = 0; i < folders.length; i++) {
         if (!url.endsWith(".png") && !url.endsWith(".jpg") && !url.endsWith(".jpeg") &&
         !url.endsWith(".webp") && !url.endsWith(".gif")) return next()
       }
-      res.setHeader("Cache-Control", "no-store")
+      res.setHeader("Cache-Control", "public, max-age=86400")
       const key = decodeURIComponent(req.path.slice(1))
       let upscaled = req.session.upscaledImages ?? false
       if (upscaleParam) upscaled = upscaleParam === "true"
@@ -242,6 +242,7 @@ for (let i = 0; i < folders.length; i++) {
       let contentLength = body.byteLength
       if (!contentLength) return res.status(404).end()
       if (!noCache.includes(folders[i]) && req.session.captchaNeeded) {
+        res.setHeader("Cache-Control", "no-store")
         body = await imageLock(body, false)
         return res.status(200).send(body)
       }
@@ -275,7 +276,7 @@ for (let i = 0; i < folders.length; i++) {
       const pixelHash = new URL(`${functions.config.getDomain()}${req.originalUrl}`).searchParams.get("hash") ?? ""
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
-      res.setHeader("Cache-Control", "no-store")
+      res.setHeader("Cache-Control", "public, max-age=86400")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/`, ""))
       let r18 = false
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
@@ -307,6 +308,7 @@ for (let i = 0; i < folders.length; i++) {
       let contentLength = body.byteLength
       if (!contentLength) return res.status(404).end()
       if (!noCache.includes(folders[i]) && req.session.captchaNeeded) {
+        res.setHeader("Cache-Control", "no-store")
         body = await imageLock(body)
         return res.status(200).send(body)
       }
@@ -341,7 +343,7 @@ for (let i = 0; i < folders.length; i++) {
       const upscaleParam = new URL(`${functions.config.getDomain()}${req.originalUrl}`).searchParams.get("upscaled") ?? ""
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
-      res.setHeader("Cache-Control", "no-store")
+      res.setHeader("Cache-Control", "public, max-age=86400")
       const key = decodeURIComponent(req.path.replace("/unverified/", ""))
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (!noCache.includes(folders[i]) && postID) {
@@ -359,6 +361,7 @@ for (let i = 0; i < folders.length; i++) {
       const body = await serverFunctions.files.getUnverifiedFile(key, upscaled)
       const contentLength = body.byteLength
       if (!contentLength) {
+        res.setHeader("Cache-Control", "no-store")
         const noImg = await imageMissing()
         return res.status(200).send(noImg)
       }
@@ -388,7 +391,7 @@ for (let i = 0; i < folders.length; i++) {
       if (!serverFunctions.util.isAllowedReferer(referer)) return res.status(403).end()
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
-      res.setHeader("Cache-Control", "no-store")
+      res.setHeader("Cache-Control", "public, max-age=86400")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/unverified/`, ""))
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (!noCache.includes(folders[i]) && postID) {
@@ -403,6 +406,7 @@ for (let i = 0; i < folders.length; i++) {
       if (!body.byteLength) body = await serverFunctions.files.getUnverifiedFile(key, false)
       let contentLength = body.byteLength
       if (!contentLength) {
+        res.setHeader("Cache-Control", "no-store")
         const noImg = await imageMissing()
         return res.status(200).send(noImg)
       }
