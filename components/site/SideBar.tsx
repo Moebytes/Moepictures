@@ -163,15 +163,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         updateTags()
         updateUserImg()
         if (!props.post) updateFavoriteTags()
-        const savedUploaderImage = localStorage.getItem("uploaderImage")
-        if (savedUploaderImage) setUploaderImage(savedUploaderImage)
     }, [session])
-
-    useEffect(() => {
-        functions.link.linkToBase64(uploaderImage).then((uploaderImage) => {
-            localStorage.setItem("uploaderImage", uploaderImage)
-        })
-    }, [uploaderImage])
 
     useEffect(() => {
         updateUserImg()
