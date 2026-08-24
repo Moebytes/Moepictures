@@ -56,7 +56,7 @@ const run = async (query: QueryConfig | QueryArrayConfig | string) => {
           console.log(query)
           return Promise.reject(error)
       } finally {
-          pgClient.release(true)
+          pgClient.release()
       }
 }
 

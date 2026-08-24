@@ -129,7 +129,7 @@ export default class SQLQuery {
           console.log(query)
           return Promise.reject(error)
       } finally {
-          pgClient.release(true)
+          pgClient.release()
       }
   }
 
