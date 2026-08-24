@@ -425,7 +425,7 @@ export default class SQLSearch {
                 JOIN images ON posts."postID" = images."postID"
                 WHERE ${whereQuery}
                 GROUP BY posts."postID"
-                ${offset ? `${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} OFFSET $${i}` : ""}
+                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
             `),
             values: []
         }

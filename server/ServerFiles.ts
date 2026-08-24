@@ -86,7 +86,7 @@ export default class ServerFiles {
             }
             if (!fs.existsSync(upscaled ? upscaledKey : originalKey)) return this.getFirstHistoryFile(file, upscaled, r18, pixelHash)
             if (upscaled) return fs.existsSync(upscaledKey) ? fs.readFileSync(upscaledKey) : Buffer.from("")
-            return fs.existsSync(originalKey) ? fs.readFileSync(originalKey) : Buffer.from("")
+            return fs.existsSync(originalKey) ? fs.readFileSync(originalKey) as Buffer : Buffer.from("")
         } else {
             let bucket = r18 ? remoteR18 : remote
             let publicBucket = r18 ? publicRemoteR18 : publicRemote

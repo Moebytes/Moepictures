@@ -87,7 +87,7 @@ const EditThumbnailDialog: React.FunctionComponent = (props) => {
         const file = event.target.files?.[0]
         if (!file) return
         const bytes = await functions.image.readFileBytes(file)
-        const base64 = functions.byte.arrayBufferToBase64(bytes)
+        const base64 = functions.byte.arrayBufferToBase64(new Uint8Array(bytes).buffer)
         images[order - 1] = base64
         setImages(structuredClone(images))
         setThumbnail(base64)

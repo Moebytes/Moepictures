@@ -148,7 +148,9 @@ export default class ServerUtil {
         const size = Math.min(metadata.width!, metadata.height!)
         const resizeWidth = resize > 0 ? resize : size
         const centerPosition = Math.max(0, Math.floor((metadata.width! - size) / 2))
-        return sharp(buffer).extract({width: size, height: size, left: centerPosition, top: 0}).resize(resizeWidth, resizeWidth).toBuffer()
+        const result = await sharp(buffer).extract({width: size, height: size, left: centerPosition, top: 0})
+            .resize(resizeWidth, resizeWidth).toBuffer()
+        return Buffer.from(result)
     }
     
     public static isTransparent = async (bytes: number[]) => {

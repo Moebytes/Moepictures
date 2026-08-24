@@ -765,7 +765,7 @@ export default class ServerUpload {
                     let newImagePath = ""
                     let newUpscaledImagePath = ""
                     if (upscaledImage) {
-                        let buffer = Buffer.from("")
+                        let buffer = Buffer.from("") as Buffer
                         if ("bytes" in upscaledImage) {
                             buffer = Buffer.from(Object.values(upscaledImage.bytes))
                         } else {
@@ -782,7 +782,7 @@ export default class ServerUpload {
                         await serverFunctions.files.uploadFile(newUpscaledImagePath, buffer, r18)
                     }
                     if (image) {
-                        let buffer = Buffer.from("")
+                        let buffer = Buffer.from("") as Buffer
                         if ("bytes" in image) {
                             buffer = Buffer.from(Object.values(image.bytes))
                         } else {
@@ -821,7 +821,7 @@ export default class ServerUpload {
                     let newImagePath = ""
                     let newUpscaledImagePath = ""
                     if (upscaledImage) {
-                        let buffer = Buffer.from("")
+                        let buffer = Buffer.from("") as Buffer
                         if ("bytes" in upscaledImage) {
                             buffer = Buffer.from(Object.values(upscaledImage.bytes))
                         } else {
@@ -838,7 +838,7 @@ export default class ServerUpload {
                         await serverFunctions.files.uploadFile(newUpscaledImagePath, buffer, r18)
                     }
                     if (image) {
-                        let buffer = Buffer.from("")
+                        let buffer = Buffer.from("") as Buffer
                         if ("bytes" in image) {
                             buffer = Buffer.from(Object.values(image.bytes))
                         } else {

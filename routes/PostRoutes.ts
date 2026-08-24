@@ -1234,7 +1234,7 @@ const PostRoutes = (app: Express) => {
                     } else if (isAnimatedWebp) {
                         await waifu2x.upscaleAnimatedWebp(tempDest, tempDest, {rename: "", upscaler, scale: Number(scaleFactor)})
                     }
-                    let newBuffer = fs.readFileSync(tempDest)
+                    let newBuffer = fs.readFileSync(tempDest) as Buffer
                     if (compressJPG) {
                         if (functions.file.isGIF(basename) || isAnimatedWebp || isAnimatedPng) {
                             newBuffer = await sharp(newBuffer, {animated: true, limitInputPixels: false}).webp({quality: 90}).toBuffer()
