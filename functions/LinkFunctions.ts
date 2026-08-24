@@ -57,7 +57,7 @@ export default class LinkFunctions {
         let image = partialPost.images[index]
         if (typeof image === "string") {
             if (image.startsWith("history/post")) return `${functions.config.getDomain()}/${image}`
-            if (new URL(image).searchParams.has("hash")) return image
+            if (image.startsWith("http") && new URL(image).searchParams.has("hash")) return image
         }
         let post = await functions.http.get("/api/post", {postID: partialPost.postID}, session, undefined, true)
         if (!post) return ""
@@ -115,7 +115,7 @@ export default class LinkFunctions {
         let image = partialPost.images[index]
         if (typeof image === "string") {
             if (image.startsWith("history/post")) return `${functions.config.getDomain()}/${image}`
-            if (new URL(image).searchParams.has("hash")) return image
+            if (image.startsWith("http") && new URL(image).searchParams.has("hash")) return image
         }
         let post = await functions.http.get("/api/post", {postID: partialPost.postID}, session, undefined, true)
         if (!post) return ""
