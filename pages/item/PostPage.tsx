@@ -260,7 +260,7 @@ const PostPage: React.FunctionComponent = () => {
     }, [postID, historyID, order, session])
 
     useEffect(() => {
-        window.scrollTo(0, functions.dom.navbarHeight() + functions.dom.titlebarHeight())
+        window.scrollTo(0, 0)
     }, [postID])
 
     useEffect(() => {
