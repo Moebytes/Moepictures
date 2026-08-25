@@ -194,6 +194,7 @@ const LocalStorage: React.FunctionComponent = () => {
 
     useEffect(() => {
         initThemeSettings()
+        if (Object.keys(session).length) localStorage.setItem("savedSession", JSON.stringify(session))
     }, [session])
 
     useEffect(() => {
@@ -234,6 +235,7 @@ const LocalStorage: React.FunctionComponent = () => {
 
     useEffect(() => {
         initLanguage()
+        const savedSession = localStorage.getItem("savedSession")
         const savedTheme = localStorage.getItem("theme")
         const savedSiteHue = localStorage.getItem("siteHue")
         const savedSiteSaturation = localStorage.getItem("siteSaturation")
@@ -288,6 +290,7 @@ const LocalStorage: React.FunctionComponent = () => {
         const savedReaderZoom = localStorage.getItem("readerZoom")
         const savedReaderInvert = localStorage.getItem("readerInvert")
         const savedUserImg = localStorage.getItem("userImg")
+        if (savedSession) setSession(JSON.parse(savedSession))
         if (savedTheme) setTheme(savedTheme as Themes)
         if (savedSiteSaturation) setSiteSaturation(Number(savedSiteSaturation))
         if (savedSiteHue) setSiteHue(Number(savedSiteHue))
