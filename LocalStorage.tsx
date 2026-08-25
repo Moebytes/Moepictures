@@ -155,7 +155,7 @@ const LocalStorage: React.FunctionComponent = () => {
     lowpass, highpass, reverb, delay, phaser, bitcrush} = useFilterSelector()
     const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate, setSplatter,
     setLowpass, setHighpass, setReverb, setDelay, setPhaser, setBitcrush} = useFilterActions()
-    const {hideSortbar, hideSidebar, hideTitlebar, hideNavbar} = useLayoutSelector()
+    const {mobile, hideSortbar, hideSidebar, hideTitlebar, hideNavbar} = useLayoutSelector()
     const {setHideSortbar, setHideSidebar, setHideTitlebar, setHideNavbar} = useLayoutActions()
     const {posts, navigationPosts, tags, bannerTags, post, tagCategories, tagGroupCategories, order, artists, characters, series} = useCacheSelector()
     const {setNavigationPosts, setTags, setBannerTags, setPost, setTagCategories, setTagGroupCategories, setOrder, setArtists, setCharacters, setSeries} = useCacheActions()
@@ -198,6 +198,13 @@ const LocalStorage: React.FunctionComponent = () => {
     }, [session])
 
     useEffect(() => {
+        if (!mobile) {
+            const savedSession = localStorage.getItem("savedSession")
+            if (savedSession) setSession(JSON.parse(savedSession))
+        }
+    }, [mobile])
+
+    useEffect(() => {
         if (typeof window === "undefined") return
         const colorList = theme.includes("light") ? lightColorList : darkColorList
         let noRotation = [
@@ -235,7 +242,6 @@ const LocalStorage: React.FunctionComponent = () => {
 
     useEffect(() => {
         initLanguage()
-        const savedSession = localStorage.getItem("savedSession")
         const savedTheme = localStorage.getItem("theme")
         const savedSiteHue = localStorage.getItem("siteHue")
         const savedSiteSaturation = localStorage.getItem("siteSaturation")
@@ -290,7 +296,6 @@ const LocalStorage: React.FunctionComponent = () => {
         const savedReaderZoom = localStorage.getItem("readerZoom")
         const savedReaderInvert = localStorage.getItem("readerInvert")
         const savedUserImg = localStorage.getItem("userImg")
-        if (savedSession) setSession(JSON.parse(savedSession))
         if (savedTheme) setTheme(savedTheme as Themes)
         if (savedSiteSaturation) setSiteSaturation(Number(savedSiteSaturation))
         if (savedSiteHue) setSiteHue(Number(savedSiteHue))
