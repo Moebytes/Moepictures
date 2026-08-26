@@ -253,7 +253,7 @@ const NavBar: React.FunctionComponent = () => {
                     <span className="mobile-nav-text" onClick={() => {navigate("/series"); setHideMobileNavbar(true)}}>{i18n.tag.series}</span>
                     <span className="mobile-nav-text" onClick={() => {navigate("/tags"); setHideMobileNavbar(true)}}>{i18n.navbar.tags}</span>
                     <span className="mobile-nav-text" onClick={() => {navigate("/groups"); setHideMobileNavbar(true)}}>{i18n.sort.groups}</span>
-                    <span className="mobile-nav-text" onClick={() => {navigate("/forum"); setHideMobileNavbar(true)}}>{i18n.navbar.forum}</span>
+                    {/* <span className="mobile-nav-text" onClick={() => {navigate("/forum"); setHideMobileNavbar(true)}}>{i18n.navbar.forum}</span> */}
                     <span className="mobile-nav-text" onClick={() => {navigate("/help"); setHideMobileNavbar(true)}}>{i18n.navbar.help}</span>
                     <span className="mobile-nav-text" onClick={() => {navigate("/mobile"); setHideMobileNavbar(true)}}>{i18n.navbar.mobile}</span>
                     {permissions.isPremiumEnabled() && session.username ? <div className="mobile-nav-img-container" onClick={() => {navigate("/premium"); setHideMobileNavbar(true)}}>
@@ -312,7 +312,7 @@ const NavBar: React.FunctionComponent = () => {
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/series")}>{i18n.tag.series}</span>
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/tags")}>{i18n.navbar.tags}</span>
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/groups")}>{i18n.sort.groups}</span>
-                    <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/forum")}>{i18n.navbar.forum}</span>
+                    {/* <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/forum")}>{i18n.navbar.forum}</span> */}
                     <span style={{marginRight: marginR, fontSize: getFontSize()}} className="nav-text" onClick={() => navigate("/help")}>{i18n.navbar.help}</span>
                     <PhoneIcon  className="nav-img" style={{marginRight: marginR, marginTop: "2px"}} onClick={() => navigate("/mobile")}/>
                     {permissions.isPremiumEnabled() && session.username ? <PremiumStarIcon  className="premium-nav-img" style={{marginTop: "2px"}} onClick={() => navigate("/premium")}/> : null}
