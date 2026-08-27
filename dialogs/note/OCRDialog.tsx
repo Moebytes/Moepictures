@@ -80,7 +80,7 @@ const OCRDialog: React.FunctionComponent = (props) => {
         return (
             <div className="dialog">
                 <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}
-                className="dialog-box" style={{width: "260px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                className="dialog-box" style={{width: "300px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.dialogs.ocr.title}</span>

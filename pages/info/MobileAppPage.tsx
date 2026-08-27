@@ -12,7 +12,8 @@ import Footer from "../../components/site/Footer"
 import {useThemeSelector, useInteractionActions,
 useLayoutActions, useActiveActions, useLayoutSelector} from "../../store"
 import functions from "../../functions/Functions"
-import AndroidAPKIcon from "../../assets/icons/androidapk.svg"
+import AppStoreIcon from "../../assets/icons/app-store.svg"
+import GooglePlayIcon from "../../assets/icons/google-play.svg"
 import mobileImg from "../../assets/images/mobileapp.jpg"
 import "./styles/helppage.less"
 
@@ -45,8 +46,8 @@ const MobileAppPage: React.FunctionComponent = () => {
         }
     }, [mobile])
 
-    const downloadApp = () => {
-        functions.dom.download("Moepictures.apk", "https://github.com/Moebytes/Moepictures-App/releases/download/v0.9/Moepictures.apk")
+    const openLink = (url: string) => {
+        window.open(url, "_blank")
     }
 
     return (
@@ -69,13 +70,9 @@ const MobileAppPage: React.FunctionComponent = () => {
                         <div className="help-img-container">
                             <img className="help-img" src={mobileImg}/>
                         </div>
-                        <div className="help-row">
-                            <div style={{display: "flex", flexDirection: "column", alignItems: "flex-start"}}>
-                                <span className="help-text">
-                                    {i18n.mobileApp.download}
-                                </span>
-                                <AndroidAPKIcon className="apk" onClick={downloadApp}/>
-                            </div>
+                        <div className="help-row" style={{display: "flex", gap: "20px"}}>
+                            <AppStoreIcon className="app-icon" onClick={() => openLink("https://apps.apple.com/us/app/moepictures/id6762224302")}/>
+                            <GooglePlayIcon className="app-icon" onClick={() => openLink("https://play.google.com/store/apps/details?id=com.moebytes.moepictures")}/>
                         </div>
                     </div> 
                 </div>

@@ -13,7 +13,7 @@ import Footer from "../../components/site/Footer"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector,
 useActiveSelector} from "../../store"
-import mainImg from "../../assets/images/mainimg.png"
+import mainImg from "../../assets/images/design.png"
 import imagefiltersImg from "../../assets/images/imagefilters.png"
 import videoPlayerImg from "../../assets/images/videoplayer.png"
 import favoritesImg from "../../assets/images/favorites.png"
@@ -322,8 +322,9 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <><span className="help-heading">{i18n.help.uploading.title}</span>
                 <span className="help-text">
                     {i18n.help.uploading.line1}<br/><br/>
-                    {i18n.help.uploading.uploadGuidelines.header}<br/>
                     <span className="help-alt">
+                    {i18n.help.uploading.uploadGuidelines.header}<br/>
+                    </span>
                     {i18n.help.uploading.uploadGuidelines.guide1}<br/>
                     {i18n.help.uploading.uploadGuidelines.guide2}<br/>
                     {i18n.help.uploading.uploadGuidelines.guide3}<br/>
@@ -341,7 +342,6 @@ const HelpPage: React.FunctionComponent = (props) => {
                     {i18n.help.uploading.uploadGuidelines.guide15}<br/>
                     {i18n.help.uploading.uploadGuidelines.guide16}<br/>
                     {i18n.help.uploading.uploadGuidelines.guide17}<br/><br/>
-                    </span>
 
                     {i18n.help.uploading.moreNotes.header}<br/>
                     {i18n.help.uploading.moreNotes.note1}<br/>
@@ -396,8 +396,9 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <span className="help-text">
                     {i18n.help.tagging.line1}<br/><br/>
 
-                    {i18n.help.tagging.tagGuidelines.header}<br/>
                     <span className="help-alt">
+                    {i18n.help.tagging.tagGuidelines.header}<br/>
+                    </span>
                     {i18n.help.tagging.tagGuidelines.guide1}<br/>
                     {i18n.help.tagging.tagGuidelines.guide2}<br/>
                     {i18n.help.tagging.tagGuidelines.guide3}<br/>
@@ -409,7 +410,6 @@ const HelpPage: React.FunctionComponent = (props) => {
                     {i18n.help.tagging.tagGuidelines.guide9}<br/>
                     {i18n.help.tagging.tagGuidelines.guide10}<br/>
                     {i18n.help.tagging.tagGuidelines.guide11}<br/><br/>
-                    </span>
 
                     {i18n.help.tagging.line2}<br/><br/>
 
@@ -498,15 +498,15 @@ const HelpPage: React.FunctionComponent = (props) => {
                     {i18n.help.compressing.line2}<br/>
                     <a className="help-link" onClick={() => openLink("https://github.com/Moebytes/Pixel-Compressor/releases")}>{mobile ? "Pixel Compressor" : "https://github.com/Moebytes/Pixel-Compressor/releases"}</a><br/><br/>
 
-                    {i18n.help.compressing.recommendedFormats.header}<br/>
                     <span className="help-alt">
+                    {i18n.help.compressing.recommendedFormats.header}<br/>
+                    </span>
                     {i18n.help.compressing.recommendedFormats.format1}<br/>
                     {i18n.help.compressing.recommendedFormats.format2}<br/>
                     {i18n.help.compressing.recommendedFormats.format3}<br/>
                     {i18n.help.compressing.recommendedFormats.format4}<br/>
                     {i18n.help.compressing.recommendedFormats.format5}<br/>
                     {i18n.help.compressing.recommendedFormats.format6}<br/><br/>
-                    </span>
 
                     {i18n.help.compressing.line3}<br/>
                 </span>
@@ -770,12 +770,12 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <span className="help-text">
                     {i18n.help.bans.line1}<br/><br/>
 
-                    {i18n.help.bans.banActions.header}<br/>
                     <span className="help-alt">
+                    {i18n.help.bans.banActions.header}<br/>
+                    </span>
                     {i18n.help.bans.banActions.action1}<br/>
                     {i18n.help.bans.banActions.action2}<br/>
                     {i18n.help.bans.banActions.action3}<br/><br/>
-                    </span>
 
                     {i18n.help.bans.line2}
                 </span></>
