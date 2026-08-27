@@ -413,7 +413,7 @@ const TagPage: React.FunctionComponent = () => {
                 let implication = typeof item === "string" ? item : item?.implication 
                 if (!implication) continue
                 let implicationSpace = implication.replaceAll("-", " ")
-                if (i !== tag.implications.length - 1) implication += ", "
+                if (i !== tag.implications.length - 1) implicationSpace += ", "
                 jsx.push(<span className="tag-text-alt" onClick={() => navigate(`/tag/${encodeURIComponent(implication)}`)}>{implicationSpace}</span>)
             }
         }
