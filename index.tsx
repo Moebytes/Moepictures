@@ -10,6 +10,7 @@ import {scan} from "react-scan"
 import {hydrateRoot} from "react-dom/client"
 import {BrowserRouter as Router} from "react-router-dom"
 import {Provider} from "react-redux"
+import ErrorBoundary from "./ui/ErrorBoundary"
 import store from "./store"
 import App from "./App"
 import pace from "pace-js"
@@ -20,5 +21,17 @@ if (process.env.SCAN === "yes") {
     scan({enabled: true})
 }
 
+const renderJSX = () => {
+    return (
+        <Router>
+        <Provider store={store} stabilityCheck="never">
+            <ErrorBoundary>
+                <App/>
+            </ErrorBoundary>
+        </Provider>
+        </Router>
+    )
+}
+
 const rootElement = document.getElementById("root")!
-hydrateRoot(rootElement, <Router><Provider store={store} stabilityCheck="never"><App/></Provider></Router>)
+hydrateRoot(rootElement, renderJSX())
