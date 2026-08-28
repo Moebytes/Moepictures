@@ -100,10 +100,6 @@ const HelpPage: React.FunctionComponent = (props) => {
         window.open(url, "_blank", "noreferrer")
     }
 
-    const getBookmarklet = () => {
-        return `javascript:location.href="${functions.config.getDomain()}/upload?link="+encodeURIComponent(location.href)`
-    }
-
     const getContainerJSX = () => {
         if (helpTab === "help") {
             return (
@@ -527,15 +523,20 @@ const HelpPage: React.FunctionComponent = (props) => {
             )
         }
         if (helpTab === "bookmarklet") {
+            const bookmarklet = `javascript:location.href="https://moepictures.com/upload?link="+encodeURIComponent(location.href)`
+
+            const bookmarkletHtml = `
+                <a style="width:auto; height:60px" class="help-link" href=${bookmarklet}>
+                    <img src="${bookmarkletImg}" alt="Upload to Moepictures"/>
+                </a>
+            `
+
             return (
                 <><span className="help-heading">{i18n.help.bookmarklet.title}</span>
                 <span className="help-text">
                     {i18n.help.bookmarklet.line1}<br/><br/>
 
-                    <a style={{width: "auto", height: "60px"}} className="help-link" href={getBookmarklet()}
-                   >
-                        <img src={bookmarkletImg} alt="Upload to Moepictures"/>
-                    </a><br/><br/>
+                    <span dangerouslySetInnerHTML={{__html: bookmarkletHtml}}/><br/><br/>
 
                     {i18n.help.bookmarklet.line2}<br/>
                     <a className="help-link" onClick={() => openLink("https://www.pixiv.net/")}>Pixiv</a><br/>

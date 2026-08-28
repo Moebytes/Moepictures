@@ -131,7 +131,7 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/misc/proxy-images", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/misc/proxy-images", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const link = decodeURIComponent(req.body.url as string)
             if (!link) return void res.status(400).send("No url")

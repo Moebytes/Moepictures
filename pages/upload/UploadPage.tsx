@@ -341,7 +341,7 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
     const parseLinkParam = async () => {
         const linkParam = new URLSearchParams(window.location.search).get("link")
         if (linkParam) {
-            const url = window.location.href.match(/(?<=\?link=)(.*)/)?.[0] || ""
+            const url = decodeURIComponent(linkParam)
             const files = await functions.http.proxyImage(url, session, setSessionFlag)
             await validate(files, new Array(files.length).fill(url))
             reset()
