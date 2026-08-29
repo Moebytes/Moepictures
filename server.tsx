@@ -95,7 +95,7 @@ app.use("/emojis", express.static(path.join(__dirname, "./assets/emojis"), {maxA
 app.use(apiKeyLogin)
 app.use(csrfGenerator)
 
-let blacklist = null as unknown as Set<string>
+let blacklist = null as Set<string> | null
 
 app.use(async (req: Request, res: Response, next: NextFunction) => {
   if (!blacklist) {
@@ -174,7 +174,7 @@ app.post("/api/misc/blacklistip", imageLimiter, async (req: Request, res: Respon
   if (!ip) return res.status(400).send("Bad ip")
   await sql.report.insertBlacklist(ip, reason)
   await sql.user.pruneIPSessions(ip)
-  blacklist = null as any
+  blacklist = null
   res.status(200).send("Success")
 })
 
@@ -184,7 +184,7 @@ app.delete("/api/misc/unblacklistip", imageLimiter, async (req: Request, res: Re
   if (!permissions.isAdmin(req.session)) return res.status(403).end()
   if (!ip) return res.status(400).send("Bad ip")
   await sql.report.deleteBlacklist(ip)
-  blacklist = null as any
+  blacklist = null
   res.status(200).send("Success")
 })
 

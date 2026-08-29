@@ -36,32 +36,32 @@ export default class CompareFunctions {
             if (imgBuffer.byteLength && functions.file.isImage(imgLink)) {
                 let isAnimated = functions.file.isAnimatedWebp(imgBuffer)
                 if (!isAnimated) isAnimated = functions.file.isAnimatedPng(imgBuffer)
-                if (!isAnimated) imgBuffer = decryption.decrypt(imgBuffer, privateKey, serverPublicKey, session)
+                if (!isAnimated) imgBuffer = decryption.decrypt(imgBuffer, privateKey, serverPublicKey, session).buffer
             }
             if (currentBuffer.byteLength && functions.file.isImage(currentLink)) {
                 let isAnimated = functions.file.isAnimatedWebp(currentBuffer)
                 if (!isAnimated) isAnimated = functions.file.isAnimatedPng(currentBuffer)
-                if (!isAnimated) currentBuffer = decryption.decrypt(currentBuffer, privateKey, serverPublicKey, session)
+                if (!isAnimated) currentBuffer = decryption.decrypt(currentBuffer, privateKey, serverPublicKey, session).buffer
             }
             if (upscaledImgBuffer.byteLength && functions.file.isImage(upscaledImgLink)) {
                 let isAnimated = functions.file.isAnimatedWebp(upscaledImgBuffer)
                 if (!isAnimated) isAnimated = functions.file.isAnimatedPng(upscaledImgBuffer)
-                if (!isAnimated) upscaledImgBuffer = decryption.decrypt(upscaledImgBuffer, privateKey, serverPublicKey, session)
+                if (!isAnimated) upscaledImgBuffer = decryption.decrypt(upscaledImgBuffer, privateKey, serverPublicKey, session).buffer
             }
             if (upscaledCurrentBuffer.byteLength && functions.file.isImage(currentUpscaledLink)) {
                 let isAnimated = functions.file.isAnimatedWebp(upscaledCurrentBuffer)
                 if (!isAnimated) isAnimated = functions.file.isAnimatedPng(upscaledCurrentBuffer)
-                if (!isAnimated) upscaledCurrentBuffer = decryption.decrypt(upscaledCurrentBuffer, privateKey, serverPublicKey, session)
+                if (!isAnimated) upscaledCurrentBuffer = decryption.decrypt(upscaledCurrentBuffer, privateKey, serverPublicKey, session).buffer
             }
 
             if (imgBuffer.byteLength) {
-                const imgMD5 = crypto.createHash("md5").update(Buffer.from(imgBuffer) as any).digest("hex")
-                const currentMD5 = crypto.createHash("md5").update(Buffer.from(currentBuffer) as any).digest("hex")
+                const imgMD5 = crypto.createHash("md5").update(Buffer.from(imgBuffer)).digest("hex")
+                const currentMD5 = crypto.createHash("md5").update(Buffer.from(currentBuffer)).digest("hex")
                 if (imgMD5 !== currentMD5) return true
             }
             if (upscaledImgBuffer.byteLength) {
-                const imgMD5 = crypto.createHash("md5").update(Buffer.from(upscaledImgBuffer) as any).digest("hex")
-                const currentMD5 = crypto.createHash("md5").update(Buffer.from(upscaledCurrentBuffer) as any).digest("hex")
+                const imgMD5 = crypto.createHash("md5").update(Buffer.from(upscaledImgBuffer)).digest("hex")
+                const currentMD5 = crypto.createHash("md5").update(Buffer.from(upscaledCurrentBuffer)).digest("hex")
                 if (imgMD5 !== currentMD5) return true
             }
         }

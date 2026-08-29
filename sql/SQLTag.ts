@@ -51,8 +51,8 @@ export default class SQLTag {
     /** Bulk insert new tags. */
     public static bulkInsertTags = async (bulkTags: BulkTag[], creator: string, noImageUpdate?: boolean) => {
         let tagValues = new Set<string>()
-        let rawValues = [] as any
-        let valueArray = [] as any 
+        let rawValues = [] as string[]
+        let valueArray = [] as string[]
         let i = 1 
         for (let j = 0; j < bulkTags.length; j++) {
             if (!bulkTags[j].tag) continue
@@ -61,9 +61,9 @@ export default class SQLTag {
             valueArray.push(`($${i}, $${i + 1}, $${i + 2}, $${i + 3}, $${i + 4}, $${i + 5}, $${i + 6}, $${i + 7}, $${i + 8})`)
             rawValues.push(bulkTags[j].tag)
             rawValues.push(bulkTags[j].type)
-            rawValues.push(bulkTags[j].description)
-            rawValues.push(bulkTags[j].image)
-            rawValues.push(bulkTags[j].imageHash)
+            rawValues.push(bulkTags[j].description ?? "")
+            rawValues.push(bulkTags[j].image ?? "")
+            rawValues.push(bulkTags[j].imageHash ?? "")
             rawValues.push(new Date().toISOString())
             rawValues.push(creator)
             rawValues.push(new Date().toISOString())
@@ -99,9 +99,9 @@ export default class SQLTag {
 
     /** Bulk insert new tags (unverified). */
     public static bulkInsertUnverifiedTags = async (bulkTags: BulkTag[], noImageUpdate?: boolean) => {
-        let tagValues = [] as any
-        let rawValues = [] as any
-        let valueArray = [] as any 
+        let tagValues = [] as string[]
+        let rawValues = [] as string[]
+        let valueArray = [] as string[] 
         let i = 1 
         for (let j = 0; j < bulkTags.length; j++) {
             if (!bulkTags[j].tag) continue
@@ -110,9 +110,9 @@ export default class SQLTag {
             valueArray.push(`($${i}, $${i + 1}, $${i + 2}, $${i + 3}, $${i + 4})`)
             rawValues.push(bulkTags[j].tag)
             rawValues.push(bulkTags[j].type)
-            rawValues.push(bulkTags[j].description)
-            rawValues.push(bulkTags[j].image)
-            rawValues.push(bulkTags[j].imageHash)
+            rawValues.push(bulkTags[j].description ?? "")
+            rawValues.push(bulkTags[j].image ?? "")
+            rawValues.push(bulkTags[j].imageHash ?? "")
             i += 5
         }
         let valueQuery = `VALUES ${valueArray.join(", ")}`
@@ -153,7 +153,7 @@ export default class SQLTag {
         if (!tagRows.length) return
 
         let i = 2
-        let valueArray = [] as any
+        let valueArray = [] as string[]
         const tagIDs: number[] = tagRows.map((row: any) => row.tagID)
 
         for (let j = 0; j < tagIDs.length; j++) {
@@ -193,7 +193,7 @@ export default class SQLTag {
     public static insertUnverifiedTagMap = async (postID: string, tags: string[]) => {
         if (!tags.length) return
         let i = 2
-        let valueArray = [] as any
+        let valueArray = [] as string[]
         for (let j = 0; j < tags.length; j++) {
             valueArray.push(`($1, $${i})`)
             i++
@@ -632,7 +632,7 @@ export default class SQLTag {
     /** Get alias/implication history */
     public static aliasImplicationHistory = async (offset?: number, limit?: number, search?: string) => {
         let i = 1
-        let values = [] as any
+        let values = [] as (string | number)[]
         let searchValue = i
         let searchQuery = ""
         if (search) {

@@ -14,7 +14,7 @@ export default class ByteFunctions {
         const buffer = await new Promise<Buffer>((resolve, reject) => {
           stream.on("data", (chunk: Buffer) => chunks.push(Buffer.from(chunk)))
           stream.on("error", (err) => reject(err))
-          stream.on("end", () => resolve(Buffer.concat(chunks as any)))
+          stream.on("end", () => resolve(Buffer.concat(chunks)))
         })
         return buffer
     }

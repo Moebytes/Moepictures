@@ -101,7 +101,7 @@ interface AddonProps {
     showSpeedDropdown: boolean
     setShowSpeedDropdown: React.Dispatch<React.SetStateAction<boolean>>
     getCurrentLink: (forceOriginal?: boolean | undefined) => Promise<string>
-    getCurrentBuffer: (forceOriginal?: boolean | undefined) => Promise<ArrayBuffer>
+    getCurrentBuffer: (forceOriginal?: boolean | undefined) => Promise<ArrayBuffer | Buffer>
     toggleFullscreen: (exit?: boolean | undefined) => Promise<void>
     exitFullScreen: () => Promise<void>
     updateProgressText: (value: number) => void

@@ -218,12 +218,12 @@ export default class SQLUser {
     }
 
     /** Set banner */
-    public static setBanner = async (text: string, link: string) => {
-        let now = new Date().toISOString()
+    public static setBanner = async (text: string | null, link: string | null) => {
+        let now = new Date().toISOString() as string | null
         if (!text) {
-            text = null as any
-            link = null as any
-            now = null as any
+            text = null
+            link = null
+            now = null
         }
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`

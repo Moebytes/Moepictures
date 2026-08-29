@@ -100,8 +100,8 @@ export default class SQLSearch {
                 ANDtags.push(tag)
             }
         })
-        let values = [] as any
-        let tagQueryArray = [] as any
+        let values = [] as (string | string[] | number | null)[]
+        let tagQueryArray = [] as string[]
         if (ANDtags.length) {
             values.push(ANDtags)
             tagQueryArray.push(`"tag map tags".tags @> $${i}`)
@@ -143,7 +143,7 @@ export default class SQLSearch {
         let favoriteQuery = ""
         if (sort === "favorites" || sort === "reverse favorites") {
             favoriteQuery = `favorites."username" = $${userValue}`
-            countValues.push(username)
+            countValues.push(username ?? null)
         }
         let limitValue = i
         if (limit) {
@@ -234,7 +234,7 @@ export default class SQLSearch {
     }
 
     /** Get result count */
-    public static count = async (countJSON: string, countValues: string[]) => {
+    public static count = async (countJSON: string, countValues: (string | number | string[] | null)[]) => {
         const query: QueryArrayConfig = {
             text: functions.multiTrim(/*sql*/`
                 ${countJSON}
@@ -562,7 +562,7 @@ export default class SQLSearch {
     /** Tag category search */
     public static tagCategory = async (category: string, sort: string, search?: string, limit?: number, offset?: number) => {
         let whereQueries = [] as string[]
-        let values = [] as any
+        let values = [] as (string | number)[]
         if (category === "artists") whereQueries.push(`tags.type = 'artist'`)
         if (category === "characters") whereQueries.push(`tags.type = 'character'`)
         if (category === "series") whereQueries.push(`tags.type = 'series'`)
@@ -667,7 +667,7 @@ export default class SQLSearch {
     public static tagSearch = async (search: string, sort: string, type?: string, limit?: number, offset?: number, 
         session?: ServerSession) => {
         let whereArray = [] as string[]
-        let values = [] as any
+        let values = [] as (string | number)[]
         let i = 1
         if (search) {
             whereArray.push( 
@@ -779,7 +779,7 @@ export default class SQLSearch {
         if (rating === "all") ratingQuery = `(groups.rating = 'cute' OR groups.rating = 'sexy' OR groups.rating = 'erotic')`
         if (rating === "all" && !username) ratingQuery = `groups.rating = 'cute'`
         let searchQuery = ""
-        let values = [] as any
+        let values = [] as (string | number)[]
         let i = 1
         let searchValue = i
         if (search) {

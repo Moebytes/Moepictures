@@ -14,7 +14,7 @@ import pixels from "image-pixels"
 import {GIFFrame} from "../types/Types"
 
 export default class AnimationFunctions {
-    public static extractAnimatedWebpFramesNative = async (data: ArrayBuffer) => {
+    public static extractAnimatedWebpFramesNative = async (data: ArrayBuffer | Buffer) => {
         let index = 0
         // @ts-ignore
         let imageDecoder = new ImageDecoder({data, type: "image/webp", preferAnimation: true})
@@ -38,7 +38,7 @@ export default class AnimationFunctions {
         return result
     }
 
-    public static extractAnimatedWebpFrames = async (webpBuffer: ArrayBuffer, nativeOnly?: boolean) => {
+    public static extractAnimatedWebpFrames = async (webpBuffer: ArrayBuffer | Buffer, nativeOnly?: boolean) => {
         if ("ImageDecoder" in window) {
             return this.extractAnimatedWebpFramesNative(webpBuffer)
         } else {
@@ -71,7 +71,7 @@ export default class AnimationFunctions {
         }
     }
 
-    public static extractAnimatedPngFramesNative = async (data: ArrayBuffer) => {
+    public static extractAnimatedPngFramesNative = async (data: ArrayBuffer | Buffer) => {
         let index = 0
         // @ts-ignore
         let imageDecoder = new ImageDecoder({data, type: "image/png", preferAnimation: true})
@@ -95,12 +95,12 @@ export default class AnimationFunctions {
         return result
     }
 
-    public static extractAnimatedPngFrames = async (pngBuffer: ArrayBuffer, nativeOnly?: boolean) => {
+    public static extractAnimatedPngFrames = async (pngBuffer: ArrayBuffer | Buffer, nativeOnly?: boolean) => {
         if ("ImageDecoder" in window) {
             return this.extractAnimatedPngFramesNative(pngBuffer)
         } else {
             if (nativeOnly) return []
-            const apng = parseAPNG(pngBuffer)
+            const apng = parseAPNG(new Uint8Array(pngBuffer).buffer)
             if (apng instanceof Error) return []
             let frames = [] as GIFFrame[]
             await apng.createImages()
@@ -139,7 +139,7 @@ export default class AnimationFunctions {
         }
     }
 
-    public static extractGIFFramesNative = async (data: ArrayBuffer) => {
+    public static extractGIFFramesNative = async (data: ArrayBuffer | Buffer) => {
         let index = 0
         // @ts-ignore
         let imageDecoder = new ImageDecoder({data, type: "image/gif", preferAnimation: true})
@@ -163,7 +163,7 @@ export default class AnimationFunctions {
         return result
     }
 
-    public static extractGIFFrames = async (gifBuffer: ArrayBuffer, nativeOnly?: boolean) => {
+    public static extractGIFFrames = async (gifBuffer: ArrayBuffer | Buffer, nativeOnly?: boolean) => {
         if ("ImageDecoder" in window) {
             return this.extractGIFFramesNative(gifBuffer)
         } else {
@@ -242,7 +242,7 @@ export default class AnimationFunctions {
         return 0
     }
 
-    public static extractUgoiraFrames = async (zipBuffer: ArrayBuffer, firstOnly?: boolean) => {
+    public static extractUgoiraFrames = async (zipBuffer: ArrayBuffer | Buffer, firstOnly?: boolean) => {
         const zip = await JSZip.loadAsync(zipBuffer)
         let frames = [] as GIFFrame[]
         let animations = [] as {file: string, delay: number}[]

@@ -2,7 +2,7 @@
     "compilerOptions": {
         "outDir": "dist",
         "noImplicitAny": false,
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "target": "es2022",
         "module": "es2022",
         "lib": ["es2023", "dom"],

@@ -56,7 +56,7 @@ export default class SQLHistory {
     /** Get tag history */
     public static tagHistory = async (tag?: string, offset?: number, limit?: number, search?: string) => {
         let i = 1
-        let values = [] as any
+        let values = [] as (string | number)[]
         let searchValue = i
         let searchQuery = ""
         if (search) {
@@ -242,7 +242,7 @@ export default class SQLHistory {
     /** Get post history */
     public static postHistory = async (postID?: string | number, offset?: number, limit?: number, search?: string) => {
         let i = 1
-        let values = [] as any
+        let values = [] as (string | number)[]
         let searchValue = i
         let searchQuery = ""
         if (search) {
@@ -386,7 +386,7 @@ export default class SQLHistory {
     /** Get note history */
     public static noteHistory = async (postID?: string, order?: number, offset?: number, limit?: number, search?: string) => {
         let i = 1
-        let values = [] as any
+        let values = [] as (string | number)[]
         let searchValue = i
         let searchQuery = ""
         if (search) {
@@ -550,7 +550,7 @@ export default class SQLHistory {
     /** Get group history */
     public static groupHistory = async (groupID?: string, offset?: number, limit?: number, search?: string) => {
         let i = 1
-        let values = [] as any
+        let values = [] as (string | number)[]
         let searchValue = i
         let searchQuery = ""
         if (search) {

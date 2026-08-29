@@ -27,8 +27,8 @@ export default class SQLMessage {
     public static bulkInsertRecipients = async (messageID: string, recipients: string[]) => {
         if (!recipients.length) return
         let dupeCheck = new Set<string>()
-        let rawValues = [] as any
-        let valueArray = [] as any 
+        let rawValues = [] as string[]
+        let valueArray = [] as string[] 
         let i = 1 
         for (let j = 0; j < recipients.length; j++) {
             if (dupeCheck.has(recipients[j])) continue
@@ -50,8 +50,8 @@ export default class SQLMessage {
     public static bulkDeleteRecipients = async (messageID: string, recipients: string[]) => {
         if (!recipients.length) return
         let dupeCheck = new Set<string>()
-        let rawValues = [messageID] as any
-        let valueArray = [] as any 
+        let rawValues = [messageID] as string[]
+        let valueArray = [] as string[] 
         let i = 2
         for (let j = 0; j < recipients.length; j++) {
             if (dupeCheck.has(recipients[j])) continue

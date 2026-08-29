@@ -64,7 +64,7 @@ export default class SQLThread {
     public static searchThreads = async (search: string, sort: string, offset?: number, sessionUsername?: string) => {
         let whereQuery = `WHERE threads.sticky = 'false'`
         let i = 1
-        let values = [] as any
+        let values = [] as (string | number)[]
         if (search) {
             values.push(search.toLowerCase())
             whereQuery += ` AND lower(threads."title") LIKE '%' || $${i} || '%'`
@@ -103,7 +103,7 @@ export default class SQLThread {
         sessionUsername?: string) => {
         let i = 2
         let whereQuery = `WHERE (threads."creator" = ANY ($1) OR replies."creator" = ANY ($1))`
-        let values = [] as any
+        let values = [] as (string | number)[]
         if (search) {
             values.push(search.toLowerCase())
             whereQuery += ` AND lower(threads."title") LIKE '%' || $${i} || '%'`
@@ -340,7 +340,7 @@ export default class SQLThread {
     public static forumPosts = async (username: string, search: string, sort: string, offset?: number) => {
         let i = 2
         let whereQuery = ""
-        let values = [] as any
+        let values = [] as (string | number)[]
         if (search) {
             values.push(search.toLowerCase())
             whereQuery += `WHERE (lower(forum_post."title") LIKE '%' || $${i} || '%' 

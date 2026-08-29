@@ -232,8 +232,8 @@ export default class SQLFavorite {
     /** Bulk insert favgroup mappings. */
     public static bulkInsertFavgroupMappings = async (favgroupID: string, posts: any[]) => {
         if (!posts.length) return
-        let rawValues = [] as any
-        let valueArray = [] as any 
+        let rawValues = [] as string[]
+        let valueArray = [] as string[]
         let i = 1 
         for (let j = 0; j < posts.length; j++) {
             valueArray.push(`($${i}, $${i + 1}, $${i + 2})`)
@@ -253,8 +253,8 @@ export default class SQLFavorite {
     /** Bulk delete favgroup mappings. */
     public static bulkDeleteFavgroupMappings = async (favgroupID: string, posts: any[]) => {
         if (!posts.length) return
-        let valueArray = [] as any
-        let rawValues = [favgroupID] as any
+        let valueArray = [] as string[]
+        let rawValues = [favgroupID] as string[]
         let i = 2
         
         for (let j = 0; j < posts.length; j++) {

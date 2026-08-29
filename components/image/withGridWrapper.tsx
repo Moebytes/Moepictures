@@ -75,7 +75,7 @@ interface AddonProps {
     backFrame: string
     setBackFrame: React.Dispatch<React.SetStateAction<string>>
     getCurrentLink: (forceOriginal?: boolean | undefined) => Promise<string>
-    getCurrentBuffer: (forceOriginal?: boolean | undefined) => Promise<ArrayBuffer>
+    getCurrentBuffer: (forceOriginal?: boolean | undefined) => Promise<ArrayBuffer | Buffer>
 }
 
 export interface GridWrapperRef {

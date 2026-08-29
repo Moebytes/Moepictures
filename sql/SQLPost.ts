@@ -54,8 +54,8 @@ export default class SQLPost {
         const {rating, style, parentID, title, englishTitle, artist, posted, source, commentary, englishCommentary, bookmarks, 
         buyLink, pixivTags, userProfile, drawingTools, sourceImageCount, mirrors, slug, type, uploadDate, uploader, updatedDate, 
         updater, hidden, approver, approveDate, hasOriginal, hasUpscaled} = params
-        let setArray = [] as any
-        let values = [] as any
+        let setArray = [] as string[]
+        let values = [] as (string | string[] | number | boolean | null)[]
         let i = 1 
         if (rating !== undefined) {
             setArray.push(`"rating" = $${i}`)
@@ -217,8 +217,8 @@ export default class SQLPost {
         userProfile, drawingTools, sourceImageCount, mirrors, slug, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, 
         newTags, hidden, hasOriginal, hasUpscaled, isNote, addedTags, removedTags, addedTagGroups, removedTagGroups, imageSources, imageLinks, 
         imageChanged, changes, reason} = params
-        let setArray = [] as any
-        let values = [] as any
+        let setArray = [] as string[]
+        let values = [] as (string | string[] | number | boolean | null)[]
         let i = 1 
         if (rating !== undefined) {
             setArray.push(`"rating" = $${i}`)

@@ -215,8 +215,8 @@ export default class SQLGroup {
     /** Bulk insert group mappings. */
     public static bulkInsertGroupMappings = async (groupID: string, posts: any[]) => {
         if (!posts.length) return
-        let rawValues = [] as any
-        let valueArray = [] as any 
+        let rawValues = [] as string[]
+        let valueArray = [] as string[] 
         let i = 1 
         for (let j = 0; j < posts.length; j++) {
             valueArray.push(`($${i}, $${i + 1}, $${i + 2})`)
@@ -236,8 +236,8 @@ export default class SQLGroup {
     /** Bulk delete group mappings. */
     public static bulkDeleteGroupMappings = async (groupID: string, posts: any[]) => {
         if (!posts.length) return
-        let valueArray = [] as any
-        let rawValues = [groupID] as any
+        let valueArray = [] as string[]
+        let rawValues = [groupID] as string[]
         let i = 2
         
         for (let j = 0; j < posts.length; j++) {

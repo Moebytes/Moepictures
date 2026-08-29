@@ -33,7 +33,7 @@ export default class VideoFunctions {
         return Promise.all(frames)
     }
 
-    public static extractWebMFrames = async (videoBuffer: ArrayBuffer, vp9?: boolean) => {
+    public static extractWebMFrames = async (videoBuffer: ArrayBuffer | Buffer, vp9?: boolean) => {
         let frames = [] as ImageBitmap[]
         await new Promise<void>(async (resolve) => {
             let demuxer = new JsWebm()

@@ -175,18 +175,18 @@ export default class FileFunctions {
         return ext === ".vrm"
     }
 
-    public static isAnimatedWebp = (buffer: ArrayBuffer) => {
+    public static isAnimatedWebp = (buffer: ArrayBuffer | Buffer) => {
         let str = ""
-        const byteArray = new Uint8Array(Buffer.from(buffer))
+        const byteArray = new Uint8Array(buffer)
         for (let i = 0; i < byteArray.length; i++) {
             str += String.fromCharCode(byteArray[i])
         }
         return str.indexOf("ANMF") !== -1
     }
 
-    public static isAnimatedPng = (buffer: ArrayBuffer) => {
+    public static isAnimatedPng = (buffer: ArrayBuffer | Buffer) => {
         let str = ""
-        const byteArray = new Uint8Array(Buffer.from(buffer))
+        const byteArray = new Uint8Array(buffer)
         for (let i = 0; i < byteArray.length; i++) {
             str += String.fromCharCode(byteArray[i])
         }

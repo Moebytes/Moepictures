@@ -12,7 +12,7 @@ import {EmailToken, $2FAToken, PasswordToken, IPToken, APIKey} from "../types/Ty
 export default class SQLToken {
     /** Insert email token. */
     public static insertEmailToken = async (email: string, token: string) => {
-        let now = new Date() as any
+        let now = new Date()
         now.setHours(now.getHours() + 24)
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
@@ -114,7 +114,7 @@ export default class SQLToken {
 
     /** Insert password token. */
     public static insertPasswordToken = async (username: string, token: string) => {
-        let now = new Date() as any
+        let now = new Date()
         now.setHours(now.getHours() + 24)
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
@@ -165,7 +165,7 @@ export default class SQLToken {
 
     /** Insert ip token. */
     public static insertIPToken = async (username: string, token: string, ip: string) => {
-        let now = new Date() as any
+        let now = new Date()
         now.setHours(now.getHours() + 24)
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
