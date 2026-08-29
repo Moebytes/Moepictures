@@ -162,7 +162,7 @@ const LocalStorage: React.FunctionComponent = () => {
     const {disableZoom, showBigPlayer} = usePlaybackSelector()
     const {setDisableZoom, setShowBigPlayer} = usePlaybackActions()
     const {session, userImg} = useSessionSelector()
-    const {setSession, setUserImg} = useSessionActions()
+    const {setUserImg} = useSessionActions()
     const {settingsLoaded} = useActiveSelector()
     const {setSettingsLoaded} = useActiveActions()
     const themeSaveTimeout = useRef<NodeJS.Timeout| null>(null)
@@ -194,15 +194,7 @@ const LocalStorage: React.FunctionComponent = () => {
 
     useEffect(() => {
         initThemeSettings()
-        if (Object.keys(session).length) localStorage.setItem("savedSession", JSON.stringify(session))
     }, [session])
-
-    useEffect(() => {
-        if (!mobile) {
-            const savedSession = localStorage.getItem("savedSession")
-            if (savedSession) setSession(JSON.parse(savedSession))
-        }
-    }, [mobile])
 
     useEffect(() => {
         if (typeof window === "undefined") return
