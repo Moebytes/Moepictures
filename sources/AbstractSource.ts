@@ -31,7 +31,7 @@ export abstract class AbstractSource {
     }
 
     public fetchJSON = async (url: string) => {
-        return serverFunctions.http.proxyFetch(url, this.headers).then((r) => r.json()) as any
+        return serverFunctions.http.fetch(url, this.headers).then((r) => r.json()) as any
     }
 
     public fetchText = async (url: string) => {

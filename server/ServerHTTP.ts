@@ -9,62 +9,40 @@ import {ProxyAgent, fetch as proxyFetch} from "undici"
 export default class ServerHTTP {
     private static proxyAgent: ProxyAgent | null = null
     private static proxyExpiration = 0
-    private static proxyPromise: Promise<ProxyAgent> | null = null
 
     public static getProxy = async () => {
         if (this.proxyAgent && Date.now() < this.proxyExpiration) {
             return this.proxyAgent
         }
-        if (this.proxyPromise) return this.proxyPromise
 
-        this.proxyPromise = (async () => {
-            const proxies = await fetch("https://cdn.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/http/data.txt")
-                .then((r) => r.text())
-                .then((text) => text.split("\n").map((p) => p.trim()).filter(Boolean))
+        const proxies = await fetch("https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/http.txt")
+            .then((r) => r.text())
+            .then((text) => text.split("\n").map((p) => p.trim()).filter(Boolean))
+        const proxy = proxies[Math.floor(Math.random() * proxies.length)]
 
-            proxies.sort(() => Math.random() - 0.5)
-
-            for (const proxy of proxies) {
-                try {
-                    const proxyAgent = new ProxyAgent(proxy)
-                    const response = await proxyFetch("https://www.google.com/generate_204", {
-                        dispatcher: proxyAgent,
-                        signal: AbortSignal.timeout(5000)
-                    })
-
-                    if (response.status === 204) {
-                        this.proxyAgent = proxyAgent
-                        this.proxyExpiration = Date.now() + 60 * 60 * 1000
-                        this.proxyPromise = null
-                        return proxyAgent
-                    }
-                    proxyAgent.close()
-                } catch {}
-            }
-
-            this.proxyPromise = null
-            throw new Error("no working proxies")
-        })()
-
-        return this.proxyPromise
+        this.proxyAgent = new ProxyAgent("http://" + proxy)
+        this.proxyExpiration = Date.now() + 60 * 60 * 1000
+        return this.proxyAgent
     }
 
     public static proxyFetch = async (link: string, headers: any = {}) => {
-        if (link.includes("danbooru")) headers["user-agent"] = `user #${process.env.DANBOORU_USER}`
         try {
-            //const proxyAgent = await this.getProxy()
-            // disable for now
-            // return proxyFetch(link, {headers, dispatcher: proxyAgent})
-            return fetch(link, {headers})
+            const proxyAgent = await this.getProxy()
+            const result = await proxyFetch(link, {headers, dispatcher: proxyAgent})
+            return result
         } catch (e) {
             console.log(e)
             this.proxyExpiration = 0
-
             if (this.proxyAgent) {
                 this.proxyAgent.close()
                 this.proxyAgent = null
             }
-            return fetch(link, {headers})
+            return globalThis.fetch(link, {headers})
         }
+    }
+
+    public static fetch = async (link: string, headers: any = {}) => {
+        if (link.includes("danbooru")) headers["user-agent"] = `user #${process.env.DANBOORU_USER}`
+        return globalThis.fetch(link, {headers})
     }
 }
