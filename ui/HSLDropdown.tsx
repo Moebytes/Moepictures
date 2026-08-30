@@ -51,7 +51,7 @@ const HSLDropdown: React.FunctionComponent<Props> = (props) => {
         <div className={`hsl-dropdown ${props.active ? "" : "hide-hsl-dropdown"}`} style={style} onMouseEnter={() => setHideNavbar(false)} onMouseLeave={() => setHideNavbar(true)}>
             <div className="hsl-dropdown-row">
                 <span className="hsl-dropdown-text">{i18n.filters.hue}</span>
-                <Slider className="hsl-dropdown-slider" trackClassName="hsl-dropdown-slider-track" thumbClassName="hsl-dropdown-slider-thumb" onChange={(value) => setSiteHue(value)} min={60} max={272} step={1} value={siteHue}/>
+                <Slider className="hsl-dropdown-slider" trackClassName="hsl-dropdown-slider-track" thumbClassName="hsl-dropdown-slider-thumb" onChange={(value) => setSiteHue(value)} min={60} max={300} step={1} value={siteHue}/>
             </div>
             <div className="hsl-dropdown-row">
                 <span className="hsl-dropdown-text">{i18n.filters.saturation}</span>
