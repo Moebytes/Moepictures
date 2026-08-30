@@ -129,7 +129,7 @@ const FavoriteRoutes = (app: Express) => {
                     if (post.private) {
                         const tags = await sql.post.postTags(post.postID)
                         const categories = await serverFunctions.tags.tagCategories(tags.map((tag) => tag.tag))
-                        if (!permissions.canPrivate(req.session, categories.artists)) group.posts.splice(i, 1)
+                        if (!permissions.canPrivate(req.session, post, categories.artists)) group.posts.splice(i, 1)
                     }
                 }
                 newFavgroups.push(group)
@@ -185,7 +185,7 @@ const FavoriteRoutes = (app: Express) => {
                 const post = favgroup.posts[i]
                 if (post.private) {
                     const categories = await serverFunctions.tags.tagCategories(post.tags)
-                    if (!permissions.canPrivate(req.session, categories.artists)) favgroup.posts.splice(i, 1)
+                    if (!permissions.canPrivate(req.session, post, categories.artists)) favgroup.posts.splice(i, 1)
                 }
             }
             serverFunctions.sendEncrypted(favgroup, req, res)

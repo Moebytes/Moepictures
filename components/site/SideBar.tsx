@@ -1335,7 +1335,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                                 <span className="side-info">{i18n.sidebar.flipParent}</span>
                             </span>
                         </div> : null}
-                        {!props.unverified && permissions.canPrivate(session, props.artists) ? <div className="sidebar-row">
+                        {!props.unverified && permissions.canPrivate(session, props.post, props.artists) ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={privatePost}>
                                 {props.post.private ?
                                 <UnprivateIcon className="sidebar-icon"/> :

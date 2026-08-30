@@ -960,7 +960,7 @@ const SortBar: React.FunctionComponent = (props) => {
                     <div className="sortbar-item" onClick={() => toggleSquare()}>
                         <SquareIcon className="sortbar-img"/>
                     </div>
-                    <div className="sortbar-item" onClick={() => setReverse(!reverse)}>
+                    {/*<div className="sortbar-item" onClick={() => setReverse(!reverse)}>
                         {reverse ? <>
                         <ReverseIcon className="sortbar-img" style={{transform: "scaleX(-1)"}}/>
                         </> : <>
@@ -969,7 +969,7 @@ const SortBar: React.FunctionComponent = (props) => {
                     </div>
                     <div className="sortbar-item" ref={speedRef} onClick={() => toggleSpeedDrop()}>
                         <SpeedIcon className="sortbar-img"/>
-                    </div>
+                    </div>*/}
                     <div className="sortbar-item" ref={filterRef} onClick={() => toggleFilterDrop()}>
                         <FiltersIcon className="sortbar-img"/>
                         <span className="sortbar-text">{i18n.filters.filters}</span>

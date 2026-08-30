@@ -942,7 +942,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             </div> : null}
                         </div>
                         <div className="mobileinfo-sub-row">
-                            {!props.unverified && permissions.canPrivate(session, props.artists) ? <div className="mobileinfo-row">
+                            {!props.unverified && permissions.canPrivate(session, props.post, props.artists) ? <div className="mobileinfo-row">
                                 <span className="mobile-option-tag" onClick={privatePost}>
                                     {props.post.private ?
                                     <UnprivateIcon className="mobile-option-icon"/> :

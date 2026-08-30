@@ -203,7 +203,7 @@ const GroupRoutes = (app: Express) => {
                 if (post.private) {
                     const tags = await sql.post.postTags(post.postID)
                     const categories = await serverFunctions.tags.tagCategories(tags.map((tag) => tag.tag))
-                    if (!permissions.canPrivate(req.session, categories.artists)) group.posts.splice(i, 1)
+                    if (!permissions.canPrivate(req.session, post, categories.artists)) group.posts.splice(i, 1)
                 }
             }
             serverFunctions.sendEncrypted(group, req, res)
@@ -234,7 +234,7 @@ const GroupRoutes = (app: Express) => {
                     if (post.private) {
                         const tags = await sql.post.postTags(post.postID)
                         const categories = await serverFunctions.tags.tagCategories(tags.map((tag) => tag.tag))
-                        if (!permissions.canPrivate(req.session, categories.artists)) group.posts.splice(i, 1)
+                        if (!permissions.canPrivate(req.session, post, categories.artists)) group.posts.splice(i, 1)
                     }
                 }
                 newGroups.push(group)

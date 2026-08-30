@@ -4,7 +4,7 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import {ServerSession, MiniTag, TagCount} from "../types/Types"
+import {ServerSession, Post, PostHistory, MiniTag, TagCount} from "../types/Types"
 
 export default class Permissions {
     public static isOwner = (session: ServerSession) => {
@@ -50,8 +50,9 @@ export default class Permissions {
         return false
     }
 
-    public static canPrivate = (session: ServerSession, artists?: TagCount[] | MiniTag[] | string[]) => {
+    public static canPrivate = (session: ServerSession, post: Post | PostHistory, artists?: TagCount[] | MiniTag[] | string[]) => {
         if (Permissions.isMod(session)) return true
+        if (post.uploader !== session.username) return false
         const artistTags = artists?.map((a: TagCount | MiniTag | string) => a.hasOwnProperty("tag") ? (a as TagCount).tag : a) || []
         if (artistTags.includes(session.username || "")) return true
         return false

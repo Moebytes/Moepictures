@@ -36,7 +36,7 @@ const PrivatePostDialog: React.FunctionComponent = (props) => {
 
     const privatePost = async () => {
         if (!privatePostID) return
-        if (permissions.canPrivate(session, privatePostID.artists)) {
+        if (permissions.canPrivate(session, privatePostID.post, privatePostID.artists)) {
             await functions.http.post("/api/post/private",  {postID: privatePostID.post.postID}, session, setSessionFlag)
             setPostFlag(privatePostID.post.postID)
             localStorage.removeItem("savedPost")
@@ -76,7 +76,7 @@ const PrivatePostDialog: React.FunctionComponent = (props) => {
     }
 
     if (privatePostID) {
-        if (permissions.canPrivate(session, privatePostID.artists)) {
+        if (permissions.canPrivate(session, privatePostID.post, privatePostID.artists)) {
             return (
                 <div className="dialog">
                     <motion.div drag dragControls={controls} dragListener={false} dragMomentum={false}

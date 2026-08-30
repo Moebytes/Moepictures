@@ -365,7 +365,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.style.items)[3]}</span>{Object.values(i18n.help.uploading.categorization.style.items)[3]}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.style.items)[4]}</span>{Object.values(i18n.help.uploading.categorization.style.items)[4]}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.style.items)[5]}</span>{Object.values(i18n.help.uploading.categorization.style.items)[5]}<br/>
-                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.style.items)[6]}</span>{Object.values(i18n.help.uploading.categorization.style.items)[6]}<br/><br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.style.items)[6]}</span>{Object.values(i18n.help.uploading.categorization.style.items)[6]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.categorization.style.items)[7]}</span>{Object.values(i18n.help.uploading.categorization.style.items)[7]}<br/><br/>
 
                     {i18n.help.uploading.categorization.parentID}<br/><br/>
 
@@ -379,7 +380,10 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[6]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[6]}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[7]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[7]}<br/>
                     <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[8]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[8]}<br/>
-                    <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[9]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[9]}<br/><br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[9]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[9]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[10]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[10]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[11]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[11]}<br/>
+                    <span className="help-alt">{Object.keys(i18n.help.uploading.sourceInformation.items)[12]}</span>{Object.values(i18n.help.uploading.sourceInformation.items)[12]}<br/><br/>
 
                     {i18n.help.uploading.appeals}<br/><br/>
                 </span>

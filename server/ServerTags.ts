@@ -18,7 +18,7 @@ PostType, PostStyle, BulkTag, MiniTagGroup, CharSplitEntry, CharSplitNote} from 
 const exec = util.promisify(child_process.exec)
 
 export default class ServerTags {
-    public static tagCategories = async (tags: string[] | undefined) => {
+    public static tagCategories = async (tags: string[] | undefined, filterMeta?: boolean) => {
         if (!tags) tags = []
         let result = await sql.tag.tags(tags.filter(Boolean))
         let artists = [] as MiniTag[] 
@@ -45,6 +45,7 @@ export default class ServerTags {
             } else if (result[index].type === "series") {
                 series.push(obj)
             } else {
+                if (filterMeta && result[index].type === "meta") continue
                 newTags.push(obj)
             }
         }

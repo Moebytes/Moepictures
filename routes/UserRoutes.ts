@@ -1074,7 +1074,7 @@ const UserRoutes = (app: Express) => {
                 const post = favorites[i]
                 if (post.private) {
                     const categories = await serverFunctions.tags.tagCategories(post.tags)
-                    if (!permissions.canPrivate(req.session, categories.artists)) favorites.splice(i, 1)
+                    if (!permissions.canPrivate(req.session, post, categories.artists)) favorites.splice(i, 1)
                 }
             }
             if (req.session.captchaNeeded) favorites = functions.post.stripTags(favorites)
@@ -1108,7 +1108,7 @@ const UserRoutes = (app: Express) => {
                 const post = uploads[i]
                 if (post.private) {
                     const categories = await serverFunctions.tags.tagCategories(post.tags)
-                    if (!permissions.canPrivate(req.session, categories.artists)) uploads.splice(i, 1)
+                    if (!permissions.canPrivate(req.session, post, categories.artists)) uploads.splice(i, 1)
                 }
             }
             if (req.session.captchaNeeded) uploads = functions.post.stripTags(uploads)
@@ -1164,7 +1164,7 @@ const UserRoutes = (app: Express) => {
                 if (comment.post.private) {
                     const tags = await sql.post.postTags(comment.post.postID)
                     const categories = await serverFunctions.tags.tagCategories(tags.map((tag) => tag.tag))
-                    if (!permissions.canPrivate(req.session, categories.artists)) comments.splice(i, 1)
+                    if (!permissions.canPrivate(req.session, comment.post, categories.artists)) comments.splice(i, 1)
                 }
             }
             serverFunctions.sendEncrypted(comments, req, res)

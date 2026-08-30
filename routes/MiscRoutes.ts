@@ -235,7 +235,7 @@ const MiscRoutes = (app: Express) => {
             const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
             const json = JSON.parse(str.match(/(?<=>>>JSON<<<)([\s\S]*?)(?=>>>ENDJSON<<<)/gm)?.[0]) as CharSplitEntry[]
 
-            const tagCategories = await serverFunctions.tags.tagCategories(post.tags)
+            const tagCategories = await serverFunctions.tags.tagCategories(post.tags, true)
             const tags = tagCategories.tags.map((t) => t.tag)
             const characters = tagCategories.characters.map((t) => t.tag)
             const data = await serverFunctions.tags.splitTagGroups(json, tags, characters)

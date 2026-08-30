@@ -152,7 +152,7 @@ const SearchRoutes = (app: Express) => {
                 const post = result[i]
                 if (post.private) {
                     const categories = await serverFunctions.tags.tagCategories(post.tags)
-                    if (!permissions.canPrivate(req.session, categories.artists)) result.splice(i, 1)
+                    if (!permissions.canPrivate(req.session, post, categories.artists)) result.splice(i, 1)
                 }
             }
             if (req.session.captchaNeeded) result = functions.post.stripTags(result)
@@ -231,7 +231,7 @@ const SearchRoutes = (app: Express) => {
                     if (post.private) {
                         const tags = await sql.post.postTags(post.postID)
                         const categories = await serverFunctions.tags.tagCategories(tags.map((tag) => tag.tag))
-                        if (!permissions.canPrivate(req.session, categories.artists)) artist.posts.splice(i, 1)
+                        if (!permissions.canPrivate(req.session, post, categories.artists)) artist.posts.splice(i, 1)
                     }
                 }
             }
@@ -278,7 +278,7 @@ const SearchRoutes = (app: Express) => {
                     if (post.private) {
                         const tags = await sql.post.postTags(post.postID)
                         const categories = await serverFunctions.tags.tagCategories(tags.map((tag) => tag.tag))
-                        if (!permissions.canPrivate(req.session, categories.artists)) character.posts.splice(i, 1)
+                        if (!permissions.canPrivate(req.session, post, categories.artists)) character.posts.splice(i, 1)
                     }
                 }
             }
@@ -325,7 +325,7 @@ const SearchRoutes = (app: Express) => {
                     if (post.private) {
                         const tags = await sql.post.postTags(post.postID)
                         const categories = await serverFunctions.tags.tagCategories(tags.map((tag) => tag.tag))
-                        if (!permissions.canPrivate(req.session, categories.artists)) series.posts.splice(i, 1)
+                        if (!permissions.canPrivate(req.session, post, categories.artists)) series.posts.splice(i, 1)
                     }
                 }
             }
@@ -403,7 +403,7 @@ const SearchRoutes = (app: Express) => {
                 if (comment.post.private) {
                     const tags = await sql.post.postTags(comment.post.postID)
                     const categories = await serverFunctions.tags.tagCategories(tags.map((tag) => tag.tag))
-                    if (!permissions.canPrivate(req.session, categories.artists)) result.splice(i, 1)
+                    if (!permissions.canPrivate(req.session, comment.post, categories.artists)) result.splice(i, 1)
                 }
             }
             serverFunctions.sendEncrypted(result, req, res)
@@ -449,7 +449,7 @@ const SearchRoutes = (app: Express) => {
                 if (note.post.private) {
                     const tags = await sql.post.postTags(note.post.postID)
                     const categories = await serverFunctions.tags.tagCategories(tags.map((tag) => tag.tag))
-                    if (!permissions.canPrivate(req.session, categories.artists)) result.splice(i, 1)
+                    if (!permissions.canPrivate(req.session, note.post, categories.artists)) result.splice(i, 1)
                 }
             }
             serverFunctions.sendEncrypted(result, req, res)

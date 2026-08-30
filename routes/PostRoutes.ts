@@ -62,7 +62,7 @@ const PostRoutes = (app: Express) => {
             }
             if (result.private) {
                 const categories = await serverFunctions.tags.tagCategories(result.tags)
-                if (!permissions.canPrivate(req.session, categories.artists)) return void res.status(403).end()
+                if (!permissions.canPrivate(req.session, result, categories.artists)) return void res.status(403).end()
             }
             result = serverFunctions.files.appendImageLinks(result)
             if (result?.images.length > 1) {
@@ -94,7 +94,7 @@ const PostRoutes = (app: Express) => {
                 const post = result[i]
                 if (post.private) {
                     const categories = await serverFunctions.tags.tagCategories(post.tags)
-                    if (!permissions.canPrivate(req.session, categories.artists)) result.splice(i, 1)
+                    if (!permissions.canPrivate(req.session, post, categories.artists)) result.splice(i, 1)
                 }
             }
             if (req.session.captchaNeeded) result = functions.post.stripTags(result)
@@ -119,7 +119,7 @@ const PostRoutes = (app: Express) => {
             }
             if (post.private) {
                 const categories = await serverFunctions.tags.tagCategories(post.tags)
-                if (!permissions.canPrivate(req.session, categories.artists)) return void res.status(403).end()
+                if (!permissions.canPrivate(req.session, post, categories.artists)) return void res.status(403).end()
             }
             let result = await sql.post.postTags(postID)
             result = result.map(serverFunctions.files.appendTagLinks)
@@ -144,7 +144,7 @@ const PostRoutes = (app: Express) => {
             }
             if (post.private) {
                 const categories = await serverFunctions.tags.tagCategories(post.tags)
-                if (!permissions.canPrivate(req.session, categories.artists)) return void res.status(403).end()
+                if (!permissions.canPrivate(req.session, post, categories.artists)) return void res.status(403).end()
             }
             const result = await sql.comment.comments(postID)
             serverFunctions.sendEncrypted(result, req, res)
@@ -320,7 +320,7 @@ const PostRoutes = (app: Express) => {
             const post = await sql.post.post(postID).catch(() => null)
             if (!post) return void res.status(404).send("Post doesn't exist")
             const categories = await serverFunctions.tags.tagCategories(post.tags)
-            if (!permissions.canPrivate(req.session, categories.artists)) return void res.status(403).end()
+            if (!permissions.canPrivate(req.session, post, categories.artists)) return void res.status(403).end()
             if (post.private) {
                 await sql.post.updatePost(postID, "private", false)
             } else {
@@ -354,7 +354,7 @@ const PostRoutes = (app: Express) => {
                 if (post.private) {
                     const tags = await sql.post.postTags(post.postID)
                     const categories = await serverFunctions.tags.tagCategories(tags.map((tag) => tag.tag))
-                    if (!permissions.canPrivate(req.session, categories.artists)) result.splice(i, 1)
+                    if (!permissions.canPrivate(req.session, post, categories.artists)) result.splice(i, 1)
                 }
             }
             serverFunctions.sendEncrypted(result, req, res)
@@ -380,7 +380,7 @@ const PostRoutes = (app: Express) => {
             if (parent.post.private) {
                 const tags = await sql.post.postTags(parent.post.postID)
                 const categories = await serverFunctions.tags.tagCategories(tags.map((tag) => tag.tag))
-                if (!permissions.canPrivate(req.session, categories.artists)) return void res.status(403).end()
+                if (!permissions.canPrivate(req.session, parent.post, categories.artists)) return void res.status(403).end()
             }
             serverFunctions.sendEncrypted(parent, req, res)
         } catch (e) {

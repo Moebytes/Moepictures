@@ -529,7 +529,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         let result = await functions.http.post(`/api/misc/charactersplit`, {postID: props.post.postID, bytes: Object.values(bytes)}, session, setSessionFlag).catch(() => null)
         if (result) {
             const copy = structuredClone(result.characterNotes)
-            let tagGroupsStr = functions.tag.parseTagGroupsField([], result.tagGroups)
+            let tags = result.tagGroups.flatMap((t) => t.tags)
+            let tagGroupsStr = functions.tag.parseTagGroupsField(tags, result.tagGroups)
             setNoteCharSplitFlag(tagGroupsStr)
             setItems((prev) => {
                 let currentID = id
