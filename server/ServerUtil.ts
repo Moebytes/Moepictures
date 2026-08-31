@@ -37,67 +37,19 @@ export default class ServerUtil {
         return region
     }
 
-    public static googleTranslate = async (text: string, to = "en") => {
-        const TKK = [434217, 1534559001]
-
-        const magicNum = (a: any, b: any) => {
-            for (var c = 0; c < b.length - 2; c += 3) {
-                var d = b.charAt(c + 2),
-                    // @ts-ignore
-                    d = "a" <= d ? d.charCodeAt(0) - 87 : Number(d),
-                    // @ts-ignore
-                    d = "+" == b.charAt(c + 1) ? a >>> d : a << d
-                a = "+" == b.charAt(c) ? (a + d) & 4294967295 : a ^ d
-            }
-            return a
+    public static deepLTranslate = async (word: string) => {
+        try {
+            if (!word) return word
+            let headers = {Authorization: `DeepL-Auth-Key ${process.env.DEEPL_API_KEY}`}
+            const result = await axios.post(`https://api-free.deepl.com/v2/translate`, {text: [word.trim()], target_lang: "EN"}, {headers}).then((r) => r.data)
+            return result.translations[0].text
+        } catch {
+            return word
         }
-
-        const generateTK = (a: any, b: any, c: any) => {
-            b = Number(b) || 0
-            let e = [] as number[]
-            let f = 0
-            let g = 0
-            for (; g < a.length; g++) {
-                let l = a.charCodeAt(g)
-                128 > l
-                    ? (e[f++] = l)
-                    : (2048 > l
-                            ? (e[f++] = (l >> 6) | 192)
-                            : (55296 == (l & 64512) &&
-                            g + 1 < a.length &&
-                            56320 == (a.charCodeAt(g + 1) & 64512)
-                                ? ((l = 65536 + ((l & 1023) << 10) + (a.charCodeAt(++g) & 1023)),
-                                    (e[f++] = (l >> 18) | 240),
-                                    (e[f++] = ((l >> 12) & 63) | 128))
-                                : (e[f++] = (l >> 12) | 224),
-                            (e[f++] = ((l >> 6) & 63) | 128)),
-                        (e[f++] = (l & 63) | 128));
-            }
-            a = b;
-            for (f = 0; f < e.length; f++) {
-                (a += e[f]), (a = magicNum(a, "+-a^+6"))
-            }
-            a = magicNum(a, "+-3^+b+-f")
-            a ^= Number(c) || 0
-            0 > a && (a = (a & 2147483647) + 2147483648)
-            a %= 1e6
-            return a.toString() + "." + (a ^ b)
-        }
-        let url = `https://translate.googleapis.com/translate_a/single?client=gtx&dj=1&dt=t&dt=at&dt=bd&dt=ex&dt=md&dt=rw&dt=ss&dt=rm`
-        url += `&sl=auto&tl=${to}&tk=${generateTK(text, TKK[0], TKK[1])}&q=${encodeURIComponent(text)}`
-        const response = await fetch(url).then((r) => r.json())
-
-        let result = ""
-        if (response.sentences) {
-            for (let i = 0; i < response.sentences.length && response.sentences[i].trans; i++) {
-                result += response.sentences[i].trans
-            }
-        }
-        return result
     }
 
     public static translate = async (words: string[]) => {
-        let translated = await Promise.all(words.map((w) => this.googleTranslate(w)))
+        let translated = await Promise.all(words.map((w) => this.deepLTranslate(w)))
         return translated
     }
 
