@@ -90,9 +90,6 @@ const LoginHistoryPage: React.FunctionComponent = () => {
             const log = visibleItems[i]
             jsx.push(
                 <div className="sitepage-table-row">
-                    <div className="sitepage-table-column">
-                        <span className="sitepage-table-name">{log.username}</span>
-                    </div>
                     <div className="sitepage-table-column" style={{width: "130px"}}>
                         <span className={`sitepage-table-name ${failedLogin(log) ? "artist-tag-color" : ""}`}>{log.type}</span>
                     </div>
