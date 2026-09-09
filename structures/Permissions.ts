@@ -78,6 +78,6 @@ export default class Permissions {
     }
 
     public static isPremiumEnabled = () => {
-        return false
+        return true
     }
 }
