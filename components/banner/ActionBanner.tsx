@@ -79,6 +79,10 @@ const ActionBanner: React.FunctionComponent = (props) => {
             setStickyText(i18n.banner.changedSource)
             document.documentElement.style.setProperty("--actionBannerColor", "#d488ebCC")
         }
+        if (actionBanner === "coming-soon") {
+            setStickyText("Coming soon")
+            document.documentElement.style.setProperty("--actionBannerColor", "#d488ebCC")
+        }
     }, [actionBanner])
 
     const getDuration = () => {

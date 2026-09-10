@@ -21,7 +21,7 @@ const MobileAppPage: React.FunctionComponent = () => {
     const {i18n} = useThemeSelector()
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
-    const {setHeaderText, setSidebarText} = useActiveActions()
+    const {setHeaderText, setSidebarText, setActionBanner} = useActiveActions()
     const {mobile} = useLayoutSelector()
 
     useEffect(() => {
@@ -50,6 +50,15 @@ const MobileAppPage: React.FunctionComponent = () => {
         window.open(url, "_blank")
     }
 
+    const openApple = () => {
+        openLink("https://apps.apple.com/us/app/moepictures/id6762224302")
+    }
+
+    const openGoogle = () => {
+        return setActionBanner("coming-soon")
+        openLink("https://play.google.com/store/apps/details?id=com.moebytes.moepictures")
+    }
+
     return (
         <>
         <TitleBar/>
@@ -71,8 +80,8 @@ const MobileAppPage: React.FunctionComponent = () => {
                             <img className="help-img" src={mobileImg}/>
                         </div>
                         <div className="help-row" style={{display: "flex", gap: "20px"}}>
-                            <AppStoreIcon className="app-icon" onClick={() => openLink("https://apps.apple.com/us/app/moepictures/id6762224302")}/>
-                            <GooglePlayIcon className="app-icon" onClick={() => openLink("https://play.google.com/store/apps/details?id=com.moebytes.moepictures")}/>
+                            <AppStoreIcon className="app-icon" onClick={openApple}/>
+                            <GooglePlayIcon className="app-icon" onClick={openGoogle}/>
                         </div>
                     </div> 
                 </div>
