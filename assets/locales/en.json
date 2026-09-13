@@ -47,7 +47,7 @@
         "unlock": "Unlock",
         "history": "History",
         "getInfo": "Get Info",
-        "splitVariations": "Split Variations",
+        "splitVariants": "Split Variants",
         "joinChildPosts": "Join Child Posts",
         "flipParent": "Flip Parent",
         "deleteFavorites": "Delete Favorites",
@@ -133,7 +133,7 @@
         "favorites": "Favorites",
         "popularity": "Popularity",
         "cuteness": "Cuteness",
-        "variations": "Variations",
+        "variants": "Variants",
         "parent": "Parent",
         "child": "Child",
         "groups": "Groups",
@@ -854,7 +854,7 @@
                 "line3": "Images should have an upscaled version. Please read the ",
                 "upscalingGuide": "upscaling guide.",
                 "line4": "Duplicates are not allowed. Similar images should be added as a ",
-                "variation": "variation",
+                "variant": "variant",
                 "or": " or ",
                 "childPost": "child post.",
                 "line5": "Max dimensions are ",
@@ -1369,14 +1369,14 @@
             "colorMatrix": "Color Matrix"
         },
         "splitPost": {
-            "title": "Split Variations",
-            "header": "Split off variations into child posts of this post? This action is irreversible.",
+            "title": "Split Variant",
+            "header": "Split off variants into child posts of this post? This action is irreversible.",
             "currentOnly": "Current Only",
             "mergeSubsequent": "Merge Subsequent"
         },
         "joinPost": {
             "title": "Join Child Posts",
-            "header": "Join all child posts into variations of this post?",
+            "header": "Join all child posts into variants of this post?",
             "lostData": " *Tag and source data of the child posts will be lost.",
             "nestedChildren": "Nested Children"
         },
@@ -1467,7 +1467,7 @@
                     "green": " - the post is a parent post.",
                     "yellow": " - the post is a child post.",
                     "orange": " - the post is in a group.",
-                    "blue": " - the post has multiple variations."
+                    "blue": " - the post has multiple variants."
                 }
             }
         },
@@ -1546,7 +1546,7 @@
                 "guide1": "⇾ Must be drawn in the anime art style. No photographs or art drawn in other styles.*",
                 "guide2": "⇾ The main subject must be a girl. Boys are only allowed in minor roles. Art with other subjects (animals, food, backgrounds, etc). is not allowed.",
                 "guide3": "⇾ It should be moe/cute, as this is the primary focus of our site.",
-                "guide4": "⇾ No duplicates are allowed. Variations of the same image should be added to the original post.",
+                "guide4": "⇾ No duplicates are allowed. Variants of the same image should be added to the original post.",
                 "guide5": "⇾ Color palette should be pleasant to look at, ie. there are no oversaturated colors that clash too much.",
                 "guide6": "⇾ The drawing should be clean overall and shouldn't look messy or have obvious mistakes.*",
                 "guide7": "⇾ The perspective, proportions, and anatomy shouldn't look weird.",
@@ -1601,7 +1601,7 @@
                         "promo": " - An ad for paid content, merch, or other goods."
                     }
                 },
-                "parentID": "Parent ID - Specify a post ID and this post will be added as a child to that post. For post variations, simply add multiple images to the post."
+                "parentID": "Parent ID - Specify a post ID and this post will be added as a child to that post. For post variants, simply add multiple images to the post."
             },
             "sourceInformation": {
                 "header": "Please provide source information for all posts. You can fill in these fields:",
@@ -1720,18 +1720,18 @@
             "line1": "Drag and drop our bookmarklet into your browser's bookmark bar to quickly upload to Moepictures from another site.",
             "line2": "It supports the same sites as using \"Enter Links\" does, which are the following:"
         },
-        "variations": {
-            "line1": "Variations of the same image are combined into a single post. You can add a variation to an existing post by editing it (use the full fledged edit, not tag/source edit). All variations of an image should be created by the original artist, otherwise it is considered a third party edit and should be added as a child post instead.",
-            "line2": "Variations all share the same tags as the main post, and only the main post will appear directly in search.",
-            "line3": "If an image has significantly different tags to the main post (eg. different characters), it's better to make it it's own post and associate the posts by creating a group. This doesn't include multiple pages of a sequential manga/comic. Please use variations and not groups for these for a better reading experience."
+        "variants": {
+            "line1": "Variants of the same image are combined into a single post. You can add a variant to an existing post by editing it (use the full fledged edit, not tag/source edit). All variants of an image should be created by the original artist, otherwise it is considered a third party edit and should be added as a child post instead.",
+            "line2": "Variants all share the same tags as the main post, and only the main post will appear directly in search.",
+            "line3": "If an image has significantly different tags to the main post (eg. different characters), it's better to make it it's own post and associate the posts by creating a group. This doesn't include multiple pages of a sequential manga/comic. Please use variants and not groups for these for a better reading experience."
         },
         "childPosts": {
             "line1": "Child posts are very similar posts that we still want to tag or categorize differently. For example, a video version of a post should be the parent post and the image version should be a child post. Or, the same image that has an entire color palette change or a transparent background. Child posts are also used for all third party edits (modifications to a work not done by the original artist) and wip sketches of the same post.",
             "line2": "Child posts behave like their own post with their own tags, and can be toggled to show up in search. They are added to the parent post in a separate section.",
-            "line3": "Another important thing to note is that images containing multiple characters that have crops of specific characters in the image should be related with child posts and not variations. If a parent image containing all the characters doesn't exist, then they should be related using groups instead."
+            "line3": "Another important thing to note is that images containing multiple characters that have crops of specific characters in the image should be related with child posts and not variants. If a parent image containing all the characters doesn't exist, then they should be related using groups instead."
         },
         "groups": {
-            "line1": "Groups are a way to associate several loosely related posts with very different tags, so variations and child posts are not a great way to relate them. This is useful when an artist posts a pixiv post containing multiple artworks of different characters, or for a series of posts/comic strips that are not sequential. If it's a manga/comic with sequential pages, we still prefer to use variations.",
+            "line1": "Groups are a way to associate several loosely related posts with very different tags, so variants and child posts are not a great way to relate them. This is useful when an artist posts a pixiv post containing multiple artworks of different characters, or for a series of posts/comic strips that are not sequential. If it's a manga/comic with sequential pages, we still prefer to use variants.",
             "line2": "All grouped posts otherwise act like their own posts and always appear directly in search.",
             "sameSource": "If all the posts in the group have the same source then name the group like ",
             "sitename": "Sitename PostID",
@@ -1948,6 +1948,55 @@
         "moetext": {
             "line1": "MoeText is our custom markup language used to format comments."
         },
+        "posts": {
+            "line1": "Posts are classified into three main categories:",
+            "type": {
+                "header": "Type",
+                "items": {
+                    "image": "- Any static piece of art.",
+                    "comic": "- Comics with multiple panels."
+                }
+            },
+            "rating": {
+                "header": "Rating",
+                "items": {
+                    "cute": "- Non-suggestive, cuteness only.",
+                    "sexy": "- Mild suggestiveness, eg. tights.",
+                    "erotic": "- High suggestiveness, eg. bikinis."
+                }
+            },
+            "style": {
+                "header": "Style",
+                "items": {
+                    "2d": "- Majority of 2d art.",
+                    "3d": "- Screencaps of 3d models.",
+                    "chibi": "- Chibi or super deformed style.",
+                    "pixel": "- Pixel art style.",
+                    "daki": "- Art for a dakimakura pillow.",
+                    "sketch": "- More rough coloring/lines.",
+                    "lineart": "- Lineart with no coloring.",
+                    "promo": "- Ads for merch or paid content."
+                }
+            },
+            "line2": "Each post can have additional source information:",
+            "source": {
+                "items": {
+                    "title": "- Original title of the work.",
+                    "english title": "- English title.",
+                    "artist": "- Name of the artist.",
+                    "posted": "- Date the work was posted.",
+                    "image count": "- Image count at the source.",
+                    "source": "- Link to the source.",
+                    "user profile": "- Artist's profile link.",
+                    "bookmarks": "- Amount of bookmarks/likes.",
+                    "commentary": "- Description of the work.",
+                    "english commentary": "- English commentary.",
+                    "mirrors": "- Alternative source links.",
+                    "drawing tools": "- Drawing software if known.",
+                    "buy link": "- Link to paid reward if available."
+                }
+            }
+        },
         "tags": {
             "line1": "In order to improve searching quality, each post should have a decent number of tags. Tags describe features in the image such as the clothing, hair style, and accessories. Different words in tags are separated by a dash \"-\" but for viewing it is shown as a space. Tags are only supported in English.",
             "tagCategories": {
@@ -1971,10 +2020,10 @@
             "line2": "The syntax to create tag groups while tagging is the following:",
             "line3": "Any tags not included in a tag group will be put into a generic \"Tags\" tag group."
         },
-        "variations": {
-            "line1": "Variations of the same image are combined into the same post. Variations are also used for comics and image sequences to provide a better reading experience.",
-            "line2": "Variations must be created by the same artist, otherwise they are third party edits that must be related using child posts instead.",
-            "line3": "Variations share the same tags as the main post. If it is better to tag them separately, you should consider using child posts or groups instead."
+        "variants": {
+            "line1": "Variants of the same image are combined into the same post. Variants are also used for comics and image sequences to provide a better reading experience.",
+            "line2": "Variants must be created by the same artist, otherwise they are third party edits that must be related using child posts instead.",
+            "line3": "Variants share the same tags as the main post. If it is better to tag them separately, you should consider using child posts or groups instead."
         },
         "childPosts": {
             "line1": "Child posts are similar posts that we want to tag or categorize differently. Most commonly they are used in images of multiple characters that have additional crops containing only one character. The main post with all characters is the parent, while the children are the crops of single characters.",
@@ -2162,8 +2211,7 @@
             "premiumSubscriptions": {
                 "title": "Premium Subscriptions",
                 "line1": "You may purchase a subscription to unlock additional features on our services. Subscriptions are managed by a third-party platform (Apple App Store or Google Play Store) and we do not handle payments directly.",
-                "line2": "Your subscription will auto-renew unless you cancel before the renewal date. Uninstalling our app will not cancel your subscription, you are responsible for canceling in the platform's settings. We reserve the right to update subscription pricing and features or discontinue availability at any time. Pricing changes will only take affect on the next renewal and you will be notified in advanced.",
-                "line3": "Multiple people cannot share an account to use the same subscription. You could lose access to premium features without a refund if you violate our terms."
+                "line2": "Your subscription will auto-renew unless you cancel before the renewal date. Uninstalling our app will not cancel your subscription, you are responsible for canceling in the platform's settings. We reserve the right to update subscription pricing and features or discontinue availability at any time. Pricing changes will only take affect on the next renewal and you will be notified in advanced."
             },
             "accountTermination": {
                 "title": "Account Termination",

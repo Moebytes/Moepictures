@@ -212,8 +212,8 @@ export default class ValidationFunctions {
             sort === "reverse favorites" ||
             sort === "cuteness" ||
             sort === "reverse cuteness" ||
-            sort === "variations" || 
-            sort === "reverse variations" ||
+            sort === "variants" || 
+            sort === "reverse variants" ||
             sort === "parent" || 
             sort === "reverse parent" ||
             sort === "child" || 

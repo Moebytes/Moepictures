@@ -10,7 +10,7 @@ Tags use the dash ("-") as the delimeter, but the search can guess what tags you
 
 ### Multiple Images Per Post
 
-A post can have multiple images, called variations. There are also child and group relationships.
+A post can have multiple images, called variants. There are also child and group relationships.
 
 ### Image Filters
 

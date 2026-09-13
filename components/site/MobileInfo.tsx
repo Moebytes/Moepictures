@@ -916,7 +916,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             {!props.unverified && permissions.isAdmin(session) ? <div className="mobileinfo-row">
                                 <span className="mobile-option-tag" onClick={triggerSplit}>
                                     <SplitIcon className="mobile-option-icon"/>
-                                    <span className="mobile-option-text">{i18n.sidebar.splitVariations}</span>
+                                    <span className="mobile-option-text">{i18n.sidebar.splitVariants}</span>
                                 </span>
                             </div> : null}
                             {!props.unverified && permissions.isAdmin(session) ? <div className="mobileinfo-row">

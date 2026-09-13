@@ -49,7 +49,7 @@ export default class PostFunctions {
         if (post.hasChildren) return "var(--parentBorder)"
         if (post.parentID) return "var(--childBorder)"
         if (post.isGrouped) return "var(--groupBorder)"
-        if (Number(post.variationCount) > 1) return "var(--variationBorder)"
+        if (Number(post.variantCount) > 1) return "var(--variantBorder)"
         return "var(--imageBorder)"
     }
 

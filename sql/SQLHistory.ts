@@ -710,7 +710,7 @@ export default class SQLHistory {
                 $${searchValue} || '%' OR post_json."artist" ILIKE '%' || $${searchValue} || '%' OR post_json."source" ILIKE '%' 
                 || $${searchValue} || '%' OR post_json."mirrors"::text ILIKE '%' || $${searchValue} || '%')` : ""}
                 GROUP BY "history"."historyID", post_json."uploadDate", post_json.posted, post_json."parentID",
-                post_json.bookmarks, post_json."cuteness", post_json."favoriteCount", post_json."variationCount", post_json."fileSize", 
+                post_json.bookmarks, post_json."cuteness", post_json."favoriteCount", post_json."variantCount", post_json."fileSize", 
                 post_json."aspectRatio"${includeTags ? `, post_json."tagCount"` : ""}
                 ${sortQuery}
                 ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}

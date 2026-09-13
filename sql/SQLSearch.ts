@@ -57,8 +57,8 @@ export default class SQLSearch {
         if (sort === "reverse cuteness") sortQuery = `ORDER BY "cuteness" ASC`
         if (sort === "popularity") sortQuery = `ORDER BY "favoriteCount" DESC`
         if (sort === "reverse popularity") sortQuery = `ORDER BY "favoriteCount" ASC`
-        if (sort === "variations") sortQuery = `ORDER BY "variationCount" DESC`
-        if (sort === "reverse variations") sortQuery = `ORDER BY "variationCount" ASC`
+        if (sort === "variants") sortQuery = `ORDER BY "variantCount" DESC`
+        if (sort === "reverse variants") sortQuery = `ORDER BY "variantCount" ASC`
         if (sort === "parent") sortQuery = `ORDER BY "hasChildren" DESC`
         if (sort === "reverse parent") sortQuery = `ORDER BY "hasChildren" ASC`
         if (sort === "child") sortQuery = `ORDER BY posts."parentID" DESC NULLS LAST`
@@ -192,7 +192,7 @@ export default class SQLSearch {
                 ${favgroupOrder ? `MIN("favgroup map"."order") AS order,` : ""} 
                 MAX(DISTINCT COALESCE(image_json."size", 0) + COALESCE(image_json."upscaledSize", 0)) AS "fileSize",
                 MAX(DISTINCT image_json."width")::float / MAX(DISTINCT image_json."height")::float AS "aspectRatio",
-                COUNT(DISTINCT image_json."imageID") AS "variationCount",
+                COUNT(DISTINCT image_json."imageID") AS "variantCount",
                 COUNT(DISTINCT favorites."username") AS "favoriteCount",
                 ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness",
                 CASE
@@ -710,8 +710,8 @@ export default class SQLSearch {
         if (sort === "reverse alphabetic") sortQuery = `ORDER BY tags.tag DESC`
         if (sort === "posts") sortQuery = `ORDER BY "postCount" DESC`
         if (sort === "reverse posts") sortQuery = `ORDER BY "postCount" ASC`
-        if (sort === "image") sortQuery = `ORDER BY "variationCount" DESC`
-        if (sort === "reverse image") sortQuery = `ORDER BY "variationCount" ASC`
+        if (sort === "image") sortQuery = `ORDER BY "variantCount" DESC`
+        if (sort === "reverse image") sortQuery = `ORDER BY "variantCount" ASC`
         if (sort === "aliases") sortQuery = `ORDER BY "aliasCount" DESC`
         if (sort === "reverse aliases") sortQuery = `ORDER BY "aliasCount" ASC`
         if (sort === "length") sortQuery = `ORDER BY LENGTH(tags.tag) ASC`
@@ -723,7 +723,7 @@ export default class SQLSearch {
                     COALESCE(json_agg(DISTINCT implications.*) FILTER (WHERE implications.implication IS NOT NULL), '[]'::json) AS implications,
                     COUNT(*) OVER() AS "tagCount",
                     COALESCE(array_length("tag map posts"."posts", 1), 0) AS "postCount",
-                    COUNT(DISTINCT tags."image") AS "variationCount", 
+                    COUNT(DISTINCT tags."image") AS "variantCount", 
                     COUNT(DISTINCT aliases."alias") AS "aliasCount"
                     FROM tags
                     LEFT JOIN aliases ON aliases."tag" = tags."tag"
@@ -753,7 +753,7 @@ export default class SQLSearch {
                     COALESCE(json_agg(DISTINCT implications.*) FILTER (WHERE implications.implication IS NOT NULL), '[]'::json) AS implications,
                     COUNT(*) OVER() AS "tagCount",
                     COUNT("tag map posts".posts) AS "postCount", 
-                    COUNT(DISTINCT tags."image") AS "variationCount", 
+                    COUNT(DISTINCT tags."image") AS "variantCount", 
                     COUNT(DISTINCT aliases."alias") AS "aliasCount"
                     FROM tags
                     LEFT JOIN aliases ON aliases."tag" = tags."tag"

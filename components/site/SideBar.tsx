@@ -1320,7 +1320,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         {!props.unverified && permissions.isAdmin(session) ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerSplit}>
                                 <SplitIcon className="sidebar-icon"/>
-                                <span className="side-info">{i18n.sidebar.splitVariations}</span>
+                                <span className="side-info">{i18n.sidebar.splitVariants}</span>
                             </span>
                         </div> : null}
                         {!props.unverified && permissions.isAdmin(session) ? <div className="sidebar-row">

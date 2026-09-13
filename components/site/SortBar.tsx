@@ -527,7 +527,7 @@ const SortBar: React.FunctionComponent = (props) => {
         if (sortType === "posted") offset = -30
         if (sortType === "cuteness") offset = -25
         if (sortType === "favorites") offset = -20
-        if (sortType === "variations") offset = -20
+        if (sortType === "variants") offset = -20
         if (sortType === "parent") offset = -25
         if (sortType === "child") offset = -30
         if (sortType === "groups") offset = -30
@@ -1151,8 +1151,8 @@ const SortBar: React.FunctionComponent = (props) => {
                 <div className="sortbar-dropdown-row" onClick={() => changeSortType("cuteness")}>
                     <span className="sortbar-dropdown-text">{i18n.sort.cuteness}</span>
                 </div>
-                <div className="sortbar-dropdown-row" onClick={() => changeSortType("variations")}>
-                    <span className="sortbar-dropdown-text">{i18n.sort.variations}</span>
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("variants")}>
+                    <span className="sortbar-dropdown-text">{i18n.sort.variants}</span>
                 </div>
                 <div className="sortbar-dropdown-row" onClick={() => changeSortType("parent")}>
                     <span className="sortbar-dropdown-text">{i18n.sort.parent}</span>

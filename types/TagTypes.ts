@@ -94,7 +94,7 @@ export interface TagSearch extends Omit<Tag, "featuredPost"> {
     aliasCount: string
     postCount: string
     tagCount: string
-    variationCount: string
+    variantCount: string
     fake?: boolean
 }
 

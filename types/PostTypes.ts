@@ -114,7 +114,7 @@ export interface PostSearch extends Post {
     series: string[]
     fileSize: number
     aspectRatio: number
-    variationCount: string
+    variantCount: string
     favoriteCount: string
     cuteness: string
     hasChildren: boolean

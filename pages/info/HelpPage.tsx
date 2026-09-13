@@ -31,7 +31,7 @@ import imageSearchingImg from "../../assets/images/imagesearching.png"
 import upscalingImg from "../../assets/images/upscaling.png"
 import emojisImg from "../../assets/images/emojis.png"
 import compressingImg from "../../assets/images/compressing.png"
-import variationsImg from "../../assets/images/variations.png"
+import variantsImg from "../../assets/images/variants.png"
 import childrenImg from "../../assets/images/children.png"
 import aliasesImg from "../../assets/images/aliases.png"
 import implicationsImg from "../../assets/images/implications.png"
@@ -557,17 +557,17 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <div className="help-img-container"><img className="help-img" src={""}/></div></>
             )
         }
-        if (helpTab === "variations") {
+        if (helpTab === "variants") {
             return (
-                <><span className="help-heading">{i18n.sort.variations}</span>
+                <><span className="help-heading">{i18n.sort.variants}</span>
                 <span className="help-text">
-                    {i18n.help.variations.line1}<br/><br/>
+                    {i18n.help.variants.line1}<br/><br/>
 
-                    {i18n.help.variations.line2}<br/><br/>
+                    {i18n.help.variants.line2}<br/><br/>
 
-                    {i18n.help.variations.line3}
+                    {i18n.help.variants.line3}
                 </span>
-                <div className="help-img-container"><img className="help-img" src={variationsImg}/></div></>
+                <div className="help-img-container"><img className="help-img" src={variantsImg}/></div></>
             )
         }
         if (helpTab === "child-posts") {
@@ -863,7 +863,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-nav-text" onClick={() => setHelpTab("compressing")}>{i18n.help.compressing.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("pixiv-downloads")}>{i18n.help.pixivDownloads.title}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("bookmarklet")}>{i18n.help.bookmarklet.title}</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("variations")}>{i18n.sort.variations}</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("variants")}>{i18n.sort.variants}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("child-posts")}>{i18n.post.childPosts}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("groups")}>{i18n.sort.groups}</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("aliases")}>{i18n.sort.aliases}</span>
