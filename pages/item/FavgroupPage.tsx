@@ -161,10 +161,10 @@ const FavgroupPage: React.FunctionComponent = () => {
             }
 
             jsx.push(
-                <div key={item.post.postID} style={{marginRight: "20px", marginTop: "10px"}}>
+                <li key={item.post.postID} style={{listStyleType: "none", marginRight: "20px", marginTop: "10px"}}>
                     <TinyImage className="group-thumbnail-img-outlined" image={item.image} live={item.live} height={300}
                     onClick={openPost} style={{cursor: reorderState ? (deleteMode ? "crosshair" : "move") : "pointer"}}/>
-                </div>
+                </li>
             )
         }
         return (

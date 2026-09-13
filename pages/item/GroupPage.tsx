@@ -173,10 +173,10 @@ const GroupPage: React.FunctionComponent = () => {
             }
 
             jsx.push(
-                <div key={item.id} style={{marginRight: "20px", marginTop: "10px"}}>
+                <li key={item.id} style={{listStyleType: "none", marginRight: "20px", marginTop: "10px"}}>
                     <GroupThumbnail image={item.image} live={item.live} onClick={openPost} 
                     style={{cursor: reorderState ? (deleteMode ? "crosshair" : "move") : "pointer"}}/>
-                </div>
+                </li>
             )
         }
         return (
