@@ -55,7 +55,6 @@ const MobileAppPage: React.FunctionComponent = () => {
     }
 
     const openGoogle = () => {
-        return setActionBanner("coming-soon")
         openLink("https://play.google.com/store/apps/details?id=com.moebytes.moepictures")
     }
 
