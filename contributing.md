@@ -3,6 +3,9 @@
 If you want to contribute to my repository, I ask that you follow my code styling. If something doesn't appear in this guide then I have no specific preference 
 for it (but this may get updated in the future as needed).
 
+**0. No AI-generated code** \
+I can tell.
+
 **1. Naming Scheme** \
 Variables and functions use `camelCase`. Classes and interfaces use `PascalCase`. 
 
