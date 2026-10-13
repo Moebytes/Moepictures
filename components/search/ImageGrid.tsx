@@ -43,6 +43,15 @@ let reloadedPost = false
 let skipRender = false
 let limit = 100
 
+let initialResultLoad = typeof window !== "undefined" &&
+    window.sessionStorage.getItem("initialResultLoad") === "true"
+
+const setInitialResultLoad = (setLoaded: (value: boolean) => void) => {
+    initialResultLoad = true
+    if (typeof window !== "undefined") window.sessionStorage.setItem("initialResultLoad", "true")
+    setLoaded(true)
+}
+
 const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
     const {mobile, hideSidebar} = useLayoutSelector()
@@ -63,6 +72,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const [noResults, setNoResults] = useState(false)
     const [afterFirstLoad, setAfterFirstLoad] = useState(false)
+    const [initialResultsLoaded, setInitialResultsLoaded] = useState(initialResultLoad)
     const [isRandomSearch, setIsRandomSearch] = useState(false)
     const [postsRef, setPostsRef] = useState([] as React.RefObject<Ref | null>[])
     const [reupdateFlag, setReupdateFlag] = useState(false)
@@ -109,6 +119,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     }
 
     const loadInitial = useEffectEvent(async (query?: string) => {
+        setNoResults(false)
         if (searchFlag) setSearchFlag(false)
         saveSearchSkip()
         setNoResults(false)
@@ -120,19 +131,26 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             if (!session.username) {
                 setSearch("")
                 setActionBanner("login-required")
+                setNoResults(true)
+                setAfterFirstLoad(true)
+                setInitialResultLoad(setInitialResultsLoaded)
                 return []
             }
             if (!permissions.isPremium(session)) {
                 setPremiumRequired(true)
+                setNoResults(true)
+                setAfterFirstLoad(true)
+                setInitialResultLoad(setInitialResultsLoaded)
                 return []
             }
         }
         const result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
         sort: functions.validation.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch}, session, setSessionFlag)
+        setInitialResultLoad(setInitialResultsLoaded)
         setHeaderFlag(true)
         setIsRandomSearch(false)
         setNoResults(result.length === 0)
-        if (result.length) setAfterFirstLoad(true)
+        setAfterFirstLoad(true)
 
         return result
     })
@@ -157,7 +175,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         return result
     })
 
-    const {items, visibleItems, page, setPage, maxPage, setSearchQuery, initItems, restructureItems, totalCount,
+    const {items, visibleItems, ended, isUpdating, page, setPage, maxPage, setSearchQuery, initItems, restructureItems, totalCount,
         setManagedPage, setManagedQuery, setManagedItems} = usePaginatedScroll({loadInitial, updateOffset, 
         pageAmount, limit, countKey: "postCount", locationState: location.state})
 
@@ -411,7 +429,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             }
         }
         loadingRef.current = false
-        if (!jsx.length && !noResults) {
+        if (!jsx.length && !noResults && (!ended || isUpdating)) {
             loadingRef.current = true
         }
         if (!jsx.length && noResults && afterFirstLoad) {
@@ -431,7 +449,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         <div className="imagegrid" onMouseEnter={() => setEnableDrag(true)}
             style={{marginTop: mobile ? "10px" : "0px", maxWidth: hideSidebar ? "" : `calc(100vw - ${functions.dom.sidebarWidth()})`}}>
             <div className="image-outer-container">
-                {loadingRef.current && <LoadingSpinner/>}
+                {(!initialResultsLoaded || loadingRef.current) && <LoadingSpinner/>}
                 <div className="image-container" style={{visibility: props.imagesLoaded ? "visible" : "hidden"}}>
                 {generateImagesJSX()}
                 </div>

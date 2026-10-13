@@ -1113,11 +1113,9 @@ const PostRoutes = (app: Express) => {
 
                     if (buffer.byteLength) {
                         const meta = await serverFunctions.util.metadata(buffer)
-                        let sharpProcess = null as unknown as sharp.Sharp
+                        let sharpProcess = sharp(buffer, {animated, limitInputPixels: false})
                         if (maxDimension && (meta.width! > Number(maxDimension) || meta.height! > Number(maxDimension))) {
-                            sharpProcess = sharp(buffer, {animated, limitInputPixels: false}).resize(Number(maxDimension), Number(maxDimension), {fit: "inside"})
-                        } else {
-                            sharpProcess = sharp(buffer, {animated, limitInputPixels: false})
+                            sharpProcess = sharpProcess.resize(Number(maxDimension), Number(maxDimension), {fit: "inside"})
                         }
                         let newFile = file
                         let newFilename = post.images[i].filename
@@ -1157,11 +1155,9 @@ const PostRoutes = (app: Express) => {
 
                     if (buffer.byteLength) {
                         const meta = await serverFunctions.util.metadata(buffer)
-                        let sharpProcess = null as unknown as sharp.Sharp
+                        let sharpProcess = sharp(buffer, {animated, limitInputPixels: false})
                         if (maxUpscaledDimension && (meta.width! > Number(maxUpscaledDimension) || meta.height! > Number(maxUpscaledDimension))) {
-                            sharpProcess = sharp(buffer, {animated, limitInputPixels: false}).resize(Number(maxUpscaledDimension), Number(maxUpscaledDimension), {fit: "inside"})
-                        } else {
-                            sharpProcess = sharp(buffer, {animated, limitInputPixels: false})
+                            sharpProcess = sharpProcess.resize(Number(maxUpscaledDimension), Number(maxUpscaledDimension), {fit: "inside"})
                         }
                         let newFile = file
                         let newFilename = post.images[i].filename

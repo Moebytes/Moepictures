@@ -27,6 +27,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
     const [visible, setVisible] = useState([] as T[])
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
+    const [isUpdating, setIsUpdating] = useState(false)
     const [managedItems, setManagedItems] = useState<T[] | null>(null)
     const [managedPage, setManagedPage] = useState<number | null>(null)
     const [managedQuery, setManagedQuery] = useState<string | null>(null)
@@ -160,6 +161,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
         }
 
         updatingRef.current = true
+        setIsUpdating(true)
 
         try {
             const currentItems = itemsOverride ?? items
@@ -211,6 +213,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
             const pending = pendingRef.current
             if (pending) updateItems(pending.offset, pending.query, pending.items)
             pendingRef.current = null
+            setIsUpdating(false)
         }
     })
 
@@ -271,6 +274,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
         setPage,
         maxPage,
         ended,
+        isUpdating,
         offset,
         searchQuery,
         setSearchQuery,

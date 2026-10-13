@@ -14,7 +14,7 @@ import {RedditSource} from "./RedditSource"
 import {SkebSource} from "./SkebSource"
 import {TumblrSource} from "./TumblrSource"
 import {TwitterSource} from "./TwitterSource"
-import functions from "../functions/Functions"
+import serverFunctions from "../server/ServerFunctions"
 
 export default class Source {
     public static extractImages = async (url: string) => {
@@ -40,7 +40,8 @@ export default class Source {
             }
         }
 
-        let buffer = await functions.http.getBuffer(url)
+        let arrayBuffer = await serverFunctions.http.fetch(url).then((r) => r.arrayBuffer())
+        let buffer = Buffer.from(arrayBuffer)
         return [buffer]
     }
 

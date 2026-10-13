@@ -35,6 +35,6 @@ export abstract class AbstractSource {
     }
 
     public fetchText = async (url: string) => {
-        return fetch(url, {headers: this.headers}).then((r) => r.text())
+        return serverFunctions.http.fetch(url, this.headers).then((r) => r.text())
     }
 }
