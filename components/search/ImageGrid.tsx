@@ -111,6 +111,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const loadInitial = useEffectEvent(async (query?: string) => {
         if (searchFlag) setSearchFlag(false)
         saveSearchSkip()
+        setNoResults(false)
         if (!query) query = search
         if (query?.includes(" ") && !saveSearchFlag) {
             query = await functions.native.parseSpaceEnabledSearch(query, session, setSessionFlag)
@@ -138,19 +139,18 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
 
     const updateOffset = useEffectEvent(async (offset: number, query?: string) => {
         if (!settingsLoaded) return []
-        if (noResults) return []
         let result = [] as PostSearch[]
 
         if (isRandomSearch) {
             result = await functions.http.get("/api/search/posts", {type: imageType, rating: ratingType, style: styleType, 
-            sort: "random", showChildren, limit, favoriteMode: favSearch, offset}, session, setSessionFlag)
+            sort: "random", showChildren, limit, favoriteMode: favSearch, offset}, session, setSessionFlag, true)
         } else {
             if (!query) query = search
             if (query.includes(" ") && !saveSearchFlag) {
                 query = await functions.native.parseSpaceEnabledSearch(query, session, setSessionFlag)
             }
             result = await functions.http.get("/api/search/posts", {query, type: imageType, rating: ratingType, style: styleType, 
-            sort: functions.validation.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch, offset}, session, setSessionFlag)
+            sort: functions.validation.parseSort(sortType, sortReverse), showChildren, limit, favoriteMode: favSearch, offset}, session, setSessionFlag, true)
         }
         skipRender = true
 

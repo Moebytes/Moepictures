@@ -32,6 +32,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
     const [managedQuery, setManagedQuery] = useState<string | null>(null)
     const loadedRef = useRef(false)
     const updatingRef = useRef(false)
+    const pendingRef = useRef<{offset?: number, query?: string, items?: T[]} | null>(null)
     const replaceRef = useRef(true)
     const navigate = useNavigate()
     const location = useLocation()
@@ -152,7 +153,11 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
     }, [managedPage, managedQuery])
 
     const updateItems = useEffectEvent(async (forceOffset?: number, queryOverride?: string, itemsOverride?: T[]) => {
-        if (ended || updatingRef.current) return
+        if (scroll && ended) return
+        if (updatingRef.current) {
+            pendingRef.current = {offset: forceOffset, query: queryOverride, items: itemsOverride}
+            return
+        }
 
         updatingRef.current = true
 
@@ -164,7 +169,7 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
             const newOffset = forceOffset ?? currentOffset
 
             let result = await updateOffset?.(newOffset, query) ?? null
-            if (!result) result = items.slice(newOffset, newOffset + pageAmount)
+            if (!result) result = currentItems.slice(newOffset, newOffset + pageAmount)
 
             const totalCount = result.length ? (getTotalCount?.(result[0]) || result.length) : 0
 
@@ -203,6 +208,9 @@ const usePaginatedScroll = <T,>(params: Params<T>) => {
             if (result.length < limit) setEnded(true)
         } finally {
             updatingRef.current = false
+            const pending = pendingRef.current
+            if (pending) updateItems(pending.offset, pending.query, pending.items)
+            pendingRef.current = null
         }
     })
 
