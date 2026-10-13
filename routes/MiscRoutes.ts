@@ -135,6 +135,7 @@ const MiscRoutes = (app: Express) => {
         try {
             const link = decodeURIComponent(req.body.url as string)
             if (!link) return void res.status(400).send("No url")
+            await serverFunctions.http.validatePublicURL(link)
             let images = await source.extractImages(link)
             res.status(200).send(images)
         } catch {
@@ -146,6 +147,10 @@ const MiscRoutes = (app: Express) => {
         try {
             const link = decodeURIComponent(req.body.url as string)
             if (!link) return void res.status(400).send("No url")
+            const url = await serverFunctions.http.validatePublicURL(link)
+            if (url.hostname !== "pixiv.net" && !url.hostname.endsWith("pixiv.net")) {
+                return void res.status(400).send("Invalid pixiv url")
+            }
             let result = await source.pixivIllust(link)
             res.status(200).json(result)
         } catch {
@@ -157,8 +162,8 @@ const MiscRoutes = (app: Express) => {
         const link = req.query.url as string
         if (!link) return void res.status(400).send("No url")
         try {
-            const response = await functions.http.followRedirect(link)
-            serverFunctions.sendEncrypted(response, req, res)
+            const response = await serverFunctions.http.followRedirect(link)
+            serverFunctions.sendEncrypted(response.url, req, res)
         } catch {
             res.status(400).end()
         }

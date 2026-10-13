@@ -48,8 +48,6 @@ import {ServerSession, Storage, PostFull} from "./types/Types"
 const __dirname = path.resolve()
 
 const app = express() as any
-app.use(express.urlencoded({extended: true, limit: "300mb", parameterLimit: 10000}))
-app.use(express.json({limit: "300mb"}))
 app.use(cors({credentials: true, origin: true}))
 app.disable("x-powered-by")
 app.set("trust proxy", "loopback")
@@ -94,6 +92,17 @@ app.use("/emojis", express.static(path.join(__dirname, "./assets/emojis"), {maxA
 
 app.use(apiKeyLogin)
 app.use(csrfGenerator)
+
+app.post("/api/post/upload", express.json({limit: "300mb"}))
+app.put("/api/post/edit", express.json({limit: "300mb"}))
+app.post("/api/post/upload/unverified", express.json({limit: "300mb"}))
+app.put("/api/post/edit/unverified", express.json({limit: "300mb"}))
+app.post("/api/search/similar", express.json({limit: "300mb"}))
+app.post("/api/misc/sourcelookup", express.json({limit: "300mb"}))
+app.post("/api/misc/taglookup", express.json({limit: "300mb"}))
+
+app.use(express.urlencoded({extended: true, limit: "1mb", parameterLimit: 10000}))
+app.use(express.json({limit: "10mb"}))
 
 let blacklist = null as Set<string> | null
 
