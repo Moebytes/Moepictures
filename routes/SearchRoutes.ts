@@ -466,7 +466,7 @@ const SearchRoutes = (app: Express) => {
             if (!rating) rating = "all"
             if (!functions.validation.validGroupSort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
-            let  result = await sql.search.groupSearch(search, sort, rating, limit, offset, req.session.username)
+            let  result = await sql.search.groupSearch(search, sort, rating, limit, offset, req.session.username, req.session)
             result = result.map((g) => {
                 g.posts = g.posts.map(serverFunctions.files.appendImageLinks)
                 return g

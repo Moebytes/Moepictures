@@ -770,7 +770,8 @@ export default class SQLSearch {
     }
 
     /** Group search. */
-    public static groupSearch = async (search: string, sort: string, rating: string, limit?: number, offset?: number, username?: string) => {
+    public static groupSearch = async (search: string, sort: string, rating: string, limit?: number, 
+        offset?: number, username?: string, session?: ServerSession) => {
         let ratingQuery = ""
         if (rating === "cute") ratingQuery = `groups.rating = 'cute'`
         if (rating === "sexy") ratingQuery = `groups.rating = 'sexy'`
@@ -789,7 +790,9 @@ export default class SQLSearch {
         }
         let limitValue = i
         if (limit) {
-            if (Number(limit) > 100) limit = 100
+            if (!Boolean(session?.apiKey)) {
+                if (Number(limit) > 100) limit = 100
+            }
             values.push(limit)
             i++
         }
