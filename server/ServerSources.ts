@@ -16,7 +16,7 @@ import sharp from "sharp"
 import serverFunctions from "./ServerFunctions"
 import functions from "../functions/Functions"
 import sql from "../sql/SQLQuery"
-import {UploadImage, PostRating, UploadTag, PixivResponse, SaucenaoResponse} from "../types/Types"
+import {UploadImage, PostRating, UploadTag, PixivResponse, OnegaiResponse, SaucenaoResponse} from "../types/Types"
 
 let pixiv: Pixiv
 let deviantart: DeviantArt
@@ -304,6 +304,24 @@ export default class ServerSources {
                 posted, bookmarks, artistIcon, artists, rating, sourceLinks}
     }
 
+    public static onegaiLookup = async (bytes: number[]) => {
+        const form = new FormData()
+        const inputType = functions.byte.bufferFileType(bytes)?.[0]
+
+        let resized = await sharp(new Uint8Array(bytes)).png()
+            .resize({width: 256, height: 256, fit: "fill"}).toBuffer()
+
+        form.append("image", resized, {
+            filename: "blob",
+            contentType: inputType.mime
+        })
+        let result = await axios.post("https://api.onegai.moe/search", form, {headers: form.getHeaders()})
+        .then((r) => r.data.result) as OnegaiResponse[]
+        result = result.sort((a, b) => Number(b.score) - Number(a.score))
+        result = result.filter((r) => Number(r.score) > 0.8)
+        return result
+    }
+
     public static saucenaoLookup = async (bytes: number[]) => {
         const form = new FormData()
         form.append("db", "999")
@@ -330,7 +348,7 @@ export default class ServerSources {
         }
 
         let pngBytes = bytes
-        if (current.ext !== "jpg" && current.ext !== "png") {
+        if (current.ext !== "png") {
             let buffer = await sharp(new Uint8Array(bytes)).png().toBuffer()
             pngBytes = Object.values(new Uint8Array(buffer))
         }
@@ -449,6 +467,91 @@ export default class ServerSources {
             }
         } catch (e) {
             console.log(e)
+        }
+
+        // Fallback to Onegai
+        let onegaiResult = await this.onegaiLookup(pngBytes)
+        if (onegaiResult.length) {
+            const pixiv = onegaiResult.filter((r) => r.site === "pixiv")
+            const danbooru = onegaiResult.filter((r) => r.site === "danbooru")
+            let skipFurther = false
+            if (pixiv.length) {
+                mirrors.push(`https://www.pixiv.net/artworks/${pixiv[0].site_id}`)
+                source = `https://www.pixiv.net/artworks/${pixiv[0].site_id}`
+                artist = pixiv[0].user.name || ""
+                title = pixiv[0].title || ""
+                try {
+                    let data = await this.pixivLookup(source, rating)
+                    source = data.source
+                    artist = data.artist
+                    title = data.title
+                    englishTitle = data.englishTitle
+                    commentary = data.commentary
+                    englishCommentary = data.englishCommentary
+                    posted = data.posted
+                    bookmarks = data.bookmarks
+                    artistIcon = data.artistIcon
+                    artists = data.artists
+                    rating = data.rating
+                    sourceLinks = data.sourceLinks
+                    pixivTags = data.pixivTags
+                    userProfile = data.userProfile
+                    drawingTools = data.drawingTools
+                    sourceImageCount = data.sourceImageCount
+                    isAI = data.isAI
+                    skipFurther = true
+                } catch (e) {
+                    console.log(e)
+                }
+            }
+            if (!skipFurther && danbooru.length) {
+                source = danbooru[0].url
+                artist = danbooru[0].user.name || ""
+                title = danbooru[0].title || ""
+                try {
+                    let data = await this.danbooruLookup(source, rating)
+                    source = data.source
+                    artist = data.artist
+                    title = data.title
+                    englishTitle = data.englishTitle
+                    commentary = data.commentary
+                    englishCommentary = data.englishCommentary
+                    posted = data.posted
+                    bookmarks = data.bookmarks
+                    artistIcon = data.artistIcon
+                    artists = data.artists
+                    rating = data.rating
+                    sourceLinks = data.sourceLinks
+                } catch (e) {
+                    console.log(e)
+                }
+            }
+            if (pixiv.length || danbooru.length) {
+                mirrors = functions.util.removeItem(mirrors, source)
+                const mirrorStr = mirrors?.length ? mirrors.join("\n") : ""
+                return {
+                    rating,
+                    artists,
+                    sourceLinks,
+                    artistIcon,
+                    isAI,
+                    source: {
+                        title,
+                        englishTitle,
+                        artist,
+                        source,
+                        commentary,
+                        englishCommentary,
+                        bookmarks,
+                        pixivTags,
+                        userProfile,
+                        drawingTools,
+                        sourceImageCount,
+                        posted,
+                        mirrors: mirrorStr
+                    }
+                }
+            }
         }
 
         // Fallback to Saucenao - this has high rate limits

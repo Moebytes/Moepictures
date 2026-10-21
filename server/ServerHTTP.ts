@@ -32,7 +32,7 @@ export default class ServerHTTP {
             if (value.startsWith("::ffff:")) {
                 return this.isPublicIP(value.slice(7))
             }
-            return !!(
+            return !(
                 value === "::" ||
                 value === "::1" ||
                 /^[fcfd]/.test(value) ||

@@ -55,6 +55,26 @@ export interface SaucenaoResponse {
     }
 }
 
+export interface OnegaiResponse {
+    uuid: string
+    root_uuid: string
+    site: string
+    site_instance: string
+    site_id: string
+    page: number
+    height: number
+    width: number
+    url: string
+    title: string
+    score: number
+    nsfw_score: number
+    user: {
+        name: string
+        url: string
+    }
+    cdn_path: string
+}
+
 export type PixivResponse = PixivIllust & {user: {twitter: string}}
 export type UgoiraData = {zip_urls: {medium: string}, frames: {file: string, delay: number}[]}
 
