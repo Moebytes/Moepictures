@@ -200,7 +200,9 @@ const Related: React.FunctionComponent<Props> = (props) => {
             props.onLoaded?.()
         }
         poll()
-        return () => {active = false}
+        return () => {
+            active = false
+        }
     }, [scroll, visibleItems])
 
     const generateImagesJSX = () => {

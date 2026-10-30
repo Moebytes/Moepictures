@@ -163,7 +163,9 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             if (active) setImages(decrypted)
         }
         decryptImages()
-        return () => {active = false}
+        return () => {
+            active = false
+        }
     }, [visibleImages, session])
 
     useEffect(() => {

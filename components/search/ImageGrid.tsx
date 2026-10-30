@@ -97,10 +97,10 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const imagePromises = useRef(new Map<string, TrackablePromise<void>>())
     const loadingRef = useRef(true)
     const scrollRestored = useRef(false)
-    const restoredSearchData = restoredSearch?.preparedQuery !== undefined ? 
-        {query: restoredSearch.query, value: restoredSearch.preparedQuery} : null
-    const [preparedSearch, setPreparedSearch] = useState<{query: string, value: string} | null>(restoredSearchData)
-    const preparedQuery = preparedSearch?.query === query ? preparedSearch.value : null
+    const restoredSearchData = restoredSearch?.activeQuery !== undefined ? 
+        {query: restoredSearch.query, value: restoredSearch.activeQuery} : null
+    const [activeSearch, setActiveSearch] = useState<{query: string, value: string} | null>(restoredSearchData)
+    const activeQuery = activeSearch?.query === query ? activeSearch.value : null
     const [pendingSearch, setPendingSearch] = useState<string | null>(null)
 
     const setPage = (value: number) => {
@@ -165,10 +165,10 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        if (restoring || (restoredSearch && preparedSearch?.query === query)) return
+        if (restoring || (restoredSearch && activeSearch?.query === query)) return
         let active = true
-        setPreparedSearch(null)
-        const prepareQuery = async () => {
+        setActiveSearch(null)
+        const updateSearch = async () => {
             let value = query
             if (value.includes(" ") && !saveSearchFlag) {
                 value = await functions.native.parseSpaceEnabledSearch(value, session, setSessionFlag)
@@ -185,9 +185,9 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
                 setInitialResultLoad(setInitialResultsLoaded)
                 return
             }
-            setPreparedSearch({query, value})
+            setActiveSearch({query, value})
         }
-        prepareQuery()
+        updateSearch()
         return () => {
             active = false
         }
@@ -216,21 +216,21 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const submitting = pendingSearch !== null && pendingSearch !== location.search
 
     const infiniteQuery = useSearchPostsInfiniteQuery(
-        {query: preparedQuery ?? "", type: imageType, rating: ratingType, style: styleType,
+        {query: activeQuery ?? "", type: imageType, rating: ratingType, style: styleType,
         sort: functions.validation.parseSort(sortType, sortReverse),
         showChildren, favoriteMode: favSearch, refreshKey, offset: previousPosts.length ? scrollOffset : 0},
         {skip: searchFlag || submitting || restoring || queryChanging || !scroll || 
-        Boolean(overridePosts) || isRandomSearch || (!settingsLoaded || preparedQuery === null),
+        Boolean(overridePosts) || isRandomSearch || (!settingsLoaded || activeQuery === null),
         initialPageParam: {offset: previousPosts.length ? scrollOffset : (page - 1) * pageAmount, limit}}
     )
 
     const pageQuery = useSearchPostsPageQuery(
-        {query: preparedQuery ?? "", type: imageType, rating: ratingType, style: styleType,
+        {query: activeQuery ?? "", type: imageType, rating: ratingType, style: styleType,
         sort: functions.validation.parseSort(sortType, sortReverse),
         showChildren, favoriteMode: favSearch,
         offset: batchOffset, limit: batchSize, refreshKey},
         {skip: searchFlag || submitting || restoring || queryChanging || scroll || 
-        Boolean(overridePosts) || isRandomSearch || (!settingsLoaded || preparedQuery === null)}
+        Boolean(overridePosts) || isRandomSearch || (!settingsLoaded || activeQuery === null)}
     )
 
     const items = useMemo(() => {
@@ -331,7 +331,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         setRandomFlag(false)
         setOverridePosts(null)
         try {
-            const result = await functions.http.get("/api/search/posts", {query: query ?? preparedQuery ?? "",
+            const result = await functions.http.get("/api/search/posts", {query: query ?? activeQuery ?? "",
                 type: imageType, rating: ratingType, style: styleType, sort: "random", showChildren,
                 limit: scroll ? limit : pageAmount, favoriteMode: favSearch}, session, setSessionFlag, true)
             setIsRandomSearch(true)
@@ -351,7 +351,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         if (!resultsReady) return
         setPosts(items)
         setPostPage(page)
-        setSearchState({page, query, preparedQuery: preparedQuery ?? undefined, refreshKey,
+        setSearchState({page, query, activeQuery: activeQuery ?? undefined, refreshKey,
             offset: overridePosts ? 0 : scroll && previousPosts.length ? restoredSearch.offset :
                 scroll || isRandomSearch ? (page - 1) * pageAmount : batchOffset,
             totalCount: overridePosts ? overridePosts.length : Number(items[0]?.postCount ?? items.length),
@@ -525,7 +525,9 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             if (active) props.setImagesLoaded(true)
         }
         poll()
-        return () => {active = false}
+        return () => {
+            active = false
+        }
     }, [scroll, visibleItems, page, submitting, resultsReady])
 
     const generateImagesJSX = () => {

@@ -93,7 +93,8 @@ export const api = createApi({
                 },
                 getPreviousPageParam: (firstPage, allPages, firstPageParam) => {
                     if (firstPageParam.offset <= 0) return undefined
-                    return {offset: Math.max(0, firstPageParam.offset - firstPageParam.limit), limit: firstPageParam.limit}
+                    return {...firstPageParam, offset: Math.max(0, firstPageParam.offset - firstPageParam.limit),
+                        query: firstPage.query, totalCount: firstPage.totalCount}
                 }
             },
             queryFn: async ({queryArg, pageParam}, queryApi, extraOptions, baseQuery) => {
@@ -108,17 +109,17 @@ export const api = createApi({
                 for (const tag of queries) {
                     query = tag
                     const offset = pageParam.query !== undefined || tag === params.query ? pageParam.offset : 0
+
                     const result = await baseQuery({url: "/api/search/posts",
                         params: {...params, query, offset, limit: pageParam.limit}})
                     if (result.error) return {error: result.error}
+                    
                     const rows = result.data as PostSearch[]
                     const count = Number(rows[0]?.postCount ?? rows.length)
-                    const seen = new Set(posts.map((post) => post.postID))
-                    const added = rows.filter((post) => post.postID !== postID && !seen.has(post.postID))
-                    posts = [...posts, ...added]
-                    if (pageParam.totalCount === undefined) totalCount += Math.max(0, count - (rows.length - added.length))
+                    posts = rows.filter((post) => post.postID !== postID)
+                    totalCount = pageParam.totalCount ?? Math.max(0, count - (rows.length - posts.length))
                     nextOffset = rows.length && offset + rows.length < count ? offset + rows.length : null
-                    if (posts.length >= 50 || pageParam.query !== undefined) break
+                    if (rows.length || pageParam.query !== undefined) break
                 }
                 return {data: {posts, totalCount, query, nextOffset}}
             },

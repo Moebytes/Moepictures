@@ -48,7 +48,7 @@ export interface PostSearchState {
     totalCount: number
     page: number
     query: string
-    preparedQuery?: string
+    activeQuery?: string
     refreshKey: number
     mode: "search" | "random" | "image"
 }
