@@ -89,25 +89,30 @@ export default class SQLComment {
         if (sort === "reverse date") sortQuery = `ORDER BY comments."postDate" ASC`
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                WITH post_json AS (
+                WITH paged_comments AS MATERIALIZED (
+                    SELECT comments.*, COUNT(*) OVER() AS "commentCount"
+                    FROM comments
+                    JOIN users ON users."username" = comments."username"
+                    WHERE EXISTS (SELECT 1 FROM images WHERE images."postID" = comments."postID")
+                    ${whereQuery.replace(/^WHERE /, "AND ")}
+                    ${sortQuery}
+                    LIMIT ${limit ? `$${i}` : 100} ${offset ? `OFFSET $${offsetValue}` : ""}
+                ),
+                post_json AS (
                     SELECT posts.*, json_agg(DISTINCT images.*) AS images
                     FROM posts
                     JOIN images ON images."postID" = posts."postID"
+                    WHERE posts."postID" IN (SELECT "postID" FROM paged_comments)
                     GROUP BY posts."postID"
                 )
                 SELECT comments.*,
-                COUNT(*) OVER() AS "commentCount",
                 users."image", users."imageHash", users."imagePost", 
                 users."role", users."premium", users."banned", users."deleted",
-                to_json((array_agg(post_json.*))[1]) AS post
-                FROM comments
+                to_json(post_json.*) AS post
+                FROM paged_comments AS comments
                 JOIN "users" ON "users"."username" = "comments"."username"
                 JOIN post_json ON post_json."postID" = "comments"."postID"
-                ${whereQuery}
-                GROUP BY comments."commentID", users."image", users."imageHash", users."imagePost", 
-                users."role", users."premium", users."banned", users."deleted"
                 ${sortQuery}
-                LIMIT ${limit ? `$${i}` : 100} ${offset ? `OFFSET $${offsetValue}` : ""}
             `),
             values: []
         }
@@ -136,25 +141,30 @@ export default class SQLComment {
         if (sort === "reverse date") sortQuery = `ORDER BY comments."postDate" ASC`
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                WITH post_json AS (
+                WITH paged_comments AS MATERIALIZED (
+                    SELECT comments.*, COUNT(*) OVER() AS "commentCount"
+                    FROM comments
+                    JOIN users ON users."username" = comments."username"
+                    WHERE EXISTS (SELECT 1 FROM images WHERE images."postID" = comments."postID")
+                    ${whereQuery.replace(/^WHERE /, "AND ")}
+                    ${sortQuery}
+                    LIMIT ${limit ? `$${i}` : 100} ${offset ? `OFFSET $${offsetValue}` : ""}
+                ),
+                post_json AS (
                     SELECT posts.*, json_agg(DISTINCT images.*) AS images
                     FROM posts
                     JOIN images ON images."postID" = posts."postID"
+                    WHERE posts."postID" IN (SELECT "postID" FROM paged_comments)
                     GROUP BY posts."postID"
                 )
                 SELECT comments.*, 
-                COUNT(*) OVER() AS "commentCount",
                 users."image", users."imageHash", users."imagePost", 
                 users."role", users."premium", users."banned", users."deleted",
-                to_json((array_agg(post_json.*))[1]) AS post
-                FROM comments
+                to_json(post_json.*) AS post
+                FROM paged_comments AS comments
                 JOIN "users" ON "users"."username" = "comments"."username"
                 JOIN post_json ON post_json."postID" = "comments"."postID"
-                ${whereQuery}
-                GROUP BY comments."commentID", users."image", users."imageHash", users."imagePost", 
-                users."role", users."premium", users."banned", users."deleted"
                 ${sortQuery}
-                LIMIT ${limit ? `$${i}` : 100} ${offset ? `OFFSET $${offsetValue}` : ""}
             `),
             values: [usernames]
         }

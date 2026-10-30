@@ -660,6 +660,21 @@ export default class SQLTag {
         const whereQueries = [searchQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
+                WITH history_page AS MATERIALIZED (
+                    SELECT history.*, COUNT(*) OVER() AS "historyCount"
+                    FROM (
+                        SELECT "historyID", "user", "date", "source", "target",
+                        "type", "affectedPosts", "sourceData", "reason"
+                        FROM "alias history"
+                        UNION ALL
+                        SELECT "historyID", "user", "date", "source", "target",
+                        "type", "affectedPosts", NULL::jsonb AS "sourceData", "reason"
+                        FROM "implication history"
+                    ) AS "history"
+                    ${whereQueries ? `WHERE ${whereQueries}` : ""}
+                    ORDER BY history."date" DESC
+                    ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
+                )
                 SELECT "history".*,
                 jsonb_build_object(
                     'username', users."username",
@@ -668,21 +683,10 @@ export default class SQLTag {
                     'banned', users."banned",
                     'deleted', users."deleted",
                     'imagePost', users."imagePost"
-                ) AS "user",
-                COUNT(*) OVER() AS "historyCount"
-                FROM (
-                    SELECT "historyID", "user", "date", "source", "target",
-                    "type", "affectedPosts", "sourceData", "reason"
-                    FROM "alias history"
-                    UNION ALL
-                    SELECT "historyID", "user", "date", "source", "target",
-                    "type", "affectedPosts", NULL::jsonb AS "sourceData", "reason"
-                    FROM "implication history"
-                ) AS "history"
+                ) AS "user"
+                FROM history_page AS history
                 LEFT JOIN users ON users."username" = "history"."user"
-                ${whereQueries ? `WHERE ${whereQueries}` : ""}
                 ORDER BY "history"."date" DESC
-                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
             `),
             values: []
         }

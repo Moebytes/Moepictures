@@ -232,7 +232,7 @@ export default class SQLSearch {
                 ${intermLimit ? `${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}` : ""}
             )`)
 
-        return {postJSON, countJSON, values, countValues, searchValue, tagQuery, sortQuery, includeTags, limitValue, offsetValue, i}
+        return {postJSON, countJSON, values, countValues, searchValue, tagQuery, sortQuery, includeTags, limitValue, offsetValue, i, whereQueries}
     }
 
     /** Only loads requested search page. */
@@ -501,13 +501,21 @@ export default class SQLSearch {
         }
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
-                COUNT(*) OVER() AS "historyCount"
-                FROM posts
-                JOIN images ON posts."postID" = images."postID"
-                WHERE ${whereQuery}
-                GROUP BY posts."postID"
-                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
+                WITH history_page AS MATERIALIZED (
+                    SELECT posts.*, COUNT(*) OVER() AS "historyCount"
+                    FROM posts
+                    WHERE ${whereQuery}
+                    AND EXISTS (SELECT 1 FROM images WHERE images."postID" = posts."postID")
+                    ORDER BY posts."postID"
+                    ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
+                )
+                SELECT posts.*, image_json.images
+                FROM history_page AS posts
+                CROSS JOIN LATERAL (
+                    SELECT json_agg(images.*) AS images
+                    FROM images WHERE images."postID" = posts."postID"
+                ) image_json
+                ORDER BY posts."postID"
             `),
             values: []
         }
@@ -801,21 +809,28 @@ export default class SQLSearch {
         if (sort === "reverse length") sortQuery = `ORDER BY LENGTH(tags.tag) DESC`
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                    SELECT tags.*, 
-                    COALESCE(json_agg(DISTINCT aliases.*) FILTER (WHERE aliases.alias IS NOT NULL), '[]'::json) AS aliases,
-                    COALESCE(json_agg(DISTINCT implications.*) FILTER (WHERE implications.implication IS NOT NULL), '[]'::json) AS implications,
-                    COUNT(*) OVER() AS "tagCount",
-                    COALESCE(array_length("tag map posts"."posts", 1), 0) AS "postCount",
-                    COUNT(DISTINCT tags."image") AS "variantCount", 
-                    COUNT(DISTINCT aliases."alias") AS "aliasCount"
-                    FROM tags
-                    LEFT JOIN aliases ON aliases."tag" = tags."tag"
-                    LEFT JOIN implications ON implications."tag" = tags."tag"
-                    LEFT JOIN "tag map posts" ON "tag map posts"."tag" = tags."tag"
-                    ${whereQuery}
-                    GROUP BY "tags"."tagID", "tag map posts"."posts"
+                    WITH paged_tags AS MATERIALIZED (
+                        SELECT tags.*, COUNT(*) OVER() AS "tagCount",
+                        COALESCE(array_length("tag map posts"."posts", 1), 0) AS "postCount",
+                        CASE WHEN tags."image" IS NULL THEN 0 ELSE 1 END::bigint AS "variantCount",
+                        (SELECT COUNT(DISTINCT aliases.alias) FROM aliases WHERE aliases.tag = tags.tag) AS "aliasCount"
+                        FROM tags
+                        LEFT JOIN "tag map posts" ON "tag map posts"."tag" = tags."tag"
+                        ${whereQuery}
+                        ${sortQuery}
+                        ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
+                    )
+                    SELECT tags.*, alias_json.aliases, implication_json.implications
+                    FROM paged_tags AS tags
+                    CROSS JOIN LATERAL (
+                        SELECT COALESCE(json_agg(aliases.*) FILTER (WHERE aliases.alias IS NOT NULL), '[]'::json) AS aliases
+                        FROM aliases WHERE aliases.tag = tags.tag
+                    ) alias_json
+                    CROSS JOIN LATERAL (
+                        SELECT COALESCE(json_agg(implications.*) FILTER (WHERE implications.implication IS NOT NULL), '[]'::json) AS implications
+                        FROM implications WHERE implications.tag = tags.tag
+                    ) implication_json
                     ${sortQuery}
-                    ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
             `)
         }
         if (offset) values.push(offset)
@@ -889,23 +904,33 @@ export default class SQLSearch {
         const whereQueries = [ratingQuery, searchQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                WITH post_json AS (
-                    SELECT posts.*, "group map"."order", json_agg(DISTINCT images.*) AS images
-                    FROM posts
-                    JOIN images ON images."postID" = posts."postID"
-                    JOIN "group map" ON "group map"."postID" = posts."postID"
-                    GROUP BY posts."postID", "group map"."order"
+                WITH paged_groups AS MATERIALIZED (
+                    SELECT groups.*, COUNT(*) OVER() AS "groupCount", COUNT(*) AS "postCount"
+                    FROM groups
+                    JOIN "group map" ON "group map"."groupID" = groups."groupID"
+                    WHERE EXISTS (SELECT 1 FROM images WHERE images."postID" = "group map"."postID")
+                    ${whereQueries ? `AND ${whereQueries}` : ""}
+                    GROUP BY groups."groupID"
+                    ${sortQuery}
+                    ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
                 )
-                SELECT groups.*, json_agg(post_json.* ORDER BY post_json."order" ASC) AS posts,
-                COUNT(*) OVER() AS "groupCount",
-                COUNT(DISTINCT post_json."postID") AS "postCount"
-                FROM "group map"
-                JOIN groups ON groups."groupID" = "group map"."groupID"
-                JOIN post_json ON post_json."postID" = "group map"."postID"
-                ${whereQueries ? `WHERE ${whereQueries}` : ""}
-                GROUP BY groups."groupID"
+                SELECT groups.*, group_json.posts
+                FROM paged_groups AS groups
+                CROSS JOIN LATERAL (
+                    SELECT json_agg(post_json.* ORDER BY post_json."order" ASC) AS posts
+                    FROM (
+                        SELECT posts.*, "group map"."order", image_json.images
+                        FROM "group map"
+                        JOIN posts ON posts."postID" = "group map"."postID"
+                        CROSS JOIN LATERAL (
+                            SELECT json_agg(images.*) AS images
+                            FROM images WHERE images."postID" = posts."postID"
+                            HAVING COUNT(*) > 0
+                        ) image_json
+                        WHERE "group map"."groupID" = groups."groupID"
+                    ) post_json
+                ) group_json
                 ${sortQuery}
-                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
             `),
             values: []
         }

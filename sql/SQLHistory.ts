@@ -82,10 +82,18 @@ export default class SQLHistory {
         const whereQueries = [searchQuery, tagQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                WITH post_json AS (
+                WITH history_page AS MATERIALIZED (
+                    SELECT "tag history".*, COUNT(*) OVER() AS "historyCount"
+                    FROM "tag history"
+                    ${whereQueries ? `WHERE ${whereQueries}` : ""}
+                    ORDER BY "tag history"."date" DESC
+                    ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
+                ),
+                post_json AS (
                         SELECT posts.*, json_agg(DISTINCT images.*) AS images
                         FROM posts
                         JOIN images ON images."postID" = posts."postID"
+                        WHERE posts."postID" IN (SELECT "featuredPost" FROM history_page)
                         GROUP BY posts."postID"
                 )
                 SELECT "tag history".*,
@@ -97,16 +105,11 @@ export default class SQLHistory {
                     'deleted', users."deleted",
                     'imagePost', users."imagePost"
                 ) AS "user",
-                to_json((array_agg(post_json.*))[1]) AS "featuredPost",
-                COUNT(*) OVER() AS "historyCount"
-                FROM "tag history"
+                to_json(post_json.*) AS "featuredPost"
+                FROM history_page AS "tag history"
                 LEFT JOIN users ON users."username" = "tag history"."user"
                 LEFT JOIN post_json ON post_json."postID" = "tag history"."featuredPost"
-                ${whereQueries ? `WHERE ${whereQueries}` : ""}
-                GROUP BY "tag history"."historyID", users."username", users."role", 
-                users."premium", users."banned", users."deleted", users."imagePost"
                 ORDER BY "tag history"."date" DESC
-                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
             `),
             values: []
         }
@@ -270,6 +273,13 @@ export default class SQLHistory {
         const whereQueries = [searchQuery, postQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
+                WITH history_page AS MATERIALIZED (
+                    SELECT "post history".*, COUNT(*) OVER() AS "historyCount"
+                    FROM "post history"
+                    ${whereQueries ? `WHERE ${whereQueries}` : ""}
+                    ORDER BY "post history"."date" DESC
+                    ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
+                )
                 SELECT "post history".*, 
                 jsonb_build_object(
                     'username', users."username",
@@ -280,17 +290,11 @@ export default class SQLHistory {
                     'imagePost', users."imagePost"
                 ) AS "user",
                 posts.locked, posts.hidden, posts.private, 
-                posts.approver, posts."approveDate", posts.deleted, posts."deletionDate",
-                COUNT(*) OVER() AS "historyCount"
-                FROM "post history"
+                posts.approver, posts."approveDate", posts.deleted, posts."deletionDate"
+                FROM history_page AS "post history"
                 LEFT JOIN users ON users."username" = "post history"."user"
                 LEFT JOIN posts ON posts."postID" = "post history"."postID"
-                ${whereQueries ? `WHERE ${whereQueries}` : ""}
-                GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
-                posts.approver, posts."approveDate", posts.deleted, posts."deletionDate", users."username", 
-                users."premium", users."role", users."banned", users."deleted", users."imagePost"
                 ORDER BY "post history"."date" DESC
-                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
             `),
             values: []
         }
@@ -418,10 +422,19 @@ export default class SQLHistory {
         const whereQueries = [searchQuery, postQuery, orderQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                WITH post_json AS (
+                WITH history_page AS MATERIALIZED (
+                    SELECT "note history".*, COUNT(*) OVER() AS "historyCount"
+                    FROM "note history"
+                    ${whereQueries ? `WHERE ${whereQueries}` : ""}
+                    ${whereQueries ? "AND" : "WHERE"} EXISTS (SELECT 1 FROM images WHERE images."postID" = "note history"."postID")
+                    ORDER BY "note history"."updatedDate" DESC
+                    ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
+                ),
+                post_json AS (
                     SELECT posts.*, json_agg(DISTINCT images.*) AS images
                     FROM posts
                     JOIN images ON images."postID" = posts."postID"
+                    WHERE posts."postID" IN (SELECT "postID" FROM history_page)
                     GROUP BY posts."postID"
                 )
                 SELECT "note history".*, 
@@ -433,16 +446,11 @@ export default class SQLHistory {
                     'deleted', users."deleted",
                     'imagePost', users."imagePost"
                 ) AS "updater",
-                COUNT(*) OVER() AS "historyCount",
-                to_json((array_agg(post_json.*))[1]) AS post
-                FROM "note history"
+                to_json(post_json.*) AS post
+                FROM history_page AS "note history"
                 LEFT JOIN "users" ON users."username" = "note history"."updater"
                 JOIN post_json ON post_json."postID" = "note history"."postID"
-                ${whereQueries ? `WHERE ${whereQueries}` : ""}
-                GROUP BY "note history"."historyID", users."username", users."role", 
-                users."premium", users."banned", users."deleted", users."imagePost"
                 ORDER BY "note history"."updatedDate" DESC
-                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
         `),
         values: []
         }
@@ -578,6 +586,13 @@ export default class SQLHistory {
         const whereQueries = [searchQuery, groupQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
+                WITH history_page AS MATERIALIZED (
+                    SELECT "group history".*, COUNT(*) OVER() AS "historyCount"
+                    FROM "group history"
+                    ${whereQueries ? `WHERE ${whereQueries}` : ""}
+                    ORDER BY "group history"."date" DESC
+                    ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
+                )
                 SELECT "group history".*,
                 jsonb_build_object(
                     'username', users."username",
@@ -586,15 +601,10 @@ export default class SQLHistory {
                     'banned', users."banned",
                     'deleted', users."deleted",
                     'imagePost', users."imagePost"
-                ) AS "user",
-                COUNT(*) OVER() AS "historyCount"
-                FROM "group history"
+                ) AS "user"
+                FROM history_page AS "group history"
                 LEFT JOIN users ON users."username" = "group history"."user"
-                ${whereQueries ? `WHERE ${whereQueries}` : ""}
-                GROUP BY "group history"."historyID", users."username", users."role", 
-                users."premium", users."banned", users."deleted", users."imagePost"
                 ORDER BY "group history"."date" DESC
-                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
             `),
             values: []
         }
@@ -693,26 +703,58 @@ export default class SQLHistory {
         rating?: string, style?: string, sort?: string, showChildren?: boolean, sessionUsername?: string) => {
         if (!sort || sort === "date") sort = "viewDate"
         if (sort === "reverse date") sort = "reverse viewDate"
-        const {postJSON, values, searchValue, sortQuery, includeTags, limitValue, offsetValue} = 
-        SQLQuery.search.boilerplate({i: 2, search, type, rating, style, sort, offset, limit, showChildren, username: sessionUsername, 
-        outerSort: true})
+        const options = {i: 2, search, type, rating, style, sort, offset, 
+            limit, showChildren, username: sessionUsername, outerSort: true}
+        const historyDateSort = sort === "viewDate" || sort === "reverse viewDate"
+        const {postJSON, values, searchValue, sortQuery, includeTags, limitValue, offsetValue, whereQueries} =
+            SQLQuery.search.boilerplate({...options, condition: historyDateSort ? undefined :
+                `EXISTS (SELECT 1 FROM history WHERE history."postID" = posts."postID" AND history.username = $1)`})
+
+        if (historyDateSort) {
+            const searchQuery = search ? `(posts.title ILIKE '%' || $${searchValue} || '%' OR posts."englishTitle" ILIKE '%' ||
+                $${searchValue} || '%' OR posts.artist ILIKE '%' || $${searchValue} || '%' OR posts.source ILIKE '%'
+                || $${searchValue} || '%' OR posts.mirrors::text ILIKE '%' || $${searchValue} || '%')` : ""
+
+            const filteredPostJSON = SQLQuery.search.boilerplate({...options,
+                condition: `posts."postID" IN (SELECT "postID" FROM history_page)`}).postJSON
+                
+            const query: QueryConfig = {
+                text: functions.multiTrim(/*sql*/`
+                    WITH history_page AS MATERIALIZED (
+                        SELECT history.*, COUNT(*) OVER() AS "historyCount"
+                        FROM history
+                        JOIN posts ON posts."postID" = history."postID"
+                        WHERE history.username = $1
+                        ${whereQueries ? `AND ${whereQueries}` : ""}
+                        ${searchQuery ? `AND ${searchQuery}` : ""}
+                        AND EXISTS (SELECT 1 FROM images WHERE images."postID" = posts."postID")
+                        ${sortQuery}
+                        ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}
+                    ),
+                    ${filteredPostJSON.replace(/^WITH\s+/, "")}
+                    SELECT history.*, to_json(post_json.*) AS post
+                    FROM history_page AS history
+                    JOIN post_json ON post_json."postID" = history."postID"
+                    ${sortQuery}
+                `),
+                values: [username, ...values]
+            }
+            return await SQLQuery.run(query) as SearchHistory[]
+        }
 
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 ${postJSON}
                 SELECT "history".*,
                 COUNT(*) OVER() AS "historyCount",
-                to_json((array_agg(post_json.*))[1]) AS post
+                to_json(post_json.*) AS post
                 FROM "history"
                 JOIN post_json ON post_json."postID" = "history"."postID"
                 WHERE "history"."username" = $1 
                 ${search ? `AND (post_json."title" ILIKE '%' || $${searchValue} || '%' OR post_json."englishTitle" ILIKE '%' || 
                 $${searchValue} || '%' OR post_json."artist" ILIKE '%' || $${searchValue} || '%' OR post_json."source" ILIKE '%' 
                 || $${searchValue} || '%' OR post_json."mirrors"::text ILIKE '%' || $${searchValue} || '%')` : ""}
-                GROUP BY "history"."historyID", post_json."uploadDate", post_json.posted, post_json."parentID",
-                post_json.bookmarks, post_json."cuteness", post_json."favoriteCount", post_json."variantCount", post_json."fileSize", 
-                post_json."aspectRatio"${includeTags ? `, post_json."tagCount"` : ""}
-                ${sortQuery}
+                ${sortQuery.replace(/posts\./g, "post_json.").replace(/favorites\./g, "post_json.")}
                 ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}
             `),
             values: [username]

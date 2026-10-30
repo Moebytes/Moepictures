@@ -857,6 +857,7 @@ CREATE INDEX IF NOT EXISTS "idx_favgroup_map_favgroupID" ON "favgroup map" ("fav
 CREATE INDEX IF NOT EXISTS "idx_favgroups_username_favgroupID" ON "favgroups" ("username", "favgroupID");
 CREATE INDEX IF NOT EXISTS "idx_child_posts_parentID" ON "child posts" ("parentID");
 CREATE INDEX IF NOT EXISTS "idx_history" ON "history" ("username", "postID");
+CREATE INDEX IF NOT EXISTS "idx_history_username_viewdate" ON "history" ("username", "viewDate" DESC);
 CREATE INDEX IF NOT EXISTS "idx_unverified_aliases" ON "unverified aliases" ("tag", "alias");
 CREATE INDEX IF NOT EXISTS "idx_comments" ON "comments" ("commentID" DESC NULLS LAST);
 CREATE INDEX IF NOT EXISTS "idx_notes" ON "notes" ("noteID" DESC NULLS LAST);
