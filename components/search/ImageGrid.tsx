@@ -108,7 +108,14 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         if (value > 1) params.set("page", String(value))
         else params.delete("page")
         const search = params.toString() ? `?${params}` : ""
-        if (search !== location.search) navigate(`${location.pathname}${search}`, {state: location.state})
+        if (search === location.search) return
+        if (!scroll) props.setImagesLoaded(false)
+        if (restoredSearch?.mode === "search") {
+            setRestoreActive(false)
+            navigate(`${location.pathname}${search}`, {state: {}})
+        } else {
+            navigate(`${location.pathname}${search}`, {state: location.state})
+        }
     }
 
     const getPageAmount = () => {
