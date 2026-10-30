@@ -4,7 +4,7 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useState} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useSessionSelector, useSessionActions, useLayoutSelector} from "../../store"
 import {useInvalidatePost} from "../../api"
 import {Rating} from "react-simple-star-rating"
@@ -22,8 +22,6 @@ interface Props {
     post: PostSearch | PostHistory
 }
 
-let cutenessTimer = null as any
-
 const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {session} = useSessionSelector()
@@ -33,6 +31,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     const [averageCuteness, setAverageCuteness] = useState((props.post as PostSearch)?.cuteness || 0)
     const [isAverage, setIsAverage] = useState(false)
     const invalidatePost = useInvalidatePost()
+    const cutenessTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
     // const sliderRef = useRef<Slider>(null)
     // useEffect(() => sliderRef.current ? sliderRef.current.resize() : null)
 
@@ -53,14 +52,15 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const updateCuteness = async () => {
-        if (!cuteness) return
-        await functions.http.post("/api/cuteness/update", {cuteness, postID: props.post.postID}, session, setSessionFlag)
+    const updateCuteness = async (value: number) => {
+        if (!value) return
+        await functions.http.post("/api/cuteness/update", {cuteness: value, postID: props.post.postID}, session, setSessionFlag)
         invalidatePost(props.post.postID)
         setIsAverage(false)
     }
 
     const deleteRating = async () => {
+        if (cutenessTimer.current) clearTimeout(cutenessTimer.current)
         await functions.http.delete("/api/cuteness/delete", {postID: props.post.postID}, session, setSessionFlag)
         invalidatePost(props.post.postID)
         setIsAverage(true)
@@ -88,15 +88,18 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
         // const thumb = document.querySelector(".cuteness-thumb")
         // if (!thumb) return 
         // thumb.style.backgroundImage = `url(${getImg()})`
-        clearTimeout(cutenessTimer)
-        cutenessTimer = setTimeout(() => {
-            updateCuteness()
-        }, 500)
-    }, [cuteness, session])
+        return () => {
+            if (cutenessTimer.current) clearTimeout(cutenessTimer.current)
+        }
+    }, [props.post.postID, session.username])
 
     const setCutenessValue = (value: number) => {
-        if (isAverage) return setCuteness(Number(averageCuteness))
-        return setCuteness(value)
+        const nextValue = isAverage ? Number(averageCuteness) : value
+        setCuteness(nextValue)
+        if (cutenessTimer.current) clearTimeout(cutenessTimer.current)
+        cutenessTimer.current = setTimeout(() => {
+            updateCuteness(nextValue)
+        }, 500)
     }
 
     const getCutenessValue = () => {
