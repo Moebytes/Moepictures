@@ -12,9 +12,9 @@ import {DeletedPost, PostSearch, PostFull, UnverifiedPost, TagCategorySearch, Ta
 export default class SQLSearch {
     public static boilerplate = (options: {i?: number, tags?: string[], type?: string, rating?: string, style?: string, sort?: string, offset?: number, 
         limit?: number, username?: string, showChildren?: boolean, withTags?: boolean, search?: string, favgroupOrder?: boolean, outerSort?: boolean,
-        format?: string, condition?: string, intermLimit?: boolean, session?: ServerSession}) => {
+        format?: string, condition?: string, intermLimit?: boolean, session?: ServerSession, pageFirst?: boolean}) => {
         let {i, tags, search, type, rating, style, sort, offset, limit, username, withTags, showChildren, 
-        favgroupOrder, outerSort, format, condition, intermLimit, session} = options
+        favgroupOrder, outerSort, format, condition, intermLimit, session, pageFirst} = options
         if (!i) i = 1
         let typeQuery = ""
         if (type === "image") typeQuery = `posts.type = 'image'`
@@ -125,7 +125,9 @@ export default class SQLSearch {
         if (STARtags.length) {
             for (const starTag of STARtags) {
                 values.push(starTag)
-                tagQueryArray.push(`EXISTS (SELECT 1 FROM unnest("tag map tags".tags) AS tag WHERE tag ~* $${i})`)
+                tagQueryArray.push(pageFirst ?
+                    `"tag map tags".tags && ARRAY(SELECT tags.tag FROM tags WHERE tags.tag ~* $${i})` :
+                    `EXISTS (SELECT 1 FROM unnest("tag map tags".tags) AS tag WHERE tag ~* $${i})`)
                 i++
             }
         }
@@ -170,16 +172,16 @@ export default class SQLSearch {
         let hasFavorites = favoriteQuery || condition?.includes("favorites.")
         let countJSON = functions.multiTrim(/*sql*/`
             WITH post_json AS (
-                SELECT posts.*
+                SELECT posts."postID"
                 FROM posts
                 ${includeTags ? `JOIN "tag map tags" ON posts."postID" = "tag map tags"."postID"` : ""}
                 ${hasFavorites ? `LEFT JOIN "favorites" ON posts."postID" = "favorites"."postID"` : ""}
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
-                GROUP BY posts."postID"
-                ${hasFavorites ? `, favorites."favoriteID"` : ""}
+                ${!pageFirst ? `GROUP BY posts."postID" ${hasFavorites ? `, favorites."favoriteID"` : ""}` : ""}
             )`)
 
-        let postJSON = functions.multiTrim(/*sql*/`
+        const postJSON = pageFirst ? this.pageBoilerplate({whereQueries, includeTags: Boolean(includeTags), favoriteQuery,
+            sort, username, userValue, limitValue, offsetValue, limit, offset}) : functions.multiTrim(/*sql*/`
             WITH image_json AS (
                 SELECT *
                 FROM images
@@ -233,20 +235,101 @@ export default class SQLSearch {
         return {postJSON, countJSON, values, countValues, searchValue, tagQuery, sortQuery, includeTags, limitValue, offsetValue, i}
     }
 
+    /** Only loads requested search page. */
+    private static pageBoilerplate = (options: {whereQueries: string, includeTags: boolean, favoriteQuery: string,
+        sort?: string, username?: string, userValue: number, limitValue: number, offsetValue: number,
+        limit?: number, offset?: number}) => {
+        const {whereQueries, includeTags, favoriteQuery, sort, username, userValue, limitValue, offsetValue, limit, offset} = options
+        const sortType = sort?.replace("reverse ", "") || "date"
+        let rank = ""
+        if (sortType === "random") rank = `random()`
+        if (sortType === "date") rank = `posts."uploadDate"`
+        if (sortType === "posted") rank = `posts.posted`
+        if (sortType === "bookmarks") rank = `posts.bookmarks`
+        if (sortType === "favorites") rank = `favorites."favoriteDate"`
+        if (sortType === "popularity") rank = `(SELECT COUNT(DISTINCT favorites.username) FROM favorites WHERE favorites."postID" = posts."postID")`
+        if (sortType === "cuteness") rank = `(SELECT ROUND(AVG(DISTINCT cuteness.cuteness)) FROM cuteness WHERE cuteness."postID" = posts."postID")`
+        if (sortType === "variants") rank = `(SELECT COUNT(*) FROM images WHERE images."postID" = posts."postID")`
+        if (sortType === "filesize") rank = `(SELECT MAX(COALESCE(images.size, 0) + COALESCE(images."upscaledSize", 0)) FROM images WHERE images."postID" = posts."postID")`
+        if (sortType === "aspectRatio") rank = `(SELECT MAX(images.width)::float / MAX(images.height)::float FROM images WHERE images."postID" = posts."postID")`
+        if (sortType === "parent") rank = `EXISTS (SELECT 1 FROM "child posts" WHERE "child posts"."parentID" = posts."postID")`
+        if (sortType === "child") rank = `posts."parentID"`
+        if (sortType === "groups") rank = `EXISTS (SELECT 1 FROM "group map" WHERE "group map"."postID" = posts."postID" AND "group map"."groupID" IS NOT NULL)`
+        if (sortType === "tagcount") rank = `array_length("tag map tags".tags, 1)`
+        if (sortType === "hidden") rank = `posts.hidden`
+        if (sortType === "locked") rank = `posts.locked`
+        if (sortType === "private") rank = `posts.private`
+
+        let sortDirection = " DESC"
+        if (sort?.startsWith("reverse ")) sortDirection = " ASC"
+        if (sortType === "random") sortDirection = ""
+        if (sortType === "posted" || sortType === "bookmarks" || sortType === "child" ||
+            sortType === "hidden" || sortType === "locked" || sortType === "private") sortDirection += " NULLS LAST"
+        const tieDirection = sortDirection.trim().startsWith("ASC") ? "ASC" : "DESC"
+        const tagJoin = includeTags ? `JOIN "tag map tags" ON posts."postID" = "tag map tags"."postID"` : ""
+        const favoritesJoin = favoriteQuery ? `JOIN favorites ON posts."postID" = favorites."postID"` : ""
+
+        return functions.multiTrim(/*sql*/`
+            WITH search_page AS MATERIALIZED (
+                SELECT posts."postID", ${rank} AS "searchRank"
+                FROM posts
+                ${tagJoin}
+                ${favoritesJoin}
+                WHERE ${whereQueries ? `${whereQueries} AND` : ""}
+                    EXISTS (SELECT 1 FROM images WHERE images."postID" = posts."postID")
+                ORDER BY "searchRank"${sortDirection}, posts."postID" ${tieDirection}
+                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"}
+                ${offset ? `OFFSET $${offsetValue}` : ""}
+            ), post_json AS (
+                SELECT posts.*, image_data.*, favorite_data.*, cuteness_data.*,
+                    ${includeTags ? `"tag map tags".tags, array_length("tag map tags".tags, 1) AS "tagCount",` : ""}
+                    EXISTS (SELECT 1 FROM "child posts" WHERE "child posts"."parentID" = posts."postID") AS "hasChildren",
+                    EXISTS (SELECT 1 FROM "group map" WHERE "group map"."postID" = posts."postID" AND "group map"."groupID" IS NOT NULL) AS "isGrouped"
+                    ${username ? `, EXISTS (
+                        SELECT 1 FROM "favgroup map"
+                        JOIN favgroups ON favgroups."favgroupID" = "favgroup map"."favgroupID"
+                        WHERE "favgroup map"."postID" = posts."postID" AND favgroups.username = $${userValue}
+                    ) AS favgrouped` : ""}
+                FROM search_page
+                JOIN posts ON posts."postID" = search_page."postID"
+                ${tagJoin}
+                CROSS JOIN LATERAL (
+                    SELECT json_agg(images ORDER BY images."order", images."imageID") AS images,
+                        MAX(COALESCE(images.size, 0) + COALESCE(images."upscaledSize", 0)) AS "fileSize",
+                        MAX(images.width)::float / MAX(images.height)::float AS "aspectRatio",
+                        COUNT(*) AS "variantCount"
+                    FROM images WHERE images."postID" = posts."postID"
+                ) image_data
+                CROSS JOIN LATERAL (
+                    SELECT COUNT(DISTINCT favorites.username) AS "favoriteCount"
+                        ${username ? `,
+                        COUNT(*) FILTER (WHERE favorites.username = $${userValue}) > 0 AS favorited,
+                        MAX(favorites."favoriteDate") FILTER (WHERE favorites.username = $${userValue}) AS "favoriteDate"` : ""}
+                    FROM favorites WHERE favorites."postID" = posts."postID"
+                    ${favoriteQuery ? `AND ${favoriteQuery}` : ""}
+                ) favorite_data
+                CROSS JOIN LATERAL (
+                    SELECT ROUND(AVG(DISTINCT cuteness.cuteness)) AS cuteness
+                    FROM cuteness WHERE cuteness."postID" = posts."postID"
+                ) cuteness_data
+                ORDER BY search_page."searchRank"${sortDirection}, posts."postID" ${tieDirection}
+            )
+        `)
+    }
+
     /** Get result count */
     public static count = async (countJSON: string, countValues: (string | number | string[] | null)[]) => {
         const query: QueryArrayConfig = {
             text: functions.multiTrim(/*sql*/`
                 ${countJSON}
-                SELECT COUNT(*) OVER() AS "postCount"
+                SELECT COUNT(*) AS "postCount"
                 FROM post_json
-                LIMIT 1
             `),
             rowMode: "array"
             }
         if (countValues?.[0]) query.values = countValues
         const result = await SQLQuery.run(query)
-        return String(result.flat(Infinity)[0])
+        return String(result.flat(Infinity)[0] ?? 0)
     }
 
     /** Search posts. */
@@ -254,14 +337,12 @@ export default class SQLSearch {
         limit?: number, withTags?: boolean, showChildren?: boolean, username?: string, session?: ServerSession) => {
         const {postJSON, countJSON, values, countValues} = 
         SQLQuery.search.boilerplate({tags, type, rating, style, sort, offset, 
-        limit, username, withTags, showChildren, session, intermLimit: true})
+        limit, username, withTags, showChildren, session, intermLimit: true, pageFirst: true})
 
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
             ${postJSON}
-            SELECT post_json.*,
-            COUNT(*) OVER() AS "postCount"
-            FROM post_json
+            SELECT post_json.* FROM post_json
         `)
         }
         if (values?.[0]) query.values = values
@@ -271,6 +352,7 @@ export default class SQLSearch {
         } else {
             result = await SQLQuery.run(query, `search/posts`)
         }
+        if (!result.length) return result
         const count = await SQLQuery.search.count(countJSON, countValues)
         result.forEach((r) => r.postCount = count)
         return result

@@ -12,9 +12,9 @@ import {GetEndpoint, PostEndpoint, PutEndpoint, DeleteEndpoint, Session,  PostSe
 
 export default class HTTPFunctions {
     public static privateKey = ""
-    public static clientKeyLock = false
+    private static clientKeyPromise: Promise<string> | null = null
     public static serverPublicKey = ""
-    public static serverKeyLock = false
+    private static serverKeyPromise: Promise<string> | null = null
     public static lockManager = {} as {[key: string]: Promise<any> | null}
 
     public static getBuffer = async (link: string, headers?: any) => {
@@ -40,34 +40,42 @@ export default class HTTPFunctions {
 
     public static updateClientKeys = async (session: Session, setSessionFlag?: (value: boolean) => void) => {
         if (this.privateKey) return this.privateKey
-        if (this.clientKeyLock) await functions.timeout(1000 + Math.random() * 1000)
-        if (!this.privateKey) {
-            this.clientKeyLock = true
-            const savedPublicKey = await localforage.getItem("publicKey") as string
-            const savedPrivateKey = await localforage.getItem("privateKey") as string
-            if (savedPublicKey && savedPrivateKey) {
-                await functions.http.post("/api/client-key", {publicKey: savedPublicKey}, session, setSessionFlag)
-                this.privateKey = savedPrivateKey
-            } else {
-                const keys = decryption.generateKeys()
+        if (!this.clientKeyPromise) {
+            this.clientKeyPromise = (async () => {
+                const [savedPublicKey, savedPrivateKey] = await Promise.all([
+                    localforage.getItem<string>("publicKey"),
+                    localforage.getItem<string>("privateKey")
+                ])
+                const keys = savedPublicKey && savedPrivateKey ?
+                    {publicKey: savedPublicKey, privateKey: savedPrivateKey} : decryption.generateKeys()
                 await functions.http.post("/api/client-key", {publicKey: keys.publicKey}, session, setSessionFlag)
-                await localforage.setItem("publicKey", keys.publicKey)
-                await localforage.setItem("privateKey", keys.privateKey)
+                if (!savedPublicKey || !savedPrivateKey) {
+                    await Promise.all([
+                        localforage.setItem("publicKey", keys.publicKey),
+                        localforage.setItem("privateKey", keys.privateKey)
+                    ])
+                }
                 this.privateKey = keys.privateKey
-            }
+                return this.privateKey
+            })().finally(() => {
+                this.clientKeyPromise = null
+            })
         }
-        return this.privateKey
+        return this.clientKeyPromise
     }
 
     public static updateServerPublicKey = async (session: Session, setSessionFlag?: (value: boolean) => void) => {
         if (this.serverPublicKey) return this.serverPublicKey
-        if (this.serverKeyLock) await functions.timeout(1000 + Math.random() * 1000)
-        if (!this.serverPublicKey) {
-            this.serverKeyLock = true
-            const response = await functions.http.post("/api/server-key", null, session, setSessionFlag)
-            this.serverPublicKey = response.publicKey
+        if (!this.serverKeyPromise) {
+            this.serverKeyPromise = (async () => {
+                const response = await functions.http.post("/api/server-key", null, session, setSessionFlag)
+                this.serverPublicKey = response.publicKey
+                return this.serverPublicKey
+            })().finally(() => {
+                this.serverKeyPromise = null
+            })
         }
-        return this.serverPublicKey
+        return this.serverKeyPromise
     }
 
     public static arrayBufferToJSON = (arrayBuffer: ArrayBuffer) => {

@@ -7,8 +7,6 @@
 import functions from "./Functions"
 import permissions from "../structures/Permissions"
 import enLocale from "../assets/locales/en.json"
-import ImageTracer from "imagetracerjs"
-import {optimize} from "svgo"
 import JSZip from "jszip"
 import path from "path"
 import {UploadImage, Session, Dimensions, Post, SplatterOptions, PixelateOptions, CanvasDrawable,
@@ -620,6 +618,8 @@ export default class ImageFunctions {
             return URL.createObjectURL(blob)
         } else if (format === "svg") {
             const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height)
+            const {default: ImageTracer} = await import("imagetracerjs")
+            const {optimize} = await import("svgo")
             const result = ImageTracer.imagedataToSVG(pixels, {numberofcolors: 24, mincolorratio: 0})
             const optimized = optimize(result)
             const blob = new Blob([optimized.data])

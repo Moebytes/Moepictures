@@ -6,8 +6,6 @@
 
 import React, {useEffect, useState, useMemo} from "react"
 import {useThemeSelector} from "../../store"
-import {loadSnowPreset} from "@tsparticles/preset-snow"
-import {loadAll} from "@tsparticles/all"
 
 const ParticleEffect: React.FunctionComponent = (props) => {
     const {theme, siteHue, particles, particleAmount, particleSize, particleSpeed} = useThemeSelector()
@@ -20,6 +18,8 @@ const ParticleEffect: React.FunctionComponent = (props) => {
 
     const loadParticles = async () => {
         const {Particles, initParticlesEngine} = await import("@tsparticles/react")
+        const {loadAll} = await import("@tsparticles/all")
+        const {loadSnowPreset} = await import("@tsparticles/preset-snow")
         initParticlesEngine(async (engine) => {
             await loadAll(engine)
             await loadSnowPreset(engine)

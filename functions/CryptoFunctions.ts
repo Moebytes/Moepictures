@@ -38,67 +38,61 @@ export default class CryptoFunctions {
         return true
     }
 
-    public static decryptThumb = async (img: string, session: Session, cacheKey?: string, forceImage?: boolean) => {
-        if (permissions.noEncryption(session)) return img
-        let privateKey = await functions.http.updateClientKeys(session)
-        let serverPublicKey = await functions.http.updateServerPublicKey(session)
+    private static pendingThumbs = new Map<string, Promise<string>>()
 
-        if (!cacheKey) cacheKey = img
+    public static decryptThumb = async (img: string, session: Session, cacheKey = img, forceImage?: boolean) => {
+        if (permissions.noEncryption(session)) return img
         const cached = functions.cache.getThumbCache(cacheKey)
         if (cached) return cached
-        let isAnimatedWebP = false
-        let isAnimatedPNG = false
-        let arrayBuffer = null as ArrayBuffer | null
-        let decryptedImg = await decryption.decryptedLink(img, privateKey, serverPublicKey, session)
+        const pendingKey = `${cacheKey}:${Boolean(forceImage)}`
+        let pending = this.pendingThumbs.get(pendingKey)
+        if (!pending) {
+            pending = this.loadThumb(img, session, forceImage).then((url) => {
+                functions.cache.cachedThumbs.set(cacheKey, url)
+                return url
+            }).finally(() => {this.pendingThumbs.delete(pendingKey)})
+            this.pendingThumbs.set(pendingKey, pending)
+        }
+        return pending
+    }
+
+    private static loadThumb = async (img: string, session: Session, forceImage?: boolean) => {
+        const privateKey = await functions.http.updateClientKeys(session)
+        const serverPublicKey = await functions.http.updateServerPublicKey(session)
         if (forceImage && functions.file.isVideo(img)) {
             const url = await functions.video.videoThumbnail(img)
-            let cacheUrl = `${url}#${path.extname(img)}`
-            functions.cache.cachedThumbs.set(cacheKey, cacheUrl)
-            return cacheUrl
+            return `${url}#${path.extname(img)}`
         }
-        if (await functions.file.isLive2D(img)) {
-            const url = await functions.model.live2dScreenshot(decryptedImg)
-            let cacheUrl = `${url}#${path.extname(img)}`
-            functions.cache.cachedThumbs.set(cacheKey, cacheUrl)
-            return cacheUrl
-        }
-        if (await functions.file.isUgoira(img)) {
-            const url = await functions.anim.ugoiraThumbnail(decryptedImg)
-            let cacheUrl = `${url}#${path.extname(img)}`
-            functions.cache.cachedThumbs.set(cacheKey, cacheUrl)
-            return cacheUrl
+        const decryptedImg = await decryption.decryptedLink(img, privateKey, serverPublicKey, session)
+        const buffer = await functions.http.getBuffer(decryptedImg)
+        const type = functions.byte.bufferFileType(buffer)[0]
+        if (type?.mime === "application/zip") {
+            if (await functions.file.isLive2DZip(buffer)) {
+                const url = await functions.model.live2dScreenshot(decryptedImg)
+                return `${url}#${path.extname(img)}`
+            }
+            if (await functions.file.isUgoiraZip(buffer)) {
+                const url = await functions.anim.ugoiraThumbnail(decryptedImg)
+                return `${url}#${path.extname(img)}`
+            }
         }
         if (functions.file.isModel(img)) {
             const url = await functions.model.modelImage(decryptedImg, img)
-            let cacheUrl = `${url}#${path.extname(img)}`
-            functions.cache.cachedThumbs.set(cacheKey, cacheUrl)
-            return cacheUrl
+            return `${url}#${path.extname(img)}`
         }
         if (functions.file.isAudio(img)) {
             const url = await functions.audio.songCover(decryptedImg)
-            let cacheUrl = `${url}#${path.extname(img)}`
-            functions.cache.cachedThumbs.set(cacheKey, cacheUrl)
-            return cacheUrl
+            return `${url}#${path.extname(img)}`
         }
-        if (functions.file.isWebP(img)) {
-            arrayBuffer = await functions.http.getBuffer(img)
-            isAnimatedWebP = functions.file.isAnimatedWebp(arrayBuffer)
-        }
-        if (functions.file.isPNG(img)) {
-            arrayBuffer = await functions.http.getBuffer(img)
-            isAnimatedPNG = functions.file.isAnimatedPng(arrayBuffer)
-        }
-        if (functions.file.isImage(img) && !isAnimatedWebP && !isAnimatedPNG) {
-            const base64 = await functions.link.linkToBase64(decryptedImg)
-            functions.cache.cachedImages.set(cacheKey, base64)
+        const animated = (functions.file.isWebP(img) && functions.file.isAnimatedWebp(buffer)) ||
+            (functions.file.isPNG(img) && functions.file.isAnimatedPng(buffer))
+        if (functions.file.isImage(img) && !animated) {
+            const mime = type?.mime || "image/jpeg"
+            const base64 = `data:${mime};base64,${Buffer.from(buffer).toString("base64")}`
+            if (decryptedImg !== img && decryptedImg.startsWith("blob:")) URL.revokeObjectURL(decryptedImg)
             return base64
-        } else {
-            if (!arrayBuffer) arrayBuffer = await functions.http.getBuffer(decryptedImg)
-            const url = URL.createObjectURL(new Blob([arrayBuffer]))
-            let cacheUrl = `${url}#${path.extname(img)}`
-            functions.cache.cachedImages.set(cacheKey, cacheUrl)
-            return cacheUrl
         }
+        return `${decryptedImg}#${path.extname(img)}`
     }
 
     public static decryptItem = async (img: string, session: Session, cacheKey?: string) => {

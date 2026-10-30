@@ -290,6 +290,15 @@ export default class SQLTag {
         return result as Promise<Tag[]>
     }
 
+    public static existingTags = async (tags: string[]) => {
+        if (!tags.length) return [] as string[]
+        const rows = await SQLQuery.run({
+            text: `SELECT tag FROM tags WHERE tag = ANY($1::text[])`,
+            values: [tags]
+        })
+        return rows.map((row: {tag: string}) => row.tag) as string[]
+    }
+
     /** Get tag. */
     public static tag = async (tag?: string) => {
         if (!tag) return undefined

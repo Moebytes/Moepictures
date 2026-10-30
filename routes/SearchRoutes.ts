@@ -46,9 +46,10 @@ const SearchRoutes = (app: Express) => {
             const tags = query?.trim().split(/ +/g).filter(Boolean)
             const qualities = functions.tag.mapSpecialQualities(query)
             const cleanTags = functions.tag.trimSpecialCharacters(query)?.split(/ +/g)
+            const existingTags = new Set(await sql.tag.existingTags(cleanTags.filter(Boolean)))
             for (let i = 0; i < cleanTags?.length; i++) {
-                const tag = await sql.tag.tag(cleanTags[i])
-                if (!tag) {
+                if (!cleanTags[i]) continue
+                if (!existingTags.has(cleanTags[i])) {
                     const alias = await sql.tag.alias(cleanTags[i])
                     if (alias) tags[i] = qualities[i] + alias.tag
                     if (!alias && functions.util.isJapaneseText(cleanTags[i])) {

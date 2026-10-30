@@ -886,3 +886,10 @@ CREATE INDEX IF NOT EXISTS "idx_posts_uploaddate_desc" ON posts ("uploadDate" DE
 CREATE INDEX IF NOT EXISTS "idx_posts_uploaddate_asc" ON posts ("uploadDate" ASC);
 CREATE INDEX IF NOT EXISTS "idx_category_tags_prefix" ON "tags" ("type", lower("tag") text_pattern_ops);
 CREATE INDEX IF NOT EXISTS "idx_tag_map_tagid_postid" ON "tag map" ("tagID", "postID" DESC);
+CREATE INDEX IF NOT EXISTS "idx_posts_search_date" ON posts ("uploadDate" DESC, "postID" DESC);
+CREATE INDEX IF NOT EXISTS "idx_favorites_search_date" ON favorites (username, "favoriteDate" DESC, "postID" DESC);
+CREATE INDEX IF NOT EXISTS "idx_group_map_postid" ON "group map" ("postID");
+
+CREATE INDEX IF NOT EXISTS "idx_posts_search_guest_date" ON posts ("uploadDate" DESC, "postID" DESC)
+    WHERE "parentID" IS NULL AND rating = 'cute' AND (type = 'image' OR type = 'comic') 
+    AND NOT (style = 'promo' OR style = 'sketch' OR style = 'lineart');

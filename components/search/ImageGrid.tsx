@@ -40,7 +40,6 @@ interface Props {
 let interval = null as any
 let reloadTimer = null as any
 let reloadedPost = false
-let skipRender = false
 let limit = 100
 
 let initialResultLoad = typeof window !== "undefined" &&
@@ -500,25 +499,9 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         }
     }, [reupdateFlag, session])
 
-    useEffect(() => {
-        const populateCache = () => {
-            for (const post of items) {
-                const image = post.images?.[0]
-                if (!image) continue
-                const thumbnail = functions.link.getThumbnailLink(image, sizeType, session, mobile)
-                functions.crypto.decryptThumb(thumbnail, session, `${thumbnail}-${sizeType}`)
-            }
-        }
-        populateCache()
-    }, [items, sizeType, session, mobile])
-
     useLayoutEffect(() => {
         if (scroll) return props.setImagesLoaded(true)
         if (!visiblePromisesRef.current.length) return
-        if (skipRender) {
-            skipRender = false
-            return
-        }
         props.setImagesLoaded(false)
         let active = true
         const promises = [...visiblePromisesRef.current]
