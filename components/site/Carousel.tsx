@@ -18,7 +18,7 @@ interface Props {
     images: string[]
     height?: number
     index?: number
-    update?: () => void
+    update?: () => void | Promise<void>
     appendImages?: string[]
     marginLeft?: number
     marginTop?: number
@@ -29,7 +29,6 @@ interface Props {
 let startX = 0
 let deltaCounter = 0
 let lastDeltaY = 0
-let id = 0
 
 const loadAmount = 25
 
@@ -52,7 +51,6 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const [effectRefs, setEffectRefs] = useState([] as React.RefObject<HTMLCanvasElement | null>[])
     const [sharpenRefs, setSharpenRefs] = useState([] as React.RefObject<HTMLImageElement | null>[])
     const [lightnessRefs, setLightnessRefs] = useState([] as React.RefObject<HTMLImageElement | null>[])
-    const [lastActive, setLastActive] = useState(null as React.RefObject<HTMLDivElement | null> | null)
     const [active, setActive] = useState(null as React.RefObject<HTMLDivElement | null> | null)
     const [showLeftArrow, setShowLeftArrow] = useState(false)
     const [showRightArrow, setShowRightArrow] = useState(false)
@@ -69,99 +67,107 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const smoothMarginRef = useRef<number>(0)
     const targetMarginRef = useRef<number>(0)
     const savedMarginRef = useRef<number>(0)
-    const arrowJump = useRef<boolean>(false)
+    const animationFrame = useRef(0)
+    const sourceImages = useRef<string[] | null>(null)
+    const appendSource = useRef<string[] | undefined>(undefined)
+    const appendedImages = useRef<string[]>([])
+    const requestedLength = useRef(-1)
+    const updating = useRef(false)
 
     useEffect(() => {
-        const smoothingFactor = 0.5
-
-        const smoothStep = () => {
-            if (!sliderRef.current) return
-            smoothMarginRef.current += (targetMarginRef.current - smoothMarginRef.current) * smoothingFactor
-            if (arrowJump) {
+        const updatePosition = () => {
+            if (sliderRef.current && smoothMarginRef.current !== targetMarginRef.current) {
                 smoothMarginRef.current = targetMarginRef.current
-                arrowJump.current = false
+                sliderRef.current.style.marginLeft = `${smoothMarginRef.current}px`
             }
-            sliderRef.current.style.marginLeft = `${smoothMarginRef.current}px`
-            id = window.requestAnimationFrame(smoothStep)
+            animationFrame.current = window.requestAnimationFrame(updatePosition)
         }
 
-        id = window.requestAnimationFrame(smoothStep)
-        return () => window.cancelAnimationFrame(id)
+        animationFrame.current = window.requestAnimationFrame(updatePosition)
+        return () => window.cancelAnimationFrame(animationFrame.current)
     }, [])
 
     const updateRefs = (amount: number) => {
-        const newImageRefs = Array.from({length: amount}, () => React.createRef<HTMLImageElement | HTMLVideoElement>())
+        const newImageRefs = Array.from({length: amount}, (_, i) => imageRefs[i] ?? React.createRef<HTMLImageElement | HTMLVideoElement>())
         setImageRefs(newImageRefs)
-        const newImageFilterRefs = Array.from({length: amount}, () => React.createRef<HTMLDivElement>())
+        const newImageFilterRefs = Array.from({length: amount}, (_, i) => imageFilterRefs[i] ?? React.createRef<HTMLDivElement>())
         setImageFilterRefs(newImageFilterRefs)
-        const newPixelateRefs = Array.from({length: amount}, () => React.createRef<HTMLCanvasElement>())
+        const newPixelateRefs = Array.from({length: amount}, (_, i) => pixelateRefs[i] ?? React.createRef<HTMLCanvasElement>())
         setPixelateRefs(newPixelateRefs)
-        const newEffectRefs = Array.from({length: amount}, () => React.createRef<HTMLCanvasElement>())
+        const newEffectRefs = Array.from({length: amount}, (_, i) => effectRefs[i] ?? React.createRef<HTMLCanvasElement>())
         setEffectRefs(newEffectRefs)
-        const newSharpenRefs = Array.from({length: amount}, () => React.createRef<HTMLImageElement>())
+        const newSharpenRefs = Array.from({length: amount}, (_, i) => sharpenRefs[i] ?? React.createRef<HTMLImageElement>())
         setSharpenRefs(newSharpenRefs)
-        const newLightnessRefs = Array.from({length: amount}, () => React.createRef<HTMLImageElement>())
+        const newLightnessRefs = Array.from({length: amount}, (_, i) => lightnessRefs[i] ?? React.createRef<HTMLImageElement>())
         setLightnessRefs(newLightnessRefs)
         return newImageFilterRefs
     }
 
     const getCombinedImages = () => {
-        const images = functions.util.removeDuplicates([...props.images, ...(props.appendImages || [])])
+        const images = functions.util.removeDuplicates([...props.images, ...appendedImages.current])
         if (props.unverified) return images
         return images.map((img) => functions.util.appendURLParams(img, {upscaled: session.upscaledImages}))
     }
 
     useEffect(() => {
-        const initialAmount = props.unlimited ? props.images.length : loadAmount
-        const newRefs = updateRefs(initialAmount)
-        setActive(newRefs[props.index ? props.index : 0])
-        setLastActive(newRefs[props.index ? props.index : 0])
-        setShowLeftArrow(false)
-        setShowRightArrow(false)
-        setLastPos(null)
-        setMouseDown(false)
-        setVisibleImages([])
-        setVisibleIndex(0)
-        setEnded(false)
-        if (sliderRef?.current) {
-            targetMarginRef.current = savedMarginRef.current
-            smoothMarginRef.current = savedMarginRef.current
-            sliderRef.current.style.marginLeft = `${savedMarginRef.current}px`
+        const previousImages = sourceImages.current ?
+            functions.util.removeDuplicates([...sourceImages.current, ...appendedImages.current]) : []
+        const previousSource = sourceImages.current
+
+        const firstLoad = previousSource === null
+        const reset = !previousSource || previousSource.some((image, i) => props.images[i] !== image)
+        const incoming = firstLoad || appendSource.current !== props.appendImages ? props.appendImages ?? [] : []
+
+        sourceImages.current = props.images
+        appendSource.current = props.appendImages
+        if (reset) {
+            appendedImages.current = []
+            requestedLength.current = -1
         }
-    }, [props.images])
+        appendedImages.current = functions.util.removeDuplicates([...appendedImages.current, ...incoming])
+        let combined = functions.util.removeDuplicates([...props.images, ...appendedImages.current])
+        if (!props.unverified) {
+            combined = combined.map((image) => functions.util.appendURLParams(image, {upscaled: session.upscaledImages}))
+        }
+
+        const addedImages = combined.length > previousImages.length
+        const amount = props.unlimited ? combined.length : reset ? loadAmount :
+            visibleImages.length + (addedImages ? loadAmount : 0)
+        const nextImages = combined.slice(0, amount)
+
+        updateRefs(nextImages.length)
+        setVisibleImages(nextImages)
+        setVisibleIndex(nextImages.length)
+        setLastPos(null)
+        setEnded(false)
+
+        if (reset) {
+            setImages([])
+            setActive(null)
+            setShowLeftArrow(false)
+            setShowRightArrow(false)
+            setMouseDown(false)
+            setScrollTimeout(false)
+            targetMarginRef.current = 0
+            smoothMarginRef.current = 0
+            savedMarginRef.current = 0
+            if (sliderRef.current) sliderRef.current.style.marginLeft = "0px"
+        }
+    }, [props.images, props.appendImages, props.unlimited, session.upscaledImages])
 
     useEffect(() => {
+        let active = true
         const decryptImages = async () => {
-            let startIndex = visibleIndex - loadAmount  > 0 ? visibleIndex - loadAmount : 0
-            if (props.unlimited) startIndex = 0
-            const newImages = visibleImages.slice(startIndex)
-            let decrypted = await Promise.all(newImages.map((image) => functions.crypto.decryptThumb(image, session, `carousel-${image}`)))
-            if (startIndex === 0) {
-                setImages(decrypted)
-            } else {
-                setImages((prev) => [...prev, ...decrypted])
-            }
+            const decrypted = await Promise.all(visibleImages.map((image) =>
+                functions.crypto.decryptThumb(image, session, `carousel-${image}`)))
+            if (active) setImages(decrypted)
         }
         decryptImages()
-    }, [visibleImages, visibleIndex, session])
-    
-    useEffect(() => {
-        const images = getCombinedImages()
-        let newVisibleImages = [] as string[]
-        let currentIndex = 0
-        const limit = props.unlimited ? images.length : loadAmount
-        for (let i = 0; i < limit; i++) {
-            if (!images[currentIndex]) break
-            newVisibleImages.push(images[currentIndex])
-            currentIndex++
-        }
-        setVisibleImages(functions.util.removeDuplicates(newVisibleImages))
-        setVisibleIndex(currentIndex)
-        updateRefs(newVisibleImages.length)
-    }, [props.images, props.appendImages])
+        return () => {active = false}
+    }, [visibleImages, session])
 
     useEffect(() => {
-        if (props.index !== undefined) {
+        if (props.index !== undefined && imageFilterRefs[props.index]) {
             setActive(imageFilterRefs[props.index])
         }
     }, [props.index])
@@ -175,6 +181,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             setTimeout(() => {
                 setScrollTimeout(false)
             }, 1000)
+            
             if (visibleImages.length < images.length) {
                 let newVisibleImages = [...visibleImages]
                 let currentIndex = visibleIndex
@@ -191,7 +198,15 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
                 }, 700)
             } else {
                 setEnded(true)
-                props.update?.()
+                if (props.update && !updating.current && requestedLength.current !== images.length) {
+                    requestedLength.current = images.length
+                    updating.current = true
+                    Promise.resolve().then(() => props.update?.()).catch(() => {
+                        requestedLength.current = -1
+                    }).finally(() => {
+                        updating.current = false
+                    })
+                }
             }
             setUpdateImagesFlag(false)
         }
@@ -229,7 +244,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         if ((event.target instanceof HTMLTextAreaElement) || (event.target instanceof HTMLInputElement) 
         || (event.target instanceof HTMLElement && event.target.classList.contains("dialog-textarea"))) return
         if (noteDrawingEnabled) return
-        let marginLeft = parseInt(sliderRef.current.style.marginLeft)
+        let marginLeft = targetMarginRef.current
         if (Number.isNaN(marginLeft)) marginLeft = 0
         const width = document.querySelector(".carousel-img")?.clientWidth || 0
         let index = imageFilterRefs.indexOf(active!)
@@ -242,10 +257,10 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         } 
         if (index < 0) index = 0
         if (index > imageFilterRefs.length - 1) index = imageFilterRefs.length - 1
-        setFunc(props.images[index], index, false, imageFilterRefs[index])
+        setFunc(getCombinedImages()[index], index, false, imageFilterRefs[index])
 
         if (marginLeft > 0) marginLeft = 0
-        if (lastPos) if (marginLeft < lastPos) marginLeft = lastPos
+        marginLeft = Math.max(getMinimumMargin(), marginLeft)
         if (index < 5 || index > imageFilterRefs.length - 6) return
         sliderRef.current.style.transition = "margin-left 0.75s"
         targetMarginRef.current = marginLeft
@@ -281,14 +296,18 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         }
         if (!active) return
         if (active.current) active.current.style.border = "3px solid var(--text-alt)"
-        setLastActive(active)
     }, [active, imageFilterRefs])
+
+    const getMinimumMargin = () => {
+        if (!carouselRef.current || !sliderRef.current) return 0
+        return Math.min(0, carouselRef.current.clientWidth - sliderRef.current.scrollWidth)
+    }
 
     const handleWheel = (event: WheelEvent) => {
         if (!sliderRef.current) return
-        if (props.images.length <= 3) return
+        if (images.length <= 3) return
         if (!trackPad) event.preventDefault()
-        let marginLeft = parseInt(sliderRef.current.style.marginLeft)
+        let marginLeft = targetMarginRef.current
         if (Number.isNaN(marginLeft)) marginLeft = 0
         let trackPadScroll = false
         if (deltaCounter < 15) trackPadScroll = true
@@ -318,7 +337,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             }
         }
         if (marginLeft > 0) marginLeft = 0
-        if (lastPos) if (marginLeft < lastPos) marginLeft = lastPos
+        marginLeft = Math.max(getMinimumMargin(), marginLeft)
         targetMarginRef.current = marginLeft
         savedMarginRef.current = marginLeft
     }
@@ -339,9 +358,9 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
 
     const handleMouseMove = (event: React.MouseEvent) => {
         if (!sliderRef.current) return
-        if (props.images.length <= 3) return
+        if (images.length <= 3) return
         if (!mouseDown) return
-        let marginLeft = parseInt(sliderRef.current.style.marginLeft)
+        let marginLeft = targetMarginRef.current
         if (Number.isNaN(marginLeft)) marginLeft = 0
         if (event.pageX < startX) {
             marginLeft -= 20
@@ -349,7 +368,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             marginLeft += 20
         }
         if (marginLeft > 0) marginLeft = 0
-        if (lastPos) if (marginLeft < lastPos) marginLeft = lastPos
+        marginLeft = Math.max(getMinimumMargin(), marginLeft)
         targetMarginRef.current = marginLeft
         savedMarginRef.current = marginLeft
         startX = event.pageX
@@ -373,10 +392,10 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
 
     const handleTouchMove = (event: React.TouchEvent) => {
         if (!sliderRef.current) return
-        if (props.images.length <= 3) return
+        if (images.length <= 3) return
         if (!event.touches.length) return
         if (!mouseDown) return
-        let marginLeft = parseInt(sliderRef.current.style.marginLeft)
+        let marginLeft = targetMarginRef.current
         if (Number.isNaN(marginLeft)) marginLeft = 0
         if (event.touches[0].pageX < startX) {
             marginLeft -= 10
@@ -384,7 +403,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             marginLeft += 10
         }
         if (marginLeft > 0) marginLeft = 0
-        if (lastPos) if (marginLeft < lastPos) marginLeft = lastPos
+        marginLeft = Math.max(getMinimumMargin(), marginLeft)
         targetMarginRef.current = marginLeft
         savedMarginRef.current = marginLeft
         startX = event.touches[0].pageX
@@ -396,7 +415,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
 
     const arrowLeftEnter = () => {
         if (!sliderRef.current) return
-        let marginLeft = parseInt(sliderRef.current.style.marginLeft)
+        let marginLeft = targetMarginRef.current
         if (Number.isNaN(marginLeft)) marginLeft = 0
         if (marginLeft < 0) setShowLeftArrow(true)
     }
@@ -404,7 +423,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const arrowRightEnter = () => {
         if (!lastPos) setShowRightArrow(true)
         if (!sliderRef.current) return
-        let marginLeft = parseInt(sliderRef.current.style.marginLeft)
+        let marginLeft = targetMarginRef.current
         if (Number.isNaN(marginLeft)) marginLeft = 0
         if (lastPos && marginLeft > lastPos) setShowRightArrow(true)
     }
@@ -412,13 +431,12 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const arrowLeftClick = () => {
         if (!showLeftArrow) return
         if (!sliderRef.current) return
-        let marginLeft = parseInt(sliderRef.current.style.marginLeft)
+        let marginLeft = targetMarginRef.current
         if (Number.isNaN(marginLeft)) marginLeft = 0
         const sidebarWidth = document.querySelector(".sidebar")?.clientWidth || 0
         let newMargin = marginLeft + ((window.innerWidth - sidebarWidth - 120) / 2)
         if (newMargin > 0) newMargin = 0
         sliderRef.current.style.transition = "margin-left 0.75s"
-        arrowJump.current = true
         targetMarginRef.current = newMargin
         savedMarginRef.current = newMargin
         setTimeout(() => {
@@ -430,13 +448,12 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const arrowRightClick = () => {
         if (!showRightArrow) return
         if (!sliderRef.current) return
-        let marginLeft = parseInt(sliderRef.current.style.marginLeft)
+        let marginLeft = targetMarginRef.current
         if (Number.isNaN(marginLeft)) marginLeft = 0
         const sidebarWidth = document.querySelector(".sidebar")?.clientWidth || 0
         let newMargin = marginLeft - ((window.innerWidth - sidebarWidth - 120) / 2)
-        if (lastPos) if (newMargin < lastPos) newMargin = lastPos
+        newMargin = Math.max(getMinimumMargin(), newMargin)
         sliderRef.current.style.transition = "margin-left 0.75s"
-        arrowJump.current = true
         targetMarginRef.current = newMargin
         savedMarginRef.current = newMargin
         setTimeout(() => {
@@ -508,7 +525,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
                 if (!drag) setFunc(img, i, event.ctrlKey || event.metaKey || event.button === 1, imageFilterRefs[i])
             }
             jsx.push(
-                <div key={i} className="carousel-img-filters" ref={imageFilterRefs[i]} onMouseDown={() => setDrag(false)} onMouseMove={() => setDrag(true)} onMouseUp={set} onAuxClick={set}>
+                <div key={visibleImages[i]} className="carousel-img-filters" ref={imageFilterRefs[i]} onMouseDown={() => setDrag(false)} onMouseMove={() => setDrag(true)} onMouseUp={set} onAuxClick={set}>
                     <img draggable={false} ref={lightnessRefs[i]} className="carousel-lightness-overlay" src={img}/>
                     <img draggable={false} ref={sharpenRefs[i]} className="carousel-sharpen-overlay" src={img}/>
                     <canvas draggable={false} ref={effectRefs[i]} className="carousel-effect-canvas"></canvas>
