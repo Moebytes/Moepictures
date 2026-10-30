@@ -98,7 +98,7 @@ const PageControls: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div key="page-numbers" className="page-container">
-            {page <= 1 ? null : <button key="first" className="page-button" onClick={firstPage}>{"<<"}</button>}
+            {mobile || page <= 1 ? null : <button key="first" className="page-button" onClick={firstPage}>{"<<"}</button>}
             {page <= 1 ? null : <button key="prev" className="page-button" onClick={previousPage}>{"<"}</button>}
             {generatePageButtonsJSX()}
             {page >= maxPage ? null : <button key="next" className="page-button" onClick={nextPage}>{">"}</button>}

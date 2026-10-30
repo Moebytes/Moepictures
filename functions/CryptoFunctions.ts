@@ -11,6 +11,8 @@ import decryption from "../structures/Decryption"
 import {Session} from "../types/Types"
 
 export default class CryptoFunctions {
+    private static pendingImages = new Map<string, Promise<string>>()
+    
     public static bufferToPem = (buffer: ArrayBuffer, label: string) => {
         const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)))
         return `-----BEGIN ${label}-----\n${base64.match(/.{1,64}/g)?.join('\n')}\n-----END ${label}-----`
@@ -95,17 +97,24 @@ export default class CryptoFunctions {
         return `${decryptedImg}#${path.extname(img)}`
     }
 
-    public static decryptItem = async (img: string, session: Session, cacheKey?: string) => {
+    public static decryptItem = async (img: string, session: Session, cacheKey = img) => {
         if (permissions.noEncryption(session)) return img
-        let privateKey = await functions.http.updateClientKeys(session)
-        let serverPublicKey = await functions.http.updateServerPublicKey(session)
-
-        if (!cacheKey) cacheKey = img
         const cached = functions.cache.getImageCache(cacheKey)
         if (cached) return cached
-        if (functions.file.isVideo(img)) {
-            return img
+        if (functions.file.isVideo(img)) return img
+        let pending = this.pendingImages.get(cacheKey)
+        if (!pending) {
+            pending = this.loadItem(img, session, cacheKey).finally(() => {
+                this.pendingImages.delete(cacheKey)
+            })
+            this.pendingImages.set(cacheKey, pending)
         }
+        return pending
+    }
+
+    private static loadItem = async (img: string, session: Session, cacheKey: string) => {
+        const privateKey = await functions.http.updateClientKeys(session)
+        const serverPublicKey = await functions.http.updateServerPublicKey(session)
         let isAnimatedWebP = false
         let isAnimatedPNG = false
         let arrayBuffer = null as ArrayBuffer | null

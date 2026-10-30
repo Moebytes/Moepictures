@@ -309,7 +309,7 @@ const PostPage: React.FunctionComponent = () => {
             }
         }
         updatePost()
-    }, [postID, posts, order])
+    }, [postID, posts])
 
     useEffect(() => {
         const updateImage = async () => {
