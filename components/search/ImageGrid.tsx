@@ -4,7 +4,7 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useRef, useState, useEffectEvent, useMemo} from "react"
+import React, {useEffect, useLayoutEffect, useRef, useState, useEffectEvent, useMemo} from "react"
 import {getPageNumber} from "../../components/site/usePageURL"
 import {useSearchActions, useThemeSelector, useLayoutSelector, useSearchSelector, useActiveSelector, useFlagActions,
 useInteractionActions, useCacheActions, useFlagSelector, useActiveActions,
@@ -512,7 +512,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         populateCache()
     }, [items, sizeType, session, mobile])
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (scroll) return props.setImagesLoaded(true)
         if (!visiblePromisesRef.current.length) return
         if (skipRender) {
