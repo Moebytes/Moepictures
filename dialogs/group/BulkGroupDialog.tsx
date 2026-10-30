@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useInteractionActions, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions,
 useSearchSelector, useSearchActions} from "../../store"
+import {useInvalidateGroup} from "../../api"
 import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
@@ -26,6 +27,7 @@ const BulkGroupDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidateGroup = useInvalidateGroup()
     
     useEffect(() => {
         const savedGroupName = localStorage.getItem("groupName")
@@ -51,6 +53,7 @@ const BulkGroupDialog: React.FunctionComponent = (props) => {
         if (!permissions.isContributor(session)) return setBulkGroupDialog(false)
         if (!selectionMode) return setBulkGroupDialog(false)
         await functions.http.post("/api/group", {postIDs: Array.from(selectionItems.values()), name}, session, setSessionFlag)
+        invalidateGroup(name)
         setBulkGroupDialog(false)
         setSelectionMode(false)
         selectionItems.clear()

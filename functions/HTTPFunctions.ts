@@ -103,11 +103,15 @@ export default class HTTPFunctions {
             if (noLock) {
                 response = await fetch(parsedURL, {headers, credentials: "include"})
             } else {
-                if (!this.lockManager[endpoint]) {
-                    this.lockManager[endpoint] = fetch(parsedURL, {headers, credentials: "include"})
+                if (!this.lockManager[parsedURL]) {
+                    this.lockManager[parsedURL] = fetch(parsedURL, {headers, credentials: "include"})
                 }
-                response = await this.lockManager[endpoint]
-                this.lockManager[endpoint] = null
+                const request = this.lockManager[parsedURL]!
+                try {
+                    response = await request
+                } finally {
+                    if (this.lockManager[parsedURL] === request) this.lockManager[parsedURL] = null
+                }
             }
             if (response.status === 404) throw new Error("404")
             if (response.status === 403) throw new Error("403")

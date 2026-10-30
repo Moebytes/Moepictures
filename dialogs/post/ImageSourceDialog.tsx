@@ -7,6 +7,7 @@
 import React, {useEffect, useState} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 usePostDialogSelector, usePostDialogActions, useActiveActions, useFlagActions} from "../../store"
+import {useInvalidatePost} from "../../api"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {motion, useDragControls} from "framer-motion"
@@ -26,6 +27,7 @@ const ImageSourceDialog: React.FunctionComponent = () => {
     const [altSource, setAltSource] = useState("")
     const [reason, setReason] = useState("")
     const controls = useDragControls()
+    const invalidatePost = useInvalidatePost()
 
     useEffect(() => {
         if (imgSourceID) {
@@ -58,6 +60,7 @@ const ImageSourceDialog: React.FunctionComponent = () => {
             if (permissions.isContributor(session)) {
                 await functions.http.put("/api/image/source", {imageID: imgSourceID.image.imageID, 
                 unverified: imgSourceID.unverified, altSource, directLink, reason}, session, setSessionFlag)
+                invalidatePost(imgSourceID.image.postID)
                 setPostFlag(imgSourceID.image.postID)
                 setActionBanner("image-source")
                 setImgSourceID(null)
@@ -76,6 +79,7 @@ const ImageSourceDialog: React.FunctionComponent = () => {
                     reason
                 }
                 await functions.http.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
+                invalidatePost(imgSourceID.post.postID)
                 setSubmitted(true)
             }
         }

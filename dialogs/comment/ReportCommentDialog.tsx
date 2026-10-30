@@ -6,6 +6,7 @@
 
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useCommentDialogSelector, useCommentDialogActions, useSessionSelector, useSessionActions} from "../../store"
+import {useInvalidateComments} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
@@ -22,6 +23,7 @@ const ReportCommentDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidateComments = useInvalidateComments()
 
     useEffect(() => {
         if (reportCommentID) {
@@ -33,7 +35,6 @@ const ReportCommentDialog: React.FunctionComponent = (props) => {
             setEnableDrag(true)
         }
     }, [reportCommentID])
-
 
     const reportComment = async () => {
         if (!reportCommentID) return
@@ -47,6 +48,7 @@ const ReportCommentDialog: React.FunctionComponent = (props) => {
             return
         }
         await functions.http.post("/api/comment/report", {commentID: reportCommentID, reason}, session, setSessionFlag)
+        invalidateComments()
         setSubmitted(true)
     }
 

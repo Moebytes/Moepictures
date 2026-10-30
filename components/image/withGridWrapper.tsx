@@ -412,7 +412,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         }
     
         const mouseUp = async (event: React.MouseEvent<HTMLElement>) => {
-            setScrollY(window.scrollY)
+            if (location.pathname === "/" || location.pathname === "/posts") setScrollY(window.scrollY)
             if (event.metaKey || event.ctrlKey || event.button == 1 || event.button == 2) return
             if (selectionMode) {
                 const isSelected = !selected

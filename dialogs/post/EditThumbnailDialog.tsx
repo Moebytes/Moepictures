@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useReducer} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 usePostDialogSelector, usePostDialogActions, useActiveActions} from "../../store"
+import {useInvalidatePost} from "../../api"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import HistoryIcon from "../../assets/svg/history-thin.svg"
@@ -29,6 +30,7 @@ const EditThumbnailDialog: React.FunctionComponent = (props) => {
     const [thumbnail, setThumbnail] = useState("")
     const [order, setOrder] = useState(1)
     const controls = useDragControls()
+    const invalidatePost = useInvalidatePost()
 
     const loadImages = async () => {
         if (!editThumbnailID) return
@@ -72,6 +74,7 @@ const EditThumbnailDialog: React.FunctionComponent = (props) => {
             }
             await functions.http.put("/api/post/thumbnail", {postID: editThumbnailID.post.postID, 
             unverified: editThumbnailID.unverified, thumbnails}, session, setSessionFlag)
+            invalidatePost(editThumbnailID.post.postID)
             setActionBanner("edit-thumbnail")
         }
     }

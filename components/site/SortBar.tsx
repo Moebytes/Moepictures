@@ -12,6 +12,7 @@ useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, useFl
 useInteractionSelector, useSessionActions, usePostDialogActions, useGroupDialogActions, useActiveSelector,
 usePageSelector, useCacheSelector, useActiveActions, useLayoutActions, useMiscDialogSelector, usePostDialogSelector, 
 useGroupDialogSelector, useCacheActions} from "../../store"
+import {useInvalidateFavorites} from "../../api"
 
 import LeftArrowIcon from "../../assets/svg/left-arrow.svg"
 import RightArrowIcon from "../../assets/svg/right-arrow.svg"
@@ -113,6 +114,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const speedRef = useRef<HTMLDivElement>(null)
     const pageMultiplierRef = useRef<HTMLDivElement>(null)
     const navigate = useNavigate()
+    const invalidateFavorites = useInvalidateFavorites()
 
     useEffect(() => {
         const clickHandler = () => {
@@ -731,6 +733,7 @@ const SortBar: React.FunctionComponent = (props) => {
         if (!selectionItems.size) return
         for (const postID of selectionItems.values()) {
             await functions.http.post("/api/favorite/toggle", {postID}, session, setSessionFlag)
+            invalidateFavorites()
             functions.http.get("/api/favorite", {postID}, session, setSessionFlag).then((favorite) => {
                 functions.post.updateLocalFavorite(postID, favorite ? true : false, posts, setPosts)
             })

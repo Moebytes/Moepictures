@@ -8,6 +8,7 @@ import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions, useLayoutSelector,
 useFilterSelector, useInteractionActions} from "../../store"
+import {useInvalidatePost, useInvalidateHistory} from "../../api"
 import functions from "../../functions/Functions"
 import RevertIcon from "../../assets/svg/revert.svg"
 import DeleteIcon from "../../assets/svg/delete.svg"
@@ -41,6 +42,8 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const imageFiltersRef = useRef<HTMLDivElement>(null)
     const postID = props.postHistory.postID
     let hasChanges = functions.compare.hasHistoryChanges(props.postHistory)
+    const invalidatePost = useInvalidatePost()
+    const invalidateHistory = useInvalidateHistory()
 
     const updateTagCategories = async () => {
         if (!props.postHistory.addedTags || !props.postHistory.removedTags) return
@@ -93,12 +96,14 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             preserveChildren: Boolean(props.postHistory.parentID), series: functions.tag.tagObject(props.postHistory.series), 
             parentID: props.postHistory.parentID, noImageUpdate: true, tags: props.postHistory.tags, tagGroups: props.postHistory.tagGroups, 
             imageSources, imageLinks, newTags, reason: props.postHistory.reason}, session, setSessionFlag)
+            invalidatePost(props.postHistory.postID)
         } else {
             await functions.http.put("/api/post/quickedit", {postID: props.postHistory.postID, type: props.postHistory.type, 
             rating: props.postHistory.rating, source: source!, style: props.postHistory.style, artists: props.postHistory.artists, 
             characters: props.postHistory.characters, series: props.postHistory.series, tags: props.postHistory.tags, imageSources,
             imageLinks, tagGroups: props.postHistory.tagGroups, parentID: props.postHistory.parentID, reason: props.postHistory.reason}, 
             session, setSessionFlag)
+            invalidatePost(props.postHistory.postID)
         }
         props.onEdit?.()
     }
@@ -118,6 +123,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const deletePostHistory = async () => {
         if (props.current) return Promise.reject()
         await functions.http.delete("/api/post/history/delete", {postID, historyID: props.postHistory.historyID}, session, setSessionFlag)
+        invalidateHistory()
         props.onDelete?.()
     }
 

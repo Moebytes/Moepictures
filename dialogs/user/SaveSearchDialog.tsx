@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSearchDialogSelector, useSearchDialogActions, useSessionSelector, 
 useSessionActions, useSearchSelector} from "../../store"
+import {useInvalidateSession} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
@@ -32,6 +33,7 @@ const SaveSearchDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null!)
     const tagRef = useRef<HTMLDivElement>(null!)
     const controls = useDragControls()
+    const invalidateSession = useInvalidateSession()
 
     useEffect(() => {
         const logPosition = (event: MouseEvent) => {
@@ -87,6 +89,7 @@ const SaveSearchDialog: React.FunctionComponent = (props) => {
         }
         let parsedTags = await functions.native.parseSpaceEnabledSearch(tags, session, setSessionFlag)
         await functions.http.post("/api/user/savesearch", {name, tags: parsedTags}, session, setSessionFlag)
+        invalidateSession()
         setSessionFlag(true)
     }
 

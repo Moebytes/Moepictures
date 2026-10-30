@@ -7,6 +7,7 @@
 import React, {useEffect, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useMessageDialogActions} from "../../store"
+import {useInvalidateMessages} from "../../api"
 import functions from "../../functions/Functions"
 import favicon from "../../assets/icons/favicon.png"
 import SoftDeleteIcon from "../../assets/svg/soft-delete.svg"
@@ -33,6 +34,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
     const [creatorDefaultIcon, setCreatorDefaultIcon] = useState(false)
     const [recipientDefaultIcon, setRecipientDefaultIcon] = useState(false)
     const navigate = useNavigate()
+    const invalidateMessages = useInvalidateMessages()
 
     const updateRecipient = async () => {
         if (!props.message?.recipients[0]) return
@@ -127,6 +129,7 @@ const MessageRow: React.FunctionComponent<Props> = (props) => {
         if (!props.message) return
         functions.cache.clearResponseCacheKey("/api/search/messages")
         await functions.http.post("/api/message/read", {messageID: props.message.messageID}, session, setSessionFlag)
+        invalidateMessages()
         props.onEdit?.()
         checkMail()
     }

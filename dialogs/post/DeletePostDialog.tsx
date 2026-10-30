@@ -6,13 +6,14 @@
 
 import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
-import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
+usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
+import {useInvalidatePost} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
 import {PostSearch, PostHistory, UnverifiedPost} from "../../types/Types"
 import "../dialog.less"
-
 
 const DeletePostDialog: React.FunctionComponent = (props) => {
     const {i18n} = useThemeSelector()
@@ -28,6 +29,7 @@ const DeletePostDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
     const controls = useDragControls()
+    const invalidatePost = useInvalidatePost()
 
     useEffect(() => {
         if (deletePostID) {
@@ -44,10 +46,12 @@ const DeletePostDialog: React.FunctionComponent = (props) => {
         if (!deletePostID) return
         if (deletePostID.unverified) {
             await functions.http.delete("/api/post/delete/unverified", {postID: deletePostID.post.postID}, session, setSessionFlag)
+            invalidatePost(deletePostID.post.postID)
             return deletePostID.post.deleted ? navigate("/posts") : setPostFlag(deletePostID.post.postID)
         }
         if (permissions.isAdmin(session)) {
             await functions.http.delete("/api/post/delete", {postID: deletePostID.post.postID}, session, setSessionFlag)
+            invalidatePost(deletePostID.post.postID)
             return deletePostID.post.deleted ? navigate("/posts") : setPostFlag(deletePostID.post.postID)
         } else {
             const badReason = functions.validation.validateReason(reason, i18n)
@@ -60,6 +64,7 @@ const DeletePostDialog: React.FunctionComponent = (props) => {
                 return
             }
             await functions.http.post("/api/post/delete/request", {postID: deletePostID.post.postID, reason}, session, setSessionFlag)
+            invalidatePost(deletePostID.post.postID)
             setSubmitted(true)
         }
     }

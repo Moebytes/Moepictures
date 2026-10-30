@@ -4,11 +4,12 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useState} from "react"
-import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
-useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, 
-useFlagSelector, useCacheActions, useGroupDialogActions, useSearchActions,
-useGroupDialogSelector, useActiveSelector, useCacheSelector} from "../../store"
+import React, {useEffect, useState, useMemo} from "react"
+import {usePageURL, getPageNumber} from "../../components/site/usePageURL"
+import {useSearchActions, useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useFlagSelector,
+useCacheActions, useGroupDialogActions, useGroupDialogSelector, useActiveSelector, useCacheSelector} from "../../store"
+import {useInvalidateGroup, useLazyGetGroupQuery} from "../../api"
 import {useNavigate, useParams, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -30,7 +31,6 @@ import ScrollIcon from "../../assets/svg/scroll.svg"
 import PagesIcon from "../../assets/svg/pages.svg"
 import {ReactSortable} from "react-sortablejs"
 import GroupThumbnail from "../../components/search/GroupThumbnail"
-import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
 import LoadingSpinner from "../../components/search/LoadingSpinner"
 import permissions from "../../structures/Permissions"
@@ -64,6 +64,13 @@ const GroupPage: React.FunctionComponent = () => {
     const navigate = useNavigate()
     const location = useLocation()
     const {group: slug} = useParams() as {group: string}
+    const [page, setPage] = useState(getPageNumber(location.search))
+    const [query, setQuery] = useState(new URLSearchParams(location.search).get("query") ?? "")
+    const [items, setItems] = useState<GroupItem[]>([])
+    const invalidateGroup = useInvalidateGroup()
+    const [getGroup] = useLazyGetGroupQuery()
+
+    usePageURL(page, setPage, query, setQuery)
 
     useEffect(() => {
         setHideNavbar(true)
@@ -80,7 +87,7 @@ const GroupPage: React.FunctionComponent = () => {
         setRelative(mobile ? true : false)
     }, [mobile])
 
-    const loadInitial = async () => {
+    const prepareItems = async () => {
         if (!group) return []
         let items = [] as GroupItem[]
 
@@ -100,8 +107,25 @@ const GroupPage: React.FunctionComponent = () => {
         return items
     }
 
-    const {items, setItems, visibleItems, setVisible, page, setPage, maxPage, 
-        initItems, toggleScroll} = usePaginatedScroll({loadInitial, pageAmount})
+    const visibleItems = useMemo(() => {
+        return scroll ? items : items.slice((page - 1) * pageAmount, page * pageAmount)
+    }, [items, page, scroll])
+
+    const maxPage = Math.max(1, Math.ceil(items.length / pageAmount))
+
+    const setVisible = (rows: GroupItem[]) => {
+        setItems((prev) => {
+            const result = [...prev]
+            result.splice(scroll ? 0 : (page - 1) * pageAmount, rows.length, ...rows)
+            return result
+        })
+    }
+
+    const toggleScroll = () => setScroll(!scroll)
+
+    const onRefresh = async () => {
+        setItems(await prepareItems())
+    }
 
     const groupInfo = async () => {
         let group = null as GroupPosts | null
@@ -111,7 +135,7 @@ const GroupPage: React.FunctionComponent = () => {
             let posts = await functions.http.get("/api/posts", {postIDs: group.posts.map((p) => p.postID)}, session, setSessionFlag).catch(() => []) as PostOrdered[]
             group.posts = posts.map((post: PostOrdered, i: number) => ({...post, order: group?.posts[i].order || 1}))
         } else {
-            group = await functions.http.get("/api/group", {name: slug}, session, setSessionFlag).catch(() => null) as GroupPosts
+            group = await getGroup({name: slug}).unwrap().catch(() => null) as GroupPosts
         }
         if (!group) return functions.dom.replaceLocation("/404")
         if (functions.post.isR18(group.rating)) {
@@ -136,7 +160,7 @@ const GroupPage: React.FunctionComponent = () => {
         if (group) {
             functions.dom.changeTitle(group.name, i18n)
             setHeaderText(group.name)
-            initItems()
+            onRefresh()
         }
     }, [group, ratingType, session])
 
@@ -198,13 +222,14 @@ const GroupPage: React.FunctionComponent = () => {
             const item = items[i]
             posts.push({postID: item.post.postID, order: i + 1})
         }
-        functions.http.put("/api/group/reorder", {slug: group.slug, posts}, session, setSessionFlag)
+        await functions.http.put("/api/group/reorder", {slug: group.slug, posts}, session, setSessionFlag)
+        invalidateGroup(group.slug)
         setReorderState(false)
     }
 
     const cancelReorder = () => {
         setReorderState(false)
-        initItems()
+        onRefresh()
     }
 
     const changeReorderState = () => {
@@ -296,7 +321,9 @@ const GroupPage: React.FunctionComponent = () => {
     const revertGroupHistory = async () => {
         if (!group) return
         await functions.http.put("/api/group/reorder", {slug, posts: group.posts}, session, setSessionFlag)
+        invalidateGroup(slug)
         await functions.http.put("/api/group/edit", {slug, name: group.name, description: group.description}, session, setSessionFlag)
+        invalidateGroup(slug)
         currentHistory(functions.post.generateSlug(group.name))
     }
 

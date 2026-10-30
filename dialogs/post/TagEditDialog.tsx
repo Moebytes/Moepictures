@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
 useFlagActions, useLayoutSelector, useActiveActions} from "../../store"
+import {useInvalidatePost} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
@@ -77,6 +78,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
     const metaRef = useRef<HTMLInputElement>(null!)
     const tagRef = useRef<HTMLDivElement>(null!)
     const controls = useDragControls()
+    const invalidatePost = useInvalidatePost()
 
     const updateFields = async () => {
         if (!tagEditID) return
@@ -173,6 +175,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             }
             setTagEditID(null)
             await functions.http.put("/api/post/quickedit", data, session, setSessionFlag)
+            invalidatePost(tagEditID.post.postID)
             setPostFlag(tagEditID.post.postID)
             setActionBanner("tag-edit")
         } else {
@@ -222,7 +225,8 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 tagGroups,
                 reason
             }
-            functions.http.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
+            await functions.http.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
+            invalidatePost(tagEditID.post.postID)
             setSubmitted(true)
             functions.cache.clearCache()
         }

@@ -4,7 +4,13 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useState, useRef} from "react"
+import React, {useEffect, useState, useRef, useEffectEvent, useMemo} from "react"
+import {usePageURL, getPageNumber} from "../../components/site/usePageURL"
+import {useSearchActions, useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions, useActiveSelector,
+useSearchSelector, usePageSelector, useFlagSelector, useThreadDialogActions, useThreadDialogSelector} from "../../store"
+import {useSearchThreadsInfiniteQuery, useSearchThreadsPageQuery} from "../../api"
+import {useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -17,11 +23,6 @@ import ScrollIcon from "../../assets/svg/scroll.svg"
 import PagesIcon from "../../assets/svg/pages.svg"
 import ThreadRow from "../../components/search/ThreadRow"
 import LoadingSpinner from "../../components/search/LoadingSpinner"
-import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
-useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
-useActiveSelector, useSearchSelector, usePageSelector, useFlagSelector,
-useThreadDialogActions, useThreadDialogSelector} from "../../store"
-import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
 import {ThreadSearch, CommentSort} from "../../types/Types"
 import "./styles/itemspage.less"
@@ -48,8 +49,16 @@ const ForumPage: React.FunctionComponent = (props) => {
     const {setShowNewThreadDialog} = useThreadDialogActions()
     const [sortType, setSortType] = useState("date" as CommentSort)
     const [sortReverse, setSortReverse] = useState(false)
-    const loadingRef = useRef(true)
+    const location = useLocation()
+    const {setScroll} = useSearchActions()
+    const [page, setPage] = useState(getPageNumber(location.search))
+    const [query, setQuery] = useState(new URLSearchParams(location.search).get("query") ?? "")
+    const [searchQuery, setSearchQuery] = useState(query)
+    const [refreshKey, setRefreshKey] = useState(0)
     const sortRef = useRef<HTMLDivElement>(null)
+    const refreshRef = useRef(false)
+
+    usePageURL(page, setPage, query, setQuery)
 
     useEffect(() => {
         setHideNavbar(true)
@@ -69,37 +78,78 @@ const ForumPage: React.FunctionComponent = (props) => {
         setRelative(mobile ? true : false)
     }, [mobile])
 
-    const loadInitial = async (query?: string) => {
-        let sort = functions.validation.parseSort(sortType, sortReverse)
-        const result = await functions.http.get("/api/search/threads", {sort, query}, session, setSessionFlag)
+    useEffect(() => {
+        setSearchQuery(query)
+    }, [query])
+
+    const infiniteQuery = useSearchThreadsInfiniteQuery(
+        {query, sort: functions.validation.parseSort(sortType, sortReverse), refreshKey},
+        {skip: !scroll, initialPageParam: {offset: (page - 1) * pageAmount, limit}}
+    )
+
+    const batchSize = Math.max(pageAmount, Math.floor(limit / pageAmount) * pageAmount)
+    const batchOffset = Math.floor((page - 1) * pageAmount / batchSize) * batchSize
+    const pageOffset = (page - 1) * pageAmount - batchOffset
+
+    const pageQuery = useSearchThreadsPageQuery(
+        {query, sort: functions.validation.parseSort(sortType, sortReverse),
+        offset: batchOffset, limit: batchSize, refreshKey},
+        {skip: scroll}
+    )
+
+    const items = useMemo(() => {
+        let result = scroll ? infiniteQuery.currentData?.pages.flat() ?? [] : pageQuery.currentData ?? []
         return result
+    }, [scroll, infiniteQuery.currentData, pageQuery.currentData])
+
+    const visibleItems = useMemo(() => {
+        return scroll ? items : items.slice(pageOffset, pageOffset + pageAmount)
+    }, [items, pageOffset, pageAmount, scroll])
+    
+    const isLoading = (scroll ? infiniteQuery.isFetching : pageQuery.isFetching) && visibleItems.length === 0
+    const totalCount = Number(items[0]?.threadCount ?? items.length)
+    const maxPage = Math.max(1, Math.ceil(totalCount / pageAmount))
+
+    const loadMore = useEffectEvent(() => {
+        if (infiniteQuery.hasNextPage && !infiniteQuery.isFetchingNextPage) infiniteQuery.fetchNextPage()
+    })
+
+    useEffect(() => {
+        if (!scroll) return
+        const onScroll = () => {
+            if (functions.dom.scrolledToBottom()) loadMore()
+        }
+        window.addEventListener("scroll", onScroll)
+        return () => window.removeEventListener("scroll", onScroll)
+    }, [scroll])
+
+    const onRefresh = async (value?: string, reset?: boolean) => {
+        const nextQuery = typeof value === "string" ? value : searchQuery
+        if (reset || nextQuery !== query) setPage(1)
+        setQuery(nextQuery)
+
+        if (refreshRef.current) setRefreshKey((prev) => prev + 1)
+        refreshRef.current = true
     }
 
-    const updateOffset = async (offset: number, query?: string) => {
-        let sort = functions.validation.parseSort(sortType, sortReverse)
-        let result = await functions.http.get("/api/search/threads", {sort, query, offset}, session, setSessionFlag)
-        return result
-    }
-
-    const {visibleItems, page, setPage, maxPage, searchQuery, setSearchQuery, initItems, setManagedPage,
-        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "threadCount"})
+    const toggleScroll = () => setScroll(!scroll)
 
     useEffect(() => {
         if (threadSearchFlag) {
             setTimeout(() => {
                 setSearchQuery(threadSearchFlag)
-                initItems(threadSearchFlag)
+                onRefresh(threadSearchFlag)
                 setThreadSearchFlag(null)
             }, 500)
         }
     }, [threadSearchFlag])
 
     useEffect(() => {
-        initItems()
+        onRefresh()
     }, [sortType, sortReverse, session])
 
     useEffect(() => {
-        if (forumPage) setManagedPage(forumPage)
+        if (forumPage && !location.search) setPage(forumPage)
     }, [])
 
     useEffect(() => {
@@ -137,10 +187,7 @@ const ForumPage: React.FunctionComponent = (props) => {
         let visible = visibleItems as ThreadSearch[]
         for (let i = 0; i < visible?.length; i++) {
             if (visible[i].fake) continue
-            jsx.push(<ThreadRow thread={visible[i]} onDelete={initItems} onEdit={initItems}/>)
-        }
-        if (jsx.length) {
-            loadingRef.current = false
+            jsx.push(<ThreadRow thread={visible[i]} onDelete={onRefresh} onEdit={onRefresh}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
@@ -171,8 +218,8 @@ const ForumPage: React.FunctionComponent = (props) => {
                     <span className="items-heading">{i18n.navbar.forum}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
-                            <button className="item-search-button" onClick={() => initItems()}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? onRefresh() : null}/>
+                            <button className="item-search-button" onClick={() => onRefresh()}>
                                 <SearchIcon className="item-search-button-icon"/>
                             </button>
                         </div>
@@ -195,7 +242,7 @@ const ForumPage: React.FunctionComponent = (props) => {
                         </div>
                     </div>
                     {mobile ? <div className="item-row">{getNewThreadButton()}</div> : null}
-                    {loadingRef.current && <LoadingSpinner/>}
+                    {isLoading && <LoadingSpinner/>}
                     <div className="items-container">
                         {generateThreadsJSX()}
                     </div>

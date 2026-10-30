@@ -4,7 +4,13 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useState, useRef} from "react"
+import React, {useEffect, useState, useRef, useEffectEvent, useMemo} from "react"
+import {usePageURL, getPageNumber} from "../../components/site/usePageURL"
+import {useSearchActions, useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions, useActiveSelector,
+useSearchSelector, usePageSelector, useFlagSelector, useTagDialogActions} from "../../store"
+import {useSearchTagsInfiniteQuery, useSearchTagsPageQuery} from "../../api"
+import {useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -19,10 +25,6 @@ import PagesIcon from "../../assets/svg/pages.svg"
 import TypeIcon from "../../assets/svg/all.svg"
 import TagRow from "../../components/search/TagRow"
 import LoadingSpinner from "../../components/search/LoadingSpinner"
-import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
-useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
-useActiveSelector, useSearchSelector, usePageSelector, useFlagSelector, useTagDialogActions} from "../../store"
-import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
 import {TagSearch, TagSort, TagType} from "../../types/Types"
 import "./styles/itemspage.less"
@@ -49,9 +51,17 @@ const TagsPage: React.FunctionComponent = (props) => {
     const [sortType, setSortType] = useState("posts" as TagSort)
     const [sortReverse, setSortReverse] = useState(false)
     const [typeType, setTypeType] = useState("all" as TagType)
-    const loadingRef = useRef(true)
+    const location = useLocation()
+    const {setScroll} = useSearchActions()
+    const [page, setPage] = useState(getPageNumber(location.search))
+    const [query, setQuery] = useState(new URLSearchParams(location.search).get("query") ?? "")
+    const [searchQuery, setSearchQuery] = useState(query)
+    const [refreshKey, setRefreshKey] = useState(0)
+    const refreshRef = useRef(false)
     const sortRef = useRef<HTMLDivElement>(null)
     const typeRef = useRef<HTMLDivElement>(null)
+
+    usePageURL(page, setPage, query, setQuery)
 
     useEffect(() => {
         setHideNavbar(true)
@@ -71,34 +81,75 @@ const TagsPage: React.FunctionComponent = (props) => {
         setRelative(mobile ? true : false)
     }, [mobile])
 
-    const loadInitial = async (query?: string) => {
-        let sort = functions.validation.parseSort(sortType, sortReverse)
-        const result = await functions.http.get("/api/search/tags", {sort, type: typeType, query, limit}, session, setSessionFlag)
+    useEffect(() => {
+        setSearchQuery(query)
+    }, [query])
+
+    const infiniteQuery = useSearchTagsInfiniteQuery(
+        {query, sort: functions.validation.parseSort(sortType, sortReverse), type: typeType, refreshKey},
+        {skip: !scroll, initialPageParam: {offset: (page - 1) * pageAmount, limit}}
+    )
+
+    const batchSize = Math.max(pageAmount, Math.floor(limit / pageAmount) * pageAmount)
+    const batchOffset = Math.floor((page - 1) * pageAmount / batchSize) * batchSize
+    const pageOffset = (page - 1) * pageAmount - batchOffset
+
+    const pageQuery = useSearchTagsPageQuery(
+        {query, sort: functions.validation.parseSort(sortType, sortReverse), type: typeType,
+        offset: batchOffset, limit: batchSize, refreshKey},
+        {skip: scroll}
+    )
+
+    const items = useMemo(() => {
+        let result = scroll ? infiniteQuery.currentData?.pages.flat() ?? [] : pageQuery.currentData ?? []
         return result
+    }, [scroll, infiniteQuery.currentData, pageQuery.currentData])
+
+    const visibleItems = useMemo(() => {
+        return scroll ? items : items.slice(pageOffset, pageOffset + pageAmount)
+    }, [items, pageOffset, pageAmount, scroll])
+    
+    const isLoading = (scroll ? infiniteQuery.isFetching : pageQuery.isFetching) && visibleItems.length === 0
+    const totalCount = Number(items[0]?.tagCount ?? items.length)
+    const maxPage = Math.max(1, Math.ceil(totalCount / pageAmount))
+
+    const loadMore = useEffectEvent(() => {
+        if (infiniteQuery.hasNextPage && !infiniteQuery.isFetchingNextPage) infiniteQuery.fetchNextPage()
+    })
+
+    useEffect(() => {
+        if (!scroll) return
+        const onScroll = () => {
+            if (functions.dom.scrolledToBottom()) loadMore()
+        }
+        window.addEventListener("scroll", onScroll)
+        return () => window.removeEventListener("scroll", onScroll)
+    }, [scroll])
+
+    const onRefresh = async (value?: string, reset?: boolean) => {
+        const nextQuery = typeof value === "string" ? value : searchQuery
+        if (reset || nextQuery !== query) setPage(1)
+        setQuery(nextQuery)
+
+        if (refreshRef.current) setRefreshKey((prev) => prev + 1)
+        refreshRef.current = true
     }
 
-    const updateOffset = async (offset: number, query?: string) => {
-        let sort = functions.validation.parseSort(sortType, sortReverse)
-        let result = await functions.http.get("/api/search/tags", {sort, type: typeType, query, limit, offset}, session, setSessionFlag)
-        return result
-    }
-
-    const {visibleItems, page, setPage, maxPage, searchQuery, setSearchQuery, initItems, setManagedPage,
-        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "tagCount"})
+    const toggleScroll = () => setScroll(!scroll)
 
     useEffect(() => {
         if (tagSearchFlag !== null) {
-            initItems(tagSearchFlag)
+            onRefresh(tagSearchFlag)
             setTagSearchFlag(null)
         }
     }, [tagSearchFlag])
 
     useEffect(() => {
-        initItems()
+        onRefresh()
     }, [sortType, sortReverse, typeType, session])
 
     useEffect(() => {
-        if (tagsPage) setManagedPage(tagsPage)
+        if (tagsPage && !location.search) setPage(tagsPage)
     }, [])
 
     useEffect(() => {
@@ -161,10 +212,7 @@ const TagsPage: React.FunctionComponent = (props) => {
             if (visible[i].fake) continue
             if (!session.username) if (visible[i].r18) continue
             if (!functions.post.isR18(ratingType)) if (visible[i].r18) continue
-            jsx.push(<TagRow tag={visible[i]} onDelete={initItems} onEdit={initItems}/>)
-        }
-        if (jsx.length) {
-            loadingRef.current = false
+            jsx.push(<TagRow key={visible[i].tag} tag={visible[i]} onDelete={onRefresh} onEdit={onRefresh}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
@@ -214,8 +262,8 @@ const TagsPage: React.FunctionComponent = (props) => {
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="item-search" type="search" spellCheck="false" value={searchQuery} style={{width: mobile ? "170px" : "230px"}}
-                            onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
-                            <button className="item-search-button" onClick={() => initItems()}>
+                            onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? onRefresh() : null}/>
+                            <button className="item-search-button" onClick={() => onRefresh()}>
                                 <SearchIcon className="item-search-button-icon"/>
                             </button>
                         </div>
@@ -295,7 +343,7 @@ const TagsPage: React.FunctionComponent = (props) => {
                         {getMassImplyButton()}
                         {getBlockedTagsButton()}
                     </div> : null}
-                    {loadingRef.current && <LoadingSpinner/>}
+                    {isLoading && <LoadingSpinner/>}
                     <div className="items-container" style={{marginTop: "15px"}}>
                         {generateTagsJSX()}
                     </div>

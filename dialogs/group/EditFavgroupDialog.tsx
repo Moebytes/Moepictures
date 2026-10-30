@@ -8,6 +8,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector,
 useSessionActions, useFlagActions} from "../../store"
+import {useInvalidateFavgroups} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import RadioButtonIcon from "../../assets/svg/radiobutton.svg"
@@ -28,6 +29,7 @@ const EditFavgroupDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
     const controls = useDragControls()
+    const invalidateFavgroups = useInvalidateFavgroups()
 
     useEffect(() => {
         if (editFavGroupObj) {
@@ -52,6 +54,7 @@ const EditFavgroupDialog: React.FunctionComponent = (props) => {
             return setError(false)
         }
         await functions.http.put("/api/favgroup/edit", {key: editFavGroupObj.name, name, isPrivate}, session, setSessionFlag)
+        invalidateFavgroups()
         const newSlug = functions.post.generateSlug(name)
         navigate(`/favgroup/${session.username}/${newSlug}`)
         setEditFavGroupObj(null)
@@ -64,7 +67,6 @@ const EditFavgroupDialog: React.FunctionComponent = (props) => {
             setEditFavGroupObj(null)
         }
     }
-
 
     if (editFavGroupObj) {
         return (

@@ -8,6 +8,7 @@ import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions, 
 useLayoutSelector, useInteractionActions} from "../../store"
+import {useInvalidateGroup} from "../../api"
 import functions from "../../functions/Functions"
 import RevertIcon from "../../assets/svg/revert.svg"
 import DeleteIcon from "../../assets/svg/delete.svg"
@@ -41,6 +42,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
     const [postIndex, setPostIndex] = useState(0)
     const slug = props.groupHistory.slug
     let hasChanges = functions.compare.hasHistoryChanges(props.groupHistory)
+    const invalidateGroup = useInvalidateGroup()
     
     const updatePost = async () => {
         let targetID = props.groupHistory.posts[0]?.postID ?? ""
@@ -56,7 +58,9 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
     const revertGroupHistory = async () => {
         if (props.current) return Promise.reject()
         await functions.http.put("/api/group/reorder", {slug: props.currentHistory.slug, posts: props.groupHistory.posts}, session, setSessionFlag)
+        invalidateGroup(props.currentHistory.slug)
         await functions.http.put("/api/group/edit", {slug: props.currentHistory.slug, name: props.groupHistory.name, description: props.groupHistory.description}, session, setSessionFlag)
+        invalidateGroup(props.currentHistory.slug)
         if (props.currentHistory.slug !== props.groupHistory.slug) {
             navigate(`/group/history/${props.groupHistory.slug}`)
         } else {
@@ -79,6 +83,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
     const deleteGroupHistory = async () => {
         if (props.current) return Promise.reject()
         await functions.http.delete("/api/group/history/delete", {slug: props.currentHistory.slug, historyID: props.groupHistory.historyID}, session, setSessionFlag)
+        invalidateGroup(props.currentHistory.slug)
         props.onDelete?.()
     }
 

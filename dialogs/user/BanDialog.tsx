@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useInteractionActions, useSessionSelector, useSessionActions, useMiscDialogSelector, useMiscDialogActions,
 useFlagActions} from "../../store"
+import {useInvalidateSession, useInvalidatePost, useInvalidateTag, useInvalidateGroup, useInvalidateNotes} from "../../api"
 import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
@@ -32,6 +33,11 @@ const BanDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidateSession = useInvalidateSession()
+    const invalidatePost = useInvalidatePost()
+    const invalidateTag = useInvalidateTag()
+    const invalidateGroup = useInvalidateGroup()
+    const invalidateNotes = useInvalidateNotes()
 
     useEffect(() => {
         if (banName) {
@@ -55,6 +61,7 @@ const BanDialog: React.FunctionComponent = (props) => {
             return setError(false)
         }
         const revertData = await functions.http.post("/api/user/ban", {username: banName, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments, deleteMessages, days: functions.util.safeNumber(days)!, reason}, session, setSessionFlag)
+        invalidateSession()
         if (revertData.revertPostIDs?.length) {
             for (const postID of revertData.revertPostIDs) {
                 const result = await functions.http.get("/api/post/history", {postID}, session, setSessionFlag)
@@ -87,6 +94,7 @@ const BanDialog: React.FunctionComponent = (props) => {
                 characters: functions.tag.tagObject(currentHistory.characters), preserveChildren: Boolean(currentHistory.parentID),
                 series: functions.tag.tagObject(currentHistory.series), tags: currentHistory.tags, tagGroups: currentHistory.tagGroups, newTags, 
                 updatedDate: currentHistory.date, parentID: currentHistory.parentID, noImageUpdate: true, reason: currentHistory.reason}, session, setSessionFlag)
+                invalidatePost(currentHistory.postID)
             }
         }
         if (revertData.revertTagIDs?.length) {
@@ -107,6 +115,7 @@ const BanDialog: React.FunctionComponent = (props) => {
                 image: image!, aliases: currentHistory.aliases, implications: currentHistory.implications, social: currentHistory.social, twitter: currentHistory.twitter,
                 website: currentHistory.website, fandom: currentHistory.fandom, wikipedia: currentHistory.wikipedia, pixivTags: currentHistory.pixivTags, danbooruTag: currentHistory.danbooruTag, 
                 featuredPost: currentHistory.featuredPost?.postID, r18: currentHistory.r18 ?? false, type: currentHistory.type, updatedDate: currentHistory.date}, session, setSessionFlag)
+                invalidateTag(currentHistory.tag)
             }
         }
         if (revertData.revertGroupIDs?.length) {
@@ -115,7 +124,9 @@ const BanDialog: React.FunctionComponent = (props) => {
                 if (!result?.[0]) continue
                 const currentHistory = result[0]
                 await functions.http.put("/api/group/reorder", {silent: true, slug: currentHistory.slug, posts: currentHistory.posts}, session, setSessionFlag)
+                invalidateGroup(currentHistory.slug)
                 await functions.http.put("/api/group/edit", {silent: true, slug: currentHistory.slug, name: currentHistory.name, description: currentHistory.description}, session, setSessionFlag)
+                invalidateGroup(currentHistory.slug)
             }
         }
         if (revertData.revertNoteIDs?.length) {
@@ -125,6 +136,7 @@ const BanDialog: React.FunctionComponent = (props) => {
                 const currentHistory = result[0]
                 await functions.http.put("/api/note/save", {silent: true, postID: currentHistory.postID, order: currentHistory.order, 
                 data: currentHistory.notes}, session, setSessionFlag)
+                invalidateNotes()
             }
         }
         setBanName(null)

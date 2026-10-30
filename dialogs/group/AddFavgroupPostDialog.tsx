@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector, 
 useSessionActions, useFlagActions} from "../../store"
+import {useInvalidateFavgroups} from "../../api"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {motion, useDragControls} from "framer-motion"
@@ -25,6 +26,7 @@ const AddFavgroupPostDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidateFavgroups = useInvalidateFavgroups()
 
     useEffect(() => {
         if (addFavgroupPostObj) {
@@ -48,6 +50,7 @@ const AddFavgroupPostDialog: React.FunctionComponent = (props) => {
         }
         setAddFavgroupPostObj(null)
         await functions.http.post("/api/favgroup/update", {postIDs: postIDs.split(/\s+/g), name: addFavgroupPostObj.slug, isPrivate: addFavgroupPostObj.private}, session, setSessionFlag)
+        invalidateFavgroups()
         setGroupFlag(true)
     }
 

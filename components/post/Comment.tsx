@@ -8,6 +8,7 @@ import React, {useEffect} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useLayoutSelector, useActiveActions, useSessionActions, 
 useCommentDialogSelector, useCommentDialogActions, useCacheSelector} from "../../store"
+import {useInvalidateComments} from "../../api"
 import functions from "../../functions/Functions"
 import moeText from "../../moetext/MoeText"
 import favicon from "../../assets/icons/favicon.png"
@@ -36,6 +37,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     const {deleteCommentID, deleteCommentFlag, editCommentFlag, editCommentID, editCommentText} = useCommentDialogSelector()
     const {setDeleteCommentID, setDeleteCommentFlag, setEditCommentFlag, setEditCommentID, setEditCommentText, setReportCommentID} = useCommentDialogActions()
     const navigate = useNavigate()
+    const invalidateComments = useInvalidateComments()
 
     const defaultIcon = props.comment?.image ? false : true
 
@@ -68,6 +70,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
 
     const deleteComment = async () => {
         await functions.http.delete("/api/comment/delete", {commentID: props.comment?.commentID}, session, setSessionFlag)
+        invalidateComments()
         props.onDelete?.()
     }
 
@@ -88,6 +91,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
         const badComment = functions.validation.validateComment(editCommentText, i18n)
         if (badComment) return
         await functions.http.put("/api/comment/edit", {commentID: props.comment?.commentID, comment: editCommentText}, session, setSessionFlag)
+        invalidateComments()
         props.onEdit?.()
     }
 

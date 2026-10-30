@@ -16,6 +16,7 @@ import HideIcon from "../../assets/svg/hide.svg"
 import functions from "../../functions/Functions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useLayoutSelector} from "../../store"
+import {useInvalidateSession} from "../../api"
 import "./styles/sitepage.less"
 
 const SignUpPage: React.FunctionComponent = (props) => {
@@ -38,6 +39,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
     const [submitted, setSubmitted] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
+    const invalidateSession = useInvalidateSession()
 
     const getCaptchaColor = () => {
         if (theme.includes("light")) return "#ffffff"
@@ -131,6 +133,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
             await functions.http.post("/api/user/signup", {username, email, password, captchaResponse}, session, setSessionFlag)
+            invalidateSession()
             setSubmitted(true)
             setError(false)
         } catch (err: any) {

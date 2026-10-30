@@ -8,6 +8,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useInteractionActions, useMessageDialogSelector, useMessageDialogActions, useSessionSelector, 
 useSessionActions} from "../../store"
+import {useInvalidateMessages} from "../../api"
 import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
@@ -37,6 +38,7 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
     const textBoxRef = useRef<MiniTextBoxRef>(null)
     const navigate = useNavigate()
     const controls = useDragControls()
+    const invalidateMessages = useInvalidateMessages()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
@@ -80,6 +82,7 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
         }
         try {
             const messageID = await functions.http.post("/api/message/create", {title, content, r18, recipients: cleanedRecipients}, session, setSessionFlag)
+            invalidateMessages()
             if (Number.isNaN(Number(messageID))) throw new Error(messageID)
             setDMTarget(null)
             if (messageID) navigate(`/message/${messageID}`)

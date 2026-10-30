@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector, 
 useSessionActions} from "../../store"
+import {useInvalidateFavgroups} from "../../api"
 import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
 import RadioButtonIcon from "../../assets/svg/radiobutton.svg"
@@ -31,6 +32,7 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidateFavgroups = useInvalidateFavgroups()
 
     const updateFavGroups = async () => {
         if (!favGroupID) return
@@ -66,6 +68,7 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
     const addFavGroup = async () => {
         if (!favGroupID) return
         await functions.http.post("/api/favgroup/update", {postIDs: [favGroupID], name, isPrivate}, session, setSessionFlag)
+        invalidateFavgroups()
         setFavGroupID(null)
         setSessionFlag(true)
     }
@@ -85,6 +88,7 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
             const favgroup = favGroups[i]
             const deleteFromFavGroup = async () => {
                 await functions.http.delete("/api/favgroup/post/delete", {postID: favGroupID, name: favgroup.name}, session, setSessionFlag)
+                invalidateFavgroups()
                 updateFavGroups()
             }
             jsx.push(

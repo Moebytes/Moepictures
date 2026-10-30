@@ -43,11 +43,22 @@ const unserializeFile = (obj: {name: string, type: string, size: number, lastMod
     return new File([contentBlob], obj.name, {type: obj.type, lastModified: obj.lastModified})
 }
 
+export interface PostSearchState {
+    offset: number
+    totalCount: number
+    page: number
+    query: string
+    preparedQuery?: string
+    refreshKey: number
+    mode: "search" | "random" | "image"
+}
+
 const cacheSlice = createSlice({
     name: "cache",
     initialState: {
         emojis: {} as {[key: string]: string},
         posts: [] as PostSearch[] | PostOrdered[] | Post[],
+        searchState: null as PostSearchState | null,
         navigationPosts: [] as PostSearch[] | PostOrdered[] | Post[],
         tags: [] as MiniTag[] | TagCount[],
         sortedTags: [] as TagCount[],
@@ -66,6 +77,7 @@ const cacheSlice = createSlice({
     reducers: {
         setEmojis: (state, action) => {state.emojis = action.payload},
         setPosts: (state, action) => {state.posts = action.payload},
+        setSearchState: (state, action) => {state.searchState = action.payload},
         setNavigationPosts: (state, action) => {state.navigationPosts = action.payload},
         setTags: (state, action) => {state.tags = action.payload},
         setSortedTags: (state, action) => {state.sortedTags = action.payload},
@@ -84,12 +96,13 @@ const cacheSlice = createSlice({
 })
 
 const {
-    setEmojis, setPosts, setTags, setVisiblePosts, setUnverifiedPosts, setUploadDropFiles,
+    setEmojis, setPosts, setSearchState, setTags, setVisiblePosts, setUnverifiedPosts, setUploadDropFiles,
     setBannerTags, setPost, setTagCategories, setOrder, setArtists, setCharacters,
     setSeries, setTagGroupCategories, setNavigationPosts, setSortedTags
 } = cacheSlice.actions
 
 const selectEmojis = createSelector((state: StoreState) => state.cache, (cache) => cache.emojis)
+const selectSearchState = createSelector((state: StoreState) => state.cache, (cache) => cache.searchState)
 const selectPosts = createSelector((state: StoreState) => state.cache, (cache) => cache.posts)
 const selectNavigationPosts = createSelector((state: StoreState) => state.cache, (cache) => cache.navigationPosts)
 const selectTags = createSelector((state: StoreState) => state.cache, (cache) => cache.tags)
@@ -117,6 +130,7 @@ export const useCacheSelector = () => {
     return {
         emojis: selector(selectEmojis),
         posts: selector(selectPosts),
+        searchState: selector(selectSearchState),
         navigationPosts: selector(selectNavigationPosts),
         tags: selector(selectTags),
         sortedTags: selector(selectSortedTags),
@@ -139,6 +153,7 @@ export const useCacheActions = () => {
     return {
         setEmojis: (state: {[key: string]: string}) => dispatch(setEmojis(state)),
         setPosts: (state: PostSearch[] | PostOrdered[] | Post[]) => dispatch(setPosts(state)),
+        setSearchState: (state: PostSearchState) => dispatch(setSearchState(state)),
         setNavigationPosts: (state: PostSearch[] | PostOrdered[] | Post[]) => dispatch(setNavigationPosts(state)),
         setTags: (state: MiniTag[] | TagCount[]) => dispatch(setTags(state)),
         setSortedTags: (state: TagCount[]) => dispatch(setSortedTags(state)),

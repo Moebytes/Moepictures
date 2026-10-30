@@ -5,8 +5,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import React, {useEffect, useState, useRef} from "react"
-import {useInteractionActions, useMiscDialogSelector, useMiscDialogActions, useSessionSelector, useSessionActions, useFlagActions} from "../../store"
-import {useThemeSelector} from "../../store"
+import {useInteractionActions, useMiscDialogSelector, useMiscDialogActions, useThemeSelector,
+useSessionSelector, useSessionActions, useFlagActions} from "../../store"
+import {useInvalidateSession} from "../../api"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {motion, useDragControls} from "framer-motion"
@@ -33,6 +34,7 @@ const PromoteDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidateSession = useInvalidateSession()
 
     const updateRole = async () => {
         if (!promoteName) return
@@ -57,6 +59,7 @@ const PromoteDialog: React.FunctionComponent = (props) => {
         if (!permissions.isAdmin(session)) return setPromoteName(null)
         try {
             await functions.http.post("/api/user/promote", {username: promoteName, role}, session, setSessionFlag)
+            invalidateSession()
             setPromoteName(null)
             setUpdateUserFlag(true)
         } catch (err: any) {

@@ -9,6 +9,7 @@ import {useNavigate, useParams} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useLayoutSelector, 
 useSessionSelector, useSessionActions, usePageSelector, usePageActions, useSearchSelector,
 useSearchActions, useActiveActions, useMiscDialogActions} from "../../store"
+import {useInvalidateSession} from "../../api"
 import HamburgerIcon from "../../assets/svg/hamburger.svg"
 import RightToLeftIcon from "../../assets/svg/reader-left.svg"
 import TopToBottomIcon from "../../assets/svg/reader-bottom.svg"
@@ -95,6 +96,7 @@ const ReaderPage: React.FunctionComponent = () => {
     const filterRef = useRef<HTMLImageElement>(null)
     const navigate = useNavigate()
     const {id: postID, slug} = useParams() as {id: string, slug: string}
+    const invalidateSession = useInvalidateSession()
 
     useEffect(() => {
         functions.dom.changeTitle("Post", i18n)
@@ -252,6 +254,7 @@ const ReaderPage: React.FunctionComponent = () => {
         if (permissions.isPremium(session)) {
             functions.cache.clearResponseCacheKey("/api/user/session")
             await functions.http.post("/api/user/upscaledimages", null, session, setSessionFlag)
+            invalidateSession()
             setSessionFlag(true)
         } else {
             setPremiumRequired(true)

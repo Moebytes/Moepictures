@@ -6,6 +6,7 @@
 
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useMiscDialogSelector, useMiscDialogActions, useSessionSelector, useSessionActions} from "../../store"
+import {useInvalidateSession} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import R18Icon from "../../assets/svg/lewd.svg"
@@ -23,6 +24,7 @@ const R18Dialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidateSession = useInvalidateSession()
 
     useEffect(() => {
         if (r18Confirmation) {
@@ -38,6 +40,7 @@ const R18Dialog: React.FunctionComponent = (props) => {
     const click = async (button: "accept" | "reject") => {
         if (button === "accept") {
             await functions.http.post("/api/user/r18", {r18: true}, session, setSessionFlag)
+            invalidateSession()
             setSessionFlag(true)
         }
         setR18Confirmation(false)

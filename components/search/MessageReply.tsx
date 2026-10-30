@@ -8,6 +8,7 @@ import React, {useEffect} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useMessageDialogActions, 
 useCacheSelector, useActiveActions, useMessageDialogSelector, useInteractionActions} from "../../store"
+import {useInvalidateThreads} from "../../api"
 import functions from "../../functions/Functions"
 import moeText from "../../moetext/MoeText"
 import favicon from "../../assets/icons/favicon.png"
@@ -36,6 +37,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
     const {setDeleteMsgReplyID, setDeleteMsgReplyFlag, setEditMsgReplyFlag, setEditMsgReplyID, setEditMsgReplyContent, setEditMsgReplyR18} = useMessageDialogActions()
     const {emojis} = useCacheSelector()
     const navigate = useNavigate()
+    const invalidateThreads = useInvalidateThreads()
 
     const defaultIcon = props.reply?.image ? false : true
 
@@ -68,6 +70,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
 
     const deleteReply = async () => {
         await functions.http.delete("/api/message/reply/delete", {messageID: props.reply?.messageID, replyID: props.reply?.replyID}, session, setSessionFlag)
+        invalidateThreads()
         props.onDelete?.()
     }
 
@@ -88,6 +91,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
         const badReply = functions.validation.validateReply(editMsgReplyContent, i18n)
         if (badReply) return
         await functions.http.put("/api/message/reply/edit", {replyID: props.reply?.replyID, content: editMsgReplyContent, r18: editMsgReplyR18}, session, setSessionFlag)
+        invalidateThreads()
         props.onEdit?.()
     }
 

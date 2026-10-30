@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 usePostDialogActions, usePostDialogSelector, useFlagActions} from "../../store"
+import {useInvalidatePosts} from "../../api"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {motion, useDragControls} from "framer-motion"
@@ -23,6 +24,7 @@ const PermaDeleteAllPostDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidatePosts = useInvalidatePosts()
 
     useEffect(() => {
         if (permaDeleteAllDialog) {
@@ -37,7 +39,8 @@ const PermaDeleteAllPostDialog: React.FunctionComponent = (props) => {
 
     const emptyRecycleBin = async () => {
         if (permissions.isAdmin(session)) {
-            functions.http.delete("/api/post/emptybin", null, session, setSessionFlag)
+            await functions.http.delete("/api/post/emptybin", null, session, setSessionFlag)
+            invalidatePosts()
         }
         setHistoryFlag(true)
         setPermaDeleteAllDialog(false)

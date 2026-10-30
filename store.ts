@@ -5,6 +5,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import {configureStore} from "@reduxjs/toolkit"
+import {api} from "./api"
 import themeReducer, {useThemeSelector, useThemeActions} from "./reducers/themeReducer"
 import layoutReducer, {useLayoutSelector, useLayoutActions} from "./reducers/layoutReducer"
 import sessionReducer, {useSessionSelector, useSessionActions} from "./reducers/sessionReducer"
@@ -28,6 +29,7 @@ import miscDialogReducer, {useMiscDialogSelector, useMiscDialogActions} from "./
 
 const store = configureStore({
     reducer: {
+        [api.reducerPath]: api.reducer,
         theme: themeReducer,
         layout: layoutReducer,
         session: sessionReducer,
@@ -48,6 +50,9 @@ const store = configureStore({
         searchDialog: searchDialogReducer,
         groupDialog: groupDialogReducer,
         miscDialog: miscDialogReducer
+    },
+    middleware: (getDefaultMiddleware) => {
+        return getDefaultMiddleware().concat(api.middleware)
     },
     devTools: {
         maxAge: 50,

@@ -8,6 +8,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
 useLayoutSelector, useFlagSelector, useCacheActions, useInteractionActions, useSearchActions, useTagDialogActions,
 useTagDialogSelector, useSearchSelector, useCacheSelector} from "../../store"
+import {useInvalidateTag} from "../../api"
 import {useNavigate, useParams, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -70,6 +71,7 @@ const TagPage: React.FunctionComponent = () => {
     const location = useLocation()
     const [loading, setLoading] = useState(true)
     let {tag: tagName} = useParams() as {tag: string}
+    const invalidateTag = useInvalidateTag()
 
     tagName = decodeURIComponent(tagName)
 
@@ -260,6 +262,7 @@ const TagPage: React.FunctionComponent = () => {
             image: image!, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, danbooruTag: editTagObj.danbooruTag,
             social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, wikipedia: editTagObj.wikipedia, 
             r18: editTagObj.r18 ?? false, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason!}, session, setSessionFlag)
+            invalidateTag(editTagObj.tag)
             if (editTagObj.tag === editTagObj.key) setTagFlag(true)
             navigate(`/tag/${encodeURIComponent(editTagObj.key!)}`)
         } catch (err: any) {
@@ -267,6 +270,7 @@ const TagPage: React.FunctionComponent = () => {
                 await functions.http.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
                 implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, danbooruTag: editTagObj.danbooruTag, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
                 wikipedia: editTagObj.wikipedia, r18: editTagObj.r18!, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
+                invalidateTag(editTagObj.tag)
                 setEditTagObj({tag: editTagObj.tag, failed: "implication"})
             } else {
                 setEditTagObj({tag: editTagObj.tag, failed: true})
@@ -315,6 +319,7 @@ const TagPage: React.FunctionComponent = () => {
     const deleteTag = async () => {
         if (!tag) return
         await functions.http.delete("/api/tag/delete", {tag: tag.tag}, session, setSessionFlag)
+        invalidateTag(tag.tag)
         navigate("/tags")
     }
 
@@ -346,6 +351,7 @@ const TagPage: React.FunctionComponent = () => {
     const favoriteTag = async () => {
         if (!tag) return
         await functions.http.post("/api/tagfavorite/toggle", {tag: tag.tag}, session, setSessionFlag)
+        invalidateTag(tag.tag)
         getFavorite()
         setTagFavoriteFlag(true)
     }
@@ -479,6 +485,7 @@ const TagPage: React.FunctionComponent = () => {
         aliases: history.aliases, implications: history.implications, pixivTags: tag.pixivTags, social: tag.social,
         twitter: tag.twitter, website: tag.website, fandom: tag.fandom, wikipedia: tag.wikipedia, type: tag.type, featuredPost: tag.featuredPost?.postID,
         r18: tag.r18 ?? false}, session, setSessionFlag)
+        invalidateTag(tag.tag)
         if (tag.tag === history.key) setTagFlag(true)
         navigate(`/tag/${encodeURIComponent(history.key)}`)
     }

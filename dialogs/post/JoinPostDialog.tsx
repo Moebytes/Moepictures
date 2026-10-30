@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
+import {useInvalidatePost} from "../../api"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import CheckboxIcon from "../../assets/svg/checkbox.svg"
@@ -24,6 +25,7 @@ const JoinPostDialog: React.FunctionComponent = (props) => {
     const {setJoinPostID} = usePostDialogActions()
     const [nestedChildren, setNestedChildren] = useState(false)
     const controls = useDragControls()
+    const invalidatePost = useInvalidatePost()
 
     useEffect(() => {
         if (joinPostID) {
@@ -40,6 +42,7 @@ const JoinPostDialog: React.FunctionComponent = (props) => {
         if (!joinPostID) return
         if (permissions.isAdmin(session)) {
             await functions.http.post("/api/post/join", {postID: joinPostID.post.postID, nested: nestedChildren}, session, setSessionFlag)
+            invalidatePost(joinPostID.post.postID)
             setPostFlag(joinPostID.post.postID)
         }
     }

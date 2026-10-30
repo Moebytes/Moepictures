@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useInteractionActions, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions,
 useSearchSelector, useSearchActions} from "../../store"
+import {useInvalidateFavgroups} from "../../api"
 import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
 import RadioButtonIcon from "../../assets/svg/radiobutton.svg"
@@ -28,6 +29,7 @@ const BulkFavgroupDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidateFavgroups = useInvalidateFavgroups()
 
     useEffect(() => {
         const savedFavgroupName = localStorage.getItem("favgroupName")
@@ -55,6 +57,7 @@ const BulkFavgroupDialog: React.FunctionComponent = (props) => {
     const bulkFavGroup = async () => {
         if (!selectionMode) return setBulkFavGroupDialog(false)
         await functions.http.post("/api/favgroup/update", {postIDs: Array.from(selectionItems.values()), name, isPrivate}, session, setSessionFlag)
+        invalidateFavgroups()
         setBulkFavGroupDialog(false)
         setSelectionMode(false)
         selectionItems.clear()

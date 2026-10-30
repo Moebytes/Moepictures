@@ -14,6 +14,7 @@ import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
+import {useInvalidateSession} from "../../api"
 import "./styles/sitepage.less"
 
 const ChangeUsernamePage: React.FunctionComponent = (props) => {
@@ -33,6 +34,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
     const [timeRemaining, setTimeRemaining] = useState("")
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
+    const invalidateSession = useInvalidateSession()
 
     const getCaptchaColor = () => {
         if (theme.includes("light")) return "#ffffff"
@@ -98,6 +100,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
             await functions.http.post("/api/user/changeusername", {newUsername, captchaResponse}, session, setSessionFlag)
+            invalidateSession()
             setSubmitted(true)
             setSessionFlag(true)
             setError(false)

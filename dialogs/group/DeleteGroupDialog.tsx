@@ -8,6 +8,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 useGroupDialogSelector, useGroupDialogActions} from "../../store"
+import {useInvalidateGroup} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
@@ -26,6 +27,7 @@ const DeleteGroupDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
     const controls = useDragControls()
+    const invalidateGroup = useInvalidateGroup()
 
     useEffect(() => {
         if (deleteGroupObj) {
@@ -42,6 +44,7 @@ const DeleteGroupDialog: React.FunctionComponent = (props) => {
         if (!deleteGroupObj) return
         if (permissions.isMod(session)) {
             await functions.http.delete("/api/group/delete", {slug: deleteGroupObj.slug}, session, setSessionFlag)
+            invalidateGroup(deleteGroupObj.slug)
             navigate("/groups")
             setDeleteGroupObj(null)
         } else {
@@ -55,6 +58,7 @@ const DeleteGroupDialog: React.FunctionComponent = (props) => {
                 return
             }
             await functions.http.post("/api/group/delete/request", {slug: deleteGroupObj.slug, reason}, session, setSessionFlag)
+            invalidateGroup(deleteGroupObj.slug)
             setSubmitted(true)
         }
     }
@@ -146,7 +150,6 @@ const DeleteGroupDialog: React.FunctionComponent = (props) => {
                 </motion.div>
             </div>
         )
-
 
     }
     return null

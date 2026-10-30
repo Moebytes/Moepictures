@@ -4,14 +4,15 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useState} from "react"
-import {useNavigate} from "react-router-dom"
-import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, usePageActions,
+import React, {useEffect, useState, useRef, useEffectEvent, useMemo} from "react"
+import {usePageURL, getPageNumber} from "../../components/site/usePageURL"
+import {useSearchActions, useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, usePageActions,
 useSearchSelector, usePageSelector, useActiveSelector} from "../../store"
+import {useGetTagDeletionsInfiniteQuery, useGetTagDeletionsPageQuery, useInvalidateTag} from "../../api"
+import {useNavigate, useLocation} from "react-router-dom"
 import ApproveIcon from "../../assets/svg/approve.svg"
 import RejectIcon from "../../assets/svg/reject.svg"
 import functions from "../../functions/Functions"
-import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
 import {TagDeleteRequest} from "../../types/Types"
 import "./styles/modposts.less"
@@ -29,27 +30,75 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
     const {setModPage} = usePageActions()
     const {modState} = useActiveSelector()
     const [hover, setHover] = useState(false)
+    const location = useLocation()
+    const [page, setPage] = useState(getPageNumber(location.search))
+    const [query, setQuery] = useState(new URLSearchParams(location.search).get("query") ?? "")
+    const [searchQuery, setSearchQuery] = useState(query)
+    const [refreshKey, setRefreshKey] = useState(0)
+    const refreshRef = useRef(false)
     const navigate = useNavigate()
+    const invalidateTag = useInvalidateTag()
 
-    const loadInitial = async () => {
-        const requests = await functions.http.get("/api/tag/delete/request/list", null, session, setSessionFlag, true)
-        return requests
-    }
-
-    const updateOffset = async (offset: number) => {
-        let result = await functions.http.get("/api/tag/delete/request/list", {offset}, session, setSessionFlag, true)
-        return result
-    }
-
-    const {visibleItems, page, setPage, maxPage, initItems, setManagedPage} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "requestCount"})
+    usePageURL(page, setPage, query, setQuery)
 
     useEffect(() => {
-        initItems()
+        setSearchQuery(query)
+    }, [query])
+
+    const infiniteQuery = useGetTagDeletionsInfiniteQuery(
+        {refreshKey},
+        {skip: !scroll, initialPageParam: {offset: (page - 1) * pageAmount, limit}}
+    )
+
+    const batchSize = Math.max(pageAmount, Math.floor(limit / pageAmount) * pageAmount)
+    const batchOffset = Math.floor((page - 1) * pageAmount / batchSize) * batchSize
+    const pageOffset = (page - 1) * pageAmount - batchOffset
+
+    const pageQuery = useGetTagDeletionsPageQuery(
+        {offset: batchOffset, refreshKey},
+        {skip: scroll}
+    )
+
+    const items = useMemo(() => {
+        let result = scroll ? infiniteQuery.currentData?.pages.flat() ?? [] : pageQuery.currentData ?? []
+        return result
+    }, [scroll, infiniteQuery.currentData, pageQuery.currentData])
+
+    const visibleItems = useMemo(() => {
+        return scroll ? items : items.slice(pageOffset, pageOffset + pageAmount)
+    }, [items, pageOffset, pageAmount, scroll])
+    
+    const totalCount = Number(items[0]?.requestCount ?? items.length)
+    const maxPage = Math.max(1, Math.ceil(totalCount / pageAmount))
+
+    const loadMore = useEffectEvent(() => {
+        if (infiniteQuery.hasNextPage && !infiniteQuery.isFetchingNextPage) infiniteQuery.fetchNextPage()
+    })
+
+    useEffect(() => {
+        if (!scroll) return
+        const onScroll = () => {
+            if (functions.dom.scrolledToBottom()) loadMore()
+        }
+        window.addEventListener("scroll", onScroll)
+        return () => window.removeEventListener("scroll", onScroll)
+    }, [scroll])
+
+    const onRefresh = async (value?: string, reset?: boolean) => {
+        const nextQuery = typeof value === "string" ? value : searchQuery
+        if (reset || nextQuery !== query) setPage(1)
+        setQuery(nextQuery)
+
+        if (refreshRef.current) setRefreshKey((prev) => prev + 1)
+        refreshRef.current = true
+    }
+
+    useEffect(() => {
+        onRefresh()
     }, [modState, session])
 
     useEffect(() => {
-        if (modPage) setManagedPage(modPage)
+        if (modPage && !location.search) setPage(modPage)
     }, [])
 
     useEffect(() => {
@@ -58,13 +107,16 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
 
     const deleteTag = async (username: string, tag: string) => {
         await functions.http.delete("/api/tag/delete", {tag}, session, setSessionFlag)
+        invalidateTag(tag)
         await functions.http.post("/api/tag/delete/request/fulfill", {username, tag, accepted: true}, session, setSessionFlag)
-        await initItems()
+        invalidateTag(tag)
+        await onRefresh()
     }
 
     const rejectRequest = async (username: string, tag: string) => {
         await functions.http.post("/api/tag/delete/request/fulfill", {username, tag, accepted: false}, session, setSessionFlag)
-        await initItems()
+        invalidateTag(tag)
+        await onRefresh()
     }
 
     const generateTagsJSX = () => {

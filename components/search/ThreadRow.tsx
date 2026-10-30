@@ -7,6 +7,7 @@
 import React, {useEffect, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions} from "../../store"
+import {useInvalidateThreads} from "../../api"
 import functions from "../../functions/Functions"
 import favicon from "../../assets/icons/favicon.png"
 import UnreadIcon from "../../assets/svg/unread.svg"
@@ -33,6 +34,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
     const [creatorDefaultIcon, setCreatorDefaultIcon] = useState(false)
     const [updaterDefaultIcon, setUpdaterDefaultIcon] = useState(false)
     const navigate = useNavigate()
+    const invalidateThreads = useInvalidateThreads()
 
     const updateUpdater = async () => {
         if (!props.thread) return
@@ -117,6 +119,7 @@ const ThreadRow: React.FunctionComponent<Props> = (props) => {
         if (!props.thread || !session.username) return
         functions.cache.clearResponseCacheKey("/api/search/threads")
         await functions.http.post("/api/thread/read", {threadID: props.thread.threadID}, session, setSessionFlag)
+        invalidateThreads()
         props.onEdit?.()
     }
 

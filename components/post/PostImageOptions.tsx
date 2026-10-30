@@ -9,6 +9,7 @@ import {useInteractionActions, useLayoutSelector,
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, 
 useSessionActions, useCacheSelector, useGroupDialogActions, useMiscDialogActions,
 useCacheActions, useActiveActions} from "../../store"
+import {useInvalidateFavorites} from "../../api"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import StarIcon from "../../assets/svg/star.svg"
@@ -57,6 +58,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const [downloadText, setDownloadText] = useState("")
     const filterRef = useRef<HTMLDivElement>(null)
     const formatRef = useRef<HTMLButtonElement>(null)
+    const invalidateFavorites = useInvalidateFavorites()
 
     useEffect(() => {
         getFavorite()
@@ -183,6 +185,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const updateFavorite = async (value: boolean) => {
         if (!props.post || !session.username) return
         await functions.http.post("/api/favorite/update", {postID: props.post.postID, favorited: value}, session, setSessionFlag)
+        invalidateFavorites()
         functions.post.updateLocalFavorite(props.post.postID, value, posts, setPosts)
         setFavorited(value)
     }

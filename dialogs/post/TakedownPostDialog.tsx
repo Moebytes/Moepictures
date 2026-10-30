@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
 useFlagActions} from "../../store"
+import {useInvalidatePost} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
@@ -25,6 +26,7 @@ const TakedownPostDialog: React.FunctionComponent = (props) => {
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const controls = useDragControls()
+    const invalidatePost = useInvalidatePost()
 
     useEffect(() => {
         if (takedownPostID) {
@@ -41,6 +43,7 @@ const TakedownPostDialog: React.FunctionComponent = (props) => {
         if (!takedownPostID) return
         if (permissions.isMod(session)) {
             await functions.http.post("/api/post/takedown",  {postID: takedownPostID.post.postID}, session, setSessionFlag)
+            invalidatePost(takedownPostID.post.postID)
             setPostFlag(takedownPostID.post.postID)
             localStorage.removeItem("savedPost")
             localStorage.removeItem("savedTagCategories")

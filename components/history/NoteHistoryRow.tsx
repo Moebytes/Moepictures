@@ -8,6 +8,7 @@ import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useNoteDialogSelector, useNoteDialogActions, useLayoutSelector,
 useFilterSelector, useInteractionActions} from "../../store"
+import {useInvalidateNotes} from "../../api"
 import functions from "../../functions/Functions"
 import RevertIcon from "../../assets/svg/revert.svg"
 import DeleteIcon from "../../assets/svg/delete.svg"
@@ -38,11 +39,13 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     const order = props.noteHistory.order
     let hasChanges = functions.compare.hasHistoryChanges(props.noteHistory)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
+    const invalidateNotes = useInvalidateNotes()
 
     const revertNoteHistory = async () => {
         if (props.current) return Promise.reject()
         await functions.http.put("/api/note/save", {postID: props.noteHistory.postID, order: props.noteHistory.order,
         data: props.noteHistory.notes}, session, setSessionFlag)
+        invalidateNotes()
         props.onEdit?.()
     }
 
@@ -61,6 +64,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     const deleteNoteHistory = async () => {
         if (props.current) return Promise.reject()
         await functions.http.delete("/api/note/history/delete", {postID, order, historyID: props.noteHistory.historyID}, session, setSessionFlag)
+        invalidateNotes()
         props.onDelete?.()
     }
 

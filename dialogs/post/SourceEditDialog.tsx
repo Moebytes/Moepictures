@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
 useFlagActions, useActiveActions} from "../../store"
+import {useInvalidatePost} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
@@ -41,6 +42,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidatePost = useInvalidatePost()
 
     const updateFields = async () => {
         if (!sourceEditID) return
@@ -119,6 +121,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
             }
             setSourceEditID(null)
             await functions.http.put("/api/post/quickedit", data, session, setSessionFlag)
+            invalidatePost(sourceEditID.post.postID)
             setPostFlag(sourceEditID.post.postID)
             setActionBanner("source-edit")
         } else {
@@ -154,7 +157,8 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                 },
                 reason
             }
-            functions.http.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
+            await functions.http.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
+            invalidatePost(sourceEditID.post.postID)
             setSubmitted(true)
         }
     }

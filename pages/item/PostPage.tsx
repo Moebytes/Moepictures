@@ -36,6 +36,7 @@ useLayoutSelector, useSearchSelector, useFlagSelector, useCacheActions, usePostD
 useNoteDialogSelector, useNoteDialogActions, useActiveSelector, usePostDialogSelector,
 useCacheSelector, useInteractionActions, useThemeSelector,
 useSearchActions} from "../../store"
+import {useInvalidatePost, useInvalidateHistory, useInvalidateNotes} from "../../api"
 import permissions from "../../structures/Permissions"
 import {PostSearch, ChildPost, PostHistory, GroupPosts, SourceData, Image} from "../../types/Types"
 import "./styles/postpage.less"
@@ -65,6 +66,7 @@ const PostPage: React.FunctionComponent = () => {
     const [childPosts, setChildPosts] = useState([] as ChildPost[])
     const [artistPosts, setArtistPosts] = useState([] as PostSearch[])
     const [parentPost, setParentPost] = useState(null as ChildPost | null)
+    const [categoriesPostID, setCategoriesPostID] = useState("")
     const [loaded, setLoaded] = useState(false)
     const [image, setImage] = useState("")
     const [historyID, setHistoryID] = useState(null as string | null)
@@ -73,6 +75,9 @@ const PostPage: React.FunctionComponent = () => {
     const navigate = useNavigate()
     const location = useLocation()
     const {id: postID, slug} = useParams() as {id: string, slug: string}
+    const invalidatePost = useInvalidatePost()
+    const invalidateHistory = useInvalidateHistory()
+    const invalidateNotes = useInvalidateNotes()
 
     useEffect(() => {
         setHideNavbar(false)
@@ -176,9 +181,10 @@ const PostPage: React.FunctionComponent = () => {
     }
 
     const saveHistory = async () => {
-        if (post && session.username && permissions.isPremium(session)) {
+        if (post?.postID === postID && session.username && permissions.isPremium(session)) {
             if (!viewPromise) {
                 viewPromise = functions.http.post("/api/post/view", {postID: post.postID}, session, setSessionFlag)
+                invalidateHistory()
             }
             await viewPromise
             viewPromise = null
@@ -254,6 +260,7 @@ const PostPage: React.FunctionComponent = () => {
             const groupCategories = await functions.tag.tagGroupCategories(historyPost, session, setSessionFlag)
             setTagGroupCategories(groupCategories)
             setTagCategories(categories)
+            setCategoriesPostID(historyPost.postID)
             setTags(tags)
         }
         updateHistory()
@@ -294,6 +301,7 @@ const PostPage: React.FunctionComponent = () => {
                 const groupCategories = await functions.tag.tagGroupCategories(post, session, setSessionFlag)
                 setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
+                setCategoriesPostID(post.postID)
                 setTags(tags)
                 setSessionFlag(true)
             } else {
@@ -375,6 +383,7 @@ const PostPage: React.FunctionComponent = () => {
                 const groupCategories = await functions.tag.tagGroupCategories(post, session, setSessionFlag)
                 setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
+                setCategoriesPostID(post.postID)
                 setTags(tags)
                 setSessionFlag(true)
             } else {
@@ -458,6 +467,7 @@ const PostPage: React.FunctionComponent = () => {
         if (!post || !noteID) return
         const note = await functions.http.get("/api/note/history", {postID: post.postID, historyID: noteID}, session, setSessionFlag).then((r) => r[0])
         await functions.http.put("/api/note/save", {postID: note.postID, order: note.order, data: note.notes}, session, setSessionFlag)
+        invalidateNotes()
         currentHistory()
     }
 
@@ -527,10 +537,12 @@ const PostPage: React.FunctionComponent = () => {
             style: post.style, artists: functions.tag.tagObject(historyPost.artists), characters: functions.tag.tagObject(historyPost.characters), noImageUpdate: true,
             preserveChildren: Boolean(post.parentID), series: functions.tag.tagObject(historyPost.series), tags: post.tags, tagGroups: post.tagGroups, newTags, imageSources,
             imageLinks, reason: historyPost.reason}, session, setSessionFlag)
+            invalidatePost(post.postID)
         } else {
             await functions.http.put("/api/post/quickedit", {postID: post.postID, type: post.type, rating: post.rating, source,
             style: post.style, artists: historyPost.artists, characters: historyPost.characters, series: historyPost.series, tags: post.tags, 
             tagGroups: historyPost.tagGroups, imageSources, imageLinks, reason: historyPost.reason}, session, setSessionFlag)
+            invalidatePost(post.postID)
         }
         currentHistory()
     }
@@ -741,7 +753,7 @@ const PostPage: React.FunctionComponent = () => {
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.englishCommentary}/> : null}
                     {post && tagCategories && artistPosts.length ? <ArtistWorks tag={tagCategories.artists[0].tag} posts={artistPosts}/> : null}
                     {post ? <Comments post={post}/> : null}
-                    {post && tagCategories ? <Related post={post} tag={tagCategories.characters[0]?.tag} 
+                    {post?.postID === postID && categoriesPostID === postID && tagCategories ? <Related key={postID} post={post} tag={tagCategories.characters[0]?.tag}
                     fallback={[tagCategories.series[0]?.tag, tagCategories.artists[0]?.tag]}/> : null}
                     <Footer/>
                 </div>

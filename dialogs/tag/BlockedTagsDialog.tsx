@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 useTagDialogSelector, useTagDialogActions} from "../../store"
+import {useInvalidateTags} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
@@ -22,6 +23,7 @@ const BlockedTagsDialog: React.FunctionComponent = (props) => {
     const [tagInput, setTagInput] = useState("")
     const [blockedTags, setBlockedTags] = useState([] as string[])
     const controls = useDragControls()
+    const invalidateTags = useInvalidateTags()
 
     useEffect(() => {
         if (blockedTagsDialog) {
@@ -46,6 +48,7 @@ const BlockedTagsDialog: React.FunctionComponent = (props) => {
         if (permissions.isAdmin(session)) {
             let tags = tagInput.split(/ +/g)
             await functions.http.put("/api/tag/blocktags", {tags}, session, setSessionFlag)
+            invalidateTags()
             updateBlockedTags()
             setTagInput("")
         }
@@ -56,6 +59,7 @@ const BlockedTagsDialog: React.FunctionComponent = (props) => {
         if (permissions.isAdmin(session)) {
             let tags = tagInput.split(/ +/g)
             await functions.http.put("/api/tag/unblocktags", {tags}, session, setSessionFlag)
+            invalidateTags()
             updateBlockedTags()
             setTagInput("")
         }

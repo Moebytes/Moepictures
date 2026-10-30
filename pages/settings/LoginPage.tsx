@@ -16,6 +16,7 @@ import HideIcon from "../../assets/svg/hide.svg"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useActiveSelector,
 useFlagSelector} from "../../store"
+import {useInvalidateSession} from "../../api"
 import functions from "../../functions/Functions"
 import "./styles/sitepage.less"
 
@@ -38,6 +39,7 @@ const LoginPage: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
+    const invalidateSession = useInvalidateSession()
 
     const getCaptchaColor = () => {
         if (theme.includes("light")) return "#ffffff"
@@ -96,6 +98,7 @@ const LoginPage: React.FunctionComponent = (props) => {
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
             const result = await functions.http.post("/api/user/login", {username, password, captchaResponse}, session, setSessionFlag)
+            invalidateSession()
             setSessionFlag(true)
             if (redirect) {
                 await functions.timeout(20)

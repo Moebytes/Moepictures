@@ -8,6 +8,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector,
 useSessionActions, useFlagActions} from "../../store"
+import {useInvalidateGroup} from "../../api"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {motion, useDragControls} from "framer-motion"
@@ -28,6 +29,7 @@ const RemapGroupDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
     const controls = useDragControls()
+    const invalidateGroup = useInvalidateGroup()
     
     useEffect(() => {
         if (remapGroupObj) {
@@ -46,6 +48,7 @@ const RemapGroupDialog: React.FunctionComponent = (props) => {
         if (permissions.isContributor(session)) {
             const postIDs = items.trim().split(/\s+/g)
             await functions.http.put("/api/group/remap", {slug: remapGroupObj.slug, postIDs}, session, setSessionFlag)
+            invalidateGroup(remapGroupObj.slug)
             setRemapGroupObj(null)
             setGroupFlag(true)
         } else {
@@ -60,6 +63,7 @@ const RemapGroupDialog: React.FunctionComponent = (props) => {
             }
             const postIDs = items.trim().split(/\s+/g)
             await functions.http.post("/api/group/request", {name: remapGroupObj.name, postIDs, reason}, session, setSessionFlag)
+            invalidateGroup(remapGroupObj.name)
             setSubmitted(true)
         }
     }

@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
+import {useInvalidatePost} from "../../api"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {motion, useDragControls} from "framer-motion"
@@ -21,6 +22,7 @@ const FlipPostDialog: React.FunctionComponent = (props) => {
     const {setFlipPostID} = usePostDialogActions()
     const {setPostFlag} = useFlagActions()
     const controls = useDragControls()
+    const invalidatePost = useInvalidatePost()
 
     useEffect(() => {
         if (flipPostID) {
@@ -37,6 +39,7 @@ const FlipPostDialog: React.FunctionComponent = (props) => {
         if (!flipPostID) return
         if (permissions.isAdmin(session)) {
             await functions.http.post("/api/post/flip", {postID: flipPostID.post.postID}, session, setSessionFlag)
+            invalidatePost(flipPostID.post.postID)
             setPostFlag(flipPostID.post.postID)
         }
     }

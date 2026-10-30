@@ -9,6 +9,7 @@ import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useThreadDialogActions, 
 useCacheSelector, useActiveActions, useThreadDialogSelector, useInteractionActions,
 useFlagActions} from "../../store"
+import {useInvalidateThreads} from "../../api"
 import functions from "../../functions/Functions"
 import moeText from "../../moetext/MoeText"
 import favicon from "../../assets/icons/favicon.png"
@@ -40,6 +41,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     const {setDeleteReplyID, setDeleteReplyFlag, setEditReplyFlag, setEditReplyID, setEditReplyContent, setEditReplyR18, setReportReplyID} = useThreadDialogActions()
     const {emojis} = useCacheSelector()
     const navigate = useNavigate()
+    const invalidateThreads = useInvalidateThreads()
 
     const defaultIcon = props.reply.image ? false : true
 
@@ -72,6 +74,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
 
     const deleteReply = async () => {
         await functions.http.delete("/api/reply/delete", {threadID: props.reply.threadID, replyID: props.reply.replyID}, session, setSessionFlag)
+        invalidateThreads()
         props.onDelete?.()
     }
 
@@ -92,6 +95,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
         const badReply = functions.validation.validateReply(editReplyContent, i18n)
         if (badReply) return
         await functions.http.put("/api/reply/edit", {replyID: props.reply.replyID, content: editReplyContent, r18: editReplyR18}, session, setSessionFlag)
+        invalidateThreads()
         props.onEdit?.()
     }
 

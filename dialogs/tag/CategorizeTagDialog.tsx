@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 useTagDialogSelector, useTagDialogActions, useFlagActions} from "../../store"
+import {useInvalidateTag} from "../../api"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {motion, useDragControls} from "framer-motion"
@@ -29,6 +30,7 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidateTag = useInvalidateTag()
 
     useEffect(() => {
         if (categorizeTag) {
@@ -46,6 +48,7 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
         if (!categorizeTag) return
         if (permissions.isContributor(session)) {
             await functions.http.put("/api/tag/edit", {tag: categorizeTag.tag, type: category}, session, setSessionFlag)
+            invalidateTag(categorizeTag.tag)
             setTagFlag(categorizeTag.tag)
             setCategorizeTag(null)
         } else {
@@ -59,6 +62,7 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
                 return
             }
             await functions.http.post("/api/tag/edit/request", {tag: categorizeTag.tag, type: category, reason}, session, setSessionFlag)
+            invalidateTag(categorizeTag.tag)
             setSubmitted(true)
         }
     }

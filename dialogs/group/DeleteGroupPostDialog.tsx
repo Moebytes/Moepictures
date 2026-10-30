@@ -8,12 +8,14 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, 
 useSessionActions, useGroupDialogSelector, useGroupDialogActions,
 useFlagActions} from "../../store"
+import {useInvalidateGroup, useInvalidateGroups} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
 import "../dialog.less"
 
 const DeleteGroupPostDialog: React.FunctionComponent = (props) => {
+    const invalidateGroups = useInvalidateGroups()
     const {i18n} = useThemeSelector()
     const {setEnableDrag} = useInteractionActions()
     const {deleteGroupPostObj} = useGroupDialogSelector()
@@ -26,6 +28,7 @@ const DeleteGroupPostDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidateGroup = useInvalidateGroup()
 
     useEffect(() => {
         if (deleteGroupPostObj) {
@@ -42,6 +45,7 @@ const DeleteGroupPostDialog: React.FunctionComponent = (props) => {
         if (!deleteGroupPostObj) return
         if (permissions.isContributor(session)) {
             await functions.http.delete("/api/group/post/delete", {postID: deleteGroupPostObj.postID, name: deleteGroupPostObj.group.name}, session, setSessionFlag)
+            invalidateGroup(deleteGroupPostObj.group.name)
             setGroupFlag(true)
             setDeleteGroupPostObj(null)
         } else {
@@ -56,6 +60,7 @@ const DeleteGroupPostDialog: React.FunctionComponent = (props) => {
             }
             let removalItems = [{postID: deleteGroupPostObj.postID, slug: deleteGroupPostObj.group.slug}]
             await functions.http.post("/api/group/post/delete/request", {reason, removalItems}, session, setSessionFlag)
+            invalidateGroups()
             setSubmitted(true)
         }
     }
@@ -147,7 +152,6 @@ const DeleteGroupPostDialog: React.FunctionComponent = (props) => {
                 </motion.div>
             </div>
         )
-
 
     }
     return null

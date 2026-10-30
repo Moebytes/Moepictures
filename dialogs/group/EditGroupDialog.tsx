@@ -8,6 +8,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector,
 useSessionActions, useFlagActions} from "../../store"
+import {useInvalidateGroup} from "../../api"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {motion, useDragControls} from "framer-motion"
@@ -29,6 +30,7 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
     const controls = useDragControls()
+    const invalidateGroup = useInvalidateGroup()
 
     useEffect(() => {
         if (editGroupObj) {
@@ -54,6 +56,7 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
                 return setError(false)
             }
             await functions.http.put("/api/group/edit", {slug: editGroupObj.slug, name, description}, session, setSessionFlag)
+            invalidateGroup(editGroupObj.slug)
             const newSlug = functions.post.generateSlug(name)
             navigate(`/group/${newSlug}`)
             setEditGroupObj(null)
@@ -76,6 +79,7 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
                 return
             }
             await functions.http.post("/api/group/edit/request", {slug: editGroupObj.slug, name, description, reason}, session, setSessionFlag)
+            invalidateGroup(editGroupObj.slug)
             setSubmitted(true)
         }
     }

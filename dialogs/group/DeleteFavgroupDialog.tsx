@@ -8,6 +8,7 @@ import React, {useEffect} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 useGroupDialogSelector, useGroupDialogActions} from "../../store"
+import {useInvalidateFavgroups} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
@@ -21,6 +22,7 @@ const DeleteFavgroupDialog: React.FunctionComponent = (props) => {
     const {setDeleteFavGroupObj} = useGroupDialogActions()
     const navigate = useNavigate()
     const controls = useDragControls()
+    const invalidateFavgroups = useInvalidateFavgroups()
 
     useEffect(() => {
         if (deleteFavGroupObj) {
@@ -36,6 +38,7 @@ const DeleteFavgroupDialog: React.FunctionComponent = (props) => {
     const deleteFavgroup = async () => {
         if (!deleteFavGroupObj) return
         await functions.http.delete("/api/favgroup/delete", {name: deleteFavGroupObj.name}, session, setSessionFlag)
+        invalidateFavgroups()
         setDeleteFavGroupObj(null)
         setSessionFlag(true)
         navigate("/profile")

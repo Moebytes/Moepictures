@@ -9,6 +9,7 @@ import {useNavigate, useLocation} from "react-router-dom"
 import {useThemeSelector, useSearchActions, useSearchSelector, 
 useFlagActions, useInteractionActions, useCacheActions, useCacheSelector, useActiveActions,
 useSessionSelector, useSessionActions, usePostDialogActions, useGroupDialogActions} from "../../store"
+import {useInvalidatePost} from "../../api"
 import permissions from "../../structures/Permissions"
 import favicon from "../../assets/icons/favicon.png"
 
@@ -90,6 +91,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const [approverData, setApproverData] = useState(null as PrunedUser | null)
     const navigate = useNavigate()
     const location = useLocation()
+    const invalidatePost = useInvalidatePost()
 
     const updateTags = async () => {
         const tags = await functions.tag.parseTags(posts, session, setSessionFlag)
@@ -458,12 +460,14 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const approvePost = async () => {
         if (!props.post) return
         await functions.http.post("/api/post/approve", {postID: props.post.postID}, session, setSessionFlag)
+        invalidatePost(props.post.postID)
         modNext()
     }
 
     const rejectPost = async () => {
         if (!props.post) return
         await functions.http.post("/api/post/reject", {postID: props.post.postID}, session, setSessionFlag)
+        invalidatePost(props.post.postID)
         modNext()
     }
 

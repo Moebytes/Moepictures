@@ -6,8 +6,8 @@
 
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useInteractionActions, useSessionSelector, useSessionActions, 
-usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
-import {useThemeSelector} from "../../store"
+usePostDialogSelector, usePostDialogActions, useFlagActions, useThemeSelector} from "../../store"
+import {useInvalidatePost} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
@@ -33,6 +33,7 @@ const CompressPostDialog: React.FunctionComponent = (props) => {
     const [original, setOriginal] = useState(true)
     const [upscaled, setUpscaled] = useState(true)
     const controls = useDragControls()
+    const invalidatePost = useInvalidatePost()
 
     useEffect(() => {
         if (compressPostID) {
@@ -52,6 +53,7 @@ const CompressPostDialog: React.FunctionComponent = (props) => {
             await functions.http.post("/api/post/compress",  {postID: compressPostID.post.postID, 
             quality: functions.util.safeNumber(quality) || 95, format, maxDimension: functions.util.safeNumber(maxDimension) || 2000, 
             maxUpscaledDimension: functions.util.safeNumber(maxUpscaledDimension) || 8000, original, upscaled}, session, setSessionFlag)
+            invalidatePost(compressPostID.post.postID)
             setPostFlag(compressPostID.post.postID)
         }
     }

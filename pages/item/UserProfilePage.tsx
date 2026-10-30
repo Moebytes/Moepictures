@@ -15,6 +15,7 @@ import {useThemeSelector, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchActions, 
 useSearchSelector, useMiscDialogActions, useCacheSelector, useCacheActions, 
 useInteractionActions, useMiscDialogSelector} from "../../store"
+import {useInvalidateFavorites, useInvalidateTags, useInvalidateSession, useInvalidateNotes} from "../../api"
 import functions from "../../functions/Functions"
 import moeText from "../../moetext/MoeText"
 import Carousel from "../../components/site/Carousel"
@@ -80,6 +81,10 @@ const UserProfilePage: React.FunctionComponent = () => {
     const textRef = useRef<HTMLTextAreaElement>(null)
     const textBoxRef = useRef<MiniTextBoxRef>(null)
     const navigate = useNavigate()
+    const invalidateFavorites = useInvalidateFavorites()
+    const invalidateTags = useInvalidateTags()
+    const invalidateSession = useInvalidateSession()
+    const invalidateNotes = useInvalidateNotes()
 
     useEffect(() => {
         limit = mobile ? 5 : 25
@@ -224,60 +229,70 @@ const UserProfilePage: React.FunctionComponent = () => {
 
     const favoritesPrivacy = async () => {
         await functions.http.post("/api/user/favoritesprivacy", null, session, setSessionFlag)
+        invalidateFavorites()
         functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
 
     const tagFavoritesPrivacy = async () => {
         await functions.http.post("/api/user/tagfavoritesprivacy", null, session, setSessionFlag)
+        invalidateTags()
         functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
 
     const showRelated = async () => {
         await functions.http.post("/api/user/showrelated", null, session, setSessionFlag)
+        invalidateSession()
         functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
 
     const showTooltips = async () => {
         await functions.http.post("/api/user/showtooltips", null, session, setSessionFlag)
+        invalidateSession()
         functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
 
     const showTagTooltips = async () => {
         await functions.http.post("/api/user/showtagtooltips", null, session, setSessionFlag)
+        invalidateTags()
         functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
 
     const showTagBanner = async () => {
         await functions.http.post("/api/user/showtagbanner", null, session, setSessionFlag)
+        invalidateTags()
         functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
 
     const downloadPixivID = async () => {
         await functions.http.post("/api/user/downloadpixivid", null, session, setSessionFlag)
+        invalidateSession()
         functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
 
     const forceNoteBubbles = async () => {
         await functions.http.post("/api/user/forcenotebubbles", null, session, setSessionFlag)
+        invalidateNotes()
         functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
 
     const liveAnimationPreview = async () => {
         await functions.http.post("/api/user/liveanimationpreview", null, session, setSessionFlag)
+        invalidateSession()
         functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
     
     const liveModelPreview = async () => {
         await functions.http.post("/api/user/livemodelpreview", null, session, setSessionFlag)
+        invalidateSession()
         functions.cache.clearResponseCacheKey("/api/user/session")
         setSessionFlag(true)
     }
@@ -285,6 +300,7 @@ const UserProfilePage: React.FunctionComponent = () => {
     const showR18 = async () => {
         if (session.showR18) {
             await functions.http.post("/api/user/r18", {r18: false}, session, setSessionFlag)
+            invalidateSession()
             functions.cache.clearResponseCacheKey("/api/user/session")
             setSessionFlag(true)
         } else {
@@ -295,6 +311,7 @@ const UserProfilePage: React.FunctionComponent = () => {
     const upscaledImages = async () => {
         if (permissions.isPremium(session)) {
             await functions.http.post("/api/user/upscaledimages", null, session, setSessionFlag)
+            invalidateSession()
             functions.cache.clearResponseCacheKey("/api/user/session")
             setSessionFlag(true)
         } else {
@@ -307,7 +324,10 @@ const UserProfilePage: React.FunctionComponent = () => {
             clearTimeout(intervalTimer) 
             intervalTimer = setTimeout(() => {
                 functions.cache.clearResponseCacheKey("/api/user/session")
-                functions.http.post("/api/user/autosearchinterval", {interval: functions.util.safeNumber(interval)}, session, setSessionFlag)
+                functions.http.post("/api/user/autosearchinterval", {interval: functions.util.safeNumber(interval)}, session, setSessionFlag).then((result) => {
+                    invalidateSession()
+                    return result
+                })
                 .then(() => setSessionFlag(true))
             }, 1000)
         }
@@ -319,7 +339,10 @@ const UserProfilePage: React.FunctionComponent = () => {
             clearTimeout(blacklistTimer) 
             blacklistTimer = setTimeout(() => {
                 functions.cache.clearResponseCacheKey("/api/user/session")
-                functions.http.post("/api/user/blacklist", {blacklist}, session, setSessionFlag)
+                functions.http.post("/api/user/blacklist", {blacklist}, session, setSessionFlag).then((result) => {
+                    invalidateSession()
+                    return result
+                })
                 .then(() => setSessionFlag(true))
             }, 1000)
         }
@@ -337,6 +360,7 @@ const UserProfilePage: React.FunctionComponent = () => {
         textBoxRef.current?.showError(i18n.buttons.submitting)
         try {
             await functions.http.post("/api/user/changebio", {bio}, session, setSessionFlag)
+            invalidateSession()
             functions.cache.clearResponseCacheKey("/api/user/session")
             setSessionFlag(true)
             textBoxRef.current?.clearError()
@@ -446,6 +470,7 @@ const UserProfilePage: React.FunctionComponent = () => {
 
     const clearPfp = async () => {
         await functions.http.delete("/api/user/pfp", null, session, setSessionFlag)
+        invalidateSession()
         functions.cache.clearResponseCacheKey("/api/user/session")
         setUserImg("")
         setSessionFlag(true)
@@ -453,6 +478,7 @@ const UserProfilePage: React.FunctionComponent = () => {
 
     const clearCookieConsent = async () => {
         await functions.http.post("/api/user/cookieconsent", {consent: null}, session, setSessionFlag)
+        invalidateSession()
         functions.cache.clearResponseCacheKey("/api/user/session")
         localStorage.removeItem("cookieConsent")
         setSessionFlag(true)

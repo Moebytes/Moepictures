@@ -11,6 +11,7 @@ useFlagActions, useInteractionActions, useCacheActions, useCacheSelector, useAct
 useMiscDialogActions, useSessionSelector, useSessionActions, usePostDialogActions, useSearchDialogActions, 
 useGroupDialogActions, useActiveSelector, useSearchDialogSelector, useFlagSelector, useTagDialogActions,
 useTagDialogSelector} from "../../store"
+import {useInvalidatePost} from "../../api"
 import {HashLink as Link} from "react-router-hash-link"
 import permissions from "../../structures/Permissions"
 import favicon from "../../assets/icons/favicon.png"
@@ -126,6 +127,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const [favoriteTags, setFavoriteTags] = useState([] as TagCount[])
     const navigate = useNavigate()
     const location = useLocation()
+    const invalidatePost = useInvalidatePost()
 
     const updateTags = async () => {
         let tags = await functions.tag.parseTags(posts, session, setSessionFlag)
@@ -718,7 +720,9 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerSearch = () => {
-        navigate(`/posts`)
+        const params = new URLSearchParams()
+        if (search.trim()) params.set("query", search)
+        navigate(`/posts${params.size ? `?${params}` : ""}`)
         setSearchFlag(true)
     }
 
@@ -797,12 +801,14 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const approvePost = async () => {
         if (!props.post) return
         await functions.http.post("/api/post/approve", {postID: props.post.postID}, session, setSessionFlag)
+        invalidatePost(props.post.postID)
         modNext()
     }
 
     const rejectPost = async () => {
         if (!props.post) return
         await functions.http.post("/api/post/reject", {postID: props.post.postID}, session, setSessionFlag)
+        invalidatePost(props.post.postID)
         modNext()
     }
 

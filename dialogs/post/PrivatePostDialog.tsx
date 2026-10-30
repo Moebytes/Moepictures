@@ -6,6 +6,7 @@
 
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, usePostDialogSelector, usePostDialogActions, useFlagActions, useSessionSelector, useSessionActions} from "../../store"
+import {useInvalidatePost} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
@@ -22,6 +23,7 @@ const PrivatePostDialog: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const controls = useDragControls()
+    const invalidatePost = useInvalidatePost()
 
     useEffect(() => {
         if (privatePostID) {
@@ -38,6 +40,7 @@ const PrivatePostDialog: React.FunctionComponent = (props) => {
         if (!privatePostID) return
         if (permissions.canPrivate(session, privatePostID.post, privatePostID.artists)) {
             await functions.http.post("/api/post/private",  {postID: privatePostID.post.postID}, session, setSessionFlag)
+            invalidatePost(privatePostID.post.postID)
             setPostFlag(privatePostID.post.postID)
             localStorage.removeItem("savedPost")
             localStorage.removeItem("savedTagCategories")

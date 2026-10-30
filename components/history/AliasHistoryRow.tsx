@@ -8,6 +8,7 @@ import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions,
 useInteractionActions} from "../../store"
+import {useInvalidateTags, useInvalidateTag} from "../../api"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import UndoIcon from "../../assets/svg/revert.svg"
@@ -30,16 +31,22 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {deleteAliasHistoryID, deleteAliasHistoryFlag, revertAliasHistoryID, revertAliasHistoryFlag} = useTagDialogSelector()
     const {setDeleteAliasHistoryID, setDeleteAliasHistoryFlag, setRevertAliasHistoryID, setRevertAliasHistoryFlag} = useTagDialogActions()
     const navigate = useNavigate()
+    const invalidateTags = useInvalidateTags()
+    const invalidateTag = useInvalidateTag()
 
     const revertAliasHistory = async () => {
         if (props.history.type === "alias") {
             await functions.http.post("/api/tag/aliasto/undo", {historyID: props.history.historyID}, session, setSessionFlag)
+            invalidateTags()
         } else if (props.history.type === "undo alias") {
             await functions.http.post("/api/tag/aliasto", {tag: props.history.source, aliasTo: props.history.target}, session, setSessionFlag)
+            invalidateTag(props.history.source)
         } else if (props.history.type === "implication") {
             await functions.http.post("/api/tag/implication/undo", {historyID: props.history.historyID}, session, setSessionFlag)
+            invalidateTags()
         } else if (props.history.type === "undo implication") {
             await functions.http.post("/api/tag/implication/redo", {historyID: props.history.historyID}, session, setSessionFlag)
+            invalidateTags()
         }
         props.onEdit?.()
     }
@@ -58,6 +65,7 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const deleteAliasHistory = async () => {
         await functions.http.delete("/api/alias/history/delete", {historyID: props.history.historyID, type: props.history.type}, session, setSessionFlag)
+        invalidateTags()
         props.onDelete?.()
     }
 

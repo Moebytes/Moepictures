@@ -8,6 +8,7 @@ import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useSearchDialogSelector, useSearchDialogActions, useLayoutSelector,
 useInteractionActions} from "../../store"
+import {useInvalidateHistory} from "../../api"
 import functions from "../../functions/Functions"
 import DeleteIcon from "../../assets/svg/delete.svg"
 import {SearchHistory} from "../../types/Types"
@@ -28,9 +29,11 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {deleteSearchHistoryID, deleteSearchHistoryFlag} = useSearchDialogSelector()
     const {setDeleteSearchHistoryID, setDeleteSearchHistoryFlag} = useSearchDialogActions()
     const navigate = useNavigate()
+    const invalidateHistory = useInvalidateHistory()
 
     const deleteSearchHistory = async () => {
         await functions.http.delete("/api/user/history/delete", {postID: props.history.postID}, session, setSessionFlag)
+        invalidateHistory()
         props.onDelete?.()
     }
 

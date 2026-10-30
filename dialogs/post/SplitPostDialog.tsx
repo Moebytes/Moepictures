@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
+import {useInvalidatePost} from "../../api"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import CheckboxIcon from "../../assets/svg/checkbox.svg"
@@ -25,6 +26,7 @@ const SplitPostDialog: React.FunctionComponent = (props) => {
     const [currentOnly, setCurrentOnly] = useState(false)
     const [mergeSubsequent, setMergeSubsequent] = useState(false)
     const controls = useDragControls()
+    const invalidatePost = useInvalidatePost()
 
     useEffect(() => {
         if (splitPostID) {
@@ -42,6 +44,7 @@ const SplitPostDialog: React.FunctionComponent = (props) => {
         if (permissions.isAdmin(session)) {
             let order = currentOnly || mergeSubsequent ? splitPostID.order : null
             await functions.http.post("/api/post/split", {postID: splitPostID.post.postID, order, mergeSubsequent}, session, setSessionFlag)
+            invalidatePost(splitPostID.post.postID)
             setPostFlag(splitPostID.post.postID)
         }
     }

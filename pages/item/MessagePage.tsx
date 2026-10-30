@@ -4,8 +4,15 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useState, useRef} from "react"
-import {useNavigate, useParams} from "react-router-dom"
+import React, {useEffect, useState, useRef, useEffectEvent, useMemo} from "react"
+import {usePageURL, getPageNumber} from "../../components/site/usePageURL"
+import {useSearchActions, useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions, useActiveSelector,
+useSearchSelector, usePageSelector, useFlagSelector, useMessageDialogActions, useMessageDialogSelector,
+useCacheSelector} from "../../store"
+import {useGetMessageRepliesInfiniteQuery, useGetMessageRepliesPageQuery, 
+useInvalidateMessages, useInvalidateThreads} from "../../api"
+import {useNavigate, useParams, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -13,17 +20,12 @@ import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
 import moeText from "../../moetext/MoeText"
 import MessageReply from "../../components/search/MessageReply"
-import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
-useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
-useActiveSelector, useSearchSelector, usePageSelector, useFlagSelector,
-useMessageDialogActions, useMessageDialogSelector, useCacheSelector} from "../../store"
 import permissions from "../../structures/Permissions"
 import favicon from "../../assets/icons/favicon.png"
 import EditIcon from "../../assets/svg/edit.svg"
 import DeleteIcon from "../../assets/svg/delete.svg"
 import QuoteIcon from "../../assets/svg/quote.svg"
 import ForwardIcon from "../../assets/svg/forward.svg"
-import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import TextBox, {TextBoxRef} from "../../ui/TextBox"
 import PageControls from "../../components/site/PageControls"
 import LoadingSpinner from "../../components/search/LoadingSpinner"
@@ -59,6 +61,16 @@ const MessagePage: React.FunctionComponent = () => {
     const navigate = useNavigate()
     const textBoxRef = useRef<TextBoxRef>(null)
     const {id: messageID} = useParams() as {id: string}
+    const location = useLocation()
+    const [page, setPage] = useState(getPageNumber(location.search))
+    const [query, setQuery] = useState(new URLSearchParams(location.search).get("query") ?? "")
+    const [searchQuery, setSearchQuery] = useState(query)
+    const [refreshKey, setRefreshKey] = useState(0)
+    const refreshRef = useRef(false)
+    const invalidateMessages = useInvalidateMessages()
+    const invalidateThreads = useInvalidateThreads()
+
+    usePageURL(page, setPage, query, setQuery)
 
     useEffect(() => {
         const replyParam = new URLSearchParams(window.location.search).get("reply")
@@ -84,6 +96,7 @@ const MessagePage: React.FunctionComponent = () => {
     useEffect(() => {
         const updateRead = async () => {
             await functions.http.post("/api/message/read", {messageID, forceRead: true}, session, setSessionFlag)
+            invalidateMessages()
             const result = await functions.http.get("/api/user/checkmail", null, session, setSessionFlag)
             setHasNotification(result)
         }
@@ -102,21 +115,66 @@ const MessagePage: React.FunctionComponent = () => {
         setDefaultIcon(message.image ? false : true)
     }
 
-    const loadInitial = async () => {
-        const result = await functions.http.get("/api/message/replies", {messageID}, session, setSessionFlag)
-        return result
-    }
+    useEffect(() => {
+        setSearchQuery(query)
+    }, [query])
 
-    const {visibleItems, page, setPage, maxPage, initItems, setManagedPage} = 
-        usePaginatedScroll({loadInitial, pageAmount, countKey: "replyCount"})
+    const infiniteQuery = useGetMessageRepliesInfiniteQuery(
+        {messageID, refreshKey},
+        {skip: !scroll, initialPageParam: {offset: (page - 1) * pageAmount, limit: 100}}
+    )
+
+    const batchSize = Math.max(pageAmount, Math.floor(100 / pageAmount) * pageAmount)
+    const batchOffset = Math.floor((page - 1) * pageAmount / batchSize) * batchSize
+    const pageOffset = (page - 1) * pageAmount - batchOffset
+
+    const pageQuery = useGetMessageRepliesPageQuery(
+        {messageID,
+        offset: batchOffset, refreshKey},
+        {skip: scroll}
+    )
+
+    const items = useMemo(() => {
+        let result = scroll ? infiniteQuery.currentData?.pages.flat() ?? [] : pageQuery.currentData ?? []
+        return result
+    }, [scroll, infiniteQuery.currentData, pageQuery.currentData])
+
+    const visibleItems = useMemo(() => {
+        return scroll ? items : items.slice(pageOffset, pageOffset + pageAmount)
+    }, [items, pageOffset, pageAmount, scroll])
+    
+    const totalCount = Number(items[0]?.replyCount ?? items.length)
+    const maxPage = Math.max(1, Math.ceil(totalCount / pageAmount))
+
+    const loadMore = useEffectEvent(() => {
+        if (infiniteQuery.hasNextPage && !infiniteQuery.isFetchingNextPage) infiniteQuery.fetchNextPage()
+    })
+
+    useEffect(() => {
+        if (!scroll) return
+        const onScroll = () => {
+            if (functions.dom.scrolledToBottom()) loadMore()
+        }
+        window.addEventListener("scroll", onScroll)
+        return () => window.removeEventListener("scroll", onScroll)
+    }, [scroll])
+
+    const onRefresh = async (value?: string, reset?: boolean) => {
+        const nextQuery = typeof value === "string" ? value : searchQuery
+        if (reset || nextQuery !== query) setPage(1)
+        setQuery(nextQuery)
+
+        if (refreshRef.current) setRefreshKey((prev) => prev + 1)
+        refreshRef.current = true
+    }
 
     useEffect(() => {
         updateMessage()
-        initItems()
+        onRefresh()
     }, [messageID, session])
 
     useEffect(() => {
-        if (messagePage) setManagedPage(messagePage)
+        if (messagePage && !location.search) setPage(messagePage)
     }, [])
 
     useEffect(() => {
@@ -195,7 +253,7 @@ const MessagePage: React.FunctionComponent = () => {
         let visible = visibleItems as MessageUserReply[]
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
-            jsx.push(<MessageReply reply={visible[i]} onDelete={initItems} onEdit={initItems} onReplyJump={onReplyJump}/>)
+            jsx.push(<MessageReply reply={visible[i]} onDelete={onRefresh} onEdit={onRefresh} onReplyJump={onReplyJump}/>)
         }
         return jsx
     }
@@ -230,6 +288,7 @@ const MessagePage: React.FunctionComponent = () => {
         const badContent = functions.validation.validateThread(editMessageContent, i18n)
         if (badContent) return
         await functions.http.put("/api/message/edit", {messageID, title: editMessageTitle, content: editMessageContent, r18: editMessageR18}, session, setSessionFlag)
+        invalidateMessages()
         updateMessage()
     }
 
@@ -251,6 +310,7 @@ const MessagePage: React.FunctionComponent = () => {
 
     const deleteMessage = async () => {
         await functions.http.delete("/api/message/delete", {messageID}, session, setSessionFlag)
+        invalidateMessages()
         navigate("/mail")
     }
 
@@ -318,7 +378,8 @@ const MessagePage: React.FunctionComponent = () => {
             return textBoxRef.current?.clearError()
         }
         await functions.http.post("/api/message/reply", {messageID, content: text, r18}, session, setSessionFlag)
-        initItems()
+        invalidateThreads()
+        onRefresh()
         textBoxRef.current?.updateText("")
     }
 

@@ -8,6 +8,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector,
 useSessionActions, useFlagActions} from "../../store"
+import {useInvalidateFavgroups} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
@@ -25,6 +26,7 @@ const RemapFavgroupDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
     const controls = useDragControls()
+    const invalidateFavgroups = useInvalidateFavgroups()
 
     useEffect(() => {
         if (remapFavGroupObj) {
@@ -42,6 +44,7 @@ const RemapFavgroupDialog: React.FunctionComponent = (props) => {
         if (!remapFavGroupObj) return
         const postIDs = items.trim().split(/\s+/g)
         await functions.http.put("/api/favgroup/remap", {name: remapFavGroupObj.name, postIDs}, session, setSessionFlag)
+        invalidateFavgroups()
         setRemapFavGroupObj(null)
         setGroupFlag(true)
     }
@@ -53,7 +56,6 @@ const RemapFavgroupDialog: React.FunctionComponent = (props) => {
             setRemapFavGroupObj(null)
         }
     }
-
 
     if (remapFavGroupObj) {
         return (

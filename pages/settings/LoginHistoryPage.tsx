@@ -4,16 +4,17 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useRef} from "react"
-import {useNavigate} from "react-router-dom"
+import React, {useEffect, useRef, useState, useMemo} from "react"
+import {usePageURL, getPageNumber} from "../../components/site/usePageURL"
+import {useSearchActions, useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useSearchSelector, useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
+import {useGetLoginHistoryPageQuery, useInvalidateSession} from "../../api"
+import {useNavigate, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import Footer from "../../components/site/Footer"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
 import functions from "../../functions/Functions"
-import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useSearchSelector,
-useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
-import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
 import {LoginHistory} from "../../types/Types"
 import "./styles/sitepage.less"
@@ -31,7 +32,16 @@ const LoginHistoryPage: React.FunctionComponent = () => {
     const {scroll} = useSearchSelector()
     const {mobile, tablet} = useLayoutSelector()
     const {setActionBanner} = useActiveActions()
+    const location = useLocation()
+    const [page, setPage] = useState(getPageNumber(location.search))
+    const [query, setQuery] = useState(new URLSearchParams(location.search).get("query") ?? "")
+    const [searchQuery, setSearchQuery] = useState(query)
+    const [refreshKey, setRefreshKey] = useState(0)
+    const refreshRef = useRef(false)
     const navigate = useNavigate()
+    const invalidateSession = useInvalidateSession()
+
+    usePageURL(page, setPage, query, setQuery)
 
     useEffect(() => {
         setHideNavbar(false)
@@ -51,12 +61,34 @@ const LoginHistoryPage: React.FunctionComponent = () => {
         setRelative(mobile ? true : false)
     }, [mobile])
 
-    const loadInitial = async () => {
-        const result = await functions.http.get("/api/user/login/history", null, session, setSessionFlag)
-        return result
-    }
+    useEffect(() => {
+        setSearchQuery(query)
+    }, [query])
 
-    const {visibleItems, page, setPage, maxPage, initItems} = usePaginatedScroll({loadInitial, pageAmount})
+    const pageQuery = useGetLoginHistoryPageQuery(
+        null, {skip: false}
+    )
+
+    const items = useMemo(() => {
+        let result = pageQuery.currentData ?? []
+        return result
+    }, [pageQuery.currentData])
+
+    const visibleItems = useMemo(() => {
+        return scroll ? items : items.slice((page - 1) * pageAmount, page * pageAmount)
+    }, [items, page, scroll])
+    
+    const totalCount = items.length
+    const maxPage = Math.max(1, Math.ceil(totalCount / pageAmount))
+
+    const onRefresh = async (value?: string, reset?: boolean) => {
+        const nextQuery = typeof value === "string" ? value : searchQuery
+        if (reset || nextQuery !== query) setPage(1)
+        setQuery(nextQuery)
+
+        if (refreshRef.current) setRefreshKey((prev) => prev + 1)
+        refreshRef.current = true
+    }
 
     useEffect(() => {
         if (!session.cookie) return
@@ -65,11 +97,12 @@ const LoginHistoryPage: React.FunctionComponent = () => {
             navigate("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         }
-        initItems()
+        onRefresh()
     }, [session])
 
     const logoutOtherSessions = async () => {
         await functions.http.post("/api/user/logout-sessions", null, session, setSessionFlag)
+        invalidateSession()
         setActionBanner("logout-sessions")
     }
 

@@ -4,11 +4,12 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useState} from "react"
-import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
-useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, 
-useFlagSelector, useCacheActions, useGroupDialogActions, useSearchActions, useActiveSelector,
-useMiscDialogActions} from "../../store"
+import React, {useEffect, useState, useMemo} from "react"
+import {usePageURL, getPageNumber} from "../../components/site/usePageURL"
+import {useSearchActions, useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useFlagSelector,
+useCacheActions, useGroupDialogActions, useActiveSelector, useMiscDialogActions} from "../../store"
+import {useInvalidateFavgroups, useLazyGetFavgroupQuery} from "../../api"
 import {useNavigate, useParams, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -28,7 +29,6 @@ import ScrollIcon from "../../assets/svg/scroll.svg"
 import PagesIcon from "../../assets/svg/pages.svg"
 import {ReactSortable} from "react-sortablejs"
 import TinyImage from "../../components/image/TinyImage"
-import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
 import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {GroupItem, Favgroup} from "../../types/Types"
@@ -57,6 +57,13 @@ const FavgroupPage: React.FunctionComponent = () => {
     const navigate = useNavigate()
     const location = useLocation()
     const {username, favgroup: favgroupName} = useParams() as {username: string, favgroup: string}
+    const [page, setPage] = useState(getPageNumber(location.search))
+    const [query, setQuery] = useState(new URLSearchParams(location.search).get("query") ?? "")
+    const [items, setItems] = useState<GroupItem[]>([])
+    const invalidateFavgroups = useInvalidateFavgroups()
+    const [getFavgroup] = useLazyGetFavgroupQuery()
+
+    usePageURL(page, setPage, query, setQuery)
 
     useEffect(() => {
         setHideNavbar(true)
@@ -75,7 +82,7 @@ const FavgroupPage: React.FunctionComponent = () => {
         setRelative(mobile ? true : false)
     }, [mobile])
 
-    const loadInitial = async () => {
+    const prepareItems = async () => {
         if (!favgroup) return []
         const items = [] as GroupItem[]
 
@@ -91,11 +98,28 @@ const FavgroupPage: React.FunctionComponent = () => {
         return items
     }
 
-    const {items, setItems, visibleItems, setVisible, page, setPage, maxPage, 
-        initItems, toggleScroll} = usePaginatedScroll({loadInitial, pageAmount})
+    const visibleItems = useMemo(() => {
+        return scroll ? items : items.slice((page - 1) * pageAmount, page * pageAmount)
+    }, [items, page, scroll])
+
+    const maxPage = Math.max(1, Math.ceil(items.length / pageAmount))
+
+    const setVisible = (rows: GroupItem[]) => {
+        setItems((prev) => {
+            const result = [...prev]
+            result.splice(scroll ? 0 : (page - 1) * pageAmount, rows.length, ...rows)
+            return result
+        })
+    }
+
+    const toggleScroll = () => setScroll(!scroll)
+
+    const onRefresh = async () => {
+        setItems(await prepareItems())
+    }
 
     const favgroupInfo = async () => {
-        let favgroup = await functions.http.get("/api/favgroup", {name: favgroupName, username}, session, setSessionFlag).catch(() => null)
+        let favgroup = await getFavgroup({name: favgroupName, username}).unwrap().catch(() => null)
         if (!favgroup) return functions.dom.replaceLocation("/404")
         if (functions.post.isR18(favgroup.rating)) {
             if (!session.cookie) return
@@ -122,7 +146,7 @@ const FavgroupPage: React.FunctionComponent = () => {
             if (favgroup.private) {
                 if (session.username !== username) return functions.dom.replaceLocation("/403")
             }
-            initItems()
+            onRefresh()
         }
     }, [favgroup, ratingType, session])
 
@@ -150,6 +174,7 @@ const FavgroupPage: React.FunctionComponent = () => {
                 if (deleteMode) {
                     await functions.http.delete("/api/favgroup/post/delete", {postID: item.post.postID, name: favgroup.name}, 
                         session, setSessionFlag)
+                    invalidateFavgroups()
                     return setGroupFlag(true)
                 }
                 if (reorderState) return
@@ -186,13 +211,14 @@ const FavgroupPage: React.FunctionComponent = () => {
             const item = items[i]
             posts.push({postID: item.post.postID, order: i + 1})
         }
-        functions.http.put("/api/favgroup/reorder", {name: favgroup.name, posts}, session, setSessionFlag)
+        await functions.http.put("/api/favgroup/reorder", {name: favgroup.name, posts}, session, setSessionFlag)
+        invalidateFavgroups()
         setReorderState(false)
     }
 
     const cancelReorder = () => {
         setReorderState(false)
-        initItems()
+        onRefresh()
     }
 
     const changeReorderState = () => {

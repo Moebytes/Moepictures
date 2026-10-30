@@ -8,6 +8,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useThreadDialogSelector, useThreadDialogActions, useSessionSelector, 
 useSessionActions} from "../../store"
+import {useInvalidateThreads} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import MiniTextBox, {MiniTextBoxRef} from "../../ui/MiniTextBox"
@@ -33,6 +34,7 @@ const NewThreadDialog: React.FunctionComponent = () => {
     const textBoxRef = useRef<MiniTextBoxRef>(null)
     const navigate = useNavigate()
     const controls = useDragControls()
+    const invalidateThreads = useInvalidateThreads()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
@@ -63,6 +65,7 @@ const NewThreadDialog: React.FunctionComponent = () => {
         }
         try {
             const threadID = await functions.http.post("/api/thread/create", {title: threadTitle, content: threadContent, r18}, session, setSessionFlag)
+            invalidateThreads()
             setShowNewThreadDialog(false)
             if (threadID) navigate(`/thread/${threadID}`)
         } catch {

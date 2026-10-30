@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useTagDialogSelector, 
 useTagDialogActions, useSessionSelector, useSessionActions, useLayoutSelector} from "../../store"
+import {useInvalidateTag} from "../../api"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {motion, useDragControls} from "framer-motion"
@@ -29,6 +30,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidateTag = useInvalidateTag()
 
     const filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
 
@@ -67,9 +69,10 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                     image = Object.values(bytes)
                 }
             }
-            functions.http.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
+            await functions.http.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases,
             implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, danbooruTag: editTagObj.danbooruTag, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
             wikipedia: editTagObj.wikipedia, r18: editTagObj.r18!, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
+            invalidateTag(editTagObj.tag)
             setSubmitted(true)
         }
     }

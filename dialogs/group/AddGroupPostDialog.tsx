@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector, 
 useSessionActions, useFlagActions} from "../../store"
+import {useInvalidateGroup} from "../../api"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {motion, useDragControls} from "framer-motion"
@@ -27,6 +28,7 @@ const AddGroupPostDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidateGroup = useInvalidateGroup()
 
     useEffect(() => {
         if (addGroupPostObj) {
@@ -51,6 +53,7 @@ const AddGroupPostDialog: React.FunctionComponent = (props) => {
             }
             setAddGroupPostObj(null)
             await functions.http.post("/api/group", {postIDs: postIDs.split(/\s+/g), name: addGroupPostObj.slug}, session, setSessionFlag)
+            invalidateGroup(addGroupPostObj.slug)
             setGroupFlag(true)
         } else {
             const badReason = functions.validation.validateReason(reason, i18n)
@@ -73,6 +76,7 @@ const AddGroupPostDialog: React.FunctionComponent = (props) => {
             let newPosts = postIDs.split(/\s+/g)
             let newPostIDs = [...existingPosts, ...newPosts]
             await functions.http.post("/api/group/request", {postIDs: newPostIDs, name: addGroupPostObj.slug, reason}, session, setSessionFlag)
+            invalidateGroup(addGroupPostObj.slug)
             setSubmitted(true)
         }
     }

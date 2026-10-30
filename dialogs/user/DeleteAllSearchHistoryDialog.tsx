@@ -8,6 +8,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 useSearchDialogSelector, useSearchDialogActions} from "../../store"
+import {useInvalidateHistory} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
@@ -23,6 +24,7 @@ const DeleteAllSearchHistoryDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
     const controls = useDragControls()
+    const invalidateHistory = useInvalidateHistory()
 
     useEffect(() => {
         if (showDeleteAllHistoryDialog) {
@@ -37,6 +39,7 @@ const DeleteAllSearchHistoryDialog: React.FunctionComponent = (props) => {
 
     const deleteAllHistory = async () => {
         await functions.http.delete("/api/user/history/delete", {all: true}, session, setSessionFlag)
+        invalidateHistory()
         navigate("/posts")
     }
 

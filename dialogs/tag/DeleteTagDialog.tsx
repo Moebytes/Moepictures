@@ -6,6 +6,7 @@
 
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions} from "../../store"
+import {useInvalidateTag} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
@@ -23,6 +24,7 @@ const DeleteTagDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidateTag = useInvalidateTag()
 
     useEffect(() => {
         if (deleteTagID) {
@@ -50,6 +52,7 @@ const DeleteTagDialog: React.FunctionComponent = (props) => {
                 return
             }
             await functions.http.post("/api/tag/delete/request", {tag: deleteTagID, reason}, session, setSessionFlag)
+            invalidateTag(deleteTagID)
             setSubmitted(true)
         }
     }
@@ -143,7 +146,6 @@ const DeleteTagDialog: React.FunctionComponent = (props) => {
                 </motion.div>
             </div>
         )
-
 
     }
     return null

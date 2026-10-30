@@ -8,6 +8,7 @@ import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useActiveSelector, 
 useActiveActions, useFlagSelector, useFlagActions} from "../../store"
+import {useInvalidateComments} from "../../api"
 import functions from "../../functions/Functions"
 import TextBox, {TextBoxRef} from "../../ui/TextBox"
 import Comment from "./Comment"
@@ -30,6 +31,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     const [commentFlag, setCommentFlag] = useState(false)
     const textBoxRef = useRef<TextBoxRef>(null)
     const navigate = useNavigate()
+    const invalidateComments = useInvalidateComments()
 
     useEffect(() => {
         const commentParam = new URLSearchParams(window.location.search).get("comment")
@@ -115,6 +117,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
         textBoxRef.current?.showError(i18n.buttons.submitting)
         try {
             await functions.http.post("/api/comment/create", {postID: props.post.postID, comment: text}, session, setSessionFlag)
+            invalidateComments()
             textBoxRef.current?.showError(i18n.errors.comment.added)
             setCommentFlag(true)
             textBoxRef.current?.updateText("")

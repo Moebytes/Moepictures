@@ -4,7 +4,13 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useState, useRef} from "react"
+import React, {useEffect, useState, useRef, useEffectEvent, useMemo} from "react"
+import {usePageURL, getPageNumber} from "../../components/site/usePageURL"
+import {useSearchActions, useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions, useActiveSelector,
+useSearchSelector, usePageSelector, useFlagSelector, useMessageDialogSelector, useMessageDialogActions} from "../../store"
+import {useSearchMessagesInfiniteQuery, useSearchMessagesPageQuery, useInvalidateMessages} from "../../api"
+import {useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -19,11 +25,6 @@ import RadioButtonIcon from "../../assets/svg/radiobutton.svg"
 import RadioButtonCheckedIcon from "../../assets/svg/radiobutton-checked.svg"
 import MessageRow from "../../components/search/MessageRow"
 import LoadingSpinner from "../../components/search/LoadingSpinner"
-import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
-useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
-useActiveSelector, useSearchSelector, usePageSelector, useFlagSelector,
-useMessageDialogSelector, useMessageDialogActions} from "../../store"
-import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
 import {MessageSearch, CommentSort} from "../../types/Types"
 import "./styles/itemspage.less"
@@ -51,8 +52,17 @@ const MailPage: React.FunctionComponent = (props) => {
     const [sortType, setSortType] = useState("date" as CommentSort)
     const [sortReverse, setSortReverse] = useState(false)
     const [hideSystem, setHideSystem] = useState(false)
-    const loadingRef = useRef(true)
+    const location = useLocation()
+    const {setScroll} = useSearchActions()
+    const [page, setPage] = useState(getPageNumber(location.search))
+    const [query, setQuery] = useState(new URLSearchParams(location.search).get("query") ?? "")
+    const [searchQuery, setSearchQuery] = useState(query)
+    const [refreshKey, setRefreshKey] = useState(0)
     const sortRef = useRef<HTMLDivElement>(null)
+    const refreshRef = useRef(false)
+    const invalidateMessages = useInvalidateMessages()
+
+    usePageURL(page, setPage, query, setQuery)
 
     useEffect(() => {
         const savedHideSystem = localStorage.getItem("hideSystem")
@@ -64,13 +74,14 @@ const MailPage: React.FunctionComponent = (props) => {
     }, [hideSystem])
 
     useEffect(() => {
-        if (hasNotification) initItems()
+        if (hasNotification) onRefresh()
     }, [hasNotification])
 
     const softDeleteMessage = async () => {
         if (!softDeleteMessageID) return
         await functions.http.post("/api/message/softdelete", {messageID: softDeleteMessageID}, session, setSessionFlag)
-        initItems()
+        invalidateMessages()
+        onRefresh()
     }
 
     useEffect(() => {
@@ -106,37 +117,78 @@ const MailPage: React.FunctionComponent = (props) => {
         }
     }, [session])
 
-    const loadInitial = async (query?: string) => {
-        let sort = functions.validation.parseSort(sortType, sortReverse)
-        const result = await functions.http.get("/api/search/messages", {sort, query, hideSystem}, session, setSessionFlag)
+    useEffect(() => {
+        setSearchQuery(query)
+    }, [query])
+
+    const infiniteQuery = useSearchMessagesInfiniteQuery(
+        {query, sort: functions.validation.parseSort(sortType, sortReverse), hideSystem, refreshKey},
+        {skip: !scroll, initialPageParam: {offset: (page - 1) * pageAmount, limit}}
+    )
+
+    const batchSize = Math.max(pageAmount, Math.floor(limit / pageAmount) * pageAmount)
+    const batchOffset = Math.floor((page - 1) * pageAmount / batchSize) * batchSize
+    const pageOffset = (page - 1) * pageAmount - batchOffset
+
+    const pageQuery = useSearchMessagesPageQuery(
+        {query, sort: functions.validation.parseSort(sortType, sortReverse), hideSystem,
+        offset: batchOffset, refreshKey},
+        {skip: scroll}
+    )
+
+    const items = useMemo(() => {
+        let result = scroll ? infiniteQuery.currentData?.pages.flat() ?? [] : pageQuery.currentData ?? []
         return result
+    }, [scroll, infiniteQuery.currentData, pageQuery.currentData])
+
+    const visibleItems = useMemo(() => {
+        return scroll ? items : items.slice(pageOffset, pageOffset + pageAmount)
+    }, [items, pageOffset, pageAmount, scroll])
+    
+    const isLoading = (scroll ? infiniteQuery.isFetching : pageQuery.isFetching) && visibleItems.length === 0
+    const totalCount = Number(items[0]?.messageCount ?? items.length)
+    const maxPage = Math.max(1, Math.ceil(totalCount / pageAmount))
+
+    const loadMore = useEffectEvent(() => {
+        if (infiniteQuery.hasNextPage && !infiniteQuery.isFetchingNextPage) infiniteQuery.fetchNextPage()
+    })
+
+    useEffect(() => {
+        if (!scroll) return
+        const onScroll = () => {
+            if (functions.dom.scrolledToBottom()) loadMore()
+        }
+        window.addEventListener("scroll", onScroll)
+        return () => window.removeEventListener("scroll", onScroll)
+    }, [scroll])
+
+    const onRefresh = async (value?: string, reset?: boolean) => {
+        const nextQuery = typeof value === "string" ? value : searchQuery
+        if (reset || nextQuery !== query) setPage(1)
+        setQuery(nextQuery)
+
+        if (refreshRef.current) setRefreshKey((prev) => prev + 1)
+        refreshRef.current = true
     }
 
-    const updateOffset = async (offset: number, query?: string) => {
-        let sort = functions.validation.parseSort(sortType, sortReverse)
-        let result = await functions.http.get("/api/search/messages", {sort, query, hideSystem, offset}, session, setSessionFlag)
-        return result
-    }
-
-    const {visibleItems, page, setPage, maxPage, searchQuery, setSearchQuery, initItems, setManagedPage, toggleScroll} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "messageCount"})
+    const toggleScroll = () => setScroll(!scroll)
 
     useEffect(() => {
         if (messageSearchFlag !== null) {
             setTimeout(() => {
                 setSearchQuery(messageSearchFlag)
-                initItems(messageSearchFlag)
+                onRefresh(messageSearchFlag)
                 setMessageSearchFlag(null)
             }, 500)
         }
     }, [messageSearchFlag, hideSystem])
 
     useEffect(() => {
-        initItems()
+        onRefresh()
     }, [sortType, sortReverse, hideSystem])
 
     useEffect(() => {
-        if (mailPage) setManagedPage(mailPage)
+        if (mailPage && !location.search) setPage(mailPage)
     }, [])
 
     useEffect(() => {
@@ -170,10 +222,7 @@ const MailPage: React.FunctionComponent = (props) => {
         let visible = visibleItems as MessageSearch[]
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
-            jsx.push(<MessageRow message={visible[i]} onDelete={initItems} onEdit={initItems}/>)
-        }
-        if (jsx.length) {
-            loadingRef.current = false
+            jsx.push(<MessageRow message={visible[i]} onDelete={onRefresh} onEdit={onRefresh}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
@@ -187,13 +236,15 @@ const MailPage: React.FunctionComponent = (props) => {
 
     const readAll = async () => {
         await functions.http.post("/api/message/bulkread", {readStatus: true}, session, setSessionFlag)
-        initItems()
+        invalidateMessages()
+        onRefresh()
         setHasNotification(false)
     }
 
     const unreadAll = async () => {
         await functions.http.post("/api/message/bulkread", {readStatus: false}, session, setSessionFlag)
-        initItems()
+        invalidateMessages()
+        onRefresh()
         setHasNotification(true)
     }
 
@@ -219,8 +270,8 @@ const MailPage: React.FunctionComponent = (props) => {
                     <span className="items-heading">{i18n.navbar.mail}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
-                            <button className="item-search-button" onClick={() => initItems()}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? onRefresh() : null}/>
+                            <button className="item-search-button" onClick={() => onRefresh()}>
                                 <SearchIcon className="item-search-button-icon"/>
                             </button>
                         </div>
@@ -256,7 +307,7 @@ const MailPage: React.FunctionComponent = (props) => {
                         <RadioButtonIcon className="itemsort-img"/>}
                         <span className="itemsort-text">{i18n.buttons.hideSystem}</span>
                     </div> : null}
-                    {loadingRef.current && <LoadingSpinner/>}
+                    {isLoading && <LoadingSpinner/>}
                     <div className="items-container">
                         {generateMessagesJSX()}
                     </div>

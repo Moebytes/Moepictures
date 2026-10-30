@@ -52,6 +52,7 @@ import PostSong from "../../components/image/PostSong"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagSelector, useFlagActions, useLayoutSelector, useSearchActions, 
 useSearchSelector, useCacheSelector, useCacheActions, useFilterActions} from "../../store"
+import {useInvalidatePosts} from "../../api"
 import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
 import {ProgressBar} from "react-bootstrap"
@@ -118,6 +119,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     const metaInputRef = useRef<HTMLInputElement>(null!)
     const appendTagsRef = useRef<HTMLTextAreaElement>(null!)
     const navigate = useNavigate()
+    const invalidatePosts = useInvalidatePosts()
 
     useEffect(() => {
         setHideNavbar(true)
@@ -530,6 +532,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 setProgress(Math.floor((100/submitData.length) * (i+1)))
                 setProgressText(`${i+1}/${submitData.length}`)
                 await functions.http.post("/api/post/upload", data, session, setSessionFlag)
+                invalidatePosts()
             } catch (e) {
                 console.log(e)
                 setSubmitError(true)

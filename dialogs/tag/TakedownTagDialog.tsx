@@ -6,6 +6,7 @@
 
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions} from "../../store"
+import {useInvalidateTag} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
@@ -21,6 +22,7 @@ const TakedownTagDialog: React.FunctionComponent = (props) => {
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const controls = useDragControls()
+    const invalidateTag = useInvalidateTag()
 
     useEffect(() => {
         if (takedownTag) {
@@ -37,6 +39,7 @@ const TakedownTagDialog: React.FunctionComponent = (props) => {
         if (!takedownTag) return
         if (permissions.isMod(session)) {
             await functions.http.post("/api/tag/takedown", {tag: takedownTag.tag}, session, setSessionFlag)
+            invalidateTag(takedownTag.tag)
             history.go(0)
         }
     }

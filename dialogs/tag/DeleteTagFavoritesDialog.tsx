@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions,
 useFlagActions} from "../../store"
+import {useInvalidateTags} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
@@ -21,6 +22,7 @@ const DeleteTagFavoritesDialog: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const controls = useDragControls()
+    const invalidateTags = useInvalidateTags()
 
     useEffect(() => {
         if (deleteTagFavoritesDialog) {
@@ -35,6 +37,7 @@ const DeleteTagFavoritesDialog: React.FunctionComponent = (props) => {
 
     const deleteTagFavorites = async () => {
         await functions.http.delete("/api/tagfavorites/delete", null, session, setSessionFlag)
+        invalidateTags()
         setTagFavoriteFlag(true)
     }
 

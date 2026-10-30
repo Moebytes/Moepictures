@@ -8,6 +8,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 usePostDialogSelector, usePostDialogActions,
 useFlagActions} from "../../store"
+import {useInvalidatePost} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
@@ -22,6 +23,7 @@ const UndeletePostDialog: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const controls = useDragControls()
+    const invalidatePost = useInvalidatePost()
 
     useEffect(() => {
         if (undeletePostID) {
@@ -38,8 +40,10 @@ const UndeletePostDialog: React.FunctionComponent = (props) => {
         if (!undeletePostID?.postID) return
         if (undeletePostID.unverified) {
             await functions.http.put("/api/post/undelete/unverified", {postID: undeletePostID.postID}, session, setSessionFlag)
+            invalidatePost(undeletePostID.postID)
         } else {
             await functions.http.put("/api/post/undelete", {postID: undeletePostID.postID}, session, setSessionFlag)
+            invalidatePost(undeletePostID.postID)
         }
         setUndeletePostID(null)
         setPostFlag(undeletePostID.postID)
@@ -53,7 +57,6 @@ const UndeletePostDialog: React.FunctionComponent = (props) => {
             setUndeletePostID(null)
         }
     }
-
 
     if (undeletePostID) {
         if (permissions.isMod(session)) {

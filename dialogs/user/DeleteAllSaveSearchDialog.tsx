@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 useSearchDialogSelector, useSearchDialogActions} from "../../store"
+import {useInvalidateSession} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
@@ -19,6 +20,7 @@ const DeleteAllSaveSearchDialog: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const controls = useDragControls()
+    const invalidateSession = useInvalidateSession()
 
     useEffect(() => {
         if (deleteAllSaveSearchDialog) {
@@ -33,6 +35,7 @@ const DeleteAllSaveSearchDialog: React.FunctionComponent = (props) => {
 
     const deleteAllSavedSearches = async () => {
         await functions.http.delete("/api/user/savesearch/delete", {all: true}, session, setSessionFlag)
+        invalidateSession()
         setSessionFlag(true)
     }
 

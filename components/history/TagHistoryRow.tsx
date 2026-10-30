@@ -8,6 +8,7 @@ import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions,
 useFilterSelector, useInteractionActions} from "../../store"
+import {useInvalidateTag} from "../../api"
 import functions from "../../functions/Functions"
 import RevertIcon from "../../assets/svg/revert.svg"
 import DeleteIcon from "../../assets/svg/delete.svg"
@@ -46,6 +47,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     const tag = props.tagHistory.tag
     let hasChanges = functions.compare.hasHistoryChanges(props.tagHistory)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
+    const invalidateTag = useInvalidateTag()
 
     const updateImage = () => {
         if (!props.tagHistory.image) return
@@ -73,6 +75,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         social: props.tagHistory.social, twitter: props.tagHistory.twitter, website: props.tagHistory.website, fandom: props.tagHistory.fandom, 
         wikipedia: props.tagHistory.wikipedia, type: props.tagHistory.type, r18: props.tagHistory.r18 ?? false, 
         featuredPost: props.tagHistory.featuredPost?.postID}, session, setSessionFlag)
+        invalidateTag(props.tagHistory.tag)
         if (props.tagHistory.key !== props.tagHistory.tag) {
             navigate(`/tag/history/${props.tagHistory.key}`)
         } else {
@@ -97,6 +100,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     const deleteTagHistory = async () => {
         if (props.current) return Promise.reject()
         await functions.http.delete("/api/tag/history/delete", {tag: props.tagHistory.tag, historyID: props.tagHistory.historyID}, session, setSessionFlag)
+        invalidateTag(props.tagHistory.tag)
         props.onDelete?.()
     }
 

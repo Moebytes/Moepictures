@@ -6,6 +6,7 @@
 
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useThreadDialogSelector, useThreadDialogActions, useSessionSelector, useSessionActions} from "../../store"
+import {useInvalidateThreads} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
@@ -22,6 +23,7 @@ const ReportReplyDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidateThreads = useInvalidateThreads()
 
     useEffect(() => {
         if (reportReplyID) {
@@ -33,7 +35,6 @@ const ReportReplyDialog: React.FunctionComponent = (props) => {
             setEnableDrag(true)
         }
     }, [reportReplyID])
-
 
     const reportReply = async () => {
         if (!reportReplyID) return
@@ -47,6 +48,7 @@ const ReportReplyDialog: React.FunctionComponent = (props) => {
             return
         }
         await functions.http.post("/api/reply/report", {replyID: reportReplyID, reason}, session, setSessionFlag)
+        invalidateThreads()
         setSubmitted(true)
     }
 

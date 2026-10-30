@@ -9,6 +9,7 @@ import {useNavigate} from "react-router-dom"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions,
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, useFlagSelector, useFlagActions,
 useMiscDialogActions, useInteractionSelector, useSessionActions, useActiveActions, usePostDialogActions} from "../../store"
+import {useInvalidateSession} from "../../api"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 
@@ -151,6 +152,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
         const backFrameRef = useRef<HTMLImageElement>(null)
         const navigate = useNavigate()
         const childRef = useRef<PostWrapperRef | null>(null)
+        const invalidateSession = useInvalidateSession()
 
         /* State passed to children */
         const containerRef = useRef<HTMLDivElement>(null)
@@ -481,6 +483,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
             if (permissions.isPremium(session)) {
                 functions.cache.clearResponseCacheKey("/api/user/session")
                 await functions.http.post("/api/user/upscaledimages", null, session, setSessionFlag)
+                invalidateSession()
                 setSessionFlag(true)
             } else {
                 setPremiumRequired(true)

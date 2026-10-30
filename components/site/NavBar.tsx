@@ -26,7 +26,8 @@ import MiniAudioPlayer from "./MiniAudioPlayer"
 import Slider from "react-slider"
 import {useThemeSelector, useThemeActions, useLayoutSelector, useSearchActions, useSearchSelector, 
 useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, usePlaybackSelector,
-usePlaybackActions, useInteractionSelector, useCacheSelector, usePageSelector} from "../../store"
+usePlaybackActions, useCacheSelector, usePageSelector, useInteractionSelector, useFlagActions} from "../../store"
+import {useInvalidateSession} from "../../api"
 import HSLDropdown from "../../ui/HSLDropdown"
 import "./styles/navbar.less"
 
@@ -38,12 +39,13 @@ const NavBar: React.FunctionComponent = () => {
     const {setHideMobileNavbar, setHideNavbar} = useLayoutActions()
     const {audio, showMiniPlayer} = usePlaybackSelector()
     const {setShowMiniPlayer} = usePlaybackActions()
+    const {posts, searchState} = useCacheSelector()
+    const {page} = usePageSelector()
     const {search} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
-    const {page} = usePageSelector()
     const {scrollY} = useInteractionSelector()
+    const {setRandomFlag, setImageSearchFlag} = useFlagActions()
     const {setEnableDrag} = useInteractionActions()
-    const {posts} = useCacheSelector()
     const {session, userImg, hasNotification} = useSessionSelector()
     const {setSessionFlag, setHasNotification} = useSessionActions()
     const [showMiniTitle, setShowMiniTitle] = useState(false)
@@ -52,6 +54,7 @@ const NavBar: React.FunctionComponent = () => {
     const [activeColorDropdown, setActiveColorDropdown] = useState(false)
     const [activeParticleDropdown, setActiveParticleDropdown] = useState(false)
     const navigate = useNavigate()
+    const invalidateSession = useInvalidateSession()
 
     useEffect(() => {
         setShowMiniTitle(false)
@@ -125,15 +128,24 @@ const NavBar: React.FunctionComponent = () => {
 
     const logout = async () => {
         await functions.http.post("/api/user/logout", null, session, setSessionFlag)
+        invalidateSession()
         setSessionFlag(true)
         navigate(0)
     }
 
     const postsClick = () => {
         setHideMobileNavbar(true)
-        let pageText = page > 1 ? `?page=${page}` : ""
-        navigate(`/posts${pageText}`, {
-            state: {restorePosts: posts, restoreScrollY: scrollY, restorePage: page}
+        const params = new URLSearchParams()
+        const restorePage = searchState?.page ?? page
+        const restoreQuery = searchState?.query ?? search
+        setSearch(restoreQuery)
+        setSearchFlag(false)
+        setRandomFlag(false)
+        setImageSearchFlag(null)
+        if (restorePage > 1) params.set("page", String(restorePage))
+        if (restoreQuery) params.set("query", restoreQuery)
+        navigate(`/posts${params.size ? `?${params}` : ""}`, {
+            state: {restorePosts: posts, restoreScrollY: scrollY, restorePage, restoreSearch: searchState}
         })
     }
 

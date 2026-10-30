@@ -13,6 +13,7 @@ import SideBar from "../../components/site/SideBar"
 import functions from "../../functions/Functions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
+import {useInvalidateMessages} from "../../api"
 import "./styles/sitepage.less"
 
 const VerifyEmailPage: React.FunctionComponent = () => {
@@ -31,6 +32,7 @@ const VerifyEmailPage: React.FunctionComponent = () => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
+    const invalidateMessages = useInvalidateMessages()
 
     const getCaptchaColor = () => {
         if (theme.includes("light")) return "#ffffff"
@@ -97,6 +99,7 @@ const VerifyEmailPage: React.FunctionComponent = () => {
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
             await functions.http.post("/api/user/verifyemail", {email, captchaResponse}, session, setSessionFlag)
+            invalidateMessages()
             setSubmitted(true)
             setSessionFlag(true)
             setError(false)

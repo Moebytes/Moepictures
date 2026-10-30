@@ -6,6 +6,7 @@
 
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions} from "../../store"
+import {useInvalidateTag} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
@@ -23,6 +24,7 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidateTag = useInvalidateTag()
 
     useEffect(() => {
         if (aliasTagID) {
@@ -51,6 +53,7 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
             }
             try {
                 await functions.http.post("/api/tag/aliasto/request", {tag: aliasTagID, aliasTo: aliasTagName, reason}, session, setSessionFlag)
+                invalidateTag(aliasTagID)
                 setSubmitted(true)
             } catch {
                 setError(true)

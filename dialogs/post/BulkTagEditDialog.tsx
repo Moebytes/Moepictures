@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
 useSearchSelector, useSearchActions, useLayoutSelector} from "../../store"
+import {useInvalidatePosts} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
@@ -76,6 +77,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
     const metaRef = useRef<HTMLInputElement>(null!)
     const tagRef = useRef<HTMLDivElement>(null!)
     const controls = useDragControls()
+    const invalidatePosts = useInvalidatePosts()
 
     const reset = () => {
         setArtists("")
@@ -185,6 +187,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
         for (let i = 0; i < promiseArray.length; i++) {
             const data = await promiseArray[i]
             await functions.http.put("/api/post/quickedit", data, session, setSessionFlag)
+            invalidatePosts()
         }
         functions.cache.clearCache()
     }

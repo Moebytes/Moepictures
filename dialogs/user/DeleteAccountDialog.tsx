@@ -8,6 +8,7 @@ import React, {useEffect} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 useMiscDialogSelector, useMiscDialogActions, useActiveActions} from "../../store"
+import {useInvalidateSession} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
@@ -22,6 +23,7 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
     const {setSessionFlag} = useSessionActions()
     const navigate = useNavigate()
     const controls = useDragControls()
+    const invalidateSession = useInvalidateSession()
 
     useEffect(() => {
         if (showDeleteAccountDialog) {
@@ -36,6 +38,7 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
 
     const deleteAccount = async () => {
         await functions.http.delete("/api/user/delete", null, session, setSessionFlag)
+        invalidateSession()
         setSessionFlag(true)
         setTimeout(() => {
             navigate("/posts")

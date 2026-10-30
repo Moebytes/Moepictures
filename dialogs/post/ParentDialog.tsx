@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useInteractionActions, usePostDialogSelector, usePostDialogActions, useSessionSelector, 
 useSessionActions, useFlagActions} from "../../store"
+import {useInvalidatePost} from "../../api"
 import {useThemeSelector} from "../../store"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
@@ -27,6 +28,7 @@ const ParentDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidatePost = useInvalidatePost()
 
     useEffect(() => {
         if (childPostObj) {
@@ -54,6 +56,7 @@ const ParentDialog: React.FunctionComponent = (props) => {
             }
             setChildPostObj(null)
             await functions.http.put("/api/post/quickedit", data, session, setSessionFlag)
+            invalidatePost(childPostObj.post.postID)
             setPostFlag(childPostObj.post.postID)
         } else {
             const badReason = functions.validation.validateReason(reason, i18n)
@@ -74,7 +77,8 @@ const ParentDialog: React.FunctionComponent = (props) => {
                 parentID,
                 reason
             }
-            functions.http.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
+            await functions.http.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
+            invalidatePost(childPostObj.post.postID)
             setSubmitted(true)
         }
     }

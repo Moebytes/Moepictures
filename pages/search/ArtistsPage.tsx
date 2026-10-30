@@ -4,7 +4,13 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect , useState, useRef} from "react"
+import React, {useEffect, useState, useRef, useEffectEvent, useMemo} from "react"
+import {usePageURL, getPageNumber} from "../../components/site/usePageURL"
+import {useSearchActions, useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useLayoutSelector, usePageActions, useActiveSelector, useSearchSelector,
+usePageSelector, useCacheSelector, useCacheActions} from "../../store"
+import {useSearchArtistsInfiniteQuery, useSearchArtistsPageQuery} from "../../api"
+import {useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -17,10 +23,6 @@ import ScrollIcon from "../../assets/svg/scroll.svg"
 import PagesIcon from "../../assets/svg/pages.svg"
 import ArtistRow from "../../components/search/ArtistRow"
 import LoadingSpinner from "../../components/search/LoadingSpinner"
-import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
-useLayoutActions, useActiveActions, useLayoutSelector, usePageActions, useActiveSelector, 
-useSearchSelector, usePageSelector, useCacheSelector, useCacheActions} from "../../store"
-import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
 import {TagCategorySearch, CategorySort} from "../../types/Types"
 import "./styles/itemspage.less"
@@ -45,8 +47,16 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     const {setArtists} = useCacheActions()
     const [sortType, setSortType] = useState("posts" as CategorySort)
     const [sortReverse, setSortReverse] = useState(false)
-    const loadingRef = useRef(true)
+    const location = useLocation()
+    const {setScroll} = useSearchActions()
+    const [page, setPage] = useState(getPageNumber(location.search))
+    const [query, setQuery] = useState(new URLSearchParams(location.search).get("query") ?? "")
+    const [searchQuery, setSearchQuery] = useState(query)
+    const [refreshKey, setRefreshKey] = useState(0)
     const sortRef = useRef<HTMLDivElement>(null)
+    const refreshRef = useRef(false)
+
+    usePageURL(page, setPage, query, setQuery)
 
     useEffect(() => {
         limit = mobile ? 5 : 25
@@ -70,28 +80,68 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         setRelative(mobile ? true : false)
     }, [mobile])
 
-    const loadInitial = async (query?: string) => {
-        let sort = functions.validation.parseSort(sortType, sortReverse)
-        const result = await functions.http.get("/api/search/artists", {sort, query, limit}, session, setSessionFlag)
-        return functions.tag.removeDuplicateCategories(result)
-    }
+    useEffect(() => {
+        setSearchQuery(query)
+    }, [query])
 
-    const updateOffset = async (offset: number, query?: string) => {
-        let sort = functions.validation.parseSort(sortType, sortReverse)
-        let result = await functions.http.get("/api/search/artists", {sort, query, limit, offset}, session, setSessionFlag)
-        return functions.tag.removeDuplicateCategories(result)
-    }
+    const infiniteQuery = useSearchArtistsInfiniteQuery(
+        {query, sort: functions.validation.parseSort(sortType, sortReverse), refreshKey},
+        {skip: !scroll, initialPageParam: {offset: (page - 1) * pageAmount, limit}}
+    )
 
-    const {items, visibleItems, page, setPage, maxPage, searchQuery, setSearchQuery, initItems, setManagedPage, setManagedItems,
-        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "tagCount"})
+    const batchSize = Math.max(pageAmount, Math.floor(limit / pageAmount) * pageAmount)
+    const batchOffset = Math.floor((page - 1) * pageAmount / batchSize) * batchSize
+    const pageOffset = (page - 1) * pageAmount - batchOffset
+
+    const pageQuery = useSearchArtistsPageQuery(
+        {query, sort: functions.validation.parseSort(sortType, sortReverse),
+        offset: batchOffset, limit: batchSize, refreshKey},
+        {skip: scroll}
+    )
+
+    const items = useMemo(() => {
+        let result = scroll ? infiniteQuery.currentData?.pages.flat() ?? [] : pageQuery.currentData ?? []
+        return functions.tag.removeDuplicateCategories(result)
+    }, [scroll, infiniteQuery.currentData, pageQuery.currentData, functions.tag.removeDuplicateCategories])
+
+    const visibleItems = useMemo(() => {
+        return scroll ? items : items.slice(pageOffset, pageOffset + pageAmount)
+    }, [items, pageOffset, pageAmount, scroll])
+    
+    const isLoading = (scroll ? infiniteQuery.isFetching : pageQuery.isFetching) && visibleItems.length === 0
+    const totalCount = Number(items[0]?.tagCount ?? items.length)
+    const maxPage = Math.max(1, Math.ceil(totalCount / pageAmount))
+
+    const loadMore = useEffectEvent(() => {
+        if (infiniteQuery.hasNextPage && !infiniteQuery.isFetchingNextPage) infiniteQuery.fetchNextPage()
+    })
 
     useEffect(() => {
-        initItems()
+        if (!scroll) return
+        const onScroll = () => {
+            if (functions.dom.scrolledToBottom()) loadMore()
+        }
+        window.addEventListener("scroll", onScroll)
+        return () => window.removeEventListener("scroll", onScroll)
+    }, [scroll])
+
+    const onRefresh = async (value?: string, reset?: boolean) => {
+        const nextQuery = typeof value === "string" ? value : searchQuery
+        if (reset || nextQuery !== query) setPage(1)
+        setQuery(nextQuery)
+
+        if (refreshRef.current) setRefreshKey((prev) => prev + 1)
+        refreshRef.current = true
+    }
+
+    const toggleScroll = () => setScroll(!scroll)
+
+    useEffect(() => {
+        onRefresh()
     }, [sortType, sortReverse, session])
 
     useEffect(() => {
-        if (artistsPage) setManagedPage(artistsPage)
-        if (artists.length) setManagedItems(artists)
+        if (artistsPage && !location.search) setPage(artistsPage)
     }, [])
 
     useEffect(() => {
@@ -128,10 +178,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
             if (visible[i].tag === "unknown-artist") continue
-            jsx.push(<ArtistRow artist={visible[i]}/>)
-        }
-        if (jsx.length) {
-            loadingRef.current = false
+            jsx.push(<ArtistRow key={visible[i].tag} artist={visible[i]}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
@@ -150,8 +197,8 @@ const ArtistsPage: React.FunctionComponent = (props) => {
                     <span className="items-heading">{i18n.navbar.artists}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
-                            <button className="item-search-button" onClick={() => initItems()}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? onRefresh() : null}/>
+                            <button className="item-search-button" onClick={() => onRefresh()}>
                                 <SearchIcon className="item-search-button-icon"/>
                             </button>
                         </div>
@@ -178,7 +225,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
-                    {loadingRef.current && <LoadingSpinner/>}
+                    {isLoading && <LoadingSpinner/>}
                     <div className="items-container">
                         {generateArtistsJSX()}
                     </div>

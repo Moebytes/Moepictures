@@ -8,6 +8,7 @@ import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions, useLayoutSelector,
 useInteractionActions} from "../../store"
+import {useInvalidatePost} from "../../api"
 import functions from "../../functions/Functions"
 import UndeleteIcon from "../../assets/svg/revert.svg"
 import DeleteIcon from "../../assets/svg/delete.svg"
@@ -29,6 +30,7 @@ const DeletedPostRow: React.FunctionComponent<Props> = (props) => {
     const {permaDeletePostID, permaDeletePostFlag} = usePostDialogSelector()
     const {setUndeletePostID, setPermaDeletePostID, setPermaDeletePostFlag} = usePostDialogActions()
     const navigate = useNavigate()
+    const invalidatePost = useInvalidatePost()
 
     const undeletePostDialog = async () => {
         setUndeletePostID({postID: props.post.postID})
@@ -36,6 +38,7 @@ const DeletedPostRow: React.FunctionComponent<Props> = (props) => {
 
     const deletePost = async () => {
         await functions.http.delete("/api/post/delete", {postID: props.post.postID}, session, setSessionFlag)
+        invalidatePost(props.post.postID)
         props.onDelete?.()
     }
 

@@ -4,8 +4,13 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useState, useRef} from "react"
-import {useNavigate, useParams} from "react-router-dom"
+import React, {useEffect, useState, useRef, useEffectEvent, useMemo} from "react"
+import {usePageURL, getPageNumber} from "../../components/site/usePageURL"
+import {useSearchActions, useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useLayoutSelector, usePageActions, useActiveSelector, useSearchSelector,
+usePageSelector, useThreadDialogActions, useThreadDialogSelector, useCacheSelector} from "../../store"
+import {useGetThreadRepliesInfiniteQuery, useGetThreadRepliesPageQuery, useInvalidateThreads} from "../../api"
+import {useNavigate, useParams, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -13,10 +18,6 @@ import Footer from "../../components/site/Footer"
 import functions from "../../functions/Functions"
 import moeText from "../../moetext/MoeText"
 import Reply from "../../components/search/Reply"
-import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
-useLayoutActions, useActiveActions, useLayoutSelector, usePageActions,
-useActiveSelector, useSearchSelector, usePageSelector,
-useThreadDialogActions, useThreadDialogSelector, useCacheSelector} from "../../store"
 import permissions from "../../structures/Permissions"
 import favicon from "../../assets/icons/favicon.png"
 import LockIcon from "../../assets/svg/lock.svg"
@@ -28,7 +29,6 @@ import DeleteIcon from "../../assets/svg/delete.svg"
 import QuoteIcon from "../../assets/svg/quote.svg"
 import ReportIcon from "../../assets/svg/report.svg"
 import TextBox, {TextBoxRef} from "../../ui/TextBox"
-import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
 import LoadingSpinner from "../../components/search/LoadingSpinner"
 import {ThreadReply, ThreadUser} from "../../types/Types"
@@ -61,6 +61,15 @@ const ThreadPage: React.FunctionComponent = () => {
     const textBoxRef = useRef<TextBoxRef>(null)
     const navigate = useNavigate()
     const {id: threadID} = useParams() as {id: string}
+    const location = useLocation()
+    const [page, setPage] = useState(getPageNumber(location.search))
+    const [query, setQuery] = useState(new URLSearchParams(location.search).get("query") ?? "")
+    const [searchQuery, setSearchQuery] = useState(query)
+    const [refreshKey, setRefreshKey] = useState(0)
+    const refreshRef = useRef(false)
+    const invalidateThreads = useInvalidateThreads()
+
+    usePageURL(page, setPage, query, setQuery)
 
     useEffect(() => {
         const replyParam = new URLSearchParams(window.location.search).get("reply")
@@ -87,6 +96,7 @@ const ThreadPage: React.FunctionComponent = () => {
         const updateRead = async () => {
             if (session.username) {
                 await functions.http.post("/api/thread/read", {threadID, forceRead: true}, session, setSessionFlag)
+                invalidateThreads()
             }
         }
         updateRead()
@@ -104,21 +114,66 @@ const ThreadPage: React.FunctionComponent = () => {
         setDefaultIcon(thread.image ? false : true)
     }
 
-    const loadInitial = async () => {
-        const result = await functions.http.get("/api/thread/replies", {threadID}, session, setSessionFlag)
-        return result
-    }
+    useEffect(() => {
+        setSearchQuery(query)
+    }, [query])
 
-    const {visibleItems, page, setPage, maxPage, initItems, setManagedPage} = 
-        usePaginatedScroll({loadInitial, pageAmount, countKey: "replyCount"})
+    const infiniteQuery = useGetThreadRepliesInfiniteQuery(
+        {threadID, refreshKey},
+        {skip: !scroll, initialPageParam: {offset: (page - 1) * pageAmount, limit: 100}}
+    )
+
+    const batchSize = Math.max(pageAmount, Math.floor(100 / pageAmount) * pageAmount)
+    const batchOffset = Math.floor((page - 1) * pageAmount / batchSize) * batchSize
+    const pageOffset = (page - 1) * pageAmount - batchOffset
+
+    const pageQuery = useGetThreadRepliesPageQuery(
+        {threadID,
+        offset: batchOffset, refreshKey},
+        {skip: scroll}
+    )
+
+    const items = useMemo(() => {
+        let result = scroll ? infiniteQuery.currentData?.pages.flat() ?? [] : pageQuery.currentData ?? []
+        return result
+    }, [scroll, infiniteQuery.currentData, pageQuery.currentData])
+
+    const visibleItems = useMemo(() => {
+        return scroll ? items : items.slice(pageOffset, pageOffset + pageAmount)
+    }, [items, pageOffset, pageAmount, scroll])
+    
+    const totalCount = Number(items[0]?.replyCount ?? items.length)
+    const maxPage = Math.max(1, Math.ceil(totalCount / pageAmount))
+
+    const loadMore = useEffectEvent(() => {
+        if (infiniteQuery.hasNextPage && !infiniteQuery.isFetchingNextPage) infiniteQuery.fetchNextPage()
+    })
+
+    useEffect(() => {
+        if (!scroll) return
+        const onScroll = () => {
+            if (functions.dom.scrolledToBottom()) loadMore()
+        }
+        window.addEventListener("scroll", onScroll)
+        return () => window.removeEventListener("scroll", onScroll)
+    }, [scroll])
+
+    const onRefresh = async (value?: string, reset?: boolean) => {
+        const nextQuery = typeof value === "string" ? value : searchQuery
+        if (reset || nextQuery !== query) setPage(1)
+        setQuery(nextQuery)
+
+        if (refreshRef.current) setRefreshKey((prev) => prev + 1)
+        refreshRef.current = true
+    }
 
     useEffect(() => {
         updateThread()
-        initItems()
+        onRefresh()
     }, [threadID, session])
 
     useEffect(() => {
-        if (threadPage) setManagedPage(threadPage)
+        if (threadPage && !location.search) setPage(threadPage)
     }, [])
 
     useEffect(() => {
@@ -175,7 +230,7 @@ const ThreadPage: React.FunctionComponent = () => {
         for (let i = 0; i < visible.length; i++) {
             const reply = visible[i]
             if (reply.fake) continue
-            jsx.push(<Reply reply={reply} thread={thread} onDelete={initItems} onEdit={initItems} onReplyJump={onReplyJump}/>)
+            jsx.push(<Reply reply={reply} thread={thread} onDelete={onRefresh} onEdit={onRefresh} onReplyJump={onReplyJump}/>)
         }
         return jsx
     }
@@ -207,12 +262,14 @@ const ThreadPage: React.FunctionComponent = () => {
     const updateSticky = async () => {
         functions.cache.clearResponseCacheKey("/api/thread")
         await functions.http.post("/api/thread/sticky", {threadID}, session, setSessionFlag)
+        invalidateThreads()
         updateThread()
     }
 
     const updateLocked = async () => {
         functions.cache.clearResponseCacheKey("/api/thread")
         await functions.http.post("/api/thread/lock", {threadID}, session, setSessionFlag)
+        invalidateThreads()
         updateThread()
     }
 
@@ -222,6 +279,7 @@ const ThreadPage: React.FunctionComponent = () => {
         const badContent = functions.validation.validateThread(editThreadContent, i18n)
         if (badContent) return
         await functions.http.put("/api/thread/edit", {threadID, title: editThreadTitle, content: editThreadContent, r18: editThreadR18}, session, setSessionFlag)
+        invalidateThreads()
         updateThread()
     }
 
@@ -243,6 +301,7 @@ const ThreadPage: React.FunctionComponent = () => {
 
     const deleteThread = async () => {
         await functions.http.delete("/api/thread/delete", {threadID}, session, setSessionFlag)
+        invalidateThreads()
         navigate("/forum")
     }
 
@@ -325,7 +384,8 @@ const ThreadPage: React.FunctionComponent = () => {
             return textBoxRef.current?.clearError()
         }
         await functions.http.post("/api/thread/reply", {threadID, content: text, r18}, session, setSessionFlag)
-        initItems()
+        invalidateThreads()
+        onRefresh()
         textBoxRef.current?.updateText("")
     }
 

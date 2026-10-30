@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions,
 useFlagActions} from "../../store"
+import {useInvalidateTags} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
@@ -23,6 +24,7 @@ const MassImplyDialog: React.FunctionComponent = (props) => {
     const [wildcard, setWildcard] = useState("")
     const [implyTo, setImplyTo] = useState("")
     const controls = useDragControls()
+    const invalidateTags = useInvalidateTags()
 
     useEffect(() => {
         if (massImplyDialog) {
@@ -41,6 +43,7 @@ const MassImplyDialog: React.FunctionComponent = (props) => {
         if (!massImplyDialog) return
         if (permissions.isAdmin(session)) {
             await functions.http.post("/api/tag/massimply", {wildcard, implyTo}, session, setSessionFlag)
+            invalidateTags()
             setTagSearchFlag(implyTo)
         }
     }

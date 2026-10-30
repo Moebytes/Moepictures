@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 usePostDialogSelector, usePostDialogActions, useActiveActions, useLayoutSelector} from "../../store"
+import {useInvalidateSession} from "../../api"
 import functions from "../../functions/Functions"
 import Carousel from "../../components/site/Carousel"
 import {motion, useDragControls} from "framer-motion"
@@ -37,6 +38,7 @@ const SetAvatarDialog: React.FunctionComponent = (props) => {
     const ref = useRef<HTMLImageElement>(null)
     const previewRef = useRef<HTMLCanvasElement>(null)
     const controls = useDragControls()
+    const invalidateSession = useInvalidateSession()
 
     const loadImages = async () => {
         if (!avatarID) return
@@ -163,6 +165,7 @@ const SetAvatarDialog: React.FunctionComponent = (props) => {
         const arrayBuffer = await functions.http.getBuffer(croppedURL)
         const bytes = new Uint8Array(arrayBuffer)
         await functions.http.post("/api/user/pfp", {postID: avatarID.post.postID, bytes: Object.values(bytes)}, session, setSessionFlag)
+        invalidateSession()
         setUserImg("")
         setSessionFlag(true)
     }

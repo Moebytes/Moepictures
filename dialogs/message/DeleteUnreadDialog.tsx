@@ -8,6 +8,7 @@ import React, {useEffect} from "react"
 import {useThemeSelector, useInteractionActions, useMessageDialogSelector, 
 useMessageDialogActions, useSessionSelector, useSessionActions,
 useFlagActions} from "../../store"
+import {useInvalidateMessages} from "../../api"
 import {motion, useDragControls} from "framer-motion"
 import functions from "../../functions/Functions"
 import "../dialog.less"
@@ -21,6 +22,7 @@ const DeleteUnreadDialog: React.FunctionComponent = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {setMessageSearchFlag} = useFlagActions()
     const controls = useDragControls()
+    const invalidateMessages = useInvalidateMessages()
 
     useEffect(() => {
         if (deleteUnreadDialog) {
@@ -35,6 +37,7 @@ const DeleteUnreadDialog: React.FunctionComponent = (props) => {
 
     const deleteUnread = async () => {
         await functions.http.delete("/api/message/deleteunread", null, session, setSessionFlag)
+        invalidateMessages()
         setMessageSearchFlag("")
     }
 

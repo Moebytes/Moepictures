@@ -6,6 +6,7 @@
 
 import React, {useEffect, useState} from "react"
 import {useThemeSelector, useSessionSelector, useSessionActions, useLayoutSelector} from "../../store"
+import {useInvalidatePost} from "../../api"
 import {Rating} from "react-simple-star-rating"
 import functions from "../../functions/Functions"
 import cuteness1 from "../../assets/images/cuteness1.png"
@@ -31,6 +32,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     const [cuteness, setCuteness] = useState(0)
     const [averageCuteness, setAverageCuteness] = useState((props.post as PostSearch)?.cuteness || 0)
     const [isAverage, setIsAverage] = useState(false)
+    const invalidatePost = useInvalidatePost()
     // const sliderRef = useRef<Slider>(null)
     // useEffect(() => sliderRef.current ? sliderRef.current.resize() : null)
 
@@ -54,11 +56,13 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     const updateCuteness = async () => {
         if (!cuteness) return
         await functions.http.post("/api/cuteness/update", {cuteness, postID: props.post.postID}, session, setSessionFlag)
+        invalidatePost(props.post.postID)
         setIsAverage(false)
     }
 
     const deleteRating = async () => {
         await functions.http.delete("/api/cuteness/delete", {postID: props.post.postID}, session, setSessionFlag)
+        invalidatePost(props.post.postID)
         setIsAverage(true)
     }
 

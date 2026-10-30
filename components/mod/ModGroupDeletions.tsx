@@ -4,14 +4,15 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useState} from "react"
-import {useNavigate} from "react-router-dom"
-import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, usePageActions,
+import React, {useEffect, useState, useRef, useEffectEvent, useMemo} from "react"
+import {usePageURL, getPageNumber} from "../../components/site/usePageURL"
+import {useSearchActions, useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, usePageActions,
 useSearchSelector, usePageSelector, useActiveSelector} from "../../store"
+import {useGetGroupDeletionsInfiniteQuery, useGetGroupDeletionsPageQuery, useInvalidateGroup} from "../../api"
+import {useNavigate, useLocation} from "react-router-dom"
 import ApproveIcon from "../../assets/svg/approve.svg"
 import RejectIcon from "../../assets/svg/reject.svg"
 import functions from "../../functions/Functions"
-import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
 import {Post, GroupDeleteRequest} from "../../types/Types"
 import "./styles/modposts.less"
@@ -31,27 +32,75 @@ const ModGroupDeletions: React.FunctionComponent = (props) => {
     const [hover, setHover] = useState(false)
     const [imagesRef, setImagesRef] = useState([] as React.RefObject<HTMLCanvasElement | null>[])
     const [updateVisibleRequestFlag, setUpdateVisibleRequestFlag] = useState(false)
+    const location = useLocation()
+    const [page, setPage] = useState(getPageNumber(location.search))
+    const [query, setQuery] = useState(new URLSearchParams(location.search).get("query") ?? "")
+    const [searchQuery, setSearchQuery] = useState(query)
+    const [refreshKey, setRefreshKey] = useState(0)
+    const refreshRef = useRef(false)
     const navigate = useNavigate()
+    const invalidateGroup = useInvalidateGroup()
 
-    const loadInitial = async () => {
-        const requests = await functions.http.get("/api/group/delete/request/list", null, session, setSessionFlag, true)
-        return requests
-    }
-
-    const updateOffset = async (offset: number) => {
-        let result = await functions.http.get("/api/group/delete/request/list", {offset}, session, setSessionFlag, true)
-        return result
-    }
-
-    const {visibleItems, page, setPage, maxPage, initItems, setManagedPage} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "requestCount"})
+    usePageURL(page, setPage, query, setQuery)
 
     useEffect(() => {
-        initItems()
+        setSearchQuery(query)
+    }, [query])
+
+    const infiniteQuery = useGetGroupDeletionsInfiniteQuery(
+        {refreshKey},
+        {skip: !scroll, initialPageParam: {offset: (page - 1) * pageAmount, limit}}
+    )
+
+    const batchSize = Math.max(pageAmount, Math.floor(limit / pageAmount) * pageAmount)
+    const batchOffset = Math.floor((page - 1) * pageAmount / batchSize) * batchSize
+    const pageOffset = (page - 1) * pageAmount - batchOffset
+
+    const pageQuery = useGetGroupDeletionsPageQuery(
+        {offset: batchOffset, refreshKey},
+        {skip: scroll}
+    )
+
+    const items = useMemo(() => {
+        let result = scroll ? infiniteQuery.currentData?.pages.flat() ?? [] : pageQuery.currentData ?? []
+        return result
+    }, [scroll, infiniteQuery.currentData, pageQuery.currentData])
+
+    const visibleItems = useMemo(() => {
+        return scroll ? items : items.slice(pageOffset, pageOffset + pageAmount)
+    }, [items, pageOffset, pageAmount, scroll])
+    
+    const totalCount = Number(items[0]?.requestCount ?? items.length)
+    const maxPage = Math.max(1, Math.ceil(totalCount / pageAmount))
+
+    const loadMore = useEffectEvent(() => {
+        if (infiniteQuery.hasNextPage && !infiniteQuery.isFetchingNextPage) infiniteQuery.fetchNextPage()
+    })
+
+    useEffect(() => {
+        if (!scroll) return
+        const onScroll = () => {
+            if (functions.dom.scrolledToBottom()) loadMore()
+        }
+        window.addEventListener("scroll", onScroll)
+        return () => window.removeEventListener("scroll", onScroll)
+    }, [scroll])
+
+    const onRefresh = async (value?: string, reset?: boolean) => {
+        const nextQuery = typeof value === "string" ? value : searchQuery
+        if (reset || nextQuery !== query) setPage(1)
+        setQuery(nextQuery)
+
+        if (refreshRef.current) setRefreshKey((prev) => prev + 1)
+        refreshRef.current = true
+    }
+
+    useEffect(() => {
+        onRefresh()
     }, [modState, session])
 
     useEffect(() => {
-        if (modPage) setManagedPage(modPage)
+        if (modPage && !location.search) setPage(modPage)
     }, [])
 
     useEffect(() => {
@@ -73,22 +122,28 @@ const ModGroupDeletions: React.FunctionComponent = (props) => {
     const deleteGroup = async (username: string, group: string, post: Post) => {
         if (post) {
             await functions.http.delete("/api/group/post/delete", {name: group, postID: post.postID, username}, session, setSessionFlag)
+            invalidateGroup(group)
             await functions.http.post("/api/group/post/delete/request/fulfill", {username, slug: group, postID: post.postID, accepted: true}, session, setSessionFlag)
+            invalidateGroup(group)
         } else {
             await functions.http.delete("/api/group/delete", {slug: group}, session, setSessionFlag)
+            invalidateGroup(group)
             await functions.http.post("/api/group/delete/request/fulfill", {username, slug: group, accepted: true}, session, setSessionFlag)
+            invalidateGroup(group)
         }
-        await initItems()
+        await onRefresh()
         setUpdateVisibleRequestFlag(true)
     }
 
     const rejectRequest = async (username: string, group: string, post: Post) => {
         if (post) {
             await functions.http.post("/api/group/post/delete/request/fulfill", {username, slug: group, postID: post.postID, accepted: false}, session, setSessionFlag)
+            invalidateGroup(group)
         } else {
             await functions.http.post("/api/group/delete/request/fulfill", {username, slug: group, accepted: false}, session, setSessionFlag)
+            invalidateGroup(group)
         }
-        await initItems()
+        await onRefresh()
         setUpdateVisibleRequestFlag(true)
     }
 

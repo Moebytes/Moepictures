@@ -6,6 +6,7 @@
 
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
+import {useInvalidatePost} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import "../dialog.less"
@@ -22,6 +23,7 @@ const AppealPostDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidatePost = useInvalidatePost()
 
     useEffect(() => {
         if (appealPostID) {
@@ -37,6 +39,7 @@ const AppealPostDialog: React.FunctionComponent = (props) => {
     const appealPost = async () => {
         if (!appealPostID) return
         await functions.http.post("/api/post/appeal", {postID: appealPostID, reason}, session, setSessionFlag)
+        invalidatePost(appealPostID)
         setAppealPostID(null)
         setPostFlag(appealPostID)
     }
@@ -48,7 +51,6 @@ const AppealPostDialog: React.FunctionComponent = (props) => {
             setAppealPostID(null)
         }
     }
-
 
     if (appealPostID) {
         return (

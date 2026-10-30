@@ -8,6 +8,7 @@ import React, {useEffect, useRef, useState} from "react"
 import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useLayoutSelector, useActiveActions, useSessionActions, 
 useThreadDialogSelector, useThreadDialogActions, useCacheSelector} from "../../store"
+import {useInvalidateThreads} from "../../api"
 import functions from "../../functions/Functions"
 import moeText from "../../moetext/MoeText"
 import permissions from "../../structures/Permissions"
@@ -40,6 +41,7 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
     setDeleteThreadID, setDeleteThreadFlag, setEditThreadID, setEditThreadFlag, setEditThreadTitle, setEditThreadContent, 
     setEditThreadR18, setReportReplyID, setReportThreadID} = useThreadDialogActions()
     const navigate = useNavigate()
+    const invalidateThreads = useInvalidateThreads()
 
     const defaultIcon = props.forumPost?.image ? false : true
 
@@ -75,6 +77,7 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
     const deleteThread = async () => {
         if (props.forumPost.type === "thread") {
             await functions.http.delete("/api/thread/delete", {threadID: props.forumPost.id}, session, setSessionFlag)
+            invalidateThreads()
             navigate("/forum")
         }
     }
@@ -83,6 +86,7 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
         if (!props.forumPost.thread) return
         if (props.forumPost.type === "reply") {
             await functions.http.delete("/api/reply/delete", {threadID: props.forumPost.thread.threadID, replyID: props.forumPost.id}, session, setSessionFlag)
+            invalidateThreads()
             props.onDelete?.()
         }
     }
@@ -118,6 +122,7 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
             const badContent = functions.validation.validateThread(editThreadContent, i18n)
             if (badContent) return
             await functions.http.put("/api/thread/edit", {threadID: props.forumPost.id, title: editThreadTitle, content: editThreadContent, r18: editThreadR18}, session, setSessionFlag)
+            invalidateThreads()
             props.onEdit?.()
         }
     }
@@ -128,6 +133,7 @@ const ForumPostRow: React.FunctionComponent<Props> = (props) => {
             const badReply = functions.validation.validateReply(editReplyContent, i18n)
             if (badReply) return
             await functions.http.put("/api/reply/edit", {replyID: props.forumPost.id, content: editReplyContent, r18: editReplyR18}, session, setSessionFlag)
+            invalidateThreads()
             props.onEdit?.()
         }
     }

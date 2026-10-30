@@ -8,6 +8,7 @@ import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, 
 useSessionActions, usePostDialogSelector, usePostDialogActions,
 useSearchSelector, useSearchActions} from "../../store"
+import {useInvalidatePost} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
@@ -25,6 +26,7 @@ const BulkDeleteDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidatePost = useInvalidatePost()
 
     useEffect(() => {
         if (showBulkDeleteDialog) {
@@ -42,6 +44,7 @@ const BulkDeleteDialog: React.FunctionComponent = (props) => {
         if (!selectionMode) return setShowBulkDeleteDialog(false)
         for (const postID of selectionItems.values()) {
             await functions.http.delete("/api/post/delete", {postID}, session, setSessionFlag)
+            invalidatePost(postID)
         }
         history.go(0)
         setShowBulkDeleteDialog(false)

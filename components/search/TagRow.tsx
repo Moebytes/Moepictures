@@ -9,6 +9,7 @@ import {useNavigate} from "react-router-dom"
 import {useThemeSelector, useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
 useLayoutSelector, useFlagSelector, useCacheActions, useInteractionActions, useSearchActions, useTagDialogActions,
 useTagDialogSelector, useSearchSelector} from "../../store"
+import {useInvalidateTag} from "../../api"
 import functions from "../../functions/Functions"
 import AliasIcon from "../../assets/svg/all.svg"
 import EditIcon from "../../assets/svg/edit.svg"
@@ -43,6 +44,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const {setEditTagObj, setEditTagFlag, setDeleteTagID, setDeleteTagFlag, setCategorizeTag, setAliasTagID, setAliasTagFlag, setAliasTagName} = useTagDialogActions()
     const navigate = useNavigate()
     const scrollRef = useRef<HTMLSpanElement>(null)
+    const invalidateTag = useInvalidateTag()
 
     useEffect(() => {
         if (!scrollRef.current) return
@@ -109,6 +111,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
 
     const deleteTag = async () => {
         await functions.http.delete("/api/tag/delete", {tag: props.tag.tag}, session, setSessionFlag)
+        invalidateTag(props.tag.tag)
         props.onDelete?.()
     }
 
@@ -150,12 +153,14 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             await functions.http.put("/api/tag/edit", {tag: props.tag.tag, key: editTagObj.key, description: editTagObj.description,
             image: image!, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, danbooruTag: editTagObj.danbooruTag, social: editTagObj.social, twitter: editTagObj.twitter,
             website: editTagObj.website, fandom: editTagObj.fandom, wikipedia: editTagObj.wikipedia, r18: editTagObj.r18 ?? false, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
+            invalidateTag(props.tag.tag)
             props.onEdit?.()
         } catch (err: any) {
             if (err.message.includes("No permission to edit implications") || err.message.includes("No permission to rename tag")) {
                 await functions.http.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
                 implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, danbooruTag: editTagObj.danbooruTag, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
                 wikipedia: editTagObj.wikipedia, r18: editTagObj.r18!, featuredPost: editTagObj.featuredPost, reason: editTagObj.reason}, session, setSessionFlag)
+                invalidateTag(editTagObj.tag)
                 setEditTagObj({tag: props.tag.tag, failed: "implication"})
             } else {
                 setEditTagObj({tag: props.tag.tag, failed: true})
@@ -199,6 +204,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
 
     const aliasTag = async () => {
         await functions.http.post("/api/tag/aliasto", {tag: props.tag.tag, aliasTo: aliasTagName}, session, setSessionFlag)
+        invalidateTag(props.tag.tag)
         props.onEdit?.()
     }
 

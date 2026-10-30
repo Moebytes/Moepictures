@@ -11,6 +11,7 @@ import SideBar from "../../components/site/SideBar"
 import Footer from "../../components/site/Footer"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useLayoutSelector} from "../../store"
+import {useInvalidateSession} from "../../api"
 import functions from "../../functions/Functions"
 import "./styles/sitepage.less"
 
@@ -28,6 +29,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const [email, setEmail] = useState("")
     const errorRef = useRef<HTMLSpanElement>(null)
+    const invalidateSession = useInvalidateSession()
 
     const getCaptchaColor = () => {
         if (theme.includes("light")) return "#ffffff"
@@ -72,6 +74,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
             await functions.http.post("/api/user/forgotpassword", {email, captchaResponse}, session, setSessionFlag)
+            invalidateSession()
             setSubmitted(true)
             setError(false)
             setEmail("")

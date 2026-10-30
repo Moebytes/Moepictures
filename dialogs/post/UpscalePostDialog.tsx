@@ -5,9 +5,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import React, {useEffect, useState, useRef} from "react"
-import {useInteractionActions, useSessionSelector, useSessionActions, 
+import {useInteractionActions, useSessionSelector, useSessionActions, useThemeSelector,
 usePostDialogSelector, usePostDialogActions, useFlagActions} from "../../store"
-import {useThemeSelector} from "../../store"
+import {useInvalidatePost} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
@@ -31,6 +31,7 @@ const UpscalePostDialog: React.FunctionComponent = (props) => {
     const [compressJPG, setCompressJPG] = useState(true)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidatePost = useInvalidatePost()
 
     useEffect(() => {
         if (upscalePostID) {
@@ -48,6 +49,7 @@ const UpscalePostDialog: React.FunctionComponent = (props) => {
         if (permissions.isMod(session)) {
             await functions.http.post("/api/post/upscale",  {postID: upscalePostID.post.postID, upscaler, 
             scaleFactor: functions.util.safeNumber(scaleFactor) || 4, compressJPG}, session, setSessionFlag)
+            invalidatePost(upscalePostID.post.postID)
             setPostFlag(upscalePostID.post.postID)
             history.go(0)
         }

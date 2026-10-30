@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, 
 usePostDialogSelector, usePostDialogActions} from "../../store"
+import {useInvalidatePost} from "../../api"
 import functions from "../../functions/Functions"
 import {PostMetadata} from "../../types/PostTypes"
 import {motion, useDragControls} from "framer-motion"
@@ -21,6 +22,7 @@ const PostInfoDialog: React.FunctionComponent = (props) => {
     const {setPostInfoID} = usePostDialogActions()
     const [info, setInfo] = useState(null as PostMetadata | null)
     const controls = useDragControls()
+    const invalidatePost = useInvalidatePost()
 
     useEffect(() => {
         if (postInfoID) {
@@ -36,6 +38,7 @@ const PostInfoDialog: React.FunctionComponent = (props) => {
     const getPostInfo = async () => {
         if (postInfoID?.post) {
             const info = await functions.http.post("/api/post/metadata", {postID: postInfoID.post.postID, order: postInfoID.order}, session, setSessionFlag)
+            invalidatePost(postInfoID.post.postID)
             setInfo(info)
         } else {
             setInfo(null)

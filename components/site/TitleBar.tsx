@@ -8,8 +8,9 @@ import React, {useEffect} from "react"
 import {useNavigate, useLocation} from "react-router-dom"
 import favicon from "../../assets/icons/favicon.png"
 import {useThemeSelector, useSessionSelector, useLayoutSelector, useSearchActions, useSearchSelector, 
-useInteractionActions, useLayoutActions, useActiveSelector, useInteractionSelector, useCacheSelector, 
-usePageSelector, useFlagSelector, useActiveActions, useFlagActions, useSessionActions} from "../../store"
+useInteractionActions, useLayoutActions, useActiveSelector, useInteractionSelector, useFlagSelector, useActiveActions, useFlagActions, useSessionActions,
+useCacheSelector, usePageSelector} from "../../store"
+import {useInvalidateSession} from "../../api"
 import functions from "../../functions/Functions"
 import HamburgerIcon from "../../assets/svg/hamburger.svg"
 import KeyIcon from "../../assets/svg/key.svg"
@@ -31,20 +32,21 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile, relative, hideTitlebar, hideMobileNavbar} = useLayoutSelector()
     const {setHideMobileNavbar, setRelative, setHideTitlebar} = useLayoutActions()
+    const {posts, searchState} = useCacheSelector()
+    const {page} = usePageSelector()
     const {search, ratingType, autoSearch} = useSearchSelector()
     const {setSearch, setSearchFlag, setImageType, setRatingType, setStyleType, setSortType} = useSearchActions()
-    const {page} = usePageSelector()
     const {scrollY, mobileScrolling} = useInteractionSelector()
     const {session, userImg} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {setEnableDrag, setMobileScrolling} = useInteractionActions()
     const {headerFlag} = useFlagSelector()
-    const {setHeaderFlag} = useFlagActions()
-    const {posts} = useCacheSelector()
+    const {setHeaderFlag, setRandomFlag, setImageSearchFlag} = useFlagActions()
     const {activeGroup, activeFavgroup, headerText} = useActiveSelector()
     const {setHeaderText} = useActiveActions()
     const navigate = useNavigate()
     const location = useLocation()
+    const invalidateSession = useInvalidateSession()
 
     useEffect(() => {
         if (headerFlag) {
@@ -65,9 +67,17 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
 
     const titleClick = async (event: React.MouseEvent) => {
         if (mobile && (location.pathname === "/" || location.pathname === "/posts")) if (event.clientY < 180) return
-        let pageText = page > 1 ? `?page=${page}` : ""
-        navigate(`/posts${pageText}`, {
-            state: {restorePosts: posts, restoreScrollY: scrollY, restorePage: page}
+        const params = new URLSearchParams()
+        const restorePage = searchState?.page ?? page
+        const restoreQuery = searchState?.query ?? search
+        setSearch(restoreQuery)
+        setSearchFlag(false)
+        setRandomFlag(false)
+        setImageSearchFlag(null)
+        if (restorePage > 1) params.set("page", String(restorePage))
+        if (restoreQuery) params.set("query", restoreQuery)
+        navigate(`/posts${params.size ? `?${params}` : ""}`, {
+            state: {restorePosts: posts, restoreScrollY: scrollY, restorePage, restoreSearch: searchState}
         })
     }
 
@@ -83,6 +93,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
 
     const logout = async () => {
         await functions.http.post("/api/user/logout", null, session, setSessionFlag)
+        invalidateSession()
         setSessionFlag(true)
         navigate(0)
     }

@@ -54,6 +54,7 @@ import PostSong from "../../components/image/PostSong"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagSelector, useFlagActions, useLayoutSelector, useSearchActions, 
 useSearchSelector, useCacheSelector, useCacheActions, useFilterActions} from "../../store"
+import {useInvalidatePosts} from "../../api"
 import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
 import permissions from "../../structures/Permissions"
@@ -158,6 +159,7 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
     const rawTagRef = useRef<HTMLTextAreaElement>(null!)
     const navigate = useNavigate()
     const {id: postID, slug} = useParams() as {id: string, slug: string}
+    const invalidatePosts = useInvalidatePosts()
 
     useEffect(() => {
         if (!session.cookie) return
@@ -1010,19 +1012,24 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
             if (props.edit) {
                 if (props.unverified) {
                     await functions.http.put("/api/post/edit/unverified", data, session, setSessionFlag)
+                    invalidatePosts()
                 } else {
                     if (permissions.isContributor(session)) {
                         await functions.http.put("/api/post/edit", data, session, setSessionFlag)
+                        invalidatePosts()
                     } else {
                         await functions.http.put("/api/post/edit/unverified", data, session, setSessionFlag)
+                        invalidatePosts()
                         setNeedsPermission(true)
                     }
                 }
             } else {
                 if (permissions.isCurator(session)) {
                     await functions.http.post("/api/post/upload", data, session, setSessionFlag)
+                    invalidatePosts()
                 } else {
                     await functions.http.post("/api/post/upload/unverified", data, session, setSessionFlag)
+                    invalidatePosts()
                 }
 
             }
@@ -1033,6 +1040,7 @@ const UploadPage: React.FunctionComponent<Props> = (props) => {
             if (String(err)?.includes("403")) {
                 try {
                     await functions.http.put("/api/post/edit/unverified", data, session, setSessionFlag)
+                    invalidatePosts()
                     setNeedsPermission(true)
                     setSubmitted(true)
                     return setSubmitError(false)

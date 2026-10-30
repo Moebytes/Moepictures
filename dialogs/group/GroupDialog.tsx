@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector, 
 useSessionActions, useFlagActions} from "../../store"
+import {useInvalidateGroup, useInvalidateGroups} from "../../api"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import DeleteIcon from "../../assets/svg/delete.svg"
@@ -31,6 +32,8 @@ const GroupDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidateGroup = useInvalidateGroup()
+    const invalidateGroups = useInvalidateGroups()
 
     const updateGroups = async () => {
         if (!groupPostID) return
@@ -71,6 +74,7 @@ const GroupDialog: React.FunctionComponent = (props) => {
                 return setError(false)
             }
             await functions.http.post("/api/group", {postIDs: [groupPostID], name}, session, setSessionFlag)
+            invalidateGroup(name)
             setGroupPostID(null)
             setPostFlag(groupPostID)
         } else {
@@ -85,6 +89,7 @@ const GroupDialog: React.FunctionComponent = (props) => {
             }
             if (removalItems.length) {
                 await functions.http.post("/api/group/post/delete/request", {reason, removalItems}, session, setSessionFlag)
+                invalidateGroups()
                 setSubmitted(true)
             } else {
                 if (!name) {
@@ -95,6 +100,7 @@ const GroupDialog: React.FunctionComponent = (props) => {
                     return setError(false)
                 }
                 await functions.http.post("/api/group/request", {postIDs: [groupPostID], name, reason}, session, setSessionFlag)
+                invalidateGroup(name)
                 setSubmitted(true)
             }
         }
@@ -122,6 +128,7 @@ const GroupDialog: React.FunctionComponent = (props) => {
             const deleteFromGroup = async () => {
                 if (permissions.isContributor(session)) {
                     await functions.http.delete("/api/group/post/delete", {postID: groupPostID, name: group.name}, session, setSessionFlag)
+                    invalidateGroup(group.name)
                     updateGroups()
                 } else {
                     removalItems.push({postID: groupPostID, slug: group.slug})

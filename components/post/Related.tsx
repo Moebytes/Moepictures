@@ -4,10 +4,12 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useEffectEvent, useState, useRef} from "react"
-import {useNavigate} from "react-router-dom"
-import {useCacheActions, useLayoutSelector, useSearchSelector, useSessionSelector, useThemeSelector,
-useSessionActions, useSearchActions, usePageSelector, usePageActions, useCacheSelector} from "../../store"
+import React, {useEffect, useEffectEvent, useState, useRef, useMemo} from "react"
+import {usePageURL, getPageNumber} from "../../components/site/usePageURL"
+import {useSearchActions, useCacheActions, useLayoutSelector, useSearchSelector, useSessionSelector, useThemeSelector,
+useActiveSelector, usePageActions} from "../../store"
+import {useRelatedPostsInfiniteQuery} from "../../api"
+import {useNavigate, useLocation} from "react-router-dom"
 import {TrackablePromise} from "../../structures/TrackablePromise"
 import functions from "../../functions/Functions"
 import ScrollIcon from "../../assets/svg/scroll.svg"
@@ -20,13 +22,10 @@ import GridVideo from "../image/GridVideo"
 import GridSong from "../image/GridSong"
 import GridModel from "../image/GridModel"
 import GridLive2D from "../image/GridLive2D"
-import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
-import {PostHistory, PostSearch} from "../../types/Types"
+import {PostHistory, PostSearch, PostSearchParams} from "../../types/Types"
 import "./styles/related.less"
 
-let relatedTimer = null as any
-let delay = 2000
 let limit = 100
 let pageAmount = 15
 
@@ -45,107 +44,90 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const {ratingType, square, showChildren, scroll, sizeType} = useSearchSelector()
     const {setSearch, setSearchFlag, setSquare, setSizeType} = useSearchActions()
     const {session} = useSessionSelector()
-    const {setSessionFlag} = useSessionActions()
-    const {relatedPage} = usePageSelector()
+    const {settingsLoaded} = useActiveSelector()
     const {setRelatedPage} = usePageActions()
-    const [init, setInit] = useState(true)
-    const [related, setRelated] = useState([] as PostSearch[])
-    const [searchTerm, setSearchTerm] = useState(props.tag)
     const [sizeDropdown, setSizeDropdown] = useState(false)
     const [allImagesLoaded, setAllImagesLoaded] = useState(false)
-    const [locationState, setLocationState] = useState<any>({restorePosts: []})
+    const location = useLocation()
+    const {setScroll} = useSearchActions()
+    const [page, setPage] = useState(() => props.count ? getPageNumber(location.search) : 1)
+    const [query, setQuery] = useState(() => props.count ? new URLSearchParams(location.search).get("query") ?? "" : "")
+    const [startOffset, setStartOffset] = useState((page - 1) * pageAmount)
     const sizeRef = useRef<HTMLImageElement>(null)
     const visiblePromisesRef = useRef<TrackablePromise<void>[]>([])
+    const imagePromises = useRef(new Map<string, TrackablePromise<void>>())
     const navigate = useNavigate()
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setLocationState(null)
-        }, 3000)
-
-        return () => clearTimeout(timer)
-    }, [])
+    usePageURL(page, setPage, query, setQuery, Boolean(props.count))
 
     let rating = props.post?.rating || (functions.post.isR18(ratingType) ? ratingType : "all")
 
-    const searchPosts = async () => {
-        if (props.post?.type === "model" || props.post?.type === "live2d") {
-            if (session.liveModelPreview) return []
-        }
-        let result = await functions.http.get("/api/search/posts", {query: props.tag, type: props.post?.type || "all", 
-        rating: functions.post.isR18(rating) ? rating : "all", style: functions.post.isSketch(props.post?.style || "all") ? "all+s" : "all", 
-        sort: props.count ? "date" : "random", limit, showChildren}, session, setSessionFlag, true)
-
-        if (result.length < 50 && props.fallback?.[0]) {
-            let interResult = await functions.http.get("/api/search/posts", {query: props.fallback[0], type: props.post?.type || "all", 
-            rating: functions.post.isR18(rating) ? rating : "all", style: functions.post.isSketch(props.post?.style || "all") ? "all+s" : "all", 
-            sort: props.count ? "date" : "random", limit, showChildren}, session, setSessionFlag)
-            const filtered = interResult.filter(p => !result.some(r => r.postID === p.postID))
-            result.push(...filtered)
-            setSearchTerm(props.fallback[0])
-        }
-
-        if (result.length < 50 && props.fallback?.[1]) {
-            let interResult = await functions.http.get("/api/search/posts", {query: props.fallback[1], type: props.post?.type || "all", 
-            rating: functions.post.isR18(rating) ? rating : "all", style: functions.post.isSketch(props.post?.style || "all") ? "all+s" : "all", 
-            sort: props.count ? "date" : "random", limit, showChildren}, session, setSessionFlag)
-            const filtered = interResult.filter(p => !result.some(r => r.postID === p.postID))
-            result.push(...filtered)
-            setSearchTerm(props.fallback[1])
-        }
-
-        return result
+    const relatedParams: PostSearchParams = {
+        type: props.post?.type || "all",
+        rating: functions.post.isR18(rating) ? rating : "all",
+        style: functions.post.isSketch(props.post?.style || "all") ? "all+s" : "all",
+        sort: props.count ? "date" : "random",
+        showChildren
     }
 
-    const loadInitial = useEffectEvent(async () => {
-        if (!props.count && (session.username && !session.showRelated)) return []
-        if (!props.tag) return []
-        let result = await searchPosts()
-        result = result.filter((p) => p.postID !== props.post?.postID)
-        delay = 0
-        return result
-    })
+    const searchTags = useMemo(() => {
+        return [...new Set([props.tag, ...(props.fallback ?? [])].filter(Boolean))]
+    }, [props.tag, props.fallback])
+
+    const hidden = !settingsLoaded || !searchTags.length || (!props.count && Boolean(session.username) && !session.showRelated) ||
+        ((props.post?.type === "model" || props.post?.type === "live2d") && Boolean(session.liveModelPreview))
     
-    const updateOffset = useEffectEvent(async (offset: number) => {
-        if (!props.count && (session.username && !session.showRelated)) return null
-        if (props.post?.type === "model" || props.post?.type === "live2d") return []
+    const relatedQuery = useRelatedPostsInfiniteQuery(
+        {...relatedParams, query: searchTags[0], fallback: searchTags.slice(1), postID: props.post?.postID},
+        {skip: hidden, initialPageParam: {offset: startOffset, limit}}
+    )
 
-        let result = await functions.http.get("/api/search/posts", {query: searchTerm, type: props.post?.type || "all", 
-        rating: functions.post.isR18(rating) ? rating : "all", style: functions.post.isSketch(props.post?.style || "all") ? "all+s" : "all", 
-        sort: props.count ? "date" : "random", showChildren, limit, offset}, session, setSessionFlag)
+    const items = useMemo(() => {
+        const posts = relatedQuery.currentData?.pages.flatMap((page) => page.posts) ?? []
+        return [...new Map(posts.map((post) => [post.postID, post])).values()]
+    }, [relatedQuery.currentData])
 
-        return result
+    const firstOffset = relatedQuery.currentData?.pageParams[0].offset ?? startOffset
+
+    const visibleItems = useMemo(() => {
+        if (scroll) return items
+        const start = (page - 1) * pageAmount - firstOffset
+        if (start < 0) return []
+        return items.slice(start, start + pageAmount)
+    }, [items, page, scroll, firstOffset])
+
+    const firstPage = relatedQuery.currentData?.pages[0]
+    const totalCount = firstPage?.totalCount ?? 0
+    const maxPage = Math.max(1, Math.ceil(totalCount / pageAmount))
+
+    const loadMore = useEffectEvent(() => {
+        if (relatedQuery.hasNextPage && !relatedQuery.isFetching) relatedQuery.fetchNextPage()
     })
 
-    const {items, visibleItems, page, setPage, maxPage, initItems, setManagedPage, setManagedItems, toggleScroll} 
-        = usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "postCount", locationState})
+    useEffect(() => {
+        if (!scroll) return
+        const onScroll = () => {
+            if (functions.dom.scrolledToBottom()) loadMore()
+        }
+        window.addEventListener("scroll", onScroll)
+        return () => window.removeEventListener("scroll", onScroll)
+    }, [scroll])
 
     useEffect(() => {
-        clearTimeout(relatedTimer)
-        relatedTimer = setTimeout(() => {
-            if (init && items.length) {
-                return setInit(false)
-            }
-            if (props.post) initItems()
-        }, delay)
-    }, [props.post, session])
+        if (scroll || relatedQuery.isFetching || !relatedQuery.currentData) return
+        const start = (page - 1) * pageAmount
+        if (start < firstOffset && relatedQuery.hasPreviousPage) {
+            relatedQuery.fetchPreviousPage()
+        } else if (start + pageAmount > firstOffset + items.length) {
+            loadMore()
+        }
+    }, [scroll, page, firstOffset, items.length, relatedQuery.isFetching, relatedQuery.currentData])
+
+    const toggleScroll = () => setScroll(!scroll)
 
     useEffect(() => {
-        clearTimeout(relatedTimer)
-        relatedTimer = setTimeout(() => {
-            if (props.tag) initItems()
-        }, delay)
-    }, [props.tag, session])
-
-    useEffect(() => {
-        if (relatedPage) setManagedPage(relatedPage)
-        if (related) setManagedItems(related)
-    }, [])
-
-    useEffect(() => {
-        setRelatedPage(page)
-        setRelated(items)
-    }, [items, page])
+        if (props.count) setRelatedPage(page)
+    }, [page, props.count])
 
     const getSizeMargin = () => {
         const rect = sizeRef.current?.getBoundingClientRect()
@@ -199,29 +181,35 @@ const Related: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        if (scroll) return
+        if (scroll) return setAllImagesLoaded(true)
         if (!visiblePromisesRef.current.length) return
         setAllImagesLoaded(false)
+        let active = true
+        const promises = [...visiblePromisesRef.current]
         const poll = async () => {
-            const notFulfilled = () => {
-                return visiblePromisesRef.current.filter((p) => p.state === "pending").length > 0
-            }
+            const notFulfilled = () => promises.some((promise) => promise.state === "pending")
             let timer = 0
-            while (notFulfilled()) {
+            while (active && notFulfilled()) {
                 await functions.timeout(50)
                 timer += 50
                 if (timer >= 1000) break
             }
             await functions.timeout(100)
+            if (!active) return
             setAllImagesLoaded(true)
             props.onLoaded?.()
         }
         poll()
-    }, [scroll, items, relatedPage])
+        return () => {active = false}
+    }, [scroll, visibleItems])
 
     const generateImagesJSX = () => {
         let jsx = [] as React.ReactElement[]
         let visible = visibleItems as PostSearch[]
+        const visibleIDs = new Set(visible.map((post) => post.postID))
+        for (const id of imagePromises.current.keys()) {
+            if (!visibleIDs.has(id)) imagePromises.current.delete(id)
+        }
         visiblePromisesRef.current.splice(0, visiblePromisesRef.current.length)
         for (let i = 0; i < visible.length; i++) {
             const post = visible[i]
@@ -229,7 +217,11 @@ const Related: React.FunctionComponent<Props> = (props) => {
             if (!session.username) if (post.rating !== functions.r13()) continue
             if (!functions.post.isR18(ratingType)) if (functions.post.isR18(post.rating)) continue
 
-            const promise = new TrackablePromise<void>()
+            let promise = imagePromises.current.get(post.postID)
+            if (!promise) {
+                promise = new TrackablePromise<void>()
+                imagePromises.current.set(post.postID, promise)
+            }
             visiblePromisesRef.current.push(promise)
 
             const image = post.images[0]
@@ -237,22 +229,22 @@ const Related: React.FunctionComponent<Props> = (props) => {
             const liveThumb = functions.link.getThumbnailLink(image, "medium", session, mobile, true)
             const images = post.images.map((image) => functions.link.getImageLink(image, session.upscaledImages))
             if (post.type === "model") {
-                jsx.push(<GridModel id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
+                jsx.push(<GridModel key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()}
                     marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} model={images[0]} post={post} onLoad={promise.resolve}/>)
             } else if (post.type === "live2d") {
-                jsx.push(<GridLive2D id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
+                jsx.push(<GridLive2D key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()}
                     marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} live2d={images[0]} post={post} onLoad={promise.resolve}/>)
             } else if (post.type === "audio") {
-                jsx.push(<GridSong id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} 
+                jsx.push(<GridSong key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()}
                     marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} audio={images[0]} post={post} onLoad={promise.resolve}/>)
             } else if (post.type === "video") {
-                jsx.push(<GridVideo id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} live={liveThumb}
+                jsx.push(<GridVideo key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} live={liveThumb}
                     marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} video={images[0]} post={post} onLoad={promise.resolve}/>)
             } else if (post.type === "animation") {
-                jsx.push(<GridAnimation id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} live={liveThumb}
+                jsx.push(<GridAnimation key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} live={liveThumb}
                     marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} anim={images[0]} post={post} onLoad={promise.resolve}/>)
             } else {
-                jsx.push(<GridImage id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()}
+                jsx.push(<GridImage key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()}
                     marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} original={images[0]} post={post} live={liveThumb}
                     comicPages={post.type === "comic" ? images : null} onLoad={promise.resolve}/>)
             }
@@ -309,7 +301,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
                 <SquareIcon className="related-icon" onClick={() => setSquare(!square)}/>
                 <SizeIcon className="related-icon" ref={sizeRef} onClick={() => setSizeDropdown((prev) => !prev)}/>
             </div>}
-            <div className="related-container" style={{visibility: allImagesLoaded ? "visible" : "hidden", width: "98%", justifyContent: related.length < 5 ? "flex-start" : "space-evenly"}}>
+            <div className="related-container" style={{visibility: allImagesLoaded ? "visible" : "hidden", width: "98%", justifyContent: items.length < 5 ? "flex-start" : "space-evenly"}}>
                 {generateImagesJSX()}
                 {/* <Carousel images={getImages()} set={click} noKey={true} marginLeft={marginLeft} height={200} unlimited={true}/> */}
             </div>

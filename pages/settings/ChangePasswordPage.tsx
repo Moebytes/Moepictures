@@ -15,6 +15,7 @@ import HideIcon from "../../assets/svg/hide.svg"
 import functions from "../../functions/Functions"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
 useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
+import {useInvalidateSession} from "../../api"
 import "./styles/sitepage.less"
 
 const ChangePasswordPage: React.FunctionComponent = (props) => {
@@ -36,6 +37,7 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const navigate = useNavigate()
+    const invalidateSession = useInvalidateSession()
 
     useEffect(() => {
         setHideNavbar(false)
@@ -91,6 +93,7 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
         errorRef.current!.innerText = i18n.buttons.submitting
         try {
             await functions.http.post("/api/user/changepassword", {oldPassword, newPassword}, session, setSessionFlag)
+            invalidateSession()
             setSubmitted(true)
             setError(false)
         } catch {

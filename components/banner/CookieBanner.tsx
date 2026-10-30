@@ -6,6 +6,7 @@
 
 import React, {useEffect, useState} from "react"
 import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionActions} from "../../store"
+import {useInvalidateSession} from "../../api"
 import functions from "../../functions/Functions"
 import CookieIcon from "../../assets/svg/cookie.svg"
 import "./styles/cookiebanner.less"
@@ -18,6 +19,7 @@ const CookieBanner: React.FunctionComponent = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {setEnableDrag} = useInteractionActions()
     const [showCookieBanner, setShowCookieBanner] = useState(false)
+    const invalidateSession = useInvalidateSession()
 
     useEffect(() => {
         if (!session.cookie) return
@@ -35,6 +37,7 @@ const CookieBanner: React.FunctionComponent = (props) => {
             {consent: button === "accept"}, session, setSessionFlag).catch(() => null)
         setShowCookieBanner(false)
         localStorage.setItem("cookieConsent", String(button === "accept"))
+        invalidateSession()
     }
 
     return (

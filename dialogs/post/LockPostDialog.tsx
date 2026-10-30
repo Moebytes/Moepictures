@@ -6,6 +6,7 @@
 
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, usePostDialogSelector, usePostDialogActions, useFlagActions, useSessionSelector, useSessionActions} from "../../store"
+import {useInvalidatePost} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
@@ -22,6 +23,7 @@ const LockPostDialog: React.FunctionComponent = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const controls = useDragControls()
+    const invalidatePost = useInvalidatePost()
 
     useEffect(() => {
         if (lockPostID) {
@@ -38,6 +40,7 @@ const LockPostDialog: React.FunctionComponent = (props) => {
         if (!lockPostID) return
         if (permissions.isMod(session)) {
             await functions.http.post("/api/post/lock",  {postID: lockPostID.post.postID}, session, setSessionFlag)
+            invalidatePost(lockPostID.post.postID)
             setPostFlag(lockPostID.post.postID)
             localStorage.removeItem("savedPost")
             localStorage.removeItem("savedTagCategories")

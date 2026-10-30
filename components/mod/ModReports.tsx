@@ -4,16 +4,17 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useState} from "react"
-import {useNavigate} from "react-router-dom"
-import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, usePageActions,
+import React, {useEffect, useState, useRef, useEffectEvent, useMemo} from "react"
+import {usePageURL, getPageNumber} from "../../components/site/usePageURL"
+import {useSearchActions, useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, usePageActions,
 useSearchSelector, usePageSelector, useActiveSelector, useCacheSelector} from "../../store"
+import {useSearchReportsInfiniteQuery, useSearchReportsPageQuery, useInvalidateComments, useInvalidateThreads} from "../../api"
+import {useNavigate, useLocation} from "react-router-dom"
 import favicon from "../../assets/icons/favicon.png"
 import ApproveIcon from "../../assets/svg/approve.svg"
 import RejectIcon from "../../assets/svg/reject.svg"
 import functions from "../../functions/Functions"
 import moeText from "../../moetext/MoeText"
-import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
 import {Report, ThreadReply, ThreadUser, UserComment} from "../../types/Types"
 import "./styles/modposts.less"
@@ -34,6 +35,8 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
     const [hover, setHover] = useState(false)
     const [asset, setAsset] = useState(null as UserComment | ThreadUser | ThreadReply | null)
     const navigate = useNavigate()
+    const invalidateComments = useInvalidateComments()
+    const invalidateThreads = useInvalidateThreads()
 
     const updateAsset = async () => {
         if (props.request.type === "comment") {
@@ -80,14 +83,20 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
     const approveRequest = async (username: string, id: string) => {
         if (props.request.type === "comment") {
             await functions.http.delete("/api/comment/delete", {commentID: props.request.id}, session, setSessionFlag)
+            invalidateComments()
             await functions.http.post("/api/comment/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: true}, session, setSessionFlag)
+            invalidateComments()
         } else if (props.request.type === "thread") {
             await functions.http.delete("/api/thread/delete", {threadID: props.request.id}, session, setSessionFlag)
+            invalidateThreads()
             await functions.http.post("/api/thread/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: true}, session, setSessionFlag)
+            invalidateThreads()
         } else if (props.request.type === "reply") {
             if (!asset) return
             await functions.http.delete("/api/reply/delete", {threadID: (asset as ThreadReply).threadID, replyID: props.request.id}, session, setSessionFlag)
+            invalidateThreads()
             await functions.http.post("/api/reply/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: true}, session, setSessionFlag)
+            invalidateThreads()
         }
         props.updateReports?.()
     }
@@ -95,10 +104,13 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
     const rejectRequest = async (username: string, id: string) => {
         if (props.request.type === "comment") {
             await functions.http.post("/api/comment/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: false}, session, setSessionFlag)
+            invalidateComments()
         } else if (props.request.type === "thread") {
             await functions.http.post("/api/thread/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: false}, session, setSessionFlag)
+            invalidateThreads()
         } else if (props.request.type === "reply") {
             await functions.http.post("/api/reply/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: false}, session, setSessionFlag)
+            invalidateThreads()
         }
         props.updateReports?.()
     }
@@ -160,26 +172,73 @@ const ModReports: React.FunctionComponent = (props) => {
     const {modPage} = usePageSelector()
     const {setModPage} = usePageActions()
     const {modState} = useActiveSelector()
+    const location = useLocation()
+    const [page, setPage] = useState(getPageNumber(location.search))
+    const [query, setQuery] = useState(new URLSearchParams(location.search).get("query") ?? "")
+    const [searchQuery, setSearchQuery] = useState(query)
+    const [refreshKey, setRefreshKey] = useState(0)
+    const refreshRef = useRef(false)
 
-    const loadInitial = async () => {
-        const requests = await functions.http.get("/api/search/reports", null, session, setSessionFlag, true)
-        return requests
-    }
-
-    const updateOffset = async (offset: number) => {
-        let result = await functions.http.get("/api/search/reports", {offset}, session, setSessionFlag, true)
-        return result
-    }
-
-    const {visibleItems, page, setPage, maxPage, initItems, setManagedPage} = 
-        usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "reportCount"})
+    usePageURL(page, setPage, query, setQuery)
 
     useEffect(() => {
-        initItems()
+        setSearchQuery(query)
+    }, [query])
+
+    const infiniteQuery = useSearchReportsInfiniteQuery(
+        {refreshKey},
+        {skip: !scroll, initialPageParam: {offset: (page - 1) * pageAmount, limit}}
+    )
+
+    const batchSize = Math.max(pageAmount, Math.floor(limit / pageAmount) * pageAmount)
+    const batchOffset = Math.floor((page - 1) * pageAmount / batchSize) * batchSize
+    const pageOffset = (page - 1) * pageAmount - batchOffset
+
+    const pageQuery = useSearchReportsPageQuery(
+        {offset: batchOffset, refreshKey},
+        {skip: scroll}
+    )
+
+    const items = useMemo(() => {
+        let result = scroll ? infiniteQuery.currentData?.pages.flat() ?? [] : pageQuery.currentData ?? []
+        return result
+    }, [scroll, infiniteQuery.currentData, pageQuery.currentData])
+
+    const visibleItems = useMemo(() => {
+        return scroll ? items : items.slice(pageOffset, pageOffset + pageAmount)
+    }, [items, pageOffset, pageAmount, scroll])
+    
+    const totalCount = Number(items[0]?.reportCount ?? items.length)
+    const maxPage = Math.max(1, Math.ceil(totalCount / pageAmount))
+
+    const loadMore = useEffectEvent(() => {
+        if (infiniteQuery.hasNextPage && !infiniteQuery.isFetchingNextPage) infiniteQuery.fetchNextPage()
+    })
+
+    useEffect(() => {
+        if (!scroll) return
+        const onScroll = () => {
+            if (functions.dom.scrolledToBottom()) loadMore()
+        }
+        window.addEventListener("scroll", onScroll)
+        return () => window.removeEventListener("scroll", onScroll)
+    }, [scroll])
+
+    const onRefresh = async (value?: string, reset?: boolean) => {
+        const nextQuery = typeof value === "string" ? value : searchQuery
+        if (reset || nextQuery !== query) setPage(1)
+        setQuery(nextQuery)
+
+        if (refreshRef.current) setRefreshKey((prev) => prev + 1)
+        refreshRef.current = true
+    }
+
+    useEffect(() => {
+        onRefresh()
     }, [modState, session])
 
     useEffect(() => {
-        if (modPage) setManagedPage(modPage)
+        if (modPage && !location.search) setPage(modPage)
     }, [])
 
     useEffect(() => {
@@ -202,7 +261,7 @@ const ModReports: React.FunctionComponent = (props) => {
             const request = visible[i]
             if (!request) break
             if (request.fake) continue
-            jsx.push(<ReportRow key={request.id} request={request} updateReports={initItems}/>)
+            jsx.push(<ReportRow key={request.id} request={request} updateReports={onRefresh}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)

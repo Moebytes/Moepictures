@@ -4,8 +4,13 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useState, useRef} from "react"
-import {useNavigate} from "react-router-dom"
+import React, {useEffect, useState, useRef, useEffectEvent, useMemo} from "react"
+import {usePageURL, getPageNumber} from "../../components/site/usePageURL"
+import {useSearchActions, useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions, useActiveSelector,
+useSearchSelector, usePageSelector, useFlagSelector} from "../../store"
+import {useSearchNotesInfiniteQuery, useSearchNotesPageQuery} from "../../api"
+import {useNavigate, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import SideBar from "../../components/site/SideBar"
@@ -18,10 +23,6 @@ import ScrollIcon from "../../assets/svg/scroll.svg"
 import PagesIcon from "../../assets/svg/pages.svg"
 import NoteRow from "../../components/search/NoteRow"
 import LoadingSpinner from "../../components/search/LoadingSpinner"
-import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
-useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
-useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector} from "../../store"
-import usePaginatedScroll from "../../components/site/usePaginatedScroll"
 import PageControls from "../../components/site/PageControls"
 import {NoteSearch, CommentSort} from "../../types/Types"
 import "./styles/itemspage.less"
@@ -48,9 +49,17 @@ const NotesPage: React.FunctionComponent = (props) => {
     const {noteSearchFlag} = useFlagSelector()
     const {setNoteSearchFlag} = useFlagActions()
     const {ratingType} = useSearchSelector()
-    const sortRef = useRef<HTMLDivElement>(null)
-    const loadingRef = useRef(true)
     const navigate = useNavigate()
+    const location = useLocation()
+    const {setScroll} = useSearchActions()
+    const [page, setPage] = useState(getPageNumber(location.search))
+    const [query, setQuery] = useState(new URLSearchParams(location.search).get("query") ?? "")
+    const [searchQuery, setSearchQuery] = useState(query)
+    const [refreshKey, setRefreshKey] = useState(0)
+    const sortRef = useRef<HTMLDivElement>(null)
+    const refreshRef = useRef(false)
+
+    usePageURL(page, setPage, query, setQuery)
 
     useEffect(() => {
         setHideNavbar(true)
@@ -70,37 +79,78 @@ const NotesPage: React.FunctionComponent = (props) => {
         setRelative(mobile ? true : false)
     }, [mobile])
 
-    const loadInitial = async (query?: string) => {
-        let sort = functions.validation.parseSort(sortType, sortReverse)
-        const result = await functions.http.get("/api/search/notes", {sort, query}, session, setSessionFlag)
+    useEffect(() => {
+        setSearchQuery(query)
+    }, [query])
+
+    const infiniteQuery = useSearchNotesInfiniteQuery(
+        {query, sort: functions.validation.parseSort(sortType, sortReverse), refreshKey},
+        {skip: !scroll, initialPageParam: {offset: (page - 1) * pageAmount, limit}}
+    )
+
+    const batchSize = Math.max(pageAmount, Math.floor(limit / pageAmount) * pageAmount)
+    const batchOffset = Math.floor((page - 1) * pageAmount / batchSize) * batchSize
+    const pageOffset = (page - 1) * pageAmount - batchOffset
+
+    const pageQuery = useSearchNotesPageQuery(
+        {query, sort: functions.validation.parseSort(sortType, sortReverse),
+        offset: batchOffset, limit: batchSize, refreshKey},
+        {skip: scroll}
+    )
+
+    const items = useMemo(() => {
+        let result = scroll ? infiniteQuery.currentData?.pages.flat() ?? [] : pageQuery.currentData ?? []
         return result
+    }, [scroll, infiniteQuery.currentData, pageQuery.currentData])
+
+    const visibleItems = useMemo(() => {
+        return scroll ? items : items.slice(pageOffset, pageOffset + pageAmount)
+    }, [items, pageOffset, pageAmount, scroll])
+    
+    const isLoading = (scroll ? infiniteQuery.isFetching : pageQuery.isFetching) && visibleItems.length === 0
+    const totalCount = Number(items[0]?.noteCount ?? items.length)
+    const maxPage = Math.max(1, Math.ceil(totalCount / pageAmount))
+
+    const loadMore = useEffectEvent(() => {
+        if (infiniteQuery.hasNextPage && !infiniteQuery.isFetchingNextPage) infiniteQuery.fetchNextPage()
+    })
+
+    useEffect(() => {
+        if (!scroll) return
+        const onScroll = () => {
+            if (functions.dom.scrolledToBottom()) loadMore()
+        }
+        window.addEventListener("scroll", onScroll)
+        return () => window.removeEventListener("scroll", onScroll)
+    }, [scroll])
+
+    const onRefresh = async (value?: string, reset?: boolean) => {
+        const nextQuery = typeof value === "string" ? value : searchQuery
+        if (reset || nextQuery !== query) setPage(1)
+        setQuery(nextQuery)
+
+        if (refreshRef.current) setRefreshKey((prev) => prev + 1)
+        refreshRef.current = true
     }
 
-    const updateOffset = async (offset: number, query?: string) => {
-        let sort = functions.validation.parseSort(sortType, sortReverse)
-        let result = await functions.http.get("/api/search/notes", {sort, query, offset}, session, setSessionFlag)
-        return result
-    }
-
-    const {visibleItems, page, setPage, maxPage, searchQuery, setSearchQuery, initItems, setManagedPage,
-        toggleScroll} = usePaginatedScroll({loadInitial, updateOffset, pageAmount, limit, countKey: "noteCount"})
+    const toggleScroll = () => setScroll(!scroll)
 
     useEffect(() => {
         if (noteSearchFlag) {
             setTimeout(() => {
                 setSearchQuery(noteSearchFlag)
-                initItems(noteSearchFlag)
+                onRefresh(noteSearchFlag)
                 setNoteSearchFlag(null)
             }, 200)
         }
     }, [noteSearchFlag])
 
     useEffect(() => {
-        initItems()
+        onRefresh()
     }, [sortType, sortReverse, session])
 
     useEffect(() => {
-        if (notesPage) setManagedPage(notesPage)
+        if (notesPage && !location.search) setPage(notesPage)
     }, [])
 
     useEffect(() => {
@@ -136,10 +186,7 @@ const NotesPage: React.FunctionComponent = (props) => {
             if (noteGroup.fake) continue
             if (!session.username) if (noteGroup.post.rating !== functions.r13()) continue
             if (!functions.post.isR18(ratingType)) if (functions.post.isR18(noteGroup.post.rating)) continue
-            jsx.push(<NoteRow note={noteGroup} onDelete={initItems} onEdit={initItems}/>)
-        }
-        if (jsx.length) {
-            loadingRef.current = false
+            jsx.push(<NoteRow key={`${noteGroup.postID}-${noteGroup.order}`} note={noteGroup} onDelete={onRefresh} onEdit={onRefresh}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
@@ -176,8 +223,8 @@ const NotesPage: React.FunctionComponent = (props) => {
                     <span className="items-heading">{i18n.navbar.notes}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? initItems() : null}/>
-                            <button className="item-search-button" onClick={() => initItems()}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? onRefresh() : null}/>
+                            <button className="item-search-button" onClick={() => onRefresh()}>
                                 <SearchIcon className="item-search-button-icon"/>
                             </button>
                         </div>
@@ -200,7 +247,7 @@ const NotesPage: React.FunctionComponent = (props) => {
                         </div>
                     </div>
                     {mobile ? <div className="item-row">{getUntranslatedButton()}</div> : null}
-                    {loadingRef.current && <LoadingSpinner/>}
+                    {isLoading && <LoadingSpinner/>}
                     <div className="items-container">
                         {generateNotesJSX()}
                     </div>

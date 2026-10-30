@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions, useMiscDialogSelector, useMiscDialogActions,
 useFlagActions} from "../../store"
+import {useInvalidateSession} from "../../api"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {motion, useDragControls} from "framer-motion"
@@ -24,6 +25,7 @@ const UnbanDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidateSession = useInvalidateSession()
 
     useEffect(() => {
         if (unbanName) {
@@ -36,11 +38,11 @@ const UnbanDialog: React.FunctionComponent = (props) => {
         }
     }, [unbanName])
 
-
     const unban = async () => {
         if (!unbanName) return
         if (!permissions.isMod(session)) return setUnbanName(null)
         await functions.http.post("/api/user/unban", {username: unbanName}, session, setSessionFlag)
+        invalidateSession()
         setUnbanName(null)
         setUpdateUserFlag(true)
     }

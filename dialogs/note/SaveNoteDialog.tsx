@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useNoteDialogSelector, useNoteDialogActions, useSessionSelector, 
 useSessionActions} from "../../store"
+import {useInvalidateNotes} from "../../api"
 import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
@@ -25,6 +26,7 @@ const SaveNoteDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidateNotes = useInvalidateNotes()
 
     useEffect(() => {
         if (saveNoteID) {
@@ -41,10 +43,12 @@ const SaveNoteDialog: React.FunctionComponent = (props) => {
         if (!saveNoteID || !saveNoteData) return
         if (saveNoteID.unverified) {
             await functions.http.put("/api/note/save/unverified", {postID: saveNoteID.post.postID, data: saveNoteData, order: saveNoteOrder, reason}, session, setSessionFlag)
+            invalidateNotes()
             return setSubmitted(true)
         } else {
             if (permissions.isContributor(session)) {
                 await functions.http.post("/api/note/save", {postID: saveNoteID.post.postID, data: saveNoteData, order: saveNoteOrder, reason}, session, setSessionFlag)
+                invalidateNotes()
                 setSubmitted(true)
             } else {
                 const badReason = functions.validation.validateReason(reason, i18n)
@@ -55,7 +59,8 @@ const SaveNoteDialog: React.FunctionComponent = (props) => {
                     await functions.timeout(2000)
                     setError(false)
                 }
-                functions.http.post("/api/note/save/request", {postID: saveNoteID.post.postID, data: saveNoteData, order: saveNoteOrder, reason}, session, setSessionFlag)
+                await functions.http.post("/api/note/save/request", {postID: saveNoteID.post.postID, data: saveNoteData, order: saveNoteOrder, reason}, session, setSessionFlag)
+                invalidateNotes()
                 setSubmitted(true)
             }
         }

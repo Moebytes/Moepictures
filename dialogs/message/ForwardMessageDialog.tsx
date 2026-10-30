@@ -7,6 +7,7 @@
 import React, {useEffect, useState, useRef} from "react"
 import {useThemeSelector, useInteractionActions, useMessageDialogSelector, useMessageDialogActions, useSessionSelector, 
 useSessionActions, useFlagActions} from "../../store"
+import {useInvalidateMessages} from "../../api"
 import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import {motion, useDragControls} from "framer-motion"
@@ -24,6 +25,7 @@ const ForwardMessageDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<HTMLSpanElement>(null)
     const controls = useDragControls()
+    const invalidateMessages = useInvalidateMessages()
 
     useEffect(() => {
         if (forwardMessageObj) {
@@ -57,6 +59,7 @@ const ForwardMessageDialog: React.FunctionComponent = (props) => {
         }
         try {
             await functions.http.post("/api/message/forward", {messageID: forwardMessageObj.messageID, recipients: cleanedRecipients}, session, setSessionFlag)
+            invalidateMessages()
             setForwardMessageObj(null)
             setMessageFlag(true)
         } catch (err) {
