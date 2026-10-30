@@ -27,7 +27,6 @@ import PageControls from "../../components/site/PageControls"
 import {TagCategorySearch, CategorySort} from "../../types/Types"
 import "./styles/itemspage.less"
 
-let limit = 10
 let pageAmount = 5
 
 const ArtistsPage: React.FunctionComponent = (props) => {
@@ -40,7 +39,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     const {mobile} = useLayoutSelector()
     const {activeDropdown} = useActiveSelector()
     const {setActiveDropdown} = useActiveActions()
-    const {scroll} = useSearchSelector()
+    const {scroll, ratingType} = useSearchSelector()
     const {artistsPage} = usePageSelector()
     const {setArtistsPage} = usePageActions()
     const {artists} = useCacheSelector()
@@ -58,9 +57,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
 
     usePageURL(page, setPage, query, setQuery)
 
-    useEffect(() => {
-        limit = mobile ? 5 : 25
-    }, [mobile])
+    const limit = mobile ? 5 : 25
 
     useEffect(() => {
         setHideNavbar(true)
@@ -85,7 +82,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     }, [query])
 
     const infiniteQuery = useSearchArtistsInfiniteQuery(
-        {query, sort: functions.validation.parseSort(sortType, sortReverse), refreshKey},
+        {query, rating: ratingType, sort: functions.validation.parseSort(sortType, sortReverse), refreshKey},
         {skip: !scroll, initialPageParam: {offset: (page - 1) * pageAmount, limit}}
     )
 
@@ -94,15 +91,15 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     const pageOffset = (page - 1) * pageAmount - batchOffset
 
     const pageQuery = useSearchArtistsPageQuery(
-        {query, sort: functions.validation.parseSort(sortType, sortReverse),
+        {query, rating: ratingType, sort: functions.validation.parseSort(sortType, sortReverse),
         offset: batchOffset, limit: batchSize, refreshKey},
         {skip: scroll}
     )
 
     const items = useMemo(() => {
         let result = scroll ? infiniteQuery.currentData?.pages.flat() ?? [] : pageQuery.currentData ?? []
-        return functions.tag.removeDuplicateCategories(result)
-    }, [scroll, infiniteQuery.currentData, pageQuery.currentData, functions.tag.removeDuplicateCategories])
+        return result
+    }, [scroll, infiniteQuery.currentData, pageQuery.currentData])
 
     const visibleItems = useMemo(() => {
         return scroll ? items : items.slice(pageOffset, pageOffset + pageAmount)

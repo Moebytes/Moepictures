@@ -884,3 +884,5 @@ CREATE INDEX IF NOT EXISTS "idx_tag_map_posts_gin" ON "tag map posts" USING gin 
 CREATE INDEX IF NOT EXISTS "idx_posts_active" ON posts("postID") WHERE deleted = false AND hidden = false;
 CREATE INDEX IF NOT EXISTS "idx_posts_uploaddate_desc" ON posts ("uploadDate" DESC);
 CREATE INDEX IF NOT EXISTS "idx_posts_uploaddate_asc" ON posts ("uploadDate" ASC);
+CREATE INDEX IF NOT EXISTS "idx_category_tags_prefix" ON "tags" ("type", lower("tag") text_pattern_ops);
+CREATE INDEX IF NOT EXISTS "idx_tag_map_tagid_postid" ON "tag map" ("tagID", "postID" DESC);

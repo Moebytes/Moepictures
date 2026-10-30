@@ -31,6 +31,7 @@ export type CommentSearchParams = {
 
 export type CategorySearchParams = {
     query?: string
+    rating?: PostRating
     sort?: CategorySort
     offset?: number
     limit?: number

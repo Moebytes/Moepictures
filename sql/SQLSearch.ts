@@ -7,7 +7,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../functions/Functions"
-import {DeletedPost, PostSearch, PostFull, UnverifiedPost, TagCategorySearch, TagSearch, GroupSearch, ServerSession} from "../types/Types"
+import {DeletedPost, PostSearch, PostFull, UnverifiedPost, TagCategorySearch, TagSearch, GroupSearch, ServerSession, PostRating} from "../types/Types"
 
 export default class SQLSearch {
     public static boilerplate = (options: {i?: number, tags?: string[], type?: string, rating?: string, style?: string, sort?: string, offset?: number, 
@@ -560,25 +560,38 @@ export default class SQLSearch {
     }
 
     /** Tag category search */
-    public static tagCategory = async (category: string, sort: string, search?: string, limit?: number, offset?: number) => {
-        let whereQueries = [] as string[]
-        let values = [] as (string | number)[]
-        if (category === "artists") whereQueries.push(`tags.type = 'artist'`)
-        if (category === "characters") whereQueries.push(`tags.type = 'character'`)
-        if (category === "series") whereQueries.push(`tags.type = 'series'`)
-        let i = 1
+    public static tagCategory = async (category: string, sort: string, search?: string, limit?: number, offset?: number,
+        session?: ServerSession, rating?: PostRating) => {
+        const values = [] as (string | number)[]
+        if (category === "artists") values.push("artist")
+        if (category === "characters") values.push("character")
+        if (category === "series") values.push("series")
+
+        const whereQueries = [`tags.type = $1`]
+        if (category === "artists") whereQueries.push(`tags.tag <> 'unknown-artist'`)
+        if (category === "characters") whereQueries.push(`tags.tag NOT IN ('original', 'unknown-character')`)
+        if (category === "series") whereQueries.push(`tags.tag NOT IN ('no-series', 'unknown-series')`)
         if (search) {
-            whereQueries.push(`lower(tags.tag) LIKE $${i} || '%'`)
             values.push(search.toLowerCase())
-            i++
+            whereQueries.push(`lower(tags.tag) LIKE $${values.length} || '%'`)
         }
-        let limitValue = i
-        if (limit) {
-            if (Number(limit) > 25) limit = 25
-            values.push(limit)
-            i++
+        const whereQuery = `WHERE ${whereQueries.join(" AND ")}`
+
+        const amount = Number(limit ?? 25)
+        const start = Number(offset ?? 0)
+        values.push(Math.min(amount, 25))
+        const limitValue = values.length
+        values.push(start)
+        const offsetValue = values.length
+
+        const postQueries = [`posts.style NOT IN ('sketch', 'lineart')`, `posts.deleted IS NOT TRUE`]
+        if (!session?.showR18) postQueries.push(`posts.rating != 'lewd'`)
+        if (!session?.username) {
+            postQueries.push(`posts.rating = 'cute'`)
+        } else if (rating) {
+            postQueries.push(functions.post.isR18(rating) ? `posts.rating = 'lewd'` : `posts.rating != 'lewd'`)
         }
-        let whereQuery = whereQueries.length ? `WHERE ${whereQueries.join(" AND ")}` : ""
+
         let sortQuery = ""
         if (sort === "random") sortQuery = `ORDER BY random()`
         if (sort === "cuteness") sortQuery = `ORDER BY "cuteness" DESC`
@@ -587,80 +600,68 @@ export default class SQLSearch {
         if (sort === "reverse posts") sortQuery = `ORDER BY "postCount" ASC`
         if (sort === "alphabetic") sortQuery = `ORDER BY tags.tag ASC`
         if (sort === "reverse alphabetic") sortQuery = `ORDER BY tags.tag DESC`
+        const sortCuteness = sort.includes("cuteness")
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                WITH post_json AS (
-                    SELECT posts.*, json_agg(DISTINCT images.*) AS images,
-                    ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
-                    FROM posts
-                    TABLESAMPLE SYSTEM(5)
-                    JOIN images ON images."postID" = posts."postID"
-                    LEFT JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
-                    WHERE NOT (posts.style = 'sketch' OR posts.style = 'lineart')
-                    GROUP BY posts."postID"
-                ),
-                post_tags AS (
-                    SELECT tags."tagID", tags.tag, tags.type, tags.image, tags."imageHash",
-                    tags.website, tags.social, tags.twitter, tags.fandom, tags.wikipedia,
-                    unnest("tag map posts".posts) AS "postID",
-                    array_length("tag map posts".posts, 1) AS "postCount"
+                WITH ${sortCuteness ? `category_scores AS (
+                    SELECT scores."tagID", ROUND(AVG(scores.cuteness)) AS cuteness
+                    FROM (
+                        SELECT tags."tagID", posts."postID", ROUND(AVG(cuteness.cuteness)) AS cuteness
+                        FROM tags
+                        JOIN "tag map" ON "tag map"."tagID" = tags."tagID"
+                        JOIN posts ON posts."postID" = "tag map"."postID"
+                        JOIN cuteness ON cuteness."postID" = posts."postID"
+                        ${whereQuery} AND posts.style NOT IN ('sketch', 'lineart') AND posts.deleted IS NOT TRUE
+                        GROUP BY tags."tagID", posts."postID"
+                    ) scores
+                    GROUP BY scores."tagID"
+                ),` : ""}
+                category_tags AS (
+                    SELECT tags.*, COALESCE(array_length("tag map posts".posts, 1), 0) AS "postCount",
+                        ${sortCuteness ? `category_scores.cuteness` : `NULL::numeric AS cuteness`}
                     FROM tags
-                    JOIN "tag map posts" ON "tag map posts".tag = tags.tag
+                    LEFT JOIN "tag map posts" ON "tag map posts".tag = tags.tag
+                    ${sortCuteness ? `LEFT JOIN category_scores ON category_scores."tagID" = tags."tagID"` : ""}
                     ${whereQuery}
                 ),
-                ranked_posts AS (
-                    SELECT post_tags."tagID",
-                    post_tags.tag,
-                    post_tags.image, post_tags."imageHash",
-                    post_tags.website, post_tags.social,
-                    post_tags.twitter, post_tags.fandom,
-                    post_tags.wikipedia,
-                    post_tags."postCount",
-                    post_json."postID",
-                    post_json.type,
-                    post_json.rating,
-                    post_json.style,
-                    post_json.images,
-                    post_json.cuteness,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY post_tags."tagID"
-                        ORDER BY post_json."postID" DESC
-                    ) AS row_number
-                    FROM post_tags
-                    JOIN post_json ON post_json."postID" = post_tags."postID"
+                selected_tags AS MATERIALIZED (
+                    SELECT tags.*, COUNT(*) OVER() AS "tagCount",
+                        ROW_NUMBER() OVER(${sortQuery}) AS "sortOrder"
+                    FROM category_tags tags
+                    ${sortQuery}
+                    LIMIT $${limitValue} OFFSET $${offsetValue}
                 )
-                SELECT * FROM (
-                    SELECT DISTINCT ON (ranked_posts."tagID")
-                    ranked_posts."tagID",
-                    ranked_posts.tag, ranked_posts.type,
-                    ranked_posts.image, ranked_posts."imageHash",
-                    ranked_posts.website, ranked_posts.social,
-                    ranked_posts.twitter, ranked_posts.fandom,
-                    ranked_posts.wikipedia,
-                    json_agg(ranked_posts.*) AS posts,
-                    COUNT(*) OVER() AS "tagCount",
-                    MAX(ranked_posts."postCount") AS "postCount",
-                    ROUND(AVG(ranked_posts.cuteness)) AS cuteness
-                    FROM ranked_posts
-                    WHERE ranked_posts.row_number <= 100
-                    GROUP BY ranked_posts."tagID",
-                    ranked_posts.tag, ranked_posts.type,
-                    ranked_posts.image, ranked_posts."imageHash",
-                    ranked_posts.website, ranked_posts.social,
-                    ranked_posts.twitter, ranked_posts.fandom,
-                    ranked_posts.wikipedia
-                )
-                ${sortQuery}
-                ${limit ? `LIMIT $${limitValue}` : "LIMIT 25"} ${offset ? `OFFSET $${i}` : ""}
-            `)
+                SELECT tags."tagID", tags.tag, tags.type, tags.image, tags."imageHash",
+                    tags.website, tags.social, tags.twitter, tags.fandom, tags.wikipedia,
+                    tags."postCount", tags."tagCount", COALESCE(tags.cuteness, previews.cuteness) AS cuteness,
+                    COALESCE(previews.posts, '[]'::json) AS posts
+                FROM selected_tags tags
+                LEFT JOIN LATERAL (
+                    SELECT json_agg(post_json ORDER BY post_json."postID" DESC) AS posts,
+                        ROUND(AVG(post_json.cuteness)) AS cuteness
+                    FROM (
+                        SELECT preview.*, (
+                            SELECT json_agg(images ORDER BY images."order", images."imageID")
+                            FROM images WHERE images."postID" = preview."postID"
+                        ) AS images, (
+                            SELECT ROUND(AVG(cuteness.cuteness)) FROM cuteness
+                            WHERE cuteness."postID" = preview."postID"
+                        ) AS cuteness
+                        FROM (
+                            SELECT posts.* FROM "tag map"
+                            JOIN posts ON posts."postID" = "tag map"."postID"
+                            WHERE "tag map"."tagID" = tags."tagID" AND ${postQueries.join(" AND ")}
+                                AND EXISTS (SELECT 1 FROM images WHERE images."postID" = posts."postID")
+                            ORDER BY "tag map"."postID" DESC
+                            LIMIT 100
+                        ) preview
+                    ) post_json
+                ) previews ON TRUE
+                ORDER BY tags."sortOrder"
+            `),
+            values
         }
-        if (offset) values.push(offset)
-        if (values?.[0]) query.values = values
-        if (sort === "random") {
-            return SQLQuery.run(query) as Promise<TagCategorySearch[]>
-        } else {
-            return SQLQuery.run(query) as Promise<TagCategorySearch[]>
-        }
+        return SQLQuery.run(query) as Promise<TagCategorySearch[]>
     }
 
     /** Tag search */
