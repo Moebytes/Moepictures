@@ -109,6 +109,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         else params.delete("page")
         const search = params.toString() ? `?${params}` : ""
         if (search === location.search) return
+        setPendingSearch(search)
         if (!scroll) props.setImagesLoaded(false)
         if (restoredSearch?.mode === "search") {
             setRestoreActive(false)
@@ -508,8 +509,8 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
 
     useLayoutEffect(() => {
         if (scroll) return props.setImagesLoaded(true)
-        if (!visiblePromisesRef.current.length) return
         props.setImagesLoaded(false)
+        if (submitting || !resultsReady || !visiblePromisesRef.current.length) return
         let active = true
         const promises = [...visiblePromisesRef.current]
         const poll = async () => {
@@ -525,7 +526,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         }
         poll()
         return () => {active = false}
-    }, [scroll, visibleItems, page])
+    }, [scroll, visibleItems, page, submitting, resultsReady])
 
     const generateImagesJSX = () => {
         const jsx = [] as React.ReactElement[]
@@ -599,7 +600,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             style={{marginTop: mobile ? "10px" : "0px", maxWidth: hideSidebar ? "" : `calc(100vw - ${functions.dom.sidebarWidth()})`}}>
             <div className="image-outer-container">
                 {(!initialResultsLoaded || loadingRef.current) && <LoadingSpinner/>}
-                <div className="image-container" style={{visibility: props.imagesLoaded ? "visible" : "hidden"}}>
+                <div className="image-container" style={{visibility: props.imagesLoaded && !submitting ? "visible" : "hidden"}}>
                 {generateImagesJSX()}
                 </div>
             </div>
