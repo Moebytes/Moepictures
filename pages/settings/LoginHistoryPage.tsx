@@ -81,7 +81,7 @@ const LoginHistoryPage: React.FunctionComponent = () => {
     const totalCount = items.length
     const maxPage = Math.max(1, Math.ceil(totalCount / pageAmount))
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -97,7 +97,7 @@ const LoginHistoryPage: React.FunctionComponent = () => {
             navigate("/login")
             setSidebarText(i18n.sidebar.loginRequired)
         }
-        onRefresh()
+        refreshItems()
     }, [session])
 
     const logoutOtherSessions = async () => {

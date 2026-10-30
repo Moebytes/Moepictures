@@ -123,7 +123,7 @@ const ForumPage: React.FunctionComponent = (props) => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -138,14 +138,14 @@ const ForumPage: React.FunctionComponent = (props) => {
         if (threadSearchFlag) {
             setTimeout(() => {
                 setSearchQuery(threadSearchFlag)
-                onRefresh(threadSearchFlag)
+                refreshItems(threadSearchFlag)
                 setThreadSearchFlag(null)
             }, 500)
         }
     }, [threadSearchFlag])
 
     useEffect(() => {
-        onRefresh()
+        refreshItems()
     }, [sortType, sortReverse, session])
 
     useEffect(() => {
@@ -187,7 +187,7 @@ const ForumPage: React.FunctionComponent = (props) => {
         let visible = visibleItems as ThreadSearch[]
         for (let i = 0; i < visible?.length; i++) {
             if (visible[i].fake) continue
-            jsx.push(<ThreadRow thread={visible[i]} onDelete={onRefresh} onEdit={onRefresh}/>)
+            jsx.push(<ThreadRow thread={visible[i]} onDelete={refreshItems} onEdit={refreshItems}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
@@ -218,8 +218,8 @@ const ForumPage: React.FunctionComponent = (props) => {
                     <span className="items-heading">{i18n.navbar.forum}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? onRefresh() : null}/>
-                            <button className="item-search-button" onClick={() => onRefresh()}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? refreshItems() : null}/>
+                            <button className="item-search-button" onClick={() => refreshItems()}>
                                 <SearchIcon className="item-search-button-icon"/>
                             </button>
                         </div>

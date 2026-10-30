@@ -27,7 +27,7 @@ import PageControls from "../../components/site/PageControls"
 import {TagCategorySearch, CategorySort} from "../../types/Types"
 import "./styles/itemspage.less"
 
-let pageAmount = 5
+let pageAmount = 10
 
 const CharactersPage: React.FunctionComponent = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
@@ -57,7 +57,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
 
     usePageURL(page, setPage, query, setQuery)
 
-    const limit = mobile ? 5 : 25
+    const limit = mobile ? 10 : 25
 
     useEffect(() => {
         setHideNavbar(true)
@@ -122,7 +122,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -134,7 +134,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
     const toggleScroll = () => setScroll(!scroll)
 
     useEffect(() => {
-        onRefresh()
+        refreshItems()
     }, [sortType, sortReverse, session])
 
     useEffect(() => {
@@ -195,8 +195,8 @@ const CharactersPage: React.FunctionComponent = (props) => {
                     <span className="items-heading">{i18n.navbar.characters}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? onRefresh() : null}/>
-                            <button className="item-search-button" onClick={() => onRefresh()}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? refreshItems() : null}/>
+                            <button className="item-search-button" onClick={() => refreshItems()}>
                                 <SearchIcon className="item-search-button-icon"/>
                             </button>
                         </div>

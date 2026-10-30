@@ -660,17 +660,18 @@ export default class SQLTag {
         const whereQueries = [searchQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                WITH history_page AS MATERIALIZED (
+                WITH history AS (
+                    SELECT "historyID", "user", "date", "source", "target",
+                    "type", "affectedPosts", "sourceData", "reason"
+                    FROM "alias history"
+                    UNION ALL
+                    SELECT "historyID", "user", "date", "source", "target",
+                    "type", "affectedPosts", NULL::jsonb AS "sourceData", "reason"
+                    FROM "implication history"
+                ),
+                history_page AS MATERIALIZED (
                     SELECT history.*, COUNT(*) OVER() AS "historyCount"
-                    FROM (
-                        SELECT "historyID", "user", "date", "source", "target",
-                        "type", "affectedPosts", "sourceData", "reason"
-                        FROM "alias history"
-                        UNION ALL
-                        SELECT "historyID", "user", "date", "source", "target",
-                        "type", "affectedPosts", NULL::jsonb AS "sourceData", "reason"
-                        FROM "implication history"
-                    ) AS "history"
+                    FROM history
                     ${whereQueries ? `WHERE ${whereQueries}` : ""}
                     ORDER BY history."date" DESC
                     ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}

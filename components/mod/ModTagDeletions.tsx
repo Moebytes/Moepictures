@@ -84,7 +84,7 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -94,7 +94,7 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        onRefresh()
+        refreshItems()
     }, [modState, session])
 
     useEffect(() => {
@@ -110,13 +110,13 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
         invalidateTag(tag)
         await functions.http.post("/api/tag/delete/request/fulfill", {username, tag, accepted: true}, session, setSessionFlag)
         invalidateTag(tag)
-        await onRefresh()
+        await refreshItems()
     }
 
     const rejectRequest = async (username: string, tag: string) => {
         await functions.http.post("/api/tag/delete/request/fulfill", {username, tag, accepted: false}, session, setSessionFlag)
         invalidateTag(tag)
-        await onRefresh()
+        await refreshItems()
     }
 
     const generateTagsJSX = () => {

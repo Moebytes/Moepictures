@@ -126,7 +126,7 @@ const TagsPage: React.FunctionComponent = (props) => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -139,13 +139,13 @@ const TagsPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (tagSearchFlag !== null) {
-            onRefresh(tagSearchFlag)
+            refreshItems(tagSearchFlag)
             setTagSearchFlag(null)
         }
     }, [tagSearchFlag])
 
     useEffect(() => {
-        onRefresh()
+        refreshItems()
     }, [sortType, sortReverse, typeType, session])
 
     useEffect(() => {
@@ -212,7 +212,7 @@ const TagsPage: React.FunctionComponent = (props) => {
             if (visible[i].fake) continue
             if (!session.username) if (visible[i].r18) continue
             if (!functions.post.isR18(ratingType)) if (visible[i].r18) continue
-            jsx.push(<TagRow key={visible[i].tag} tag={visible[i]} onDelete={onRefresh} onEdit={onRefresh}/>)
+            jsx.push(<TagRow key={visible[i].tag} tag={visible[i]} onDelete={refreshItems} onEdit={refreshItems}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
@@ -262,8 +262,8 @@ const TagsPage: React.FunctionComponent = (props) => {
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="item-search" type="search" spellCheck="false" value={searchQuery} style={{width: mobile ? "170px" : "230px"}}
-                            onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? onRefresh() : null}/>
-                            <button className="item-search-button" onClick={() => onRefresh()}>
+                            onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? refreshItems() : null}/>
+                            <button className="item-search-button" onClick={() => refreshItems()}>
                                 <SearchIcon className="item-search-button-icon"/>
                             </button>
                         </div>

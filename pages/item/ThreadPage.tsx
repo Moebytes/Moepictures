@@ -158,7 +158,7 @@ const ThreadPage: React.FunctionComponent = () => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -169,7 +169,7 @@ const ThreadPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         updateThread()
-        onRefresh()
+        refreshItems()
     }, [threadID, session])
 
     useEffect(() => {
@@ -230,7 +230,7 @@ const ThreadPage: React.FunctionComponent = () => {
         for (let i = 0; i < visible.length; i++) {
             const reply = visible[i]
             if (reply.fake) continue
-            jsx.push(<Reply reply={reply} thread={thread} onDelete={onRefresh} onEdit={onRefresh} onReplyJump={onReplyJump}/>)
+            jsx.push(<Reply reply={reply} thread={thread} onDelete={refreshItems} onEdit={refreshItems} onReplyJump={onReplyJump}/>)
         }
         return jsx
     }
@@ -385,7 +385,7 @@ const ThreadPage: React.FunctionComponent = () => {
         }
         await functions.http.post("/api/thread/reply", {threadID, content: text, r18}, session, setSessionFlag)
         invalidateThreads()
-        onRefresh()
+        refreshItems()
         textBoxRef.current?.updateText("")
     }
 

@@ -135,7 +135,7 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -163,7 +163,7 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
     }, [historyItems, isSuccess, isUpdating, props.all, page])
 
     useEffect(() => {
-        onRefresh()
+        refreshItems()
         processRedirects()
     }, [postID, session])
 
@@ -186,7 +186,7 @@ const NoteHistoryPage: React.FunctionComponent<Props> = (props) => {
                 previous?.order !== current.order) previous = null
             if (username && !functions.compare.hasHistoryChanges(visible[i])) continue
             jsx.push(<NoteHistoryRow key={i} previousHistory={previous} noteHistory={visible[i]} 
-                onDelete={onRefresh} onEdit={onRefresh} current={i === currentIndex}/>)
+                onDelete={refreshItems} onEdit={refreshItems} current={i === currentIndex}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage} scrollToTop={true}/>)

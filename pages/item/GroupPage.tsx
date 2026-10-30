@@ -123,7 +123,7 @@ const GroupPage: React.FunctionComponent = () => {
 
     const toggleScroll = () => setScroll(!scroll)
 
-    const onRefresh = async () => {
+    const refreshItems = async () => {
         setItems(await prepareItems())
     }
 
@@ -160,7 +160,7 @@ const GroupPage: React.FunctionComponent = () => {
         if (group) {
             functions.dom.changeTitle(group.name, i18n)
             setHeaderText(group.name)
-            onRefresh()
+            refreshItems()
         }
     }, [group, ratingType, session])
 
@@ -229,7 +229,7 @@ const GroupPage: React.FunctionComponent = () => {
 
     const cancelReorder = () => {
         setReorderState(false)
-        onRefresh()
+        refreshItems()
     }
 
     const changeReorderState = () => {

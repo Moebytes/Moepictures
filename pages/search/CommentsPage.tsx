@@ -132,7 +132,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -147,14 +147,14 @@ const CommentsPage: React.FunctionComponent = (props) => {
         if (commentSearchFlag) {
             setTimeout(() => {
                 setSearchQuery(commentSearchFlag)
-                onRefresh(commentSearchFlag)
+                refreshItems(commentSearchFlag)
                 setCommentSearchFlag(null)
             }, 200)
         }
     }, [commentSearchFlag])
 
     useEffect(() => {
-        onRefresh()
+        refreshItems()
     }, [sortType, sortReverse, session])
 
     useEffect(() => {
@@ -218,7 +218,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
             if (comment.fake) continue
             if (!session.username) if (comment.post.rating !== functions.r13()) continue
             if (!functions.post.isR18(ratingType)) if (functions.post.isR18(comment.post.rating)) continue
-            jsx.push(<CommentRow key={comment.commentID} comment={comment} onDelete={onRefresh} onEdit={onRefresh} onCommentJump={onCommentJump}/>)
+            jsx.push(<CommentRow key={comment.commentID} comment={comment} onDelete={refreshItems} onEdit={refreshItems} onCommentJump={onCommentJump}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
@@ -237,8 +237,8 @@ const CommentsPage: React.FunctionComponent = (props) => {
                     <span className="items-heading">{i18n.navbar.comments}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? onRefresh() : null}/>
-                            <button className="item-search-button" onClick={() => onRefresh()}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? refreshItems() : null}/>
+                            <button className="item-search-button" onClick={() => refreshItems()}>
                                 <SearchIcon className="item-search-button-icon"/>
                             </button>
                         </div>

@@ -896,3 +896,4 @@ CREATE INDEX IF NOT EXISTS "idx_group_map_postid" ON "group map" ("postID");
 CREATE INDEX IF NOT EXISTS "idx_posts_search_guest_date" ON posts ("uploadDate" DESC, "postID" DESC)
     WHERE "parentID" IS NULL AND rating = 'cute' AND (type = 'image' OR type = 'comic') 
     AND NOT (style = 'promo' OR style = 'sketch' OR style = 'lineart');
+    

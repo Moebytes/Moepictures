@@ -89,7 +89,7 @@ const ModRejected: React.FunctionComponent = (props) => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -99,7 +99,7 @@ const ModRejected: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        onRefresh()
+        refreshItems()
     }, [modState, session])
 
     useEffect(() => {
@@ -125,14 +125,14 @@ const ModRejected: React.FunctionComponent = (props) => {
     const restorePost = async (postID: string) => {
         await functions.http.put("/api/post/undelete/unverified", {postID}, session, setSessionFlag)
         invalidatePost(postID)
-        await onRefresh()
+        await refreshItems()
         setUpdateVisiblePostFlag(true)
     }
 
     const rejectPost = async (postID: string) => {
         await functions.http.post("/api/post/reject", {postID}, session, setSessionFlag)
         invalidatePost(postID)
-        await onRefresh()
+        await refreshItems()
         setUpdateVisiblePostFlag(true)
     }
 

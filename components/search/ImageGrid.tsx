@@ -297,7 +297,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : query
         const params = new URLSearchParams(location.search)
         if (reset || nextQuery !== query) params.delete("page")
@@ -374,7 +374,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
 
             reloadTimer = setTimeout(() => {
                 const img = document.querySelector(".image")
-                if (!img) onRefresh(query)
+                if (!img) refreshItems(query)
             }, 3000)
         }
         window.addEventListener("load", onDOMLoaded)
@@ -403,7 +403,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             setIsRandomSearch(false)
             setSearchFlag(false)
             saveSearchSkip()
-            onRefresh(search, true)
+            refreshItems(search, true)
         }
     }, [search, searchFlag])
 
@@ -424,7 +424,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             }, 500)
             //return
         }
-        onRefresh(query, filtersLoaded.current)
+        refreshItems(query, filtersLoaded.current)
         filtersLoaded.current = true
     }, [settingsLoaded, imageType, ratingType, styleType, 
         sortType, sortReverse, showChildren, favSearch])
@@ -584,13 +584,13 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         }
         if (!jsx.length && noResults && afterFirstLoad) {
             jsx.push(
-                <div className="noresults-container">
+                <div key="no-results" className="noresults-container">
                     <img className="noresults" src={noresults}/>
                 </div>
             )
         }
         if (!scroll) {
-            jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
+            jsx.push(<PageControls key="page-controls" page={page} maxPage={maxPage} setPage={setPage}/>)
         }
         return jsx
     }

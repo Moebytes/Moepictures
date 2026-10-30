@@ -86,7 +86,7 @@ const ModGroupDeletions: React.FunctionComponent = (props) => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -96,7 +96,7 @@ const ModGroupDeletions: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        onRefresh()
+        refreshItems()
     }, [modState, session])
 
     useEffect(() => {
@@ -131,7 +131,7 @@ const ModGroupDeletions: React.FunctionComponent = (props) => {
             await functions.http.post("/api/group/delete/request/fulfill", {username, slug: group, accepted: true}, session, setSessionFlag)
             invalidateGroup(group)
         }
-        await onRefresh()
+        await refreshItems()
         setUpdateVisibleRequestFlag(true)
     }
 
@@ -143,7 +143,7 @@ const ModGroupDeletions: React.FunctionComponent = (props) => {
             await functions.http.post("/api/group/delete/request/fulfill", {username, slug: group, accepted: false}, session, setSessionFlag)
             invalidateGroup(group)
         }
-        await onRefresh()
+        await refreshItems()
         setUpdateVisibleRequestFlag(true)
     }
 

@@ -135,7 +135,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -175,7 +175,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     }, [historyItems, isSuccess, isUpdating, props.all, page])
 
     useEffect(() => {
-        onRefresh()
+        refreshItems()
         processRedirects()
     }, [postID, session])
 
@@ -197,7 +197,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
             if (username && !functions.compare.hasHistoryChanges(visible[i])) continue
             jsx.push(<PostHistoryRow key={i} historyIndex={i+1} postHistory={visible[i]} 
                 previousHistory={previous} currentHistory={current} current={i === currentIndex}
-                onDelete={onRefresh} onEdit={onRefresh} imageHeight={username ? undefined : 300}/>)
+                onDelete={refreshItems} onEdit={refreshItems} imageHeight={username ? undefined : 300}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage} scrollToTop={true}/>)

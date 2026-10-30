@@ -280,7 +280,8 @@ export default class SQLSearch {
                 ORDER BY "searchRank"${sortDirection}, posts."postID" ${tieDirection}
                 ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"}
                 ${offset ? `OFFSET $${offsetValue}` : ""}
-            ), post_json AS (
+            ), 
+            post_json AS (
                 SELECT posts.*, image_data.*, favorite_data.*, cuteness_data.*,
                     ${includeTags ? `"tag map tags".tags, array_length("tag map tags".tags, 1) AS "tagCount",` : ""}
                     EXISTS (SELECT 1 FROM "child posts" WHERE "child posts"."parentID" = posts."postID") AS "hasChildren",
@@ -652,27 +653,41 @@ export default class SQLSearch {
     /** Tag category search */
     public static tagCategory = async (category: string, sort: string, search?: string, limit?: number, offset?: number,
         session?: ServerSession, rating?: PostRating) => {
+        let i = 1
         const values = [] as (string | number)[]
-        if (category === "artists") values.push("artist")
-        if (category === "characters") values.push("character")
-        if (category === "series") values.push("series")
+        if (category === "artists") {
+            values.push("artist")
+            i++
+        }
+        if (category === "characters") {
+            values.push("character")
+            i++
+        }
+        if (category === "series") {
+            values.push("series")
+            i++
+        }
 
         const whereQueries = [`tags.type = $1`]
         if (category === "artists") whereQueries.push(`tags.tag <> 'unknown-artist'`)
         if (category === "characters") whereQueries.push(`tags.tag NOT IN ('original', 'unknown-character')`)
         if (category === "series") whereQueries.push(`tags.tag NOT IN ('no-series', 'unknown-series')`)
         if (search) {
+            whereQueries.push(`lower(tags.tag) LIKE $${i} || '%'`)
             values.push(search.toLowerCase())
-            whereQueries.push(`lower(tags.tag) LIKE $${values.length} || '%'`)
+            i++
         }
         const whereQuery = `WHERE ${whereQueries.join(" AND ")}`
-
-        const amount = Number(limit ?? 25)
-        const start = Number(offset ?? 0)
-        values.push(Math.min(amount, 25))
-        const limitValue = values.length
-        values.push(start)
-        const offsetValue = values.length
+        const limitValue = i
+        if (limit !== undefined) {
+            values.push(Math.min(Number(limit), 25))
+            i++
+        }
+        const offsetValue = i
+        if (offset !== undefined) {
+            values.push(Number(offset))
+            i++
+        }
 
         const postQueries = [`posts.style NOT IN ('sketch', 'lineart')`, `posts.deleted IS NOT TRUE`]
         if (!session?.showR18) postQueries.push(`posts.rating != 'lewd'`)
@@ -693,18 +708,19 @@ export default class SQLSearch {
         const sortCuteness = sort.includes("cuteness")
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                WITH ${sortCuteness ? `category_scores AS (
-                    SELECT scores."tagID", ROUND(AVG(scores.cuteness)) AS cuteness
-                    FROM (
-                        SELECT tags."tagID", posts."postID", ROUND(AVG(cuteness.cuteness)) AS cuteness
-                        FROM tags
-                        JOIN "tag map" ON "tag map"."tagID" = tags."tagID"
-                        JOIN posts ON posts."postID" = "tag map"."postID"
-                        JOIN cuteness ON cuteness."postID" = posts."postID"
-                        ${whereQuery} AND posts.style NOT IN ('sketch', 'lineart') AND posts.deleted IS NOT TRUE
-                        GROUP BY tags."tagID", posts."postID"
-                    ) scores
-                    GROUP BY scores."tagID"
+                WITH ${sortCuteness ? `post_scores AS (
+                    SELECT tags."tagID", posts."postID", ROUND(AVG(cuteness.cuteness)) AS cuteness
+                    FROM tags
+                    JOIN "tag map" ON "tag map"."tagID" = tags."tagID"
+                    JOIN posts ON posts."postID" = "tag map"."postID"
+                    JOIN cuteness ON cuteness."postID" = posts."postID"
+                    ${whereQuery} AND posts.style NOT IN ('sketch', 'lineart') AND posts.deleted IS NOT TRUE
+                    GROUP BY tags."tagID", posts."postID"
+                ),
+                category_scores AS (
+                    SELECT post_scores."tagID", ROUND(AVG(post_scores.cuteness)) AS cuteness
+                    FROM post_scores
+                    GROUP BY post_scores."tagID"
                 ),` : ""}
                 category_tags AS (
                     SELECT tags.*, COALESCE(array_length("tag map posts".posts, 1), 0) AS "postCount",
@@ -715,11 +731,11 @@ export default class SQLSearch {
                     ${whereQuery}
                 ),
                 selected_tags AS MATERIALIZED (
-                    SELECT tags.*, COUNT(*) OVER() AS "tagCount",
-                        ROW_NUMBER() OVER(${sortQuery}) AS "sortOrder"
+                    SELECT tags.*, COUNT(*) OVER() AS "tagCount", ROW_NUMBER() OVER(${sortQuery}) AS "sortOrder"
                     FROM category_tags tags
                     ${sortQuery}
-                    LIMIT $${limitValue} OFFSET $${offsetValue}
+                    ${limit !== undefined ? `LIMIT $${limitValue}` : "LIMIT 25"}
+                    ${offset !== undefined ? `OFFSET $${offsetValue}` : ""}
                 )
                 SELECT tags."tagID", tags.tag, tags.type, tags.image, tags."imageHash",
                     tags.website, tags.social, tags.twitter, tags.fandom, tags.wikipedia,
@@ -727,25 +743,35 @@ export default class SQLSearch {
                     COALESCE(previews.posts, '[]'::json) AS posts
                 FROM selected_tags tags
                 LEFT JOIN LATERAL (
+                    WITH preview AS (
+                        SELECT posts.* FROM "tag map"
+                        JOIN posts ON posts."postID" = "tag map"."postID"
+                        WHERE "tag map"."tagID" = tags."tagID" AND ${postQueries.join(" AND ")}
+                            AND EXISTS (SELECT 1 FROM images WHERE images."postID" = posts."postID")
+                        ORDER BY "tag map"."postID" DESC
+                        LIMIT 100
+                    ),
+                    image_json AS (
+                        SELECT images."postID", json_agg(images ORDER BY images."order", images."imageID") AS images
+                        FROM images
+                        JOIN preview ON preview."postID" = images."postID"
+                        GROUP BY images."postID"
+                    ),
+                    post_scores AS (
+                        SELECT cuteness."postID", ROUND(AVG(cuteness.cuteness)) AS cuteness
+                        FROM cuteness
+                        JOIN preview ON preview."postID" = cuteness."postID"
+                        GROUP BY cuteness."postID"
+                    ),
+                    post_json AS (
+                        SELECT preview.*, image_json.images, post_scores.cuteness
+                        FROM preview
+                        JOIN image_json ON image_json."postID" = preview."postID"
+                        LEFT JOIN post_scores ON post_scores."postID" = preview."postID"
+                    )
                     SELECT json_agg(post_json ORDER BY post_json."postID" DESC) AS posts,
                         ROUND(AVG(post_json.cuteness)) AS cuteness
-                    FROM (
-                        SELECT preview.*, (
-                            SELECT json_agg(images ORDER BY images."order", images."imageID")
-                            FROM images WHERE images."postID" = preview."postID"
-                        ) AS images, (
-                            SELECT ROUND(AVG(cuteness.cuteness)) FROM cuteness
-                            WHERE cuteness."postID" = preview."postID"
-                        ) AS cuteness
-                        FROM (
-                            SELECT posts.* FROM "tag map"
-                            JOIN posts ON posts."postID" = "tag map"."postID"
-                            WHERE "tag map"."tagID" = tags."tagID" AND ${postQueries.join(" AND ")}
-                                AND EXISTS (SELECT 1 FROM images WHERE images."postID" = posts."postID")
-                            ORDER BY "tag map"."postID" DESC
-                            LIMIT 100
-                        ) preview
-                    ) post_json
+                    FROM post_json
                 ) previews ON TRUE
                 ORDER BY tags."sortOrder"
             `),
@@ -761,14 +787,9 @@ export default class SQLSearch {
         let values = [] as (string | number)[]
         let i = 1
         if (search) {
-            whereArray.push( 
-            `(lower(tags.tag) LIKE '%' || $${i} || '%'
-            OR EXISTS (
-            SELECT 1 
-            FROM aliases
-            WHERE aliases.tag = "tags".tag 
-            AND lower(aliases.alias) LIKE '%' || $1 || '%'
-            ))`)
+            whereArray.push(`(lower(tags.tag) LIKE '%' || $${i} || '%'
+            OR EXISTS (SELECT 1 FROM aliases WHERE aliases.tag = "tags".tag 
+            AND lower(aliases.alias) LIKE '%' || $1 || '%'))`)
             values.push(search.toLowerCase())
             i++
         }
@@ -917,18 +938,22 @@ export default class SQLSearch {
                 SELECT groups.*, group_json.posts
                 FROM paged_groups AS groups
                 CROSS JOIN LATERAL (
-                    SELECT json_agg(post_json.* ORDER BY post_json."order" ASC) AS posts
-                    FROM (
+                    WITH image_json AS (
+                        SELECT images."postID", json_agg(images.*) AS images
+                        FROM images
+                        JOIN "group map" ON "group map"."postID" = images."postID"
+                        WHERE "group map"."groupID" = groups."groupID"
+                        GROUP BY images."postID"
+                    ),
+                    post_json AS (
                         SELECT posts.*, "group map"."order", image_json.images
                         FROM "group map"
                         JOIN posts ON posts."postID" = "group map"."postID"
-                        CROSS JOIN LATERAL (
-                            SELECT json_agg(images.*) AS images
-                            FROM images WHERE images."postID" = posts."postID"
-                            HAVING COUNT(*) > 0
-                        ) image_json
+                        JOIN image_json ON image_json."postID" = posts."postID"
                         WHERE "group map"."groupID" = groups."groupID"
-                    ) post_json
+                    )
+                    SELECT json_agg(post_json.* ORDER BY post_json."order" ASC) AS posts
+                    FROM post_json
                 ) group_json
                 ${sortQuery}
             `),

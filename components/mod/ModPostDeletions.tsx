@@ -86,7 +86,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -96,7 +96,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        onRefresh()
+        refreshItems()
     }, [modState, session])
 
     useEffect(() => {
@@ -118,14 +118,14 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
         invalidatePost(postID)
         await functions.http.post("/api/post/delete/request/fulfill", {username, postID, accepted: true}, session, setSessionFlag)
         invalidatePost(postID)
-        await onRefresh()
+        await refreshItems()
         setUpdateVisibleRequestFlag(true)
     }
 
     const rejectRequest = async (username: string, postID: string) => {
         await functions.http.post("/api/post/delete/request/fulfill", {username, postID, accepted: false}, session, setSessionFlag)
         invalidatePost(postID)
-        await onRefresh()
+        await refreshItems()
         setUpdateVisibleRequestFlag(true)
     }
 

@@ -251,7 +251,7 @@ const HistoryPage: React.FunctionComponent = () => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -273,7 +273,7 @@ const HistoryPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         resetState()
-        onRefresh()
+        refreshItems()
     }, [session, historyTab])
 
     useEffect(() => {
@@ -286,7 +286,7 @@ const HistoryPage: React.FunctionComponent = () => {
 
     useEffect(() => {
         if (historyFlag) {
-            onRefresh()
+            refreshItems()
             setHistoryFlag(false)
         }
     }, [historyFlag, session])
@@ -325,7 +325,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 if (!functions.compare.hasHistoryChanges(item)) continue
                 jsx.push(<PostHistoryRow key={i} historyIndex={i+1} postHistory={item} 
                     previousHistory={previous} currentHistory={current} current={i === currentIndex}
-                    onDelete={onRefresh} onEdit={onRefresh}/>)
+                    onDelete={refreshItems} onEdit={refreshItems}/>)
             }
 
             if (historyTab === "tag") {
@@ -340,7 +340,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 if (!functions.compare.hasHistoryChanges(item)) continue
                 jsx.push(<TagHistoryRow key={i} historyIndex={i+1} tagHistory={item} 
                     previousHistory={previous} currentHistory={current} current={i === currentIndex}
-                    onDelete={onRefresh} onEdit={onRefresh}/>)
+                    onDelete={refreshItems} onEdit={refreshItems}/>)
             }
 
             if (historyTab === "group") {
@@ -355,7 +355,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 if (!functions.compare.hasHistoryChanges(item)) continue
                 jsx.push(<GroupHistoryRow key={i} historyIndex={i+1} groupHistory={item} 
                     previousHistory={previous} currentHistory={current} current={i === currentIndex}
-                    onDelete={onRefresh} onEdit={onRefresh}/>)
+                    onDelete={refreshItems} onEdit={refreshItems}/>)
             }
 
             if (historyTab === "note") {
@@ -371,19 +371,19 @@ const HistoryPage: React.FunctionComponent = () => {
                     previous?.order !== current.order) previous = null
                 if (!functions.compare.hasHistoryChanges(item)) continue
                 jsx.push(<NoteHistoryRow key={i} previousHistory={previous} noteHistory={item} 
-                    onDelete={onRefresh} onEdit={onRefresh} current={i === currentIndex}/>)
+                    onDelete={refreshItems} onEdit={refreshItems} current={i === currentIndex}/>)
             }
 
             if (historyTab === "alias") {
-                jsx.push(<AliasHistoryRow key={i} history={visible[i] as AliasHistorySearch} onDelete={onRefresh} onEdit={onRefresh}/>)
+                jsx.push(<AliasHistoryRow key={i} history={visible[i] as AliasHistorySearch} onDelete={refreshItems} onEdit={refreshItems}/>)
             }
 
             if (historyTab === "search") {
-                jsx.push(<SearchHistoryRow key={i} history={visible[i] as SearchHistory} onDelete={onRefresh}/>)
+                jsx.push(<SearchHistoryRow key={i} history={visible[i] as SearchHistory} onDelete={refreshItems}/>)
             }
 
             if (historyTab === "delete") {
-                jsx.push(<DeletedPostRow key={i} post={visible[i] as DeletedPost} onDelete={onRefresh}/>)
+                jsx.push(<DeletedPostRow key={i} post={visible[i] as DeletedPost} onDelete={refreshItems}/>)
             }
         }
         if (!scroll && !isLoading) {
@@ -400,8 +400,8 @@ const HistoryPage: React.FunctionComponent = () => {
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? onRefresh() : null}/>
-                        <button className="history-search-button" onClick={() => onRefresh()}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? refreshItems() : null}/>
+                        <button className="history-search-button" onClick={() => refreshItems()}>
                             <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>
@@ -421,8 +421,8 @@ const HistoryPage: React.FunctionComponent = () => {
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? onRefresh() : null}/>
-                        <button className="history-search-button" onClick={() => onRefresh()}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? refreshItems() : null}/>
+                        <button className="history-search-button" onClick={() => refreshItems()}>
                             <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>
@@ -442,8 +442,8 @@ const HistoryPage: React.FunctionComponent = () => {
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? onRefresh() : null}/>
-                        <button className="history-search-button" onClick={() => onRefresh()}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? refreshItems() : null}/>
+                        <button className="history-search-button" onClick={() => refreshItems()}>
                             <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>
@@ -463,8 +463,8 @@ const HistoryPage: React.FunctionComponent = () => {
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? onRefresh() : null}/>
-                        <button className="history-search-button" onClick={() => onRefresh()}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? refreshItems() : null}/>
+                        <button className="history-search-button" onClick={() => refreshItems()}>
                             <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>
@@ -484,8 +484,8 @@ const HistoryPage: React.FunctionComponent = () => {
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? onRefresh() : null}/>
-                        <button className="history-search-button" onClick={() => onRefresh()}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? refreshItems() : null}/>
+                        <button className="history-search-button" onClick={() => refreshItems()}>
                             <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>
@@ -505,8 +505,8 @@ const HistoryPage: React.FunctionComponent = () => {
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? onRefresh() : null}/>
-                        <button className="history-search-button" onClick={() => onRefresh()}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? refreshItems() : null}/>
+                        <button className="history-search-button" onClick={() => refreshItems()}>
                             <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>
@@ -530,8 +530,8 @@ const HistoryPage: React.FunctionComponent = () => {
                 </div>
                 <div className="history-row">
                     <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? onRefresh() : null}/>
-                        <button className="history-search-button" onClick={() => onRefresh()}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? refreshItems() : null}/>
+                        <button className="history-search-button" onClick={() => refreshItems()}>
                             <SearchIcon className="history-search-button-icon"/>
                         </button>
                     </div>

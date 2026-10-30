@@ -159,7 +159,7 @@ const MessagePage: React.FunctionComponent = () => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -170,7 +170,7 @@ const MessagePage: React.FunctionComponent = () => {
 
     useEffect(() => {
         updateMessage()
-        onRefresh()
+        refreshItems()
     }, [messageID, session])
 
     useEffect(() => {
@@ -253,7 +253,7 @@ const MessagePage: React.FunctionComponent = () => {
         let visible = visibleItems as MessageUserReply[]
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
-            jsx.push(<MessageReply reply={visible[i]} onDelete={onRefresh} onEdit={onRefresh} onReplyJump={onReplyJump}/>)
+            jsx.push(<MessageReply reply={visible[i]} onDelete={refreshItems} onEdit={refreshItems} onReplyJump={onReplyJump}/>)
         }
         return jsx
     }
@@ -379,7 +379,7 @@ const MessagePage: React.FunctionComponent = () => {
         }
         await functions.http.post("/api/message/reply", {messageID, content: text, r18}, session, setSessionFlag)
         invalidateThreads()
-        onRefresh()
+        refreshItems()
         textBoxRef.current?.updateText("")
     }
 

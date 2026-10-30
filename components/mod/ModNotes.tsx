@@ -84,7 +84,7 @@ const ModNotes: React.FunctionComponent = (props) => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -94,7 +94,7 @@ const ModNotes: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        onRefresh()
+        refreshItems()
     }, [modState, session])
 
     useEffect(() => {
@@ -108,13 +108,13 @@ const ModNotes: React.FunctionComponent = (props) => {
     const approveNote = async (postID: string, originalID: string, order: number, data: Note[], username: string) => {
         await functions.http.post("/api/note/approve", {postID, originalID, order, data, username}, session, setSessionFlag)
         invalidateNotes()
-        await onRefresh()
+        await refreshItems()
     }
 
     const rejectNote = async (postID: string, originalID: string, order: number, data: Note[], username: string) => {
         await functions.http.post("/api/note/reject", {postID, originalID, order, data, username}, session, setSessionFlag)
         invalidateNotes()
-        await onRefresh()
+        await refreshItems()
     }
 
     const noteDataJSX = (unverifiedNote: UnverifiedNoteSearch) => {

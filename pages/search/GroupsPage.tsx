@@ -124,7 +124,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -139,14 +139,14 @@ const GroupsPage: React.FunctionComponent = (props) => {
         if (groupSearchFlag) {
             setTimeout(() => {
                 setSearchQuery(groupSearchFlag)
-                onRefresh(groupSearchFlag)
+                refreshItems(groupSearchFlag)
                 setGroupSearchFlag(null)
             }, 200)
         }
     }, [groupSearchFlag])
 
     useEffect(() => {
-        onRefresh()
+        refreshItems()
     }, [sortType, sortReverse, ratingType, session])
 
     useEffect(() => {
@@ -207,8 +207,8 @@ const GroupsPage: React.FunctionComponent = (props) => {
                     <span className="items-heading">{i18n.sort.groups}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? onRefresh() : null}/>
-                            <button className="item-search-button" onClick={() => onRefresh()}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? refreshItems() : null}/>
+                            <button className="item-search-button" onClick={() => refreshItems()}>
                                 <SearchIcon className="item-search-button-icon"/>
                             </button>
                         </div>

@@ -224,7 +224,7 @@ const ModReports: React.FunctionComponent = (props) => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -234,7 +234,7 @@ const ModReports: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        onRefresh()
+        refreshItems()
     }, [modState, session])
 
     useEffect(() => {
@@ -261,7 +261,7 @@ const ModReports: React.FunctionComponent = (props) => {
             const request = visible[i]
             if (!request) break
             if (request.fake) continue
-            jsx.push(<ReportRow key={request.id} request={request} updateReports={onRefresh}/>)
+            jsx.push(<ReportRow key={request.id} request={request} updateReports={refreshItems}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)

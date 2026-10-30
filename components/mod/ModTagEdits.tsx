@@ -88,7 +88,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -109,7 +109,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
     }, [visibleItems])
 
     useEffect(() => {
-        onRefresh()
+        refreshItems()
     }, [modState, session])
 
     useEffect(() => {
@@ -136,13 +136,13 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         invalidateTag(request.tag)
         await functions.http.post("/api/tag/edit/request/fulfill", {username: request.username, tag: request.tag, image: request.image, accepted: true}, session, setSessionFlag)
         invalidateTag(request.tag)
-        await onRefresh()
+        await refreshItems()
     }
 
     const rejectRequest = async (username: string, tag: string, image: string) => {
         await functions.http.post("/api/tag/edit/request/fulfill", {username, tag, image, accepted: false}, session, setSessionFlag)
         invalidateTag(tag)
-        await onRefresh()
+        await refreshItems()
     }
 
     const diffJSX = (oldTag: Tag, newTag: TagEditRequest, showOldTag: boolean) => {

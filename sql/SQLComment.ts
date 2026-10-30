@@ -76,7 +76,7 @@ export default class SQLComment {
         let whereQuery = ""
         let i = 1
         if (search) {
-            whereQuery = `WHERE lower(comments."comment") LIKE '%' || $${i} || '%'`
+            whereQuery = `AND lower(comments."comment") LIKE '%' || $${i} || '%'`
             i++
         }
         let offsetValue = i
@@ -94,7 +94,7 @@ export default class SQLComment {
                     FROM comments
                     JOIN users ON users."username" = comments."username"
                     WHERE EXISTS (SELECT 1 FROM images WHERE images."postID" = comments."postID")
-                    ${whereQuery.replace(/^WHERE /, "AND ")}
+                    ${whereQuery}
                     ${sortQuery}
                     LIMIT ${limit ? `$${i}` : 100} ${offset ? `OFFSET $${offsetValue}` : ""}
                 ),
@@ -126,9 +126,9 @@ export default class SQLComment {
     /** Comments by usernames. */
     public static searchCommentsByUsername = async (usernames: string[], search: string, sort: string, offset?: number, limit?: number) => {
         let i = 2
-        let whereQuery = `WHERE comments."username" = ANY ($1)`
+        let whereQuery = `AND comments."username" = ANY ($1)`
         if (search) {
-            whereQuery += `AND lower(comments."comment") LIKE '%' || $${i} || '%'`
+            whereQuery += ` AND lower(comments."comment") LIKE '%' || $${i} || '%'`
             i++
         }
         let offsetValue = i
@@ -146,7 +146,7 @@ export default class SQLComment {
                     FROM comments
                     JOIN users ON users."username" = comments."username"
                     WHERE EXISTS (SELECT 1 FROM images WHERE images."postID" = comments."postID")
-                    ${whereQuery.replace(/^WHERE /, "AND ")}
+                    ${whereQuery}
                     ${sortQuery}
                     LIMIT ${limit ? `$${i}` : 100} ${offset ? `OFFSET $${offsetValue}` : ""}
                 ),

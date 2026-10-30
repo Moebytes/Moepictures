@@ -113,7 +113,7 @@ const ForumPostsPage: React.FunctionComponent = () => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -126,14 +126,14 @@ const ForumPostsPage: React.FunctionComponent = () => {
         if (forumPostSearchFlag) {
             setTimeout(() => {
                 setSearchQuery(forumPostSearchFlag)
-                onRefresh(forumPostSearchFlag)
+                refreshItems(forumPostSearchFlag)
                 setForumPostSearchFlag(null)
             }, 200)
         }
     }, [forumPostSearchFlag])
 
     useEffect(() => {
-        onRefresh()
+        refreshItems()
     }, [sortType, sortReverse, session])
 
     useEffect(() => {
@@ -151,7 +151,7 @@ const ForumPostsPage: React.FunctionComponent = () => {
             const forumPost = visible[i]
             if (forumPost.fake) continue
             if (!functions.post.isR18(ratingType)) if (forumPost.r18) continue
-            jsx.push(<ForumPostRow forumPost={forumPost} onDelete={onRefresh} onEdit={onRefresh}/>)
+            jsx.push(<ForumPostRow forumPost={forumPost} onDelete={refreshItems} onEdit={refreshItems}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)

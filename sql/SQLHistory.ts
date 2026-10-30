@@ -90,11 +90,11 @@ export default class SQLHistory {
                     ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
                 ),
                 post_json AS (
-                        SELECT posts.*, json_agg(DISTINCT images.*) AS images
-                        FROM posts
-                        JOIN images ON images."postID" = posts."postID"
-                        WHERE posts."postID" IN (SELECT "featuredPost" FROM history_page)
-                        GROUP BY posts."postID"
+                    SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                    FROM posts
+                    JOIN images ON images."postID" = posts."postID"
+                    WHERE posts."postID" IN (SELECT "featuredPost" FROM history_page)
+                    GROUP BY posts."postID"
                 )
                 SELECT "tag history".*,
                 jsonb_build_object(
@@ -703,64 +703,58 @@ export default class SQLHistory {
         rating?: string, style?: string, sort?: string, showChildren?: boolean, sessionUsername?: string) => {
         if (!sort || sort === "date") sort = "viewDate"
         if (sort === "reverse date") sort = "reverse viewDate"
-        const options = {i: 2, search, type, rating, style, sort, offset, 
-            limit, showChildren, username: sessionUsername, outerSort: true}
         const historyDateSort = sort === "viewDate" || sort === "reverse viewDate"
-        const {postJSON, values, searchValue, sortQuery, includeTags, limitValue, offsetValue, whereQueries} =
+
+        const options = {i: 2, search, type, rating, style, sort, offset, limit, showChildren, 
+            username: sessionUsername, outerSort: true}
+
+        const {postJSON, values, searchValue, sortQuery, limitValue, offsetValue, whereQueries} =
             SQLQuery.search.boilerplate({...options, condition: historyDateSort ? undefined :
                 `EXISTS (SELECT 1 FROM history WHERE history."postID" = posts."postID" AND history.username = $1)`})
 
-        if (historyDateSort) {
-            const searchQuery = search ? `(posts.title ILIKE '%' || $${searchValue} || '%' OR posts."englishTitle" ILIKE '%' ||
-                $${searchValue} || '%' OR posts.artist ILIKE '%' || $${searchValue} || '%' OR posts.source ILIKE '%'
-                || $${searchValue} || '%' OR posts.mirrors::text ILIKE '%' || $${searchValue} || '%')` : ""
+        const postTable = historyDateSort ? "posts" : "post_json"
+        const searchQuery = search ? `AND (${["title", "englishTitle", "artist", "source", "mirrors"].map((field) =>
+            `${postTable}."${field}"${field === "mirrors" ? "::text" : ""} ILIKE '%' || $${searchValue} || '%'`).join(" OR ")})` : ""
 
+        const pagination = `${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}`
+        let historyQuery = postJSON
+
+        if (historyDateSort) {
             const filteredPostJSON = SQLQuery.search.boilerplate({...options,
                 condition: `posts."postID" IN (SELECT "postID" FROM history_page)`}).postJSON
                 
-            const query: QueryConfig = {
-                text: functions.multiTrim(/*sql*/`
-                    WITH history_page AS MATERIALIZED (
-                        SELECT history.*, COUNT(*) OVER() AS "historyCount"
-                        FROM history
-                        JOIN posts ON posts."postID" = history."postID"
-                        WHERE history.username = $1
-                        ${whereQueries ? `AND ${whereQueries}` : ""}
-                        ${searchQuery ? `AND ${searchQuery}` : ""}
-                        AND EXISTS (SELECT 1 FROM images WHERE images."postID" = posts."postID")
-                        ${sortQuery}
-                        ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}
-                    ),
-                    ${filteredPostJSON.replace(/^WITH\s+/, "")}
-                    SELECT history.*, to_json(post_json.*) AS post
-                    FROM history_page AS history
-                    JOIN post_json ON post_json."postID" = history."postID"
+            historyQuery = functions.multiTrim(/*sql*/`
+                WITH history_page AS MATERIALIZED (
+                    SELECT history.*, COUNT(*) OVER() AS "historyCount"
+                    FROM history
+                    JOIN posts ON posts."postID" = history."postID"
+                    WHERE history.username = $1
+                    ${whereQueries ? `AND ${whereQueries}` : ""}
+                    ${searchQuery}
+                    AND EXISTS (SELECT 1 FROM images WHERE images."postID" = posts."postID")
                     ${sortQuery}
-                `),
-                values: [username, ...values]
-            }
-            return await SQLQuery.run(query) as SearchHistory[]
+                    ${pagination}
+                ),
+                ${filteredPostJSON.replace(/^WITH\s+/, "")}
+            `)
         }
-
         const query: QueryConfig = {
-        text: functions.multiTrim(/*sql*/`
-                ${postJSON}
-                SELECT "history".*,
-                COUNT(*) OVER() AS "historyCount",
+            text: functions.multiTrim(/*sql*/`
+                ${historyQuery}
+                SELECT history.*,
+                ${historyDateSort ? "" : `COUNT(*) OVER() AS "historyCount",`}
                 to_json(post_json.*) AS post
-                FROM "history"
-                JOIN post_json ON post_json."postID" = "history"."postID"
-                WHERE "history"."username" = $1 
-                ${search ? `AND (post_json."title" ILIKE '%' || $${searchValue} || '%' OR post_json."englishTitle" ILIKE '%' || 
-                $${searchValue} || '%' OR post_json."artist" ILIKE '%' || $${searchValue} || '%' OR post_json."source" ILIKE '%' 
-                || $${searchValue} || '%' OR post_json."mirrors"::text ILIKE '%' || $${searchValue} || '%')` : ""}
-                ${sortQuery.replace(/posts\./g, "post_json.").replace(/favorites\./g, "post_json.")}
-                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}
+                FROM ${historyDateSort ? "history_page" : "history"} AS history
+                JOIN post_json ON post_json."postID" = history."postID"
+                ${historyDateSort ? sortQuery : `
+                    WHERE history.username = $1
+                    ${searchQuery}
+                    ${sortQuery.replace(/posts\./g, "post_json.").replace(/favorites\./g, "post_json.")}
+                    ${pagination}
+                `}
             `),
-            values: [username]
+            values: [username, ...values]
         }
-        if (values?.[0]) query.values?.push(...values)
-        const result = await SQLQuery.run(query)
-        return result as Promise<SearchHistory[]>
+        return SQLQuery.run(query) as Promise<SearchHistory[]>
     }
 }

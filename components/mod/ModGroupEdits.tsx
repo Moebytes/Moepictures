@@ -88,7 +88,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -109,7 +109,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
     }, [visibleItems])
 
     useEffect(() => {
-        onRefresh()
+        refreshItems()
     }, [modState, session])
 
     useEffect(() => {
@@ -125,13 +125,13 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
         invalidateGroup(slug)
         await functions.http.post("/api/group/edit/request/fulfill", {username, slug, accepted: true}, session, setSessionFlag)
         invalidateGroup(slug)
-        await onRefresh()
+        await refreshItems()
     }
 
     const rejectRequest = async (username: string, slug: string) => {
         await functions.http.post("/api/group/edit/request/fulfill", {username, slug, accepted: false}, session, setSessionFlag)
         invalidateGroup(slug)
-        await onRefresh()
+        await refreshItems()
     }
 
     const diffJSX = (oldGroup: Group, newGroup: GroupEditRequest, showOldGroup: boolean) => {

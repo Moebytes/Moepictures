@@ -129,7 +129,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
         return () => window.removeEventListener("scroll", onScroll)
     }, [scroll])
 
-    const onRefresh = async (value?: string, reset?: boolean) => {
+    const refreshItems = async (value?: string, reset?: boolean) => {
         const nextQuery = typeof value === "string" ? value : searchQuery
         if (reset || nextQuery !== query) setPage(1)
         setQuery(nextQuery)
@@ -163,7 +163,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
     }, [historyItems, isSuccess, isUpdating, props.all, page])
 
     useEffect(() => {
-        onRefresh()
+        refreshItems()
     }, [slug, session])
 
     const generateRevisionsJSX = () => {
@@ -184,7 +184,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
             if (username && !functions.compare.hasHistoryChanges(visible[i])) continue
             jsx.push(<GroupHistoryRow key={i} historyIndex={i+1} groupHistory={visible[i]} 
                 previousHistory={previous} currentHistory={current} current={i === currentIndex}
-                onDelete={onRefresh} onEdit={onRefresh}/>)
+                onDelete={refreshItems} onEdit={refreshItems}/>)
         }
         if (!scroll) {
             jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage} scrollToTop={true}/>)

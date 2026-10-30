@@ -354,11 +354,7 @@ export default class SQLThread {
         if (sort === "reverse date") sortQuery = `ORDER BY forum_post."updatedDate" ASC`
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                SELECT forum_post.*, users."image", users."imagePost", users."imageHash", 
-                users."role", users."premium", users."banned", users."deleted",
-                to_jsonb(thread_data.*) AS thread,
-                COUNT(*) OVER() AS "postCount"
-                FROM (
+                WITH forum_post AS (
                     SELECT "threadID" AS "id", "creator", "createDate", "updatedDate",
                     "title", "content", "r18", 'thread' AS "type"
                     FROM threads
@@ -368,7 +364,12 @@ export default class SQLThread {
                     NULL AS "title", "content", "r18", 'reply' AS "type"
                     FROM replies
                     WHERE replies."creator" = $1
-                ) AS forum_post
+                )
+                SELECT forum_post.*, users."image", users."imagePost", users."imageHash",
+                users."role", users."premium", users."banned", users."deleted",
+                to_jsonb(thread_data.*) AS thread,
+                COUNT(*) OVER() AS "postCount"
+                FROM forum_post
                 JOIN users ON users."username" = forum_post."creator"
                 LEFT JOIN threads AS thread_data 
                 ON (forum_post."type" = 'thread' AND forum_post."id" = thread_data."threadID") 

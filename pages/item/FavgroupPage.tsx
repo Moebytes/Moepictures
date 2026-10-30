@@ -114,7 +114,7 @@ const FavgroupPage: React.FunctionComponent = () => {
 
     const toggleScroll = () => setScroll(!scroll)
 
-    const onRefresh = async () => {
+    const refreshItems = async () => {
         setItems(await prepareItems())
     }
 
@@ -146,7 +146,7 @@ const FavgroupPage: React.FunctionComponent = () => {
             if (favgroup.private) {
                 if (session.username !== username) return functions.dom.replaceLocation("/403")
             }
-            onRefresh()
+            refreshItems()
         }
     }, [favgroup, ratingType, session])
 
@@ -218,7 +218,7 @@ const FavgroupPage: React.FunctionComponent = () => {
 
     const cancelReorder = () => {
         setReorderState(false)
-        onRefresh()
+        refreshItems()
     }
 
     const changeReorderState = () => {
