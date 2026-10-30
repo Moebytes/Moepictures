@@ -84,6 +84,13 @@ export default class CompareFunctions {
         if (revertPost.artist !== currentPost.artist) return true
         if (revertPost.commentary !== currentPost.commentary) return true
         if (revertPost.englishCommentary !== currentPost.englishCommentary) return true
+        if (revertPost.bookmarks !== currentPost.bookmarks) return true
+        if (revertPost.buyLink !== currentPost.buyLink) return true
+        if (revertPost.sourceImageCount !== currentPost.sourceImageCount) return true
+        if (revertPost.userProfile !== currentPost.userProfile) return true
+        if (JSON.stringify(revertPost.pixivTags) !== JSON.stringify(currentPost.pixivTags)) return true
+        if (JSON.stringify(revertPost.drawingTools) !== JSON.stringify(currentPost.drawingTools)) return true
+        if (JSON.stringify(revertPost.mirrors) !== JSON.stringify(currentPost.mirrors)) return true
         return false
     }
 
@@ -114,7 +121,7 @@ export default class CompareFunctions {
             json.type = newPost.type
         }
         if (oldPost.rating !== newPost.rating) {
-            json.rating = oldPost.rating
+            json.rating = newPost.rating
         }
         if (oldPost.style !== newPost.style) {
             json.style = newPost.style
@@ -315,19 +322,19 @@ export default class CompareFunctions {
             let changes = history.changes && Boolean(Object.keys(history.changes).length)
             let tagChanges = Boolean(history.addedTags?.length) || Boolean(history.removedTags?.length)
             let tagGroupChanges = Boolean(history.addedTagGroups?.length) || Boolean(history.removedTagGroups?.length)
-            return changes || tagChanges || tagGroupChanges
+            return Boolean(history.imageChanged) || changes || tagChanges || tagGroupChanges
         }
         if ("addedEntries" in history) {
             let noData = history.notes.length === 1 && history.notes[0]?.transcript?.trim().toLowerCase() === "no data"
             const hasNotes = history.notes.length > 1 || !noData
             let noteChanges = Boolean(history.addedEntries?.length) || Boolean(history.removedEntries?.length)
-            return hasNotes || noteChanges
+            return Boolean(history.styleChanged) || hasNotes || noteChanges
         }
         if ("addedPosts" in history) {
             let changes = history.changes && Boolean(Object.keys(history.changes).length)
-            let postChanges = Boolean(history.addedPosts?.length) || Boolean(history.addedPosts?.length)
-            return changes || postChanges
+            let postChanges = Boolean(history.addedPosts?.length) || Boolean(history.removedPosts?.length)
+            return Boolean(history.orderChanged) || changes || postChanges
         }
-        return history.changes && Boolean(Object.keys(history.changes).length)
+        return Boolean(history.imageChanged) || (history.changes && Boolean(Object.keys(history.changes).length))
     }
 }

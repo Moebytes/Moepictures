@@ -43,6 +43,7 @@ const noteEquality = (a: Note, b: Note) => {
         a.rotation === b.rotation &&
         a.imageWidth === b.imageWidth &&
         a.imageHeight === b.imageHeight &&
+        a.imageHash === b.imageHash &&
         a.overlay === b.overlay &&
         a.fontSize === b.fontSize &&
         a.backgroundColor === b.backgroundColor &&
@@ -84,7 +85,7 @@ const insertNotes = async (oldNotes: Note[], newNotes: Note[], data: {postID: st
     } else {
         const matchIndexes = new Set<number>()
         for (const note of oldNotes) {
-            const matchIndex = newNotes.findIndex((n) => noteEquality(note, n))
+            const matchIndex = newNotes.findIndex((n, index) => !matchIndexes.has(index) && noteEquality(note, n))
 
             if (matchIndex !== -1) {
                 // Update oldNotes that are already in newNotes

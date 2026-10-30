@@ -57,9 +57,11 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const revertGroupHistory = async () => {
         if (props.current) return Promise.reject()
+        const metadataChanged = props.currentHistory.name !== props.groupHistory.name || props.currentHistory.description !== props.groupHistory.description
+        if (metadataChanged && !permissions.isContributor(session)) return Promise.reject()
         await functions.http.put("/api/group/reorder", {slug: props.currentHistory.slug, posts: props.groupHistory.posts}, session, setSessionFlag)
         invalidateGroup(props.currentHistory.slug)
-        await functions.http.put("/api/group/edit", {slug: props.currentHistory.slug, name: props.groupHistory.name, description: props.groupHistory.description}, session, setSessionFlag)
+        if (metadataChanged) await functions.http.put("/api/group/edit", {slug: props.currentHistory.slug, name: props.groupHistory.name, description: props.groupHistory.description}, session, setSessionFlag)
         invalidateGroup(props.currentHistory.slug)
         if (props.currentHistory.slug !== props.groupHistory.slug) {
             navigate(`/group/history/${props.groupHistory.slug}`)

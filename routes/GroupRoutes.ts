@@ -323,9 +323,13 @@ const GroupRoutes = (app: Express) => {
             if (req.session.banned) return void res.status(403).send("You are banned")
             const group = await sql.group.group(slug)
             if (!group) return void res.status(400).send("Invalid group")
+            if (!Array.isArray(posts) || !posts.length) return void res.status(400).send("Invalid posts")
+            if (new Set(posts.map((post) => String(post.postID))).size !== posts.length) return void res.status(400).send("Duplicate posts")
             for (let i = 0; i < posts.length; i++) {
                 if (Number(posts[i].order) !== i + 1) return void res.status(400).send("Bad post orders")
             }
+            const targetPosts = await sql.search.posts(posts.map((post) => post.postID))
+            if (targetPosts.length !== posts.length) return void res.status(400).send("Invalid posts")
             let added = [] as any[]
             let removed = [] as any[]
             let changed = [] as any[]
@@ -354,6 +358,7 @@ const GroupRoutes = (app: Express) => {
             if (![...toRemove, ...toAdd].length) return void res.status(200).send("Success")
             await sql.group.bulkDeleteGroupMappings(group.groupID, toRemove)
             await sql.group.bulkInsertGroupMappings(group.groupID, toAdd)
+            await sql.group.updateGroup(group.groupID, "rating", functions.reduceHighestRating(targetPosts))
             await sql.group.updateGroup(group.groupID, "updater", req.session.username)
             await sql.group.updateGroup(group.groupID, "updatedDate", new Date().toISOString())
 

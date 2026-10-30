@@ -74,7 +74,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         aliases: props.tagHistory.aliases, implications: props.tagHistory.implications, pixivTags: props.tagHistory.pixivTags, danbooruTag: props.tagHistory.danbooruTag, 
         social: props.tagHistory.social, twitter: props.tagHistory.twitter, website: props.tagHistory.website, fandom: props.tagHistory.fandom, 
         wikipedia: props.tagHistory.wikipedia, type: props.tagHistory.type, r18: props.tagHistory.r18 ?? false, 
-        featuredPost: props.tagHistory.featuredPost?.postID}, session, setSessionFlag)
+        featuredPost: props.tagHistory.featuredPost?.postID ?? ""}, session, setSessionFlag)
         invalidateTag(props.tagHistory.tag)
         if (props.tagHistory.key !== props.tagHistory.tag) {
             navigate(`/tag/history/${props.tagHistory.key}`)
@@ -90,8 +90,8 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
                 setRevertTagHistoryFlag(false)
             }).catch((err) => {
                 setRevertTagHistoryFlag(false)
-                if (err.message.includes("No permission to edit implications")) return setRevertTagHistoryID({failed: "implication", historyID: props.tagHistory.historyID})
-                if (err.message.includes("No permission to rename tag")) return setRevertTagHistoryID({failed: "rename", historyID: props.tagHistory.historyID})
+                if (err?.message?.includes("No permission to edit implications")) return setRevertTagHistoryID({failed: "implication", historyID: props.tagHistory.historyID})
+                if (err?.message?.includes("No permission to rename tag")) return setRevertTagHistoryID({failed: "rename", historyID: props.tagHistory.historyID})
                 setRevertTagHistoryID({failed: true, historyID: props.tagHistory.historyID})
             })
         }

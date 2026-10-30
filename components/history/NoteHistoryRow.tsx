@@ -51,6 +51,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (revertNoteHistoryFlag && props.noteHistory.historyID === revertNoteHistoryID?.historyID) {
+            setRevertNoteHistoryID(null)
             revertNoteHistory().then(() => {
                 setRevertNoteHistoryFlag(false)
                 setRevertNoteHistoryID(null)
