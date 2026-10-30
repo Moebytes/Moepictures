@@ -350,17 +350,25 @@ export default class SQLNote {
                     ${whereQuery}
                     ORDER BY notes."postID", notes."order", notes."updatedDate" DESC
                 ),
+                paged_notes AS MATERIALIZED (
+                    SELECT base_notes.*, COUNT(*) OVER () AS "noteCount"
+                    FROM base_notes
+                    JOIN users ON users."username" = base_notes."updater"
+                    ${sortQuery}
+                    LIMIT ${limit ? `$${i}` : 100} ${offset ? `OFFSET $${offsetValue}` : ""}
+                ),
                 post_json AS (
                     SELECT posts.*, json_agg(DISTINCT images) AS images
                     FROM posts
                     LEFT JOIN images ON images."postID" = posts."postID"
+                    WHERE posts."postID" IN (SELECT "postID" FROM paged_notes)
                     GROUP BY posts."postID"
                 ), 
                 note_json AS (
                     SELECT notes."postID", notes."order", 
                     jsonb_agg(notes) AS data
                     FROM notes
-                    JOIN base_notes ON base_notes."postID" = notes."postID" AND base_notes."order" = notes."order"
+                    JOIN paged_notes ON paged_notes."postID" = notes."postID" AND paged_notes."order" = notes."order"
                     GROUP BY notes."postID", notes."order"
                 )
                 SELECT base_notes."noteID", base_notes."postID", base_notes."updater", base_notes."updatedDate",
@@ -368,13 +376,12 @@ export default class SQLNote {
                 users."image", users."imageHash", users."imagePost", 
                 users."role", users."premium", users."banned", users."deleted",
                 to_jsonb(post_json) AS post,
-                COUNT(*) OVER () AS "noteCount"
-                FROM base_notes
+                base_notes."noteCount"
+                FROM paged_notes AS base_notes
                 JOIN users ON users."username" = base_notes."updater"
                 LEFT JOIN post_json ON post_json."postID" = base_notes."postID"
                 LEFT JOIN note_json ON note_json."postID" = base_notes."postID" AND note_json."order" = base_notes."order"
                 ${sortQuery}
-                LIMIT ${limit ? `$${i}` : 100} ${offset ? `OFFSET $${offsetValue}` : ""}
             `),
             values: []
         }
@@ -399,8 +406,8 @@ export default class SQLNote {
         }
         let sortQuery = ""
         if (sort === "random") sortQuery = `ORDER BY random()`
-        if (sort === "date") sortQuery = `ORDER BY notes."updatedDate" DESC`
-        if (sort === "reverse date") sortQuery = `ORDER BY notes."updatedDate" ASC`
+        if (sort === "date") sortQuery = `ORDER BY base_notes."updatedDate" DESC`
+        if (sort === "reverse date") sortQuery = `ORDER BY base_notes."updatedDate" ASC`
         const query: QueryConfig = {
                 text: functions.multiTrim(/*sql*/`
                 WITH base_notes AS (
@@ -410,17 +417,25 @@ export default class SQLNote {
                     ${whereQuery}
                     ORDER BY notes."postID", notes."order", notes."updatedDate" DESC
                 ),
+                paged_notes AS MATERIALIZED (
+                    SELECT base_notes.*, COUNT(*) OVER () AS "noteCount"
+                    FROM base_notes
+                    JOIN users ON users."username" = base_notes."updater"
+                    ${sortQuery}
+                    LIMIT ${limit ? `$${i}` : 100} ${offset ? `OFFSET $${offsetValue}` : ""}
+                ),
                 post_json AS (
                     SELECT posts.*, json_agg(DISTINCT images) AS images
                     FROM posts
                     LEFT JOIN images ON images."postID" = posts."postID"
+                    WHERE posts."postID" IN (SELECT "postID" FROM paged_notes)
                     GROUP BY posts."postID"
                 ), 
                 note_json AS (
                     SELECT notes."postID", notes."order", 
                     jsonb_agg(notes) AS data
                     FROM notes
-                    JOIN base_notes ON base_notes."postID" = notes."postID" AND base_notes."order" = notes."order"
+                    JOIN paged_notes ON paged_notes."postID" = notes."postID" AND paged_notes."order" = notes."order"
                     GROUP BY notes."postID", notes."order"
                 )
                 SELECT base_notes."noteID", base_notes."postID", base_notes."updater", base_notes."updatedDate",
@@ -428,13 +443,12 @@ export default class SQLNote {
                 users."image", users."imageHash", users."imagePost", 
                 users."role", users."premium", users."banned", users."deleted",
                 to_jsonb(post_json) AS post,
-                COUNT(*) OVER () AS "noteCount"
-                FROM base_notes
+                base_notes."noteCount"
+                FROM paged_notes AS base_notes
                 JOIN users ON users."username" = base_notes."updater"
                 LEFT JOIN post_json ON post_json."postID" = base_notes."postID"
                 LEFT JOIN note_json ON note_json."postID" = base_notes."postID" AND note_json."order" = base_notes."order"
                 ${sortQuery}
-                LIMIT ${limit ? `$${i}` : 100} ${offset ? `OFFSET $${offsetValue}` : ""}
             `),
             values: [usernames]
         }

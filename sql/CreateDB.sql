@@ -860,6 +860,8 @@ CREATE INDEX IF NOT EXISTS "idx_history" ON "history" ("username", "postID");
 CREATE INDEX IF NOT EXISTS "idx_unverified_aliases" ON "unverified aliases" ("tag", "alias");
 CREATE INDEX IF NOT EXISTS "idx_comments" ON "comments" ("commentID" DESC NULLS LAST);
 CREATE INDEX IF NOT EXISTS "idx_notes" ON "notes" ("noteID" DESC NULLS LAST);
+CREATE INDEX IF NOT EXISTS "idx_notes_post_order_updated" ON "notes" ("postID", "order", "updatedDate" DESC);
+CREATE INDEX IF NOT EXISTS "idx_notes_updater_post_order_updated" ON "notes" ("updater", "postID", "order", "updatedDate" DESC);
 CREATE INDEX IF NOT EXISTS "idx_tag_map_postID" ON "tag map" ("postID");
 CREATE INDEX IF NOT EXISTS "idx_tags" ON "tags" ("tag");
 CREATE INDEX IF NOT EXISTS "idx_aliases" ON "aliases" ("tag", "alias");
