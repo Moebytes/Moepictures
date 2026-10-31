@@ -117,16 +117,20 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
             }
         }
 
-        if (suggestions.length < 100) {
-            const seriesTags = new Set(sortedTags.filter((tag) => tag.type === "series").map((tag) => tag.tag))
+        const seriesTags = new Set(sortedTags.filter((tag) => tag.type === "series" &&
+            tag.tag.toLowerCase().includes(searchString)).map((tag) => tag.tag))
+            
+        if (seriesTags.size) {
             for (const tagCount of tagCounts) {
                 if (tagCount.type === "character" && !suggestions.includes(tagCount) &&
                     tagCount.seriesImplications?.some((series) => seriesTags.has(series))) {
                     suggestions.push(tagCount)
                 }
-                if (suggestions.length >= 100) break
             }
         }
+
+        suggestions.sort((a, b) => Number(b.count) - Number(a.count))
+        suggestions = suggestions.slice(0, 100)
 
         setSuggestions(suggestions)
     }

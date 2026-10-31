@@ -796,7 +796,9 @@ export default class SQLSearch {
         if (search) {
             whereArray.push(`(lower(tags.tag) LIKE '%' || $${i} || '%'
             OR EXISTS (SELECT 1 FROM aliases WHERE aliases.tag = "tags".tag 
-            AND lower(aliases.alias) LIKE '%' || $1 || '%'))`)
+            AND lower(aliases.alias) LIKE '%' || $1 || '%')
+            OR EXISTS (SELECT 1 FROM implications WHERE implications.tag = "tags".tag
+            AND lower(implications.implication) LIKE '%' || $1 || '%'))`)
             values.push(search.toLowerCase())
             i++
         }
