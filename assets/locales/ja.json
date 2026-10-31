@@ -47,8 +47,10 @@
         "unlock": "アンロック",
         "history": "歴史",
         "getInfo": "情報を得る",
-        "splitVariants": "スプリットのバリアント",
+        "splitChildPosts": "子投稿の分割",
         "joinChildPosts": "子どもの投稿に参加する",
+        "splitGroups": "グループの分割",
+        "joinGroups": "グループに参加する",
         "flipParent": "親を反転させる",
         "deleteFavorites": "お気に入りの削除",
         "editThumbnail": "サムネイルの編集",
@@ -1371,7 +1373,7 @@
             "colorMatrix": "カラーマトリックス"
         },
         "splitPost": {
-            "title": "スプリットのバリアント",
+            "title": "子投稿の分割",
             "header": "この記事の子記事にバリアントを分割しますか？この操作は不可逆です。",
             "currentOnly": "現在のみ",
             "mergeSubsequent": "後続をマージ"
@@ -1385,6 +1387,17 @@
         "flipPost": {
             "title": "Flip Parent",
             "header": "この投稿を親投稿にするには？"
+        },
+        "splitGroups": {
+            "title": "グループの分割",
+            "header": "バリエーションを、同じグループ内の別の投稿に分割しますか？この操作は元に戻せません。",
+            "currentOnly": "電流のみ"
+        },
+        "joinGroups": {
+            "title": "グループに参加する",
+            "header": "最初のグループにあるすべての投稿を、この投稿のバリエーションにまとめますか？",
+            "lostData": " *個々の投稿のタグおよびソースデータは失われます。",
+            "allGroups": "すべてのグループ"
         },
         "deleteTagFavorites": {
             "title": "タグのお気に入りを削除",

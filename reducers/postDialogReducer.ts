@@ -83,6 +83,8 @@ const postDialogSlice = createSlice({
         avatarID: null as EditThumbnailID | null,
         splitPostID: null as PostInfoID | null,
         joinPostID: null as PostEditID | null,
+        splitGroupPostID: null as PostInfoID | null,
+        joinGroupPostID: null as PostEditID | null,
         flipPostID: null as PostEditID | null,
         imgSourceID: null as ImgSourceID | null
     },
@@ -112,6 +114,8 @@ const postDialogSlice = createSlice({
         setAvatarID: (state, action) => {state.avatarID = action.payload},
         setSplitPostID: (state, action) => {state.splitPostID = action.payload},
         setJoinPostID: (state, action) => {state.joinPostID = action.payload},
+        setSplitGroupPostID: (state, action) => {state.splitGroupPostID = action.payload},
+        setJoinGroupPostID: (state, action) => {state.joinGroupPostID = action.payload},
         setFlipPostID: (state, action) => {state.flipPostID = action.payload},
         setImgSourceID: (state, action) => {state.imgSourceID = action.payload}
     }
@@ -124,7 +128,7 @@ const {
     setShowBulkTagEditDialog, setShowBulkDeleteDialog, setCompressPostID, setUpscalePostID,
     setUndeletePostID, setPermaDeletePostID, setPermaDeletePostFlag, setPermaDeleteAllDialog, 
     setAppealPostID, setPostInfoID, setSplitPostID, setJoinPostID, setEditThumbnailID, setFlipPostID,
-    setAvatarID
+    setAvatarID, setSplitGroupPostID, setJoinGroupPostID
 } = postDialogSlice.actions
 
 export const usePostDialogSelector = () => {
@@ -155,6 +159,8 @@ export const usePostDialogSelector = () => {
         avatarID: selector((state) => state.postDialog.avatarID),
         splitPostID: selector((state) => state.postDialog.splitPostID),
         joinPostID: selector((state) => state.postDialog.joinPostID),
+        splitGroupPostID: selector((state) => state.postDialog.splitGroupPostID),
+        joinGroupPostID: selector((state) => state.postDialog.joinGroupPostID),
         flipPostID: selector((state) => state.postDialog.flipPostID),
         imgSourceID: selector((state) => state.postDialog.imgSourceID),
     }
@@ -188,6 +194,8 @@ export const usePostDialogActions = () => {
         setAvatarID: (state: EditThumbnailID | null) => dispatch(setAvatarID(state)),
         setSplitPostID: (state: PostInfoID | null) => dispatch(setSplitPostID(state)),
         setJoinPostID: (state: PostEditID | null) => dispatch(setJoinPostID(state)),
+        setSplitGroupPostID: (state: PostInfoID | null) => dispatch(setSplitGroupPostID(state)),
+        setJoinGroupPostID: (state: PostEditID | null) => dispatch(setJoinGroupPostID(state)),
         setFlipPostID: (state: PostEditID | null) => dispatch(setFlipPostID(state)),
         setImgSourceID: (state: ImgSourceID | null) => dispatch(setImgSourceID(state))
     }    

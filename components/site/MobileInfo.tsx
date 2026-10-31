@@ -23,6 +23,8 @@ import GroupIcon from "../../assets/svg/add-group.svg"
 import SnapshotIcon from "../../assets/svg/snapshot.svg"
 import SplitIcon from "../../assets/svg/split.svg"
 import JoinIcon from "../../assets/svg/join.svg"
+import SplitGroupsIcon from "../../assets/svg/split-groups.svg"
+import JoinGroupsIcon from "../../assets/svg/join-groups.svg"
 import FlipIcon from "../../assets/svg/flip.svg"
 import PrivateIcon from "../../assets/svg/private.svg"
 import UnprivateIcon from "../../assets/svg/unprivate.svg"
@@ -81,7 +83,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {setTagEditID, setSourceEditID, setPrivatePostID, setLockPostID, setUpscalePostID, setCompressPostID, 
     setDeletePostID, setTakedownPostID, setChildPostObj, setUndeletePostID, setAppealPostID, setPostInfoID,
-    setSplitPostID, setJoinPostID, setFlipPostID, setEditThumbnailID, setAvatarID} = usePostDialogActions()
+    setSplitPostID, setJoinPostID, setFlipPostID, setSplitGroupPostID, setJoinGroupPostID, setEditThumbnailID, setAvatarID} = usePostDialogActions()
     const {setActionBanner} = useActiveActions()
     const {setGroupPostID} = useGroupDialogActions()
     const [uploaderImage, setUploaderImage] = useState("")
@@ -619,6 +621,16 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         setJoinPostID({post: props.post, unverified: props.unverified})
     }
 
+    const triggerGroupSplit = async () => {
+        if (!permissions.isAdmin(session) || !props.post) return
+        setSplitGroupPostID({post: props.post, order: props.order || 1})
+    }
+
+    const triggerGroupJoin = async () => {
+        if (!permissions.isAdmin(session) || !props.post) return
+        setJoinGroupPostID({post: props.post, unverified: props.unverified})
+    }
+
     const triggerFlip = async () => {
         if (!permissions.isAdmin(session) || !props.post) return
         setFlipPostID({post: props.post, unverified: props.unverified})
@@ -920,13 +932,27 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             {!props.unverified && permissions.isAdmin(session) ? <div className="mobileinfo-row">
                                 <span className="mobile-option-tag" onClick={triggerSplit}>
                                     <SplitIcon className="mobile-option-icon"/>
-                                    <span className="mobile-option-text">{i18n.sidebar.splitVariants}</span>
+                                    <span className="mobile-option-text">{i18n.sidebar.splitChildPosts}</span>
                                 </span>
                             </div> : null}
                             {!props.unverified && permissions.isAdmin(session) ? <div className="mobileinfo-row">
                                 <span className="mobile-option-tag" onClick={triggerJoin}>
                                     <JoinIcon className="mobile-option-icon"/>
                                     <span className="mobile-option-text">{i18n.sidebar.joinChildPosts}</span>
+                                </span>
+                            </div> : null}
+                        </div>
+                        <div className="mobileinfo-sub-row">
+                            {!props.unverified && permissions.isAdmin(session) ? <div className="mobileinfo-row">
+                                <span className="mobile-option-tag" onClick={triggerGroupSplit}>
+                                    <SplitGroupsIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.sidebar.splitGroups}</span>
+                                </span>
+                            </div> : null}
+                            {!props.unverified && permissions.isAdmin(session) ? <div className="mobileinfo-row">
+                                <span className="mobile-option-tag" onClick={triggerGroupJoin}>
+                                    <JoinGroupsIcon className="mobile-option-icon"/>
+                                    <span className="mobile-option-text">{i18n.sidebar.joinGroups}</span>
                                 </span>
                             </div> : null}
                         </div>

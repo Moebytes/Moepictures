@@ -39,6 +39,8 @@ import GroupIcon from "../../assets/svg/add-group.svg"
 import SnapshotIcon from "../../assets/svg/snapshot.svg"
 import SplitIcon from "../../assets/svg/split.svg"
 import JoinIcon from "../../assets/svg/join.svg"
+import SplitGroupsIcon from "../../assets/svg/split-groups.svg"
+import JoinGroupsIcon from "../../assets/svg/join-groups.svg"
 import FlipIcon from "../../assets/svg/flip.svg"
 import PrivateIcon from "../../assets/svg/private.svg"
 import UnprivateIcon from "../../assets/svg/unprivate.svg"
@@ -112,7 +114,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {setTagEditID, setSourceEditID, setPrivatePostID, setLockPostID, setUpscalePostID, setCompressPostID, 
     setDeletePostID, setTakedownPostID, setChildPostObj, setUndeletePostID, setAppealPostID, setPostInfoID,
-    setSplitPostID, setJoinPostID, setFlipPostID, setEditThumbnailID, setAvatarID} = usePostDialogActions()
+    setSplitPostID, setJoinPostID, setFlipPostID, setSplitGroupPostID, setJoinGroupPostID, setEditThumbnailID, setAvatarID} = usePostDialogActions()
     const {saveSearchDialog, deleteAllSaveSearchDialog} = useSearchDialogSelector()
     const {setSaveSearchDialog, setDeleteAllSaveSearchDialog, setEditSaveSearchName, setEditSaveSearchKey, setEditSaveSearchTags} = useSearchDialogActions()
     const {setActionBanner} = useActiveActions()
@@ -873,8 +875,18 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (!permissions.isAdmin(session) || !props.post) return
         setJoinPostID({post: props.post, unverified: props.unverified})
     }
+    
+    const triggerGroupSplit = async () => {
+        if (!permissions.isAdmin(session) || !props.post) return
+        setSplitGroupPostID({post: props.post, order: props.order || 1})
+    }
 
-    const triggerFlip = async () => {
+    const triggerGroupJoin = async () => {
+        if (!permissions.isAdmin(session) || !props.post) return
+        setJoinGroupPostID({post: props.post, unverified: props.unverified})
+    }
+
+const triggerFlip = async () => {
         if (!permissions.isAdmin(session) || !props.post) return
         setFlipPostID({post: props.post, unverified: props.unverified})
     }
@@ -1326,13 +1338,25 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         {!props.unverified && permissions.isAdmin(session) ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerSplit}>
                                 <SplitIcon className="sidebar-icon"/>
-                                <span className="side-info">{i18n.sidebar.splitVariants}</span>
+                                <span className="side-info">{i18n.sidebar.splitChildPosts}</span>
                             </span>
                         </div> : null}
                         {!props.unverified && permissions.isAdmin(session) ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerJoin}>
                                 <JoinIcon className="sidebar-icon"/>
                                 <span className="side-info">{i18n.sidebar.joinChildPosts}</span>
+                            </span>
+                        </div> : null}
+                        {!props.unverified && permissions.isAdmin(session) ? <div className="sidebar-row">
+                            <span className="tag-hover" onClick={triggerGroupSplit}>
+                                <SplitGroupsIcon className="sidebar-icon"/>
+                                <span className="side-info">{i18n.sidebar.splitGroups}</span>
+                            </span>
+                        </div> : null}
+                        {!props.unverified && permissions.isAdmin(session) ? <div className="sidebar-row">
+                            <span className="tag-hover" onClick={triggerGroupJoin}>
+                                <JoinGroupsIcon className="sidebar-icon"/>
+                                <span className="side-info">{i18n.sidebar.joinGroups}</span>
                             </span>
                         </div> : null}
                         {!props.unverified && props.post.parentID && permissions.isAdmin(session) ? <div className="sidebar-row">

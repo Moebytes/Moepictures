@@ -76,7 +76,7 @@ export default class SQLGroup {
                 FROM "group map"
                 JOIN groups ON groups."groupID" = "group map"."groupID"
                 JOIN post_json ON post_json."postID" = "group map"."postID"
-                WHERE "group map"."groupID" = (
+                WHERE "group map"."groupID" IN (
                     SELECT "group map"."groupID" FROM "group map" WHERE "group map"."postID" = $1
                 )
                 GROUP BY groups."groupID"

@@ -47,8 +47,10 @@
         "unlock": "Unlock",
         "history": "History",
         "getInfo": "Get Info",
-        "splitVariants": "Split Variants",
+        "splitChildPosts": "Split Child Posts",
         "joinChildPosts": "Join Child Posts",
+        "splitGroups": "Split Groups",
+        "joinGroups": "Join Groups",
         "flipParent": "Flip Parent",
         "deleteFavorites": "Delete Favorites",
         "editThumbnail": "Edit Thumbnail",
@@ -1369,7 +1371,7 @@
             "colorMatrix": "Color Matrix"
         },
         "splitPost": {
-            "title": "Split Variant",
+            "title": "Split Child Posts",
             "header": "Split off variants into child posts of this post? This action is irreversible.",
             "currentOnly": "Current Only",
             "mergeSubsequent": "Merge Subsequent"
@@ -1383,6 +1385,17 @@
         "flipPost": {
             "title": "Flip Parent",
             "header": "Flip this post to become the parent?"
+        },
+        "splitGroups": {
+            "title": "Split Groups",
+            "header": "Split off variants into separate posts part of the same group? This action is irreversible.",
+            "currentOnly": "Current Only"
+        },
+        "joinGroups": {
+            "title": "Join Groups",
+            "header": "Join all posts in the first group into variants of this post?",
+            "lostData": " *Tag and source data of individual posts will be lost.",
+            "allGroups": "All Groups"
         },
         "deleteTagFavorites": {
             "title": "Delete Tag Favorites",

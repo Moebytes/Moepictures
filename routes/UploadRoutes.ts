@@ -12,7 +12,7 @@ import serverFunctions, {csrfProtection, keyGenerator, handler} from "../server/
 import rateLimit from "express-rate-limit"
 import multer from "multer"
 import {UploadParams, EditParams, UnverifiedUploadParams, UnverifiedEditParams, 
-PostFull, UnverifiedPost, ApproveParams, SourceData, ChildPost, ImageChunk} from "../types/Types"
+PostFull, UnverifiedPost, ApproveParams, SourceData, ChildPost, ImageChunk, UploadImage, UploadTag, MiniTag} from "../types/Types"
 import {addToGroup} from "./GroupRoutes"
 
 const upload = multer({
@@ -897,6 +897,203 @@ const CreateRoutes = (app: Express) => {
         
         await sql.removeCache(`cached-post/${postID}`)
         
+        res.status(200).send("Success")
+      } catch (e) {
+        console.log(e)
+        res.status(400).send("Bad request")
+      }
+    })
+
+    app.post("/api/post/split-groups", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        let {postID, order} = req.body as {postID: string, order: number | null}
+        if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
+        if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
+        if (!permissions.isAdmin(req.session)) return void res.status(403).end()
+        const post = await sql.post.post(postID)
+        if (!post) return void res.status(400).send("Bad postID")
+
+        const images = [...post.images].sort((a, b) => a.order - b.order)
+        const selected = order == null ? null : Number(order)
+        if (selected !== null && Number.isNaN(selected)) return void res.status(400).send("Bad order")
+
+        const toSplit = images.slice(1).filter((image) => selected === null || image.order === selected)
+
+        let groupName = `Post ${postID}`
+        try {
+            const url = new URL(post.source || "")
+            const id = url.pathname.match(/\d+/g)?.pop()
+            const site = url.hostname.replace(/^www\./, "").split(".")[0]
+            groupName = `${functions.util.toProperCase(site)} ${id || postID}`
+        } catch {}
+
+        const r18 = functions.post.isR18(post.rating)
+        await addToGroup([postID], groupName, req.session.username, new Date().toISOString(), true)
+        const group = await sql.group.group(functions.post.generateSlug(groupName.trim()))
+        if (group && post.source) await sql.group.updateGroup(group.groupID, "description", post.source)
+
+        for (const image of toSplit) {
+            let type = image.type
+            let rating = post.rating
+            let style = post.style
+            let source = {...post, mirrors: post.mirrors ? Object.values(post.mirrors).join("\n") : ""} as SourceData
+
+            const categories = await serverFunctions.tags.tagCategories(post.tags)
+            let artists: UploadTag[] | MiniTag[] = categories.artists
+            let characters: UploadTag[] | MiniTag[] = categories.characters
+            let series: UploadTag[] | MiniTag[] = categories.series
+            const allTags = categories.tags
+
+            let tags = allTags.map((tag) => tag.tag)
+            let newTags = [] as UploadTag[]
+            let tagGroups = post.tagGroups
+
+            const imagePath = functions.link.getImagePath(image.type, postID, image.order, image.filename)
+            const upscaledPath = functions.link.getUpscaledImagePath(image.type, postID, image.order, image.upscaledFilename || image.filename)
+            const buffer = await serverFunctions.files.getFile(imagePath, false, r18, image.pixelHash)
+            const upscaledBuffer = buffer.byteLength ? null : await serverFunctions.files.getFile(upscaledPath, false, r18, image.pixelHash)
+            
+            const current = {
+              name: image.filename, ext: image.filename.split(".").pop() || "png",
+              bytes: Array.from(buffer.byteLength ? buffer : upscaledBuffer!),
+              thumbnail: "", width: image.width, height: image.height, size: image.size,
+              link: "", originalLink: "", thumbnailExt: "", altSource: image.altSource || "", directLink: image.directLink || ""
+            } as UploadImage
+
+            // Split posts of a group will often have different characters, so we will attempt to regenerate
+            // the tag and source data.
+            try {
+              const sourceData = await serverFunctions.sources.sourceLookup(current, rating)
+              if (sourceData.source.source) {
+                source = {...sourceData.source, 
+                  drawingTools: sourceData.source.drawingTools || null, 
+                  bookmarks: Number(sourceData.source.bookmarks) || null,
+                  buyLink: null
+                }
+              }
+              rating = sourceData.rating
+              if (sourceData.artists?.[0]?.tag) artists = sourceData.artists
+            } catch {}
+
+            try {
+                const tagData = await serverFunctions.tags.tagLookup(current, type, rating, style, Boolean(image.upscaledFilename))
+                type = tagData.type
+                rating = tagData.rating
+                style = tagData.style
+                if (!artists?.[0]?.tag) artists = tagData.artists
+                characters = tagData.characters
+                series = tagData.series
+                tags = [...tagData.tags, ...tagData.meta]
+                newTags = tagData.newTags
+                tagGroups = []
+            } catch {}
+
+            const newPostID = await sql.post.insertPost()
+            const {hasOriginal, hasUpscaled, inferredType} = await serverFunctions.upload.insertImages(newPostID, {
+              images: [image], upscaledImages: [image], type, rating, source, characters, imgChanged: true
+            })
+
+            await serverFunctions.upload.updatePost(newPostID, {artists, type: inferredType, rating, style, source, 
+              hasOriginal, hasUpscaled, uploader: req.session.username, updater: req.session.username, 
+              approver: req.session.username})
+
+            await serverFunctions.upload.insertTags(newPostID, {artists, characters, series, tags, newTags,
+              noImageUpdate: true, username: req.session.username})
+
+            await serverFunctions.upload.updateTagGroups(newPostID, {oldTagGroups: [], newTagGroups: tagGroups})
+
+            await sql.cuteness.updateCuteness(newPostID, req.session.username, 500)
+
+            await addToGroup([newPostID], groupName, req.session.username, new Date().toISOString(), true)
+
+            await sql.post.deleteImage(image.imageID)
+            await serverFunctions.files.deleteFile(imagePath, r18)
+            await serverFunctions.files.deleteFile(upscaledPath, r18)
+        }
+
+        await sql.removeCache(`cached-post/${postID}`)
+
+        res.status(200).send("Success")
+      } catch (e) {
+        console.log(e)
+        res.status(400).send("Bad request")
+      }
+    })
+
+    app.post("/api/post/join-groups", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        let {postID, allGroups} = req.body as {postID: string, allGroups: boolean}
+        if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
+        if (Number.isNaN(postID)) return void res.status(400).send("Bad postID")
+        if (!permissions.isAdmin(req.session)) return void res.status(403).end()
+        const post = await sql.post.post(postID)
+        if (!post) return void res.status(400).send("Bad postID")
+
+        const groups = await sql.group.postGroups(postID)
+        const selectedGroups = allGroups ? groups : groups.slice(0, 1)
+
+        const seen = new Set<string>([String(post.postID)])
+        const destinationR18 = functions.post.isR18(post.rating)
+        let maxOrder = Math.max(0, ...post.images.map((image) => image.order))
+
+        for (const group of selectedGroups) {
+            for (const item of group.posts) {
+                if (seen.has(String(item.postID))) continue
+                seen.add(String(item.postID))
+
+                const groupPost = await sql.post.post(item.postID)
+                if (!groupPost || String(groupPost.postID) === String(post.postID)) continue
+
+                const groupImages = [...groupPost.images].sort((a, b) => a.order - b.order)
+
+                for (const image of groupImages) {
+                    let order = ++maxOrder
+                    const r18 = functions.post.isR18(groupPost.rating)
+
+                    const imagePath = functions.link.getImagePath(image.type, image.postID, image.order, image.filename)
+                    const upscaledImagePath = functions.link.getUpscaledImagePath(image.type, image.postID, image.order, image.upscaledFilename || image.filename)
+                    
+                    const buffer = await serverFunctions.files.getFile(imagePath, false, r18, image.pixelHash)
+                    const upscaledBuffer = await serverFunctions.files.getFile(upscaledImagePath, false, r18, image.pixelHash)
+
+                    if (buffer.byteLength) {
+                        let imagePath = functions.link.getImagePath(image.type, postID, order, image.filename)
+                        await serverFunctions.files.uploadFile(imagePath, buffer, destinationR18)
+                    }
+
+                    if (upscaledBuffer.byteLength) {
+                        let imagePath = functions.link.getUpscaledImagePath(image.type, postID, order, image.upscaledFilename || image.filename)
+                        await serverFunctions.files.uploadFile(imagePath, upscaledBuffer, destinationR18)
+                    }
+
+                    let thumbnail = image.thumbnail
+                    if (thumbnail) {
+                        const oldThumbnailPath = functions.link.getThumbnailImagePath(image.type, thumbnail)
+                        const thumbnailBuffer = await serverFunctions.files.getFile(oldThumbnailPath, false, r18)
+                        thumbnail = `${postID}-${order}-${thumbnail}`
+                        const thumbnailPath = functions.link.getThumbnailImagePath(image.type, thumbnail)
+                        await serverFunctions.files.uploadFile(thumbnailPath, thumbnailBuffer, destinationR18)
+                    }
+
+                    await sql.post.insertImage(postID, image.filename, image.upscaledFilename, image.type, order, image.hash, 
+                    image.pixelHash, image.width, image.height, image.upscaledWidth, image.upscaledHeight, image.size, 
+                    image.upscaledSize, image.duration, thumbnail, image.directLink, image.altSource)
+                }
+
+                await serverFunctions.posts.deletePost(groupPost)
+                await sql.removeCache(`cached-post/${groupPost.postID}`)
+            }
+        }
+
+        for (const rawGroup of selectedGroups) {
+            const group = await sql.group.group(rawGroup.slug)
+            if (group && group.posts.length === 1) {
+                await sql.group.deleteGroup(group.groupID)
+            }
+        }
+
+        await sql.removeCache(`cached-post/${postID}`)
+
         res.status(200).send("Success")
       } catch (e) {
         console.log(e)
