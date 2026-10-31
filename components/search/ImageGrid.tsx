@@ -40,7 +40,8 @@ interface Props {
 let interval = null as any
 let reloadTimer = null as any
 let reloadedPost = false
-let limit = 100
+const limit = 100
+const scrollLimit = 24
 
 let initialResultLoad = typeof window !== "undefined" &&
     window.sessionStorage.getItem("initialResultLoad") === "true"
@@ -55,7 +56,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const {i18n} = useThemeSelector()
     const {mobile, hideSidebar} = useLayoutSelector()
     const {search, searchFlag, scroll, imageType, ratingType, styleType, sortType, sortReverse, sizeType, 
-    pageMultiplier, autoSearch, showChildren, favSearch} = useSearchSelector()
+    pageMultiplier, tiling, autoSearch, showChildren, favSearch} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
     const {setEnableDrag} = useInteractionActions()
     const {setPosts, setSearchState, setNavigationPosts, setVisiblePosts} = useCacheActions()
@@ -135,6 +136,15 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             if (Number.isSafeInteger(savedMultiplier) && savedMultiplier > 0) multiplier = savedMultiplier
         }
         return loadAmount * Math.max(1, multiplier)
+    }
+
+    const getColumnSize = () => {
+        if (tiling !== "column") return undefined
+        if (sizeType === "tiny") return mobile ? 70 : 105
+        if (sizeType === "small") return mobile ? 100 : 130
+        if (sizeType === "medium") return mobile ? 145 : 180
+        if (sizeType === "large") return mobile ? 180 : 230
+        if (sizeType === "massive") return mobile ? 265 : 300
     }
 
     const getLoadAmount = () => {
@@ -222,7 +232,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         showChildren, favoriteMode: favSearch, refreshKey, offset: previousPosts.length ? scrollOffset : 0},
         {skip: searchFlag || restoring || queryChanging || !scroll ||
         Boolean(overridePosts) || isRandomSearch || (!settingsLoaded || activeQuery === null),
-        initialPageParam: {offset: previousPosts.length ? scrollOffset : (page - 1) * pageAmount, limit}}
+        initialPageParam: {offset: previousPosts.length ? scrollOffset : (page - 1) * pageAmount, limit: scrollLimit}}
     )
 
     const pageQuery = useSearchPostsPageQuery(
@@ -334,7 +344,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         try {
             const result = await functions.http.get("/api/search/posts", {query: query ?? activeQuery ?? "",
                 type: imageType, rating: ratingType, style: styleType, sort: "random", showChildren,
-                limit: scroll ? limit : pageAmount, favoriteMode: favSearch}, session, setSessionFlag, true)
+                limit: scroll ? scrollLimit : pageAmount, favoriteMode: favSearch}, session, setSessionFlag, true)
             setIsRandomSearch(true)
             setRandomResults((prev) => reset || !scroll ? result : [...prev, ...result])
         } finally {
@@ -599,9 +609,6 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-        if (!scroll) {
-            jsx.push(<PageControls key="page-controls" page={page} maxPage={maxPage} setPage={setPage}/>)
-        }
         return jsx
     }
 
@@ -610,9 +617,11 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             style={{marginTop: mobile ? "10px" : "0px", maxWidth: hideSidebar ? "" : `calc(100vw - ${functions.dom.sidebarWidth()})`}}>
             <div className="image-outer-container">
                 {(!initialResultsLoaded || loadingRef.current) && <LoadingSpinner/>}
-                <div className="image-container" style={{visibility: imagesReady && !submitting ? "visible" : "hidden"}}>
+                <div className={`image-container ${tiling === "column" && visibleItems.length ? "column-tiling" : ""}`}
+                    style={{columnWidth: getColumnSize(), visibility: imagesReady && !submitting ? "visible" : "hidden"}}>
                 {generateImagesJSX()}
                 </div>
+                {!scroll && <PageControls page={page} maxPage={maxPage} setPage={setPage}/>}
             </div>
         </div>
     )

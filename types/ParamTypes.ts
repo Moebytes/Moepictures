@@ -12,6 +12,11 @@ export type Languages =
     | "en"
     | "ja"
 
+export type Tiling = 
+    | "row" 
+    | "square" 
+    | "column"
+
 export type PostType =
     | "all"
     | "mobile"

@@ -20,7 +20,7 @@ const GridVideo = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
     const {sharpen, pixelate} = useFilterSelector()
     const {reverse, speed, seekTo, secondsProgress} = usePlaybackSelector()
     const {setReverse, setSeekTo, setSecondsProgress} = usePlaybackActions()
-    const {sizeType, square} = useSearchSelector()
+    const {sizeType, tiling} = useSearchSelector()
     const [liveImg, setLiveImg] = useState("")
     const {imageLoaded, setImageLoaded} = props
     const {imageSize, setImageSize} = props
@@ -193,7 +193,7 @@ const GridVideo = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
         return () => {
             videoRef.current?.cancelVideoFrameCallback(id)
         }
-    }, [imageLoaded, videoData, sharpen, pixelate, square, imageSize, reverse, speed, hover, session])
+    }, [imageLoaded, videoData, sharpen, pixelate, tiling, imageSize, reverse, speed, hover, session])
 
     const download = async () => {
         let filename = path.basename(props.video!).replace(/\?.*$/, "")

@@ -86,10 +86,10 @@ const SortBar: React.FunctionComponent = (props) => {
     const {setActiveDropdown, setFilterDropActive, setActionBanner} = useActiveActions()
     const {reverse} = usePlaybackSelector()
     const {setReverse, setSpeed} = usePlaybackActions()
-    const {scroll, square, imageType, ratingType, styleType, sizeType, sortType, sortReverse, selectionMode, 
+    const {scroll, imageType, ratingType, styleType, sizeType, sortType, sortReverse, selectionMode,
     pageMultiplier, selectionItems, selectionPosts, showChildren, autoScroll} = useSearchSelector()
     const {setScroll, setImageType, setRatingType, setStyleType, setSizeType, setSortType, setSortReverse, 
-    setSelectionMode, setPageMultiplier, setSquare, setSearchFlag, setShowChildren, setAutoScroll,
+    setSelectionMode, setPageMultiplier, cycleTiling, setSearchFlag, setShowChildren, setAutoScroll,
     setSelectionItems, setSelectionPosts} = useSearchActions()
     const {setDownloadFlag, setDownloadIDs, setPageFlag} = useFlagActions()
     const {showDownloadDialog} = useMiscDialogSelector()
@@ -594,11 +594,6 @@ const SortBar: React.FunctionComponent = (props) => {
         setFilterDropActive(newValue === "page-multiplier")
     }
 
-    const toggleSquare = () => {
-        const newValue = !square
-        setSquare(newValue)
-    }
-
     const toggleShowChildren = () => {
         const newValue = !showChildren
         setShowChildren(newValue)
@@ -858,7 +853,7 @@ const SortBar: React.FunctionComponent = (props) => {
                 {scroll ? 
                 <ScrollIcon className="sortbar-img" style={{height: "30px"}} onClick={() => toggleScroll()}/> :
                 <PagesIcon className="sortbar-img" style={{height: "30px"}} onClick={() => toggleScroll()}/>}
-                <SquareIcon className="sortbar-img" style={{height: "30px"}} onClick={() => toggleSquare()}/>
+                <SquareIcon className="sortbar-img" style={{height: "30px"}} onClick={() => cycleTiling()}/>
                 <FiltersIcon className="sortbar-img" style={{height: "30px"}} onClick={() => toggleFilterDrop()}/>
                 <SizeIcon className="sortbar-img" style={{height: "30px"}} onClick={() => {setActiveDropdown(activeDropdown === "size" ? "none" : "size"); setFilterDropActive(false)}}/>
                 {sortReverse ? 
@@ -960,7 +955,7 @@ const SortBar: React.FunctionComponent = (props) => {
                         <PagesIcon className="sortbar-img"/>}
                         {!tablet ? <span className="sortbar-text-alt">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span> : null}
                     </div>
-                    <div className="sortbar-item" onClick={() => toggleSquare()}>
+                    <div className="sortbar-item" onClick={() => cycleTiling()}>
                         <SquareIcon className="sortbar-img"/>
                     </div>
                     {/*<div className="sortbar-item" onClick={() => setReverse(!reverse)}>

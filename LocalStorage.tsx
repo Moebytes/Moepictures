@@ -9,9 +9,8 @@ import {useThemeSelector, useThemeActions, useSearchSelector, useSearchActions, 
 usePlaybackActions, useFilterSelector, useFilterActions, useLayoutSelector, useLayoutActions,
 useCacheSelector, useCacheActions, useSessionSelector, useSessionActions, useActiveSelector,
 useActiveActions} from "./store"
-import {Themes, ImageFormat, PostType, PostRating, PostStyle, PostSize, PostSort} from "./types/Types"
+import {Themes, Tiling, ImageFormat, PostType, PostRating, PostStyle, PostSize, PostSort} from "./types/Types"
 import functions from "./functions/Functions"
-import localforage from "localforage"
 
 const lightColorList = {
     "--selection": "#ffe0f4",
@@ -145,11 +144,11 @@ const LocalStorage: React.FunctionComponent = () => {
     particleAmount, particleSize, particleSpeed} = useThemeSelector()
     const {setTheme, setLanguage, setSiteHue, setSiteSaturation, setSiteLightness, 
     setParticles, setParticleAmount, setParticleSize, setParticleSpeed} = useThemeActions()
-    const {imageExpand, noteDrawingEnabled, scroll, format, saveSearch, favSearch, square, imageType, 
+    const {imageExpand, noteDrawingEnabled, scroll, format, saveSearch, favSearch, tiling, imageType,
     ratingType, styleType, sizeType, sortType, sortReverse, pageMultiplier, showChildren, readerHorizontal,
     readerInvert, readerThumbnails, readerZoom, showTranscript} = useSearchSelector()
     const {setImageExpand, setNoteDrawingEnabled, setScroll, setFormat, setSaveSearch, setFavSearch, setImageType, setRatingType, 
-    setStyleType, setSizeType, setSortType, setSortReverse, setPageMultiplier, setSquare, setShowChildren, setReaderHorizontal,
+    setStyleType, setSizeType, setSortType, setSortReverse, setPageMultiplier, setTiling, setShowChildren, setReaderHorizontal,
     setReaderInvert, setReaderThumbnails, setReaderZoom, setShowTranscript} = useSearchActions()
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter,
     lowpass, highpass, reverb, delay, phaser, bitcrush} = useFilterSelector()
@@ -270,7 +269,7 @@ const LocalStorage: React.FunctionComponent = () => {
         const savedSize = localStorage.getItem("size")
         const savedSort = localStorage.getItem("sort")
         const savedSortReverse = localStorage.getItem("sortReverse")
-        const savedSquare = localStorage.getItem("square")
+        const savedTiling = localStorage.getItem("tiling")
         const savedMultiplier = localStorage.getItem("pageMultiplier")
         const savedShowChildren = localStorage.getItem("showChildren")
         const savedHideTitlebar = localStorage.getItem("titlebar")
@@ -324,7 +323,7 @@ const LocalStorage: React.FunctionComponent = () => {
         if (savedSize) setSizeType(savedSize as PostSize)
         if (savedSort) setSortType(savedSort as PostSort)
         if (savedSortReverse) setSortReverse(savedSortReverse === "true")
-        if (savedSquare) setSquare(savedSquare === "true")
+        if (savedTiling) setTiling(savedTiling as Tiling)
         if (savedMultiplier) setPageMultiplier(Number(savedMultiplier))
         if (savedShowChildren) setShowChildren(savedShowChildren === "true")
         if (savedHideTitlebar) setHideTitlebar(savedHideTitlebar === "true")
@@ -369,10 +368,10 @@ const LocalStorage: React.FunctionComponent = () => {
         localStorage.setItem("sort", sortType)
         localStorage.setItem("sortReverse", String(sortReverse))
         localStorage.setItem("pageMultiplier", String(pageMultiplier))
-        localStorage.setItem("square", String(square))
+        localStorage.setItem("tiling", tiling)
         localStorage.setItem("showChildren", String(showChildren))
     }, [scroll, imageType, ratingType, styleType, sizeType, sortType, sortReverse, 
-        pageMultiplier, square, showChildren])
+        pageMultiplier, tiling, showChildren])
 
     useEffect(() => {
         localStorage.setItem("brightness", String(brightness))

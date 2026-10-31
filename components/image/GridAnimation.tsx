@@ -20,7 +20,7 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
     const {sharpen, pixelate} = useFilterSelector()
     const {reverse, speed, seekTo, secondsProgress} = usePlaybackSelector()
     const {setReverse, setSeekTo, setSecondsProgress} = usePlaybackActions()
-    const {sizeType, square, format} = useSearchSelector()
+    const {sizeType, tiling, format} = useSearchSelector()
     const [img, setImg] = useState(props.cached ? props.img : "")
     const [staticImg, setStaticImg] = useState("")
     const [liveImg, setLiveImg] = useState("")
@@ -249,7 +249,7 @@ const GridAnimation = forwardRef<GridWrapperRef, GridWrapperProps>((props, paren
         return () => {
             window.cancelAnimationFrame(id)
         }
-    }, [imageLoaded, gifData, sharpen, pixelate, square, imageSize, reverse, speed, hover, session])
+    }, [imageLoaded, gifData, sharpen, pixelate, tiling, imageSize, reverse, speed, hover, session])
 
     const download = async () => {
         let filename = path.basename(props.anim!).replace(/\?.*$/, "")

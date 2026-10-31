@@ -31,7 +31,6 @@ interface Props {
     live?: string
     cached?: boolean
     comicPages?: string[] | null
-    square?: boolean
     marginBottom?: number
     marginLeft?: number
     height?: number
@@ -92,7 +91,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         const {mobile} = useLayoutSelector()
         const {session} = useSessionSelector()
         const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter} = useFilterSelector()
-        const {sizeType, square, scroll, format, selectionMode, selectionItems, selectionPosts} = useSearchSelector()
+        const {sizeType, tiling, scroll, format, selectionMode, selectionItems, selectionPosts} = useSearchSelector()
         const {setSelectionItems, setSelectionPosts} = useSearchActions()
         const {downloadFlag, downloadIDs} = useFlagSelector()
         const {setPostFlag, setDownloadFlag, setDownloadIDs} = useFlagActions()
@@ -167,21 +166,12 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         const resizeOverlays = () => {
             const currentRef = getRef()
             if (!currentRef) return
-            if (overlayRef.current) {
-                overlayRef.current.width = currentRef.clientWidth
-                overlayRef.current.height = currentRef.clientHeight
-            }
-            if (lightnessRef.current) {
-                lightnessRef.current.width = currentRef.clientWidth
-                lightnessRef.current.height = currentRef.clientHeight
-            }
-            if (pixelateRef.current) {
-                pixelateRef.current.width = currentRef.clientWidth
-                pixelateRef.current.height = currentRef.clientHeight
-            }
-            if (effectRef.current) {
-                effectRef.current.width = currentRef.clientWidth
-                effectRef.current.height = currentRef.clientHeight
+            const width = currentRef.clientWidth
+            const height = currentRef.clientHeight
+            for (const overlay of [overlayRef.current, lightnessRef.current, pixelateRef.current, effectRef.current]) {
+                if (!overlay) continue
+                if (overlay.width !== width) overlay.width = width
+                if (overlay.height !== height) overlay.height = height
             }
         }
     
@@ -216,13 +206,20 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
             return 5
         }
     
-        const updateSquare = () => {
+        const updateTiling = () => {
             if (!containerRef.current) return
             const currentRef = getRef()
             const refWidth = currentRef?.clientWidth
             const refHeight = currentRef?.clientHeight
             if (!refWidth || !refHeight) return
-            if (square || props.square) {
+            if (tiling === "column") {
+                containerRef.current.style.width = "100%"
+                containerRef.current.style.height = "max-content"
+                containerRef.current.style.marginLeft = "0px"
+                containerRef.current.style.marginBottom = "10px"
+                currentRef.style.width = "100%"
+                currentRef.style.height = "auto"
+            } else if (tiling === "square") {
                 const sidebarWidth = document.querySelector(".sidebar")?.clientWidth || 0
                 const width = window.innerWidth - sidebarWidth
                 const containerWidth = Math.floor(width / (mobile ? functions.render.getImagesPerRowMobile(sizeType) : functions.render.getImagesPerRow(sizeType))) - getSquareOffset()
@@ -249,8 +246,8 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         }
     
         useEffect(() => {
-            updateSquare()
-        }, [square, sizeType, imageSize, imageWidth, imageHeight])
+            updateTiling()
+        }, [tiling, sizeType, imageSize, imageWidth, imageHeight])
     
         useEffect(() => {
             if (!containerRef.current) return
@@ -335,7 +332,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         useEffect(() => {
             functions.image.pixelateEffect(pixelateRef.current, getDrawableRef(), pixelate, 
             {isAnimation: Number(gifData?.length) > 0, isVideo: Boolean(videoRef.current)})
-        }, [pixelate, square, imageSize])
+        }, [pixelate, tiling, imageSize])
     
         useEffect(() => {
             functions.image.splatterEffect(effectRef.current, getDrawableRef(), splatter, {lineMultiplier: 4, 
@@ -544,11 +541,13 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         }
         
         const refWidth = getRef()?.clientWidth
+        const preview = props.post.images[0]
+        const reservePreview = tiling === "column" && preview?.width > 0 && preview?.height > 0
     
         return (
             <div style={{opacity: visible && refWidth ? "1" : "0", transition: "opacity 0.1s", borderRadius: `${props.borderRadius || 5}px`}} className="image-box" id={String(props.id)} ref={containerRef} 
             onClick={onClick} onAuxClick={onClick} onContextMenu={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
-                <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
+                <div className="image-filters" style={{aspectRatio: reservePreview ? `${preview.width} / ${preview.height}` : undefined}} ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
                     {cornerIcon()}
                     <WrappedComponent 
                         {...props}

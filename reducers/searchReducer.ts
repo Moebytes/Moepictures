@@ -8,7 +8,7 @@ import {createSlice} from "@reduxjs/toolkit"
 import {createSelector} from "reselect"
 import {useSelector, useDispatch} from "react-redux"
 import type {StoreState, StoreDispatch} from "../store"
-import {PostType, PostRating, PostStyle, PostSize, PostSort, PostSearch, ImageFormat} from "../types/Types"
+import {PostType, PostRating, PostStyle, PostSize, PostSort, PostSearch, ImageFormat, Tiling} from "../types/Types"
 
 const getSearchQuery = () => {
     if (typeof window === "undefined") return ""
@@ -27,7 +27,7 @@ const searchSlice = createSlice({
         sizeType: "medium" as PostSize,
         sortType: "random" as PostSort,
         sortReverse: false,
-        square: false,
+        tiling: "row" as Tiling,
         scroll: false,
         selectionMode: false,
         selectionItems: Array.from(new Set<string>()),
@@ -58,7 +58,7 @@ const searchSlice = createSlice({
         setSizeType: (state, action) => {state.sizeType = action.payload},
         setSortType: (state, action) => {state.sortType = action.payload},
         setSortReverse: (state, action) => {state.sortReverse = action.payload},
-        setSquare: (state, action) => {state.square = action.payload},
+        setTiling: (state, action) => {state.tiling = action.payload},
         setScroll: (state, action) => {state.scroll = action.payload},
         setSelectionMode: (state, action) => {state.selectionMode = action.payload},
         setSelectionItems: (state, action) => {state.selectionItems = Array.from(action.payload)},
@@ -84,7 +84,7 @@ const searchSlice = createSlice({
 
 const {
     setSearch, setSearchFlag, setImageType, setRatingType, setStyleType, setSizeType,
-    setSortType, setSortReverse, setSquare, setScroll, setSelectionMode, setPageMultiplier,
+    setSortType, setSortReverse, setTiling, setScroll, setSelectionMode, setPageMultiplier,
     setSelectionItems, setSelectionPosts, setFormat, setAutoSearch, setSaveSearch,
     setNoteMode, setNoteDrawingEnabled, setImageExpand, setShowUpscaled, setFavSearch,
     setShowChildren, setReaderHorizontal, setReaderInvert, setReaderThumbnails, setReaderZoom,
@@ -105,7 +105,7 @@ export const useSearchSelector = () => {
         sizeType: selector((state) => state.search.sizeType),
         sortType: selector((state) => state.search.sortType),
         sortReverse: selector((state) => state.search.sortReverse),
-        square: selector((state) => state.search.square),
+        tiling: selector((state) => state.search.tiling),
         scroll: selector((state) => state.search.scroll),
         selectionMode: selector((state) => state.search.selectionMode),
         selectionItems: selector(selectSelectionItems),
@@ -130,6 +130,7 @@ export const useSearchSelector = () => {
 }
 
 export const useSearchActions = () => {
+    const tiling = useSelector((state: StoreState) => state.search.tiling)
     const dispatch = useDispatch.withTypes<StoreDispatch>()()
     return {
         setSearch: (state: string) => dispatch(setSearch(state)),
@@ -140,7 +141,8 @@ export const useSearchActions = () => {
         setSizeType: (state: PostSize) => dispatch(setSizeType(state)),
         setSortType: (state: PostSort) => dispatch(setSortType(state)),
         setSortReverse: (state: boolean) => dispatch(setSortReverse(state)),
-        setSquare: (state: boolean) => dispatch(setSquare(state)),
+        setTiling: (state: Tiling) => dispatch(setTiling(state)),
+        cycleTiling: () => dispatch(setTiling(tiling === "row" ? "square" : tiling === "square" ? "column" : "row")),
         setScroll: (state: boolean) => dispatch(setScroll(state)),
         setSelectionMode: (state: boolean) => dispatch(setSelectionMode(state)),
         setSelectionItems: (state: Set<string>) => dispatch(setSelectionItems(state)),

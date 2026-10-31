@@ -147,3 +147,31 @@
     pointer-events: all;
     color: var(--sortbarIcons);
 }
+
+.image-container.column-tiling,
+.related-container.column-tiling {
+    display: block;
+    height: auto;
+    column-gap: 10px;
+    transition: none;
+
+    &::after { 
+        display: none; 
+    }
+
+    > .image-box {
+        break-inside: avoid;
+        display: inline-flex;
+        vertical-align: top;
+        width: 100%;
+
+        .image, .video {
+            width: 100% !important;
+            height: auto !important;
+        }
+
+        .image-filters { 
+            width: 100%; 
+        }
+    }
+}

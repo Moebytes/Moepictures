@@ -26,7 +26,8 @@ import PageControls from "../../components/site/PageControls"
 import {PostHistory, PostSearch, PostSearchParams} from "../../types/Types"
 import "./styles/related.less"
 
-let limit = 100
+const limit = 100
+const scrollLimit = 24
 let pageAmount = 15
 
 interface Props {
@@ -41,8 +42,8 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {mobile} = useLayoutSelector()
     const {setNavigationPosts} = useCacheActions()
-    const {ratingType, square, showChildren, scroll, sizeType} = useSearchSelector()
-    const {setSearch, setSearchFlag, setSquare, setSizeType} = useSearchActions()
+    const {ratingType, tiling, showChildren, scroll, sizeType} = useSearchSelector()
+    const {setSearch, setSearchFlag, cycleTiling, setSizeType} = useSearchActions()
     const {session} = useSessionSelector()
     const {settingsLoaded} = useActiveSelector()
     const {setRelatedPage} = usePageActions()
@@ -79,7 +80,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     
     const relatedQuery = useRelatedPostsInfiniteQuery(
         {...relatedParams, query: searchTags[0], fallback: searchTags.slice(1), postID: props.post?.postID},
-        {skip: hidden, initialPageParam: {offset: startOffset, limit}}
+        {skip: hidden, initialPageParam: {offset: startOffset, limit: scroll ? scrollLimit : limit}}
     )
 
     const items = useMemo(() => {
@@ -165,8 +166,17 @@ const Related: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const getColumnSize = () => {
+        if (tiling !== "column") return undefined
+        if (sizeType === "tiny") return mobile ? 74 : 87
+        if (sizeType === "small") return mobile ? 101 : 121
+        if (sizeType === "medium") return mobile ? 147 : 168
+        if (sizeType === "large") return mobile ? 181 : 268
+        if (sizeType === "massive") return mobile ? 268 : 335
+    }
+
     const getSize = () => {
-        if (square) return getSquareSize()
+        if (tiling === "square") return getSquareSize()
         if (sizeType === "tiny") {
             return mobile ? 110 : 130
         } else if (sizeType === "small") {
@@ -231,28 +241,25 @@ const Related: React.FunctionComponent<Props> = (props) => {
             const liveThumb = functions.link.getThumbnailLink(image, "medium", session, mobile, true)
             const images = post.images.map((image) => functions.link.getImageLink(image, session.upscaledImages))
             if (post.type === "model") {
-                jsx.push(<GridModel key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()}
+                jsx.push(<GridModel key={post.postID} id={post.postID} autoLoad={true} marginBottom={getMarginBottom()}
                     marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} model={images[0]} post={post} onLoad={promise.resolve}/>)
             } else if (post.type === "live2d") {
-                jsx.push(<GridLive2D key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()}
+                jsx.push(<GridLive2D key={post.postID} id={post.postID} autoLoad={true} marginBottom={getMarginBottom()}
                     marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} live2d={images[0]} post={post} onLoad={promise.resolve}/>)
             } else if (post.type === "audio") {
-                jsx.push(<GridSong key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()}
+                jsx.push(<GridSong key={post.postID} id={post.postID} autoLoad={true} marginBottom={getMarginBottom()}
                     marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} audio={images[0]} post={post} onLoad={promise.resolve}/>)
             } else if (post.type === "video") {
-                jsx.push(<GridVideo key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} live={liveThumb}
+                jsx.push(<GridVideo key={post.postID} id={post.postID} autoLoad={true} marginBottom={getMarginBottom()} live={liveThumb}
                     marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} video={images[0]} post={post} onLoad={promise.resolve}/>)
             } else if (post.type === "animation") {
-                jsx.push(<GridAnimation key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()} live={liveThumb}
+                jsx.push(<GridAnimation key={post.postID} id={post.postID} autoLoad={true} marginBottom={getMarginBottom()} live={liveThumb}
                     marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} anim={images[0]} post={post} onLoad={promise.resolve}/>)
             } else {
-                jsx.push(<GridImage key={post.postID} id={post.postID} autoLoad={true} square={square} marginBottom={getMarginBottom()}
+                jsx.push(<GridImage key={post.postID} id={post.postID} autoLoad={true} marginBottom={getMarginBottom()}
                     marginLeft={getMarginLeft()} height={getSize()} borderRadius={4} img={thumb} original={images[0]} post={post} live={liveThumb}
                     comicPages={post.type === "comic" ? images : null} onLoad={promise.resolve}/>)
             }
-        }
-        if (!scroll) {
-            jsx.push(<PageControls page={page} maxPage={maxPage} setPage={setPage}/>)
         }
         return jsx
     }
@@ -292,7 +299,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
                 {scroll ? 
                 <ScrollIcon className="related-icon" onClick={toggleScroll}/> :
                 <PagesIcon className="related-icon" onClick={toggleScroll}/>}
-                <SquareIcon className="related-icon" onClick={() => setSquare(!square)}/>
+                <SquareIcon className="related-icon" onClick={() => cycleTiling()}/>
                 <SizeIcon className="related-icon" ref={sizeRef} onClick={() => setSizeDropdown((prev) => !prev)}/>
             </div> :
             <div style={{display: "flex", alignItems: "center", marginBottom: "20px"}}>
@@ -300,13 +307,16 @@ const Related: React.FunctionComponent<Props> = (props) => {
                 {scroll ? 
                 <ScrollIcon className="related-icon" onClick={toggleScroll}/> :
                 <PagesIcon className="related-icon" onClick={toggleScroll}/>}
-                <SquareIcon className="related-icon" onClick={() => setSquare(!square)}/>
+                <SquareIcon className="related-icon" onClick={() => cycleTiling()}/>
                 <SizeIcon className="related-icon" ref={sizeRef} onClick={() => setSizeDropdown((prev) => !prev)}/>
             </div>}
-            <div className="related-container" style={{visibility: allImagesLoaded ? "visible" : "hidden", width: "98%", justifyContent: items.length < 5 ? "flex-start" : "space-evenly"}}>
+            <div className={`related-container ${tiling === "column" ? "column-tiling" : ""}`}
+                style={{visibility: allImagesLoaded ? "visible" : "hidden", width: "98%",
+                    columnWidth: getColumnSize(), justifyContent: items.length < 5 ? "flex-start" : "space-evenly"}}>
                 {generateImagesJSX()}
                 {/* <Carousel images={getImages()} set={click} noKey={true} marginLeft={marginLeft} height={200} unlimited={true}/> */}
             </div>
+            {!scroll && <PageControls page={page} maxPage={maxPage} setPage={setPage}/>}
             <div className={`related-dropdown ${sizeDropdown ? "" : "hide-related-dropdown"}`} 
             style={{marginRight: getSizeMargin(), top: `50px`}} onClick={() => setSizeDropdown(false)}>
                 <div className="related-dropdown-row" onClick={() => setSizeType("tiny")}>
