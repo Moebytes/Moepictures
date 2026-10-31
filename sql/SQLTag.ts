@@ -482,6 +482,7 @@ export default class SQLTag {
 
     /** Rename tag map. */
     public static renameTagMap = async (tag: string, newTag: string) => {
+        if (tag === newTag) return
         const query: QueryConfig = {
             text: /*sql*/`
                 WITH new_tag AS (
@@ -499,16 +500,15 @@ export default class SQLTag {
                         (SELECT "tagID" FROM "tags" WHERE "tag" = $1)
                     ) AS "newTagID"
                 ),
-                deleted AS (
-                    DELETE FROM "tag map" t1
-                    USING "tag map" t2, old_tag, resolved_tag
-                    WHERE t1."postID" = t2."postID"
-                    AND t1."tagID" = resolved_tag."newTagID"
-                    AND t2."tagID" = old_tag."oldTagID"
+                moved AS (
+                    DELETE FROM "tag map"
+                    WHERE "tagID" = (SELECT "oldTagID" FROM old_tag)
+                    RETURNING "postID"
                 )
-                UPDATE "tag map"
-                SET "tagID" = (SELECT "newTagID" FROM resolved_tag)
-                WHERE "tagID" = (SELECT "oldTagID" FROM old_tag)
+                INSERT INTO "tag map" ("postID", "tagID")
+                SELECT moved."postID", resolved_tag."newTagID"
+                FROM moved CROSS JOIN resolved_tag
+                ON CONFLICT ("postID", "tagID") DO NOTHING
             `,
             values: [newTag, tag]
         }
