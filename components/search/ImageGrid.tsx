@@ -85,6 +85,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const [refreshKey, setRefreshKey] = useState(restoredSearch?.refreshKey ?? 0)
     const [overridePosts, setOverridePosts] = useState<PostSearch[] | null>(restoredSearch?.mode === "image" ? restoredPosts : null)
     const [randomResults, setRandomResults] = useState<PostSearch[]>(restoredSearch?.mode === "random" ? restoredPosts : [])
+    const [isRandomLoading, setIsRandomLoading] = useState(false)
     const [scrollOffset, setScrollOffset] = useState(restoredSearch?.offset ?? 0)
     const [previousPosts, setPreviousPosts] = useState<PostSearch[]>([])
     const [totalCount, setTotalCount] = useState(Number(restoredSearch?.totalCount ?? 0))
@@ -103,7 +104,6 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const [activeSearch, setActiveSearch] = useState<{query: string, value: string} | null>(restoredSearchData)
     const activeQuery = activeSearch?.query === query ? activeSearch.value : null
     const [pendingSearch, setPendingSearch] = useState<string | null>(null)
-    const [loadedPage, setLoadedPage] = useState<{search: string, items: PostSearch[]} | null>(null)
 
     const setPage = (value: number) => {
         const params = new URLSearchParams(location.search)
@@ -230,7 +230,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         {query: activeQuery ?? "", type: imageType, rating: ratingType, style: styleType,
         sort: functions.validation.parseSort(sortType, sortReverse),
         showChildren, favoriteMode: favSearch, refreshKey, offset: previousPosts.length ? scrollOffset : 0},
-        {skip: searchFlag || restoring || queryChanging || !scroll ||
+        {skip: searchFlag || submitting || restoring || queryChanging || !scroll ||
         Boolean(overridePosts) || isRandomSearch || (!settingsLoaded || activeQuery === null),
         initialPageParam: {offset: previousPosts.length ? scrollOffset : (page - 1) * pageAmount, limit: scrollLimit}}
     )
@@ -240,7 +240,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         sort: functions.validation.parseSort(sortType, sortReverse),
         showChildren, favoriteMode: favSearch,
         offset: batchOffset, limit: batchSize, refreshKey},
-        {skip: searchFlag || restoring || queryChanging || scroll ||
+        {skip: searchFlag || submitting || restoring || queryChanging || scroll ||
         Boolean(overridePosts) || isRandomSearch || (!settingsLoaded || activeQuery === null)}
     )
 
@@ -261,11 +261,11 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         return items.slice(pageOffset, pageOffset + pageAmount)
     }, [items, page, scroll, overridePosts, isRandomSearch, pageOffset, pageAmount])
 
-    const resultsReady = Boolean(overridePosts) || isRandomSearch || canRestore ||
-        Boolean(scroll ? infiniteQuery.currentData : pageQuery.currentData)
+    const resultsReady = !isRandomLoading && (Boolean(overridePosts) || isRandomSearch ||
+        canRestore || Boolean(scroll ? infiniteQuery.currentData : pageQuery.currentData))
 
     const maxPage = Math.max(1, Math.ceil(totalCount / pageAmount))
-    const isUpdating = !restoring && (scroll ? infiniteQuery.isFetching : pageQuery.isFetching)
+    const isUpdating = isRandomLoading || (!restoring && (scroll ? infiniteQuery.isFetching : pageQuery.isFetching))
     const ended = !infiniteQuery.hasNextPage
 
     useEffect(() => {
@@ -339,6 +339,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const randomPosts = async (query?: string, reset = true) => {
         if (randomLoading.current) return
         randomLoading.current = true
+        setIsRandomLoading(true)
         setRandomFlag(false)
         setOverridePosts(null)
         try {
@@ -349,6 +350,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             setRandomResults((prev) => reset || !scroll ? result : [...prev, ...result])
         } finally {
             randomLoading.current = false
+            setIsRandomLoading(false)
         }
     }
 
@@ -533,20 +535,13 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
                 if (timer >= 1000) break
             }
             await functions.timeout(100)
-            if (active) {
-                setLoadedPage({search: location.search, items: visibleItems})
-                props.setImagesLoaded(true)
-            }
+            if (active) props.setImagesLoaded(true)
         }
         poll()
         return () => {
             active = false
         }
-    }, [scroll, visibleItems, page, submitting, resultsReady, location.search])
-
-    const imagesReady = scroll || (props.imagesLoaded && 
-        loadedPage?.search === location.search &&
-        loadedPage.items === visibleItems)
+    }, [scroll, visibleItems, page, submitting, resultsReady])
 
     const generateImagesJSX = () => {
         const jsx = [] as React.ReactElement[]
@@ -618,7 +613,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             <div className="image-outer-container">
                 {(!initialResultsLoaded || loadingRef.current) && <LoadingSpinner/>}
                 <div className={`image-container ${tiling === "column" && visibleItems.length ? "column-tiling" : ""}`}
-                    style={{columnWidth: getColumnSize(), visibility: imagesReady && !submitting ? "visible" : "hidden"}}>
+                    style={{columnWidth: getColumnSize(), visibility: props.imagesLoaded && !submitting ? "visible" : "hidden"}}>
                 {generateImagesJSX()}
                 </div>
                 {!scroll && <PageControls page={page} maxPage={maxPage} setPage={setPage}/>}
