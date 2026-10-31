@@ -10,10 +10,63 @@ import functions from "../functions/Functions"
 import {DeletedPost, PostSearch, PostFull, UnverifiedPost, TagCategorySearch, TagSearch, GroupSearch, ServerSession, PostRating} from "../types/Types"
 
 export default class SQLSearch {
-    public static boilerplate = (options: {i?: number, tags?: string[], type?: string, rating?: string, style?: string, sort?: string, offset?: number, 
+    public static tagOperators = (tags: string[] = [], i = 1, column = '"tag map tags".tags', pageFirst = false) => {
+        let ANDtags = [] as string[]
+        let ORtags = [] as string[]
+        let NOTtags = [] as string[]
+        let NOTORtags = [] as string[]
+        let STARtags = [] as string[]
+        tags?.forEach((tag) => {
+            if (tag.startsWith("+-")) {
+                NOTORtags.push(tag.replace("+-", ""))
+            } else if (tag.startsWith("+")) {
+                ORtags.push(tag.replace("+", ""))
+            } else if (tag.startsWith("-")) {
+                NOTtags.push(tag.replace("-", ""))
+            } else if (tag.startsWith("*")) {
+                STARtags.push(tag.replace("*", ""))
+            } else {
+                ANDtags.push(tag)
+            }
+        })
+        let values = [] as (string | string[] | number | null)[]
+        let tagQueryArray = [] as string[]
+        if (ANDtags.length) {
+            values.push(ANDtags)
+            tagQueryArray.push(`${column} @> $${i}`)
+            i++
+        }
+        if (ORtags.length) {
+            values.push(ORtags)
+            tagQueryArray.push(`${column} && $${i}`)
+            i++
+        }
+        if (NOTtags.length) {
+            values.push(NOTtags)
+            tagQueryArray.push(`NOT ${column} @> $${i}`)
+            i++
+        }
+        if (NOTORtags.length) {
+            values.push(NOTORtags)
+            tagQueryArray.push(`NOT ${column} && $${i}`)
+            i++
+        }
+        if (STARtags.length) {
+            for (const starTag of STARtags) {
+                values.push(starTag)
+                tagQueryArray.push(pageFirst ?
+                    `${column} && ARRAY(SELECT tags.tag FROM tags WHERE tags.tag ~* $${i})` :
+                    `EXISTS (SELECT 1 FROM unnest(${column}) AS tag WHERE tag ~* $${i})`)
+                i++
+            }
+        }
+        return {tagQuery: tagQueryArray.join(" AND "), values, i}
+    }
+
+    public static boilerplate = (options: {i?: number, tags?: string[], type?: string, rating?: string, style?: string, sort?: string, offset?: number,
         limit?: number, username?: string, showChildren?: boolean, withTags?: boolean, search?: string, favgroupOrder?: boolean, outerSort?: boolean,
         format?: string, condition?: string, intermLimit?: boolean, session?: ServerSession, pageFirst?: boolean}) => {
-        let {i, tags, search, type, rating, style, sort, offset, limit, username, withTags, showChildren, 
+        let {i, tags, search, type, rating, style, sort, offset, limit, username, withTags, showChildren,
         favgroupOrder, outerSort, format, condition, intermLimit, session, pageFirst} = options
         if (!i) i = 1
         let typeQuery = ""
@@ -82,55 +135,9 @@ export default class SQLSearch {
         if (sort === "private") sortQuery = `ORDER BY posts.private DESC NULLS LAST`
         if (sort === "reverse private") sortQuery = `ORDER BY posts.private ASC NULLS LAST`
         let childQuery = showChildren ? "" : `posts."parentID" IS NULL`
-        let ANDtags = [] as string[]
-        let ORtags = [] as string[]
-        let NOTtags = [] as string[]
-        let NOTORtags = [] as string[]
-        let STARtags = [] as string[]
-        tags?.forEach((tag) => {
-            if (tag.startsWith("+-")) {
-                NOTORtags.push(tag.replace("+-", ""))
-            } else if (tag.startsWith("+")) {
-                ORtags.push(tag.replace("+", ""))
-            } else if (tag.startsWith("-")) {
-                NOTtags.push(tag.replace("-", ""))
-            } else if (tag.startsWith("*")) {
-                STARtags.push(tag.replace("*", ""))
-            } else {
-                ANDtags.push(tag)
-            }
-        })
-        let values = [] as (string | string[] | number | null)[]
-        let tagQueryArray = [] as string[]
-        if (ANDtags.length) {
-            values.push(ANDtags)
-            tagQueryArray.push(`"tag map tags".tags @> $${i}`)
-            i++ 
-        }
-        if (ORtags.length) {
-            values.push(ORtags)
-            tagQueryArray.push(`"tag map tags".tags && $${i}`)
-            i++ 
-        }
-        if (NOTtags.length) {
-            values.push(NOTtags)
-            tagQueryArray.push(`NOT "tag map tags".tags @> $${i}`)
-            i++
-        }
-        if (NOTORtags.length) {
-            values.push(NOTORtags)
-            tagQueryArray.push(`NOT "tag map tags".tags && $${i}`)
-            i++ 
-        }
-        if (STARtags.length) {
-            for (const starTag of STARtags) {
-                values.push(starTag)
-                tagQueryArray.push(pageFirst ?
-                    `"tag map tags".tags && ARRAY(SELECT tags.tag FROM tags WHERE tags.tag ~* $${i})` :
-                    `EXISTS (SELECT 1 FROM unnest("tag map tags".tags) AS tag WHERE tag ~* $${i})`)
-                i++
-            }
-        }
+        const tagFilter = SQLSearch.tagOperators(tags, i, '"tag map tags".tags', pageFirst)
+        let {values} = tagFilter
+        i = tagFilter.i
         let searchValue = i
         if (search) {
             values.push(search)
@@ -165,7 +172,7 @@ export default class SQLSearch {
             values.push(format)
             i++
         }
-        let tagQuery = tagQueryArray.length ? tagQueryArray.join(" AND ") : ""
+        let tagQuery = tagFilter.tagQuery
         const whereQueries = [tagQuery, typeQuery, ratingQuery, styleQuery, childQuery, favoriteQuery, condition].filter(Boolean).join(" AND ")
         let includeTags = withTags || tagQuery || sort === "tagcount" || sort === "reverse tagcount"
 
@@ -890,7 +897,7 @@ export default class SQLSearch {
 
     /** Group search. */
     public static groupSearch = async (search: string, sort: string, rating: string, limit?: number, 
-        offset?: number, username?: string, session?: ServerSession) => {
+        offset?: number, username?: string, session?: ServerSession, titleSearch = search) => {
         let ratingQuery = ""
         if (rating === "cute") ratingQuery = `groups.rating = 'cute'`
         if (rating === "sexy") ratingQuery = `groups.rating = 'sexy'`
@@ -898,13 +905,13 @@ export default class SQLSearch {
         if (rating === "lewd") ratingQuery = `groups.rating = 'lewd'`
         if (rating === "all") ratingQuery = `(groups.rating = 'cute' OR groups.rating = 'sexy' OR groups.rating = 'erotic')`
         if (rating === "all" && !username) ratingQuery = `groups.rating = 'cute'`
-        let searchQuery = ""
-        let values = [] as (string | number)[]
-        let i = 1
-        let searchValue = i
-        if (search) {
-            searchQuery = `lower(groups."name") LIKE '%' || $${searchValue} || '%'`
-            values.push(search.toLowerCase())
+        const tags = search.trim().split(/\s+/g).filter(Boolean)
+        const tagFilter = SQLSearch.tagOperators(tags, 1, "group_tags.tags")
+        let searchQuery = tagFilter.tagQuery
+        let {values, i} = tagFilter
+        if (titleSearch.trim()) {
+            values.push(titleSearch.trim().toLowerCase())
+            searchQuery = `(${searchQuery ? `${searchQuery} OR ` : ""}lower(groups."name") LIKE '%' || $${i} || '%')`
             i++
         }
         let limitValue = i
@@ -929,6 +936,13 @@ export default class SQLSearch {
                     SELECT groups.*, COUNT(*) OVER() AS "groupCount", COUNT(*) AS "postCount"
                     FROM groups
                     JOIN "group map" ON "group map"."groupID" = groups."groupID"
+                    ${tags.length ? `CROSS JOIN LATERAL (
+                        SELECT COALESCE(array_agg(DISTINCT tag), ARRAY[]::text[]) AS tags
+                        FROM "group map" AS group_posts
+                        JOIN "tag map tags" ON "tag map tags"."postID" = group_posts."postID"
+                        CROSS JOIN LATERAL unnest("tag map tags".tags) AS tag
+                        WHERE group_posts."groupID" = groups."groupID"
+                    ) AS group_tags` : ""}
                     WHERE EXISTS (SELECT 1 FROM images WHERE images."postID" = "group map"."postID")
                     ${whereQueries ? `AND ${whereQueries}` : ""}
                     GROUP BY groups."groupID"

@@ -38,6 +38,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     const navigate = useNavigate()
 
     const handleKeydown = (event: any) => {
+        if (!props.active) return
         if (event.key === "Enter") {
             if (!active || !suggestions.length || !suggestions[activeIndex]) return
             event.preventDefault()
@@ -70,21 +71,22 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
         return () => {
             window.removeEventListener("keydown", handleKeydown)
         }
-    }, [suggestions, activeIndex])
+    }, [suggestions, activeIndex, props.active, props.click])
 
     useEffect(() => {
         if (props.active) {
             setActive(true)
         } else {
-            setTimeout(() => {
+            const timeout = setTimeout(() => {
                 setActive(false)
                 setActiveIndex(-1)
             }, 200)
+            return () => clearTimeout(timeout)
         }
     }, [props.active])
 
     const updateSearchSuggestions = async () => {
-        let query = props.text ? functions.tag.parseTagGroups(props.text).tags.join(" ") : search
+        let query = props.text !== undefined ? functions.tag.parseTagGroups(props.text).tags.join(" ") : search
         if (!query) return setSuggestions([])
 
         query = functions.tag.trimSpecialCharacters(query)

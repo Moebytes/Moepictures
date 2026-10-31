@@ -22,6 +22,7 @@ import SortReverseIcon from "../../assets/svg/sort-reverse.svg"
 import ScrollIcon from "../../assets/svg/scroll.svg"
 import PagesIcon from "../../assets/svg/pages.svg"
 import LoadingSpinner from "../../components/search/LoadingSpinner"
+import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import GroupThumbnail from "../../components/search/GroupThumbnail"
 import PageControls from "../../components/site/PageControls"
 import {GroupSearch, GroupSort} from "../../types/Types"
@@ -54,10 +55,26 @@ const GroupsPage: React.FunctionComponent = (props) => {
     const [query, setQuery] = useState(new URLSearchParams(location.search).get("query") ?? "")
     const [searchQuery, setSearchQuery] = useState(query)
     const [refreshKey, setRefreshKey] = useState(0)
+    const searchRef = useRef<HTMLInputElement>(null)
+    const [suggestionsActive, setSuggestionsActive] = useState(false)
+    const [suggestionPosition, setSuggestionPosition] = useState({x: 0, y: 0, width: 230})
     const sortRef = useRef<HTMLDivElement>(null)
     const refreshRef = useRef(false)
 
     usePageURL(page, setPage, query, setQuery)
+
+    const showSuggestions = () => {
+        const rect = searchRef.current?.getBoundingClientRect()
+        if (rect) setSuggestionPosition({x: rect.left + window.scrollX, y: rect.bottom + window.scrollY, width: rect.width})
+        setSuggestionsActive(true)
+    }
+
+    const selectSuggestion = (tag: string) => {
+        const parts = searchQuery.split(/ +/g)
+        parts[parts.length - 1] = functions.tag.appendSpecialCharacters(parts, tag)
+        setSearchQuery(parts.join(" ") + " ")
+        searchRef.current?.focus()
+    }
 
     useEffect(() => {
         setHideNavbar(true)
@@ -196,6 +213,16 @@ const GroupsPage: React.FunctionComponent = (props) => {
         return jsx
     }
 
+    const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key !== "Enter") return
+        setTimeout(() => {
+            if (!event.nativeEvent.defaultPrevented) {
+                setSuggestionsActive(false)
+                refreshItems()
+            }
+        }, 0)
+    }
+
     return (
         <>
         <TitleBar/>
@@ -207,7 +234,11 @@ const GroupsPage: React.FunctionComponent = (props) => {
                     <span className="items-heading">{i18n.sort.groups}</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? refreshItems() : null}/>
+                            <input ref={searchRef} className="item-search" type="search" spellCheck="false" value={searchQuery}
+                            onChange={(event) => {setSearchQuery(event.target.value); showSuggestions()}}
+                            onFocus={showSuggestions} onBlur={() => setSuggestionsActive(false)}
+                            onKeyDown={onKeyDown}/>
+                            <SearchSuggestions active={suggestionsActive} text={searchQuery} {...suggestionPosition} click={selectSuggestion}/>
                             <button className="item-search-button" onClick={() => refreshItems()}>
                                 <SearchIcon className="item-search-button-icon"/>
                             </button>

@@ -466,11 +466,29 @@ const SearchRoutes = (app: Express) => {
             if (!sort) sort = "random"
             if (!rating) rating = "all"
             if (!functions.validation.validGroupSort(sort)) return void res.status(400).send("Invalid sort")
+
             const search = query?.trim() ?? ""
-            let  result = await sql.search.groupSearch(search, sort, rating, limit, offset, req.session.username, req.session)
-            result = result.map((g) => {
-                g.posts = g.posts.map(serverFunctions.files.appendImageLinks)
-                return g
+            const tags = search.trim().split(/ +/g).filter(Boolean)
+            const qualities = functions.tag.mapSpecialQualities(search)
+            const cleanTags = functions.tag.trimSpecialCharacters(search)?.split(/ +/g)
+            const existingTags = new Set(await sql.tag.existingTags(cleanTags.filter(Boolean)))
+            for (let i = 0; i < cleanTags?.length; i++) {
+                if (!cleanTags[i]) continue
+                if (!existingTags.has(cleanTags[i])) {
+                    const alias = await sql.tag.alias(cleanTags[i])
+                    if (alias) tags[i] = qualities[i] + alias.tag
+                    if (!alias && functions.util.isJapaneseText(cleanTags[i])) {
+                        const pixivTag = await sql.tag.tagFromPixivTag(cleanTags[i])
+                        if (pixivTag) tags[i] = qualities[i] + pixivTag.tag
+                    }
+                }
+            }
+
+            let result = await sql.search.groupSearch(tags.join(" "), sort, rating, limit, offset, 
+                req.session.username, req.session, search)
+            result = result.map((group) => {
+                group.posts = group.posts.map(serverFunctions.files.appendImageLinks)
+                return group
             })
             if (!req.session.showR18) {
                 result = result.filter((g: any) => !functions.post.isR18(g.rating))
