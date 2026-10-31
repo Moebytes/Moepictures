@@ -117,6 +117,17 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
             }
         }
 
+        if (suggestions.length < 100) {
+            const seriesTags = new Set(sortedTags.filter((tag) => tag.type === "series").map((tag) => tag.tag))
+            for (const tagCount of tagCounts) {
+                if (tagCount.type === "character" && !suggestions.includes(tagCount) &&
+                    tagCount.seriesImplications?.some((series) => seriesTags.has(series))) {
+                    suggestions.push(tagCount)
+                }
+                if (suggestions.length >= 100) break
+            }
+        }
+
         setSuggestions(suggestions)
     }
 
@@ -126,7 +137,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         updateSearchSuggestions()
-    }, [props.text, search, session])
+    }, [props.text, props.type, search, session, sortedTags])
 
     const generateSuggestionsJSX = () => {
         let jsx = [] as any

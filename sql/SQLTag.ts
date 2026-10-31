@@ -337,7 +337,15 @@ export default class SQLTag {
                     "tags".type, "tags".image, "tags"."imageHash", 
                     "tags"."hidden", "tags"."r18", 
                     "tags"."social", "tags"."twitter", "tags"."website", 
-                    "tags"."fandom", "tags"."wikipedia"
+                    "tags"."fandom", "tags"."wikipedia",
+                    ARRAY(
+                        SELECT implications.implication
+                        FROM implications
+                        JOIN tags AS series ON series.tag = implications.implication
+                        WHERE implications.tag = tags.tag
+                        AND tags.type = 'character' AND series.type = 'series'
+                        ORDER BY implications.implication
+                    ) AS "seriesImplications"
                     FROM tags
                     LEFT JOIN "tag map posts" ON "tag map posts".tag = tags.tag
                     ${whereQuery}

@@ -48,6 +48,7 @@ export interface TagCount {
     fandom: string | null
     wikipedia: string | null
     imageLink?: string | null
+    seriesImplications?: string[]
 }
 
 export interface Alias {
