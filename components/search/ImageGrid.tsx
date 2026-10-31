@@ -102,6 +102,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const [activeSearch, setActiveSearch] = useState<{query: string, value: string} | null>(restoredSearchData)
     const activeQuery = activeSearch?.query === query ? activeSearch.value : null
     const [pendingSearch, setPendingSearch] = useState<string | null>(null)
+    const [loadedPage, setLoadedPage] = useState<{search: string, items: PostSearch[]} | null>(null)
 
     const setPage = (value: number) => {
         const params = new URLSearchParams(location.search)
@@ -219,7 +220,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         {query: activeQuery ?? "", type: imageType, rating: ratingType, style: styleType,
         sort: functions.validation.parseSort(sortType, sortReverse),
         showChildren, favoriteMode: favSearch, refreshKey, offset: previousPosts.length ? scrollOffset : 0},
-        {skip: searchFlag || submitting || restoring || queryChanging || !scroll || 
+        {skip: searchFlag || restoring || queryChanging || !scroll ||
         Boolean(overridePosts) || isRandomSearch || (!settingsLoaded || activeQuery === null),
         initialPageParam: {offset: previousPosts.length ? scrollOffset : (page - 1) * pageAmount, limit}}
     )
@@ -229,7 +230,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         sort: functions.validation.parseSort(sortType, sortReverse),
         showChildren, favoriteMode: favSearch,
         offset: batchOffset, limit: batchSize, refreshKey},
-        {skip: searchFlag || submitting || restoring || queryChanging || scroll || 
+        {skip: searchFlag || restoring || queryChanging || scroll ||
         Boolean(overridePosts) || isRandomSearch || (!settingsLoaded || activeQuery === null)}
     )
 
@@ -522,13 +523,20 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
                 if (timer >= 1000) break
             }
             await functions.timeout(100)
-            if (active) props.setImagesLoaded(true)
+            if (active) {
+                setLoadedPage({search: location.search, items: visibleItems})
+                props.setImagesLoaded(true)
+            }
         }
         poll()
         return () => {
             active = false
         }
-    }, [scroll, visibleItems, page, submitting, resultsReady])
+    }, [scroll, visibleItems, page, submitting, resultsReady, location.search])
+
+    const imagesReady = scroll || (props.imagesLoaded && 
+        loadedPage?.search === location.search &&
+        loadedPage.items === visibleItems)
 
     const generateImagesJSX = () => {
         const jsx = [] as React.ReactElement[]
@@ -602,7 +610,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             style={{marginTop: mobile ? "10px" : "0px", maxWidth: hideSidebar ? "" : `calc(100vw - ${functions.dom.sidebarWidth()})`}}>
             <div className="image-outer-container">
                 {(!initialResultsLoaded || loadingRef.current) && <LoadingSpinner/>}
-                <div className="image-container" style={{visibility: props.imagesLoaded && !submitting ? "visible" : "hidden"}}>
+                <div className="image-container" style={{visibility: imagesReady && !submitting ? "visible" : "hidden"}}>
                 {generateImagesJSX()}
                 </div>
             </div>
