@@ -79,11 +79,21 @@ const ActionBanner: React.FunctionComponent = (props) => {
             setStickyText(i18n.banner.changedSource)
             document.documentElement.style.setProperty("--actionBannerColor", "#d488ebCC")
         }
+        if (actionBanner === "copy") {
+            setStickyText(i18n.banner.copied)
+            document.documentElement.style.setProperty("--actionBannerColor", "#ed5197cc")
+        }
+        if (actionBanner === "paste") {
+            setStickyText(i18n.banner.pasted)
+            document.documentElement.style.setProperty("--actionBannerColor", "#b073decc")
+        }
     }, [actionBanner])
 
     const getDuration = () => {
         if (actionBanner === "account-restored") {
             return 5000
+        } else if (actionBanner === "copy" || actionBanner === "paste") {
+            return 1000
         } else {
             return 2000
         }

@@ -12,6 +12,7 @@ import functions from "../../functions/Functions"
 import {motion, useDragControls} from "framer-motion"
 import permissions from "../../structures/Permissions"
 import {UploadImage} from "../../types/Types"
+import DialogClipboard from "../DialogClipboard"
 import "../dialog.less"
 
 const SourceEditDialog: React.FunctionComponent = (props) => {
@@ -77,6 +78,33 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
         setUserProfile("")
         setDrawingTools("")
         setSourceImageCount("")
+    }
+
+    const getClipboardData = () => {
+        return {title, englishTitle, artist,
+            posted, source, commentary,
+            englishCommentary, userProfile,
+            bookmarks, pixivTags, drawingTools,
+            sourceImageCount, buyLink, mirrors}
+    }
+
+    const pasteClipboardData = (pastedObject: string) => {
+        try {
+            if (!pastedObject) return
+            const data = JSON.parse(pastedObject)
+            if (data.title !== undefined) setTitle(data.title)
+            if (data.englishTitle !== undefined) setEnglishTitle(data.englishTitle)
+            if (data.artist !== undefined) setArtist(data.artist)
+            if (data.posted !== undefined) setPosted(data.posted)
+            if (data.source !== undefined) setSource(data.source)
+            if (data.commentary !== undefined) setCommentary(data.commentary)
+            if (data.englishCommentary !== undefined) setEnglishCommentary(data.englishCommentary)
+            if (data.userProfile !== undefined) setUserProfile(data.userProfile)
+            if (data.pixivTags !== undefined) setPixivTags(data.pixivTags)
+            if (data.sourceImageCount !== undefined) setSourceImageCount(data.sourceImageCount)
+            if (data.buyLink !== undefined) setBuyLink(data.buyLink)
+            if (data.mirrors !== undefined) setMirrors(data.mirrors)
+        } catch {}
     }
 
     useEffect(() => {
@@ -345,6 +373,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                         <div className="dialog-container">
                             <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                                 <span className="dialog-title">{i18n.sidebar.sourceEdit}</span>
+                                <DialogClipboard getData={getClipboardData} pasteData={pasteClipboardData}/>
                             </div>
                             {mainJSX()}
                             {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
@@ -366,6 +395,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                     <div className="dialog-container">
                         <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.dialogs.sourceEdit.request}</span>
+                            {!submitted && <DialogClipboard getData={getClipboardData} pasteData={pasteClipboardData}/>}
                         </div>
                         {submitted ? <>
                         <div className="dialog-row">

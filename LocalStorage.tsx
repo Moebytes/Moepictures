@@ -200,7 +200,6 @@ const LocalStorage: React.FunctionComponent = () => {
         if (typeof window === "undefined") return
         const colorList = theme.includes("light") ? lightColorList : darkColorList
         let noRotation = [
-            "--buttonBG",
             "--previewBG",
             "--r18BGColor"
         ]

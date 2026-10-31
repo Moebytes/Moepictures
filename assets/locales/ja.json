@@ -282,6 +282,7 @@
     },
     "banner": {
         "copied": "コピー！",
+        "pasted": "貼り付け完了！",
         "copiedTags": "コピーされたタグ！",
         "copiedHash": "コピーハッシュ！",
         "copiedNotes": "コピーノート！",

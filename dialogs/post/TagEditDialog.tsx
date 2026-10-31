@@ -37,6 +37,7 @@ import PromoIcon from "../../assets/svg/promo.svg"
 import SearchSuggestions from "../../components/tooltip/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
 import {PostType, PostRating, PostStyle, UploadImage} from "../../types/Types"
+import DialogClipboard from "../DialogClipboard"
 import "../dialog.less"
 
 let caretPosition = 0
@@ -102,6 +103,27 @@ const TagEditDialog: React.FunctionComponent = (props) => {
         setRawTags("")
     }
 
+
+    const getClipboardData = () => {
+        return {type, rating, style,
+            artists, characters, series,
+            metaTags, rawTags}
+    }
+
+    const pasteClipboardData = (pastedObject: string) => {
+        try {
+            if (!pastedObject) return
+            const data = JSON.parse(pastedObject)
+            if (data.type !== undefined) setType(data.type)
+            if (data.rating !== undefined) setRating(data.rating)
+            if (data.style !== undefined) setStyle(data.style)
+            if (data.artists !== undefined) setArtists(data.artists)
+            if (data.characters !== undefined) setCharacters(data.characters)
+            if (data.series !== undefined) setSeries(data.series)
+            if (data.metaTags !== undefined) setMetaTags(data.metaTags)
+            if (data.rawTags !== undefined) setRawTags(data.rawTags)
+        } catch {}
+    }
     useEffect(() => {
         const logPosition = (event: MouseEvent) => {
             const element = document.querySelector(".dialog-box")
@@ -596,6 +618,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                         <div className="dialog-container">
                             <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                                 <span className="dialog-title">{i18n.sidebar.tagEdit}</span>
+                                <DialogClipboard getData={getClipboardData} pasteData={pasteClipboardData}/>
                             </div>
                             {mainJSX()}
                             {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
@@ -617,6 +640,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                     <div className="dialog-container">
                         <div className="dialog-title-container" onPointerDown={(event) => controls.start(event)}>
                             <span className="dialog-title">{i18n.dialogs.tagEdit.request}</span>
+                            {!submitted && <DialogClipboard getData={getClipboardData} pasteData={pasteClipboardData}/>}
                         </div>
                         {submitted ? <>
                         <div className="dialog-row">
