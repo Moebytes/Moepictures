@@ -441,7 +441,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
     
         const mouseEnter = () => {
             setHover(true)
-            if (pageBuffering) return
+            if (mobile || pageBuffering) return
             tooltipTimer = setTimeout(() => {
                 if (!containerRef.current) return
                 const rect = containerRef.current.getBoundingClientRect()

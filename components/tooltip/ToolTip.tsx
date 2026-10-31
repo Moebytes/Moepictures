@@ -62,6 +62,7 @@ const ToolTip: React.FunctionComponent = (props) => {
     const location = useLocation()
 
     const updatePost = async () => {
+        if (mobile) return
         if (tooltipPost) setPost(tooltipPost)
         if (postTooltipID) {
             const post = await functions.http.get("/api/post", {postID: postTooltipID ?? ""}, session, setSessionFlag)
@@ -81,9 +82,10 @@ const ToolTip: React.FunctionComponent = (props) => {
     useEffect(() => {
         setImg("")
         updatePost()
-    }, [tooltipPost, postTooltipID, session])
+    }, [tooltipPost, postTooltipID, session, mobile])
 
     const updateTags = async () => {
+        if (mobile) return
         if (session?.username && !session?.showTooltips) return
         if (!post) return
         const result = await functions.tag.parseTags([post], session, setSessionFlag)
@@ -104,7 +106,7 @@ const ToolTip: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (post) updateTags()
-    }, [post, session])
+    }, [post, session, mobile])
 
     useEffect(() => {
        if (scrollRef.current) scrollRef.current.scrollTop = 0
@@ -235,7 +237,7 @@ const ToolTip: React.FunctionComponent = (props) => {
         setActionBanner("copy-tags")
     }
 
-    if (selectionMode) return null
+    if (mobile || selectionMode) return null
     if (!artist || !tags || !post) return null
     if (session?.username && !session?.showTooltips) return null
 
