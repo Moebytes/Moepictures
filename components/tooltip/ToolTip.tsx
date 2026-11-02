@@ -61,6 +61,12 @@ const ToolTip: React.FunctionComponent = (props) => {
     const navigate = useNavigate()
     const location = useLocation()
 
+    useEffect(() => {
+        setToolTipEnabled(false)
+        setToolTipPost(null)
+        setPostTooltipID(null)
+    }, [location.pathname])
+
     const updatePost = async () => {
         if (mobile) return
         if (tooltipPost) setPost(tooltipPost)
