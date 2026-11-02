@@ -12,7 +12,134 @@ import {Session} from "../types/Types"
 let tooltipTimer = null as any
 let timerTimeout = 300
 
+type MoeTextNode = {
+    kind: "format" | "color" | "details" | "code" | "link" | "url"
+    value: string
+    children: (string | MoeTextNode)[]
+    summary?: (string | MoeTextNode)[]
+}
+
+type OpenSegment = {
+    opener: string
+    closer: string
+    node: MoeTextNode
+    children: (string | MoeTextNode)[]
+}
+
 export default class MoeText {
+    public static parseMarkup = (text: string) => {
+        const root: (string | MoeTextNode)[] = []
+        const stack: OpenSegment[] = []
+        const children = () => stack.at(-1)?.children ?? root
+
+        const appendText = (value: string) => {
+            const target = children()
+            if (typeof target.at(-1) === "string") {
+                target[target.length - 1] = (target.at(-1) as string) + value
+            } else if (value) {
+                target.push(value)
+            }
+        }
+
+        const open = (kind: MoeTextNode["kind"], value: string, opener: string, closer: string) => {
+            const node: MoeTextNode = {kind, value, children: []}
+            stack.push({opener, closer, node, children: node.children})
+        }
+
+        const close = () => {
+            const current = stack.pop()!
+            if (current.node.kind === "details" && typeof current.node.children[0] === "string") {
+                current.node.children[0] = current.node.children[0].trimStart()
+            }
+            children().push(current.node)
+        }
+
+        const tokenPatterns = {
+            code: /```/,
+            link: /\[[^\]\n]*\]\([^\n)]*\)/,
+            url: /https?:\/\/\S+/,
+            email: /\b[A-Za-z0-9._%+-]+[@＠][A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/,
+            emoji: /:[^\s:]+:/,
+            color: /#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{3})\{/,
+            detailsEnd: /\|\|>>/,
+            detailsStart: /<</,
+            bold: /\*\*/,
+            italic: /\/\//,
+            underline: /__/,
+            strikethrough: /~~/,
+            spoiler: /\|\|/,
+            highlight: /==/,
+            colorEnd: /}/
+        }
+
+        const tokens = new RegExp(Object.values(tokenPatterns).map((pattern) => pattern.source).join("|"), "g")
+        let position = 0
+        let match: RegExpExecArray | null
+
+        while ((match = tokens.exec(text))) {
+            appendText(text.slice(position, match.index))
+            const token = match[0]
+            position = tokens.lastIndex
+            const current = stack.at(-1)
+
+            if (token === "```") {
+                const end = text.indexOf("```", position)
+                if (end === -1) {
+                    appendText(token)
+                } else {
+                    children().push({kind: "code", value: text.slice(position, end), children: []})
+                    position = tokens.lastIndex = end + 3
+                }
+            } else if (token.startsWith("[")) {
+                const separator = token.indexOf("](")
+                const label = token.slice(1, separator)
+                const destination = token.slice(separator + 2, -1)
+                children().push({kind: "link", value: destination, children: this.parseMarkup(label)})
+            } else if (token.startsWith("http://") || token.startsWith("https://")) {
+                let end = token.length
+                for (const parent of stack) {
+                    const index = token.indexOf(parent.closer, token.indexOf("://") + 3)
+                    if (index !== -1) end = Math.min(end, index)
+                }
+                children().push({kind: "url", value: token.slice(0, end), children: []})
+                position = tokens.lastIndex = match.index + end
+            } else if (token.includes("@") || token.includes("＠") || token.startsWith(":")) {
+                appendText(token)
+            } else if (current && token === current.closer) {
+                if (current.node.kind === "details" && !current.node.summary) {
+                    appendText(token)
+                } else {
+                    close()
+                }
+            } else if (token === "||" && current?.node.kind === "details" && !current.node.summary) {
+                current.node.summary = current.children
+                current.node.children = current.children = []
+            } else if (token === "<<") {
+                open("details", "", token, "||>>")
+            } else if (token.startsWith("#")) {
+                open("color", token.slice(0, -1), token, "}")
+            } else if (token === "}" || token === "||>>") {
+                appendText(token)
+            } else {
+                open("format", token, token, token)
+            }
+        }
+        
+        appendText(text.slice(position))
+
+        while (stack.length) {
+            const current = stack.pop()!
+            appendText(current.opener)
+            if (current.node.summary) {
+                children().push(...current.node.summary)
+                appendText("||")
+            }
+            children().push(...current.children)
+        }
+
+        return root
+    }
+
     public static appendChain = (items: {text: any, jsx: any}[], 
         func: (text: string) => {text: any, jsx: any}[]) => {
         let result = [] as {text: any, jsx: any}[]
@@ -52,7 +179,7 @@ export default class MoeText {
     }
 
     public static parseBullets = (text: string) => {
-        return [{text: text.replace(/(^|\n)-\s+/g, "$1▪ "), jsx: null}]
+        return text.replace(/(^|\n)-\s+/g, "$1▪ ")
     }
 
     public static parseBold = (text: string) => {
@@ -390,21 +517,56 @@ export default class MoeText {
         return this.generateMarkup(items)
     }
 
-    public static commonChain = (text: string, emojis: any) => {
-        let items = this.parseBullets(text)
-        items = this.appendChain(items, this.parseLinks)
-        items = this.appendChain(items, this.parseEmails)
-        items = this.appendParamChain(items, emojis, this.parseEmojis)
-        items = this.appendChain(items, this.parseDetails)
-        items = this.appendChain(items, this.parseHighlight)
-        items = this.appendChain(items, this.parseBold)
-        items = this.appendChain(items, this.parseItalic)
-        items = this.appendChain(items, this.parseUnderline)
-        items = this.appendChain(items, this.parseStrikethrough)
-        items = this.appendChain(items, this.parseSpoiler)
-        items = this.appendChain(items, this.parseColor)
-        items = this.appendChain(items, this.parseCode)
-        return items
+    public static commonChain = (text: string, emojis: any, mentions = false) => {
+        const styles: Record<string, React.CSSProperties> = {
+            "**": {fontWeight: "bold"},
+            "//": {fontStyle: "italic"},
+            "__": {textDecoration: "underline"},
+            "~~": {textDecoration: "line-through"},
+            "==": {color: "var(--text-strong)"}
+        }
+
+        const render = (nodes: (string | MoeTextNode)[], inLink = false) => nodes.map((node, index) => {
+            if (typeof node === "string") {
+                let items = [{text: node, jsx: null}] as {text: any, jsx: any}[]
+                if (!inLink) items = this.appendChain(items, this.parseEmails)
+                items = this.appendParamChain(items, emojis, this.parseEmojis)
+                if (mentions && !inLink) items = this.appendChain(items, this.parseMention)
+                return <span key={index}>{this.generateMarkup(items)}</span>
+            }
+            if (node.kind === "code") {
+                return <code key={index} style={{color: "inherit"}}>{node.value}</code>
+            }
+            if (node.kind === "url") {
+                return <span key={index}>{inLink ? node.value : this.generateMarkup(this.parseLinks(node.value))}</span>
+            }
+            if (node.kind === "link") {
+                const label = render(node.children, true)
+                if (inLink) return <span key={index}>{label}</span>
+                return (
+                    <a key={index} className="link" style={{fontWeight: "bold"}} 
+                    href={node.value} target="_blank" rel="noopener">{label}</a>
+                )
+            }
+            if (node.kind === "details") {
+                return (
+                    <details key={index}>
+                        <summary>{render(node.summary ?? [], inLink)}</summary>
+                        <div style={{whiteSpace: "pre-wrap"}}>{render(node.children, inLink)}</div>
+                    </details>
+                )
+            }
+            const style = node.kind === "color" ? {color: node.value} : styles[node.value]
+            return (
+                <span key={index} style={style} className={node.value === "||" ? "spoiler" : undefined}>
+                    {render(node.children, inLink)}
+                </span>
+            )
+        })
+
+        const bullets = this.parseBullets(text)
+        const parsedMarkup = this.parseMarkup(bullets)
+        return [{text: null, jsx: <>{render(parsedMarkup)}</>}]
     }
 
     public static renderCommentText = (text: string, emojis: any) => {
@@ -413,8 +575,7 @@ export default class MoeText {
     }
 
     public static renderReplyText = (text: string, emojis: any) => {
-        let items = this.commonChain(text, emojis)
-        items = this.appendChain(items, this.parseMention)
+        let items = this.commonChain(text, emojis, true)
         return this.generateMarkup(items)
     }
 
