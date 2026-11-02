@@ -50,9 +50,9 @@ const GridVideo = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
 
     const loadImage = async () => {
         const thumb = await functions.crypto.decryptThumb(props.img, session, `${props.img}-${sizeType}`, true)
+        setBackFrame(thumb)
         const liveImg = await functions.crypto.decryptThumb(props.live!, session, `${props.live}-${sizeType}`)
         setLiveImg(liveImg)
-        setBackFrame(thumb)
     }
 
     const shouldUpdate = () => {
@@ -204,8 +204,7 @@ const GridVideo = forwardRef<GridWrapperRef, GridWrapperProps>((props, parentRef
     }
 
     const getDisplay = (invert?: boolean) => {
-        let condition = hover && !mobile
-        if (session.liveAnimationPreview && !mobile) condition = true
+        let condition = imageLoaded && !mobile && (hover || session.liveAnimationPreview)
         if (invert) condition = !condition
         return condition ? {opacity: "0", zIndex: 10, position: "absolute", width: "100%", height: "100%"} as React.CSSProperties : {opacity: "1"}
     }

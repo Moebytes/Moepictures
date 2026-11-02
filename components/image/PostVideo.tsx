@@ -188,7 +188,6 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
             if (paused) {
                 videoRef.current.pause()
                 setSeekTo(null)
-                if (!dragging && !videoData) return
             } else {
                 if (videoRef.current?.paused) videoRef.current.play()
             }
@@ -197,7 +196,7 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
             } else {
                 videoRef.current.preservesPitch = false
             }
-            const adjustedData = videoData ? functions.video.videoSpeed(videoData, speed) : null
+            const adjustedData = videoData?.length ? videoData : null
             videoRef.current.playbackRate = speed 
             const pixelateCanvas = pixelateRef.current
             const sharpenOverlay = overlayRef.current
@@ -227,27 +226,29 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
             let seekValue = seekTo !== null ? seekTo * speed : null 
             seekValue = dragging ? (dragProgress || 0) * speed : seekValue
             if (seekValue !== null) if (Number.isNaN(seekValue) || !Number.isFinite(seekValue)) seekValue = 0
-            if (seekValue) videoRef.current.currentTime = seekValue
+            if (seekValue !== null) {
+                videoRef.current.currentTime = seekValue
+                if (seekTo !== null) setSeekTo(null)
+            }
             if (reverse && adjustedData) pos = (adjustedData.length - 1) - pos
             let frame = adjustedData ? adjustedData[pos] : videoRef.current
             setDuration(duration)
 
-            const update = () => {
+            let lastProgress = -Infinity
+            const update = (now: number, mediaTime: number) => {
                 if (!videoRef.current) return
-                if (reverse) {
-                    pos--
-                } else {
-                    pos++
-                }
-                if (adjustedData) {
-                    if (pos < 0) pos = adjustedData.length - 1
-                    if (pos > adjustedData.length - 1) pos = 0
+                if (adjustedData?.length) {
+                    pos = functions.video.videoFrameAtTime(adjustedData.length, mediaTime, videoRef.current.duration, reverse)
                 }
                 frame = adjustedData ? adjustedData[pos] : videoRef.current
-                let secondsProgress = videoRef.current.currentTime / speed
-                if (reverse) secondsProgress = (videoRef.current.duration / speed) - secondsProgress
-                setSecondsProgress(secondsProgress)
-                setProgress((secondsProgress / duration) * 100)
+                
+                if (now - lastProgress >= functions.video.progressInterval) {
+                    let secondsProgress = mediaTime / speed
+                    if (reverse) secondsProgress = (videoRef.current.duration / speed) - secondsProgress
+                    setSecondsProgress(secondsProgress)
+                    setProgress((secondsProgress / duration) * 100)
+                    lastProgress = now
+                }
             }
 
             const draw = () => {
@@ -286,16 +287,24 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
                 }
             }
 
-            const videoLoop = async () => {
+            const videoLoop = (now: number, metadata: VideoFrameCallbackMetadata) => {
+                update(now, metadata.mediaTime)
                 draw()
                 if (paused) return videoRef.current?.cancelVideoFrameCallback(id)
-                update()
                 id = videoRef.current?.requestVideoFrameCallback(videoLoop)!
             }
-            id = videoRef.current.requestVideoFrameCallback(videoLoop)
-
-        } return () => {
-            videoRef.current?.cancelVideoFrameCallback(id)
+            const element = videoRef.current
+            const redraw = () => {
+                update(performance.now(), element.currentTime)
+                draw()
+            }
+            element.addEventListener("seeked", redraw)
+            redraw()
+            if (!paused) id = element.requestVideoFrameCallback(videoLoop)
+            return () => {
+                element.removeEventListener("seeked", redraw)
+                element.cancelVideoFrameCallback(id)
+            }
         }
     }, [imageLoaded, videoData, reverse, seekTo, pixelate, paused, speed, preservePitch, dragging, dragProgress, sharpen, fullscreen])
 

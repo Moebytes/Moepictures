@@ -30,7 +30,7 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
     const {setSecondsProgress, setProgress, setDragProgress, setReverse, setSpeed, setPaused, setDuration, 
     setDragging, setSeekTo} = usePlaybackActions()
     const {setEnableDrag} = useInteractionActions()
-    const {imageExpand, format} = useSearchSelector()
+    const {imageExpand} = useSearchSelector()
     const gifControls = useRef<HTMLDivElement>(null)
     const gifSpeedRef = useRef<HTMLImageElement>(null)
     const gifSliderRef = useRef<Slider>(null)
@@ -47,7 +47,7 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
     const {fullscreen, setFullscreen} = props
     const {showSpeedDropdown, setShowSpeedDropdown} = props
     const {animationRef, imageRef, lightnessRef, overlayRef, effectRef, pixelateRef, onLoaded} = props
-    const navigate = useNavigate()
+    const playbackTime = useRef(0)
 
     useImperativeHandle(parentRef, () => ({
         download: download
@@ -83,6 +83,7 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
         setDragProgress(0)
         setDragging(false)
         setSeekTo(null)
+        playbackTime.current = 0
         cancelAnimation()
         if (props.anim) setTempLink(tempLink ? "" : localStorage.getItem("reverseSearchLink") || "")
         if (animationRef.current) animationRef.current.style.opacity = "1"
@@ -169,8 +170,7 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
 
     useEffect(() => {
         if (!animationRef.current || !imageRef.current) return
-        if (gifData) {
-            if (paused && !dragging) return clearTimeout(timeout)
+        if (gifData?.length) {
             const adjustedData = functions.anim.gifSpeed(gifData, speed)
             const gifCanvas = animationRef.current
             gifCanvas.style.opacity = "1"
@@ -186,18 +186,21 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
             }
             imageRef.current.style.opacity = "0"
             const ctx = gifCanvas.getContext("2d")!
-            const frames = adjustedData.length - 1
+            const frames = Math.max(1, adjustedData.length - 1)
             let duration = adjustedData.map((d) => d.delay).reduce((p, c) => p + c) / 1000
             let interval = duration / frames
-            let sp = seekTo !== null ? seekTo : secondsProgress
+            let sp = seekTo !== null ? seekTo : playbackTime.current / speed / 1000
+            if (seekTo !== null) setSeekTo(null)
             if (dragging) sp = dragProgress || 0
+            playbackTime.current = sp * speed * 1000
             let pos = Math.floor(sp / interval)
             if (!adjustedData[pos]) pos = 0
             let frame = adjustedData[pos].frame
             let delay = adjustedData[pos].delay
             setDuration(duration)
 
-            const update = () => {
+            let lastProgress = -Infinity
+            const update = (now: number) => {
                 if (reverse) {
                     pos--
                 } else {
@@ -208,9 +211,14 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
                 frame = adjustedData[pos].frame
                 delay = adjustedData[pos].delay
                 if (delay < 0) delay = 0
-                const secondsProgress = (pos * interval)
-                setSecondsProgress(secondsProgress)
-                setProgress((secondsProgress / duration) * 100)
+                const secondsProgress = pos * interval
+                playbackTime.current = secondsProgress * speed * 1000
+                
+                if (now - lastProgress >= functions.video.progressInterval) {
+                    setSecondsProgress(secondsProgress)
+                    setProgress((secondsProgress / duration) * 100)
+                    lastProgress = now
+                }
             }
 
             const draw = () => {
@@ -240,14 +248,18 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
 
             let lastTime = performance.now()
 
+            let lastFrame = -1
             const animate = (now: number) => {
-                draw()
-                if (paused) return clearTimeout(timeout)
                 const delta = now - lastTime
-                if (delta >= delay) {
-                    update()
+                if (!paused && !dragging && delta >= delay) {
+                    update(now)
                     lastTime = now
                 }
+                if (pos !== lastFrame) {
+                    draw()
+                    lastFrame = pos
+                }
+                if (paused || dragging) return clearTimeout(timeout)
                 id = window.requestAnimationFrame(animate)
             }
             id = window.requestAnimationFrame(animate)

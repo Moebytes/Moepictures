@@ -9,6 +9,40 @@ import {JsWebm} from "jswebm"
 import functions from "./Functions"
 
 export default class VideoFunctions {
+    public static progressInterval = 100
+
+    public static wrapTime = (time: number, duration: number) => {
+        return ((time % duration) + duration) % duration
+    }
+
+    public static createFrameTimeline = (frames: {delay: number}[]) => {
+        let duration = 0
+        const endTimes = frames.map(({delay}) => {
+            duration += Number.isFinite(delay) && delay > 0 ? delay : 10
+            return duration
+        })
+        return {endTimes, duration}
+    }
+
+    public static frameAtTime = (endTimes: number[], time: number) => {
+        let low = 0
+        let high = endTimes.length - 1
+        while (low < high) {
+            const mid = (low + high) >>> 1
+            if (time < endTimes[mid]) {
+                high = mid
+            } else {
+                low = mid + 1
+            }
+        }
+        return low
+    }
+
+    public static videoFrameAtTime = (count: number, time: number, duration: number, reverse: boolean) => {
+        const index = Math.min(count - 1, Math.max(0, Math.floor(time / duration * count)))
+        return reverse ? count - 1 - index : index
+    }
+
     public static extractMP4Frames = async (videoFile: string) => {
         let frames = [] as ImageBitmap[]
         await new Promise<void>(async (resolve) => {
