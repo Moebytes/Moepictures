@@ -256,9 +256,9 @@ export default class SQLGroup {
 
     /** Search group. */
     public static searchGroup = async (groupID: string, limit?: number, offset?: number, type?: string, rating?: string, 
-        style?: string, sort?: string, showChildren?: boolean, sessionUsername?: string) => {
+        style?: string, sort?: string, showChildren?: boolean, sessionUsername?: string, tags: string[] = []) => {
         const {postJSON, values, limitValue, offsetValue} = 
-        SQLQuery.search.boilerplate({i: 2, type, rating, style, sort, offset, limit, showChildren, username: sessionUsername})
+        SQLQuery.search.boilerplate({tags, i: 2, type, rating, style, sort, offset, limit, showChildren, username: sessionUsername})
 
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`

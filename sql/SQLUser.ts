@@ -12,10 +12,10 @@ import {PostSearch, User, LoginHistory, Banner, UserUpdateColumns} from "../type
 export default class SQLUser {
     /** Get uploads. */
     public static uploads = async (username: string, limit?: number, offset?: number, type?: string, rating?: string, style?: string, 
-        sort?: string, showChildren?: boolean, sessionUsername?: string) => {
+        sort?: string, showChildren?: boolean, sessionUsername?: string, tags: string[] = []) => {
         let condition = `posts."uploader" = $1`
         const {postJSON, countJSON, values, countValues} = 
-        SQLQuery.search.boilerplate({i: 2, type, rating, style, sort, offset, 
+        SQLQuery.search.boilerplate({tags, i: 2, type, rating, style, sort, offset,
         limit, showChildren, condition, username: sessionUsername, intermLimit: true})
 
         const query: QueryConfig = {

@@ -368,10 +368,10 @@ export default class SQLSearch {
 
     /** Search pixiv id. */
     public static searchPixivID = async (pixivID: string, type: string, rating: string, style: string, sort: string, 
-        offset?: number, limit?: number, withTags?: boolean, showChildren?: boolean, username?: string) => {
+        offset?: number, limit?: number, withTags?: boolean, showChildren?: boolean, username?: string, tags: string[] = []) => {
         let condition = `(posts."source" LIKE 'https://%pixiv.net/%/' || $1 OR posts."mirrors"::text LIKE 'https://%pixiv.net/%/' || $1)`
-        const {postJSON, values} = 
-        SQLQuery.search.boilerplate({condition, i: 2, type, rating, style, sort, offset, 
+        const {postJSON, values, countJSON, countValues} =
+        SQLQuery.search.boilerplate({tags, condition, i: 2, type, rating, style, sort, offset,
         limit, username, withTags, showChildren, intermLimit: true})
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
@@ -383,20 +383,24 @@ export default class SQLSearch {
             values: [pixivID]
         }
         if (values?.[0]) query.values?.push(...values)
+        let result = [] as PostSearch[]
         if (sort === "random" || sort === "favorites" || sort === "reverse favorites") {
-            return SQLQuery.run(query) as Promise<PostSearch[]>
+            result = await SQLQuery.run(query)
         } else {
-            return SQLQuery.run(query, `search/pixiv-id/${pixivID}`) as Promise<PostSearch[]>
+            result = await SQLQuery.run(query, `search/pixiv-id/${pixivID}`)
         }
+        const count = await SQLQuery.search.count(countJSON, [pixivID, ...countValues])
+        result.forEach((post) => post.postCount = count)
+        return result
     }
 
     /** Search twitter id. */
     public static searchTwitterID = async (twitterID: string, type: string, rating: string, style: string, sort: string, 
-        offset?: number, limit?: number, withTags?: boolean, showChildren?: boolean, username?: string) => {
+        offset?: number, limit?: number, withTags?: boolean, showChildren?: boolean, username?: string, tags: string[] = []) => {
         let condition = `(posts."source" LIKE 'https://%x.com/%/status/' || $1 OR posts."source" LIKE 'https://%twitter.com/%/status/' || $1 
         OR posts."mirrors"::text LIKE 'https://%x.com/%/status/' || $1 OR posts."mirrors"::text LIKE 'https://%twitter.com/%/status/' || $1)`
-        const {postJSON, values} = 
-        SQLQuery.search.boilerplate({condition, i: 2, type, rating, style, sort, offset, 
+        const {postJSON, values, countJSON, countValues} =
+        SQLQuery.search.boilerplate({tags, condition, i: 2, type, rating, style, sort, offset,
         limit, username, withTags, showChildren, intermLimit: true})
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
@@ -408,20 +412,24 @@ export default class SQLSearch {
             values: [twitterID]
         }
         if (values?.[0]) query.values?.push(...values)
+        let result = [] as PostSearch[]
         if (sort === "random" || sort === "favorites" || sort === "reverse favorites") {
-            return SQLQuery.run(query) as Promise<PostSearch[]>
+            result = await SQLQuery.run(query)
         } else {
-            return SQLQuery.run(query, `search/twitter-id/${twitterID}`) as Promise<PostSearch[]>
+            result = await SQLQuery.run(query, `search/twitter-id/${twitterID}`)
         }
+        const count = await SQLQuery.search.count(countJSON, [twitterID, ...countValues])
+        result.forEach((post) => post.postCount = count)
+        return result
     }
 
     /** Search search. */
     public static searchSource = async (source: string, type: string, rating: string, style: string, sort: string, 
-        offset?: number, limit?: number, withTags?: boolean, showChildren?: boolean, username?: string, negate?: boolean) => {
+        offset?: number, limit?: number, withTags?: boolean, showChildren?: boolean, username?: string, negate?: boolean, tags: string[] = []) => {
         let condition = `(COALESCE(posts."source", '') LIKE '%' || $1 || '%' OR COALESCE(posts."mirrors"::text, '') LIKE '%' || $1 || '%')`
         if (negate) condition = `NOT ${condition}`
-        const {postJSON, values, countJSON, countValues} = 
-        SQLQuery.search.boilerplate({condition, i: 2, type, rating, style, sort, offset, 
+        const {postJSON, values, countJSON, countValues} =
+        SQLQuery.search.boilerplate({tags, condition, i: 2, type, rating, style, sort, offset,
         limit, username, withTags, showChildren, intermLimit: true})
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
@@ -445,10 +453,12 @@ export default class SQLSearch {
     }
 
     /** Search format. */
-    public static searchFormat = async (format: string, type: string, rating: string, style: string, sort: string, 
-        offset?: number, limit?: number, withTags?: boolean, showChildren?: boolean, username?: string) => {
-        const {postJSON, countJSON, values, countValues} = 
-        SQLQuery.search.boilerplate({format, type, rating, style, sort, offset, 
+    public static searchFormat = async (format: string, type: string, rating: string, style: string, sort: string, offset?: number,
+        limit?: number, withTags?: boolean, showChildren?: boolean, username?: string, negate = false, tags: string[] = []) => {
+        let condition = `EXISTS (SELECT 1 FROM images WHERE images."postID" = posts."postID" AND images.filename LIKE '%' || $1)`
+        if (negate) condition = `NOT ${condition}`
+        const {postJSON, countJSON, values, countValues} =
+        SQLQuery.search.boilerplate({tags, i: 2, condition, format: negate ? undefined : format, type, rating, style, sort, offset,
         limit, username, withTags, showChildren, intermLimit: true})
 
         const query: QueryConfig = {
@@ -459,15 +469,32 @@ export default class SQLSearch {
             FROM post_json
         `)
         }
-        if (values?.[0]) query.values = values
+        query.values = [format, ...values]
         let result = [] as PostSearch[]
         if (sort === "random" || sort === "favorites" || sort === "reverse favorites") {
             result = await SQLQuery.run(query)
         } else {
             result = await SQLQuery.run(query, `search/format/${format}`)
         }
-        const count = await SQLQuery.search.count(countJSON, countValues)
+        const count = await SQLQuery.search.count(countJSON, [format, ...countValues])
         result.forEach((r) => r.postCount = count)
+        return result
+    }
+
+    public static searchPostIDs = async (postIDs: string[], tags: string[], type: string, rating: string, style: string,
+        sort: string, offset?: number, limit?: number, withTags?: boolean, showChildren?: boolean, username?: string) => {
+        const {postJSON, countJSON, values, countValues} = SQLSearch.boilerplate({
+            i: 2, condition: `posts."postID" = ANY ($1)`, tags, type, rating, style, sort,
+            offset, limit, withTags, showChildren, username, intermLimit: true, pageFirst: true
+        })
+        const query: QueryConfig = {
+            text: `${postJSON} SELECT post_json.* FROM post_json`,
+            values: [postIDs, ...values]
+        }
+        const result = await SQLQuery.run(query) as PostSearch[]
+        if (!result.length) return result
+        const count = await SQLSearch.count(countJSON, [postIDs, ...countValues])
+        result.forEach((post) => post.postCount = count)
         return result
     }
 

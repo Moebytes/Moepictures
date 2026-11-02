@@ -700,15 +700,15 @@ export default class SQLHistory {
 
     /** Get user search history */
     public static userSearchHistory = async (username: string, limit?: number, offset?: number, search?: string, type?: string, 
-        rating?: string, style?: string, sort?: string, showChildren?: boolean, sessionUsername?: string) => {
+        rating?: string, style?: string, sort?: string, showChildren?: boolean, sessionUsername?: string, tags: string[] = []) => {
         if (!sort || sort === "date") sort = "viewDate"
         if (sort === "reverse date") sort = "reverse viewDate"
         const historyDateSort = sort === "viewDate" || sort === "reverse viewDate"
 
-        const options = {i: 2, search, type, rating, style, sort, offset, limit, showChildren, 
+        const options = {i: 2, tags, search, type, rating, style, sort, offset, limit, showChildren,
             username: sessionUsername, outerSort: true}
 
-        const {postJSON, values, searchValue, sortQuery, limitValue, offsetValue, whereQueries} =
+        const {postJSON, values, searchValue, sortQuery, limitValue, offsetValue, whereQueries, includeTags} =
             SQLQuery.search.boilerplate({...options, condition: historyDateSort ? undefined :
                 `EXISTS (SELECT 1 FROM history WHERE history."postID" = posts."postID" AND history.username = $1)`})
 
@@ -728,6 +728,7 @@ export default class SQLHistory {
                     SELECT history.*, COUNT(*) OVER() AS "historyCount"
                     FROM history
                     JOIN posts ON posts."postID" = history."postID"
+                    ${includeTags ? `JOIN "tag map tags" ON posts."postID" = "tag map tags"."postID"` : ""}
                     WHERE history.username = $1
                     ${whereQueries ? `AND ${whereQueries}` : ""}
                     ${searchQuery}

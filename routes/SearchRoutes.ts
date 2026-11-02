@@ -43,10 +43,20 @@ const SearchRoutes = (app: Express) => {
             if (functions.post.isR18(rating)) if (!req.session.showR18) return void res.status(403).end()
             if (!functions.validation.validStyle(style, true)) return void res.status(400).send("Invalid style")
             if (!functions.validation.validSort(sort)) return void res.status(400).send("Invalid sort")
-            const tags = query?.trim().split(/ +/g).filter(Boolean)
-            const qualities = functions.tag.mapSpecialQualities(query)
-            const cleanTags = functions.tag.trimSpecialCharacters(query)?.split(/ +/g)
+
+            const terms = query.trim().split(/ +/g).filter(Boolean)
+            const specialPrefixes = [
+                "id:", "pixiv:", "twitter:", "source:", "-source:", "format:", "-format:", "hash:",
+                "favorites:", "user:", "group:", "favgroup:", "history:", "http://", "https://"
+            ]
+            const specialIndex = terms.findIndex((term) => specialPrefixes.some((prefix) => term.startsWith(prefix)))
+            const specialQuery = specialIndex === -1 ? "" : terms.splice(specialIndex, 1)[0]
+            const tagQuery = terms.join(" ")
+            const tags = terms
+            const qualities = functions.tag.mapSpecialQualities(tagQuery)
+            const cleanTags = functions.tag.trimSpecialCharacters(tagQuery)?.split(/ +/g)
             const existingTags = new Set(await sql.tag.existingTags(cleanTags.filter(Boolean)))
+
             for (let i = 0; i < cleanTags?.length; i++) {
                 if (!cleanTags[i]) continue
                 if (!existingTags.has(cleanTags[i])) {
@@ -80,61 +90,78 @@ const SearchRoutes = (app: Express) => {
                 const appended = functions.tag.appendFavoriteTags(favoriteTags.map((t) => t.tag))
                 tags.unshift(...appended)
             }
-            if (query.startsWith("id:")) {
-                const id = query.match(/(\d+)/g)?.[0] || ""
+            if (specialQuery.startsWith("id:")) {
+                const id = specialQuery.match(/(\d+)/g)?.[0] || ""
                 const post = await sql.post.post(id)
-                if (post) result = [{...post, postCount: "1"}] as PostSearch[]
-            } else if (query.startsWith("pixiv:") || query.includes("pixiv.net")) {
-                const pixivID = query.match(/(\d+)/g)?.[0] || ""
-                result = await sql.search.searchPixivID(pixivID, type, rating, style, sort, offset, limit, withTags, showChildren, req.session.username)
-            } else if (query.startsWith("twitter:") || query.includes("twitter.com") || query.includes("x.com")) {
-                const twitterID = query.match(/(\d{10,})/g)?.[0] || ""
-                result = await sql.search.searchTwitterID(twitterID, type, rating, style, sort, offset, limit, withTags, showChildren, req.session.username)
-            } else if (query.startsWith("source:") || query.startsWith("-source:") || query.startsWith("http")) {
-                const negate = query.startsWith("-source:")
-                const source = query.replace("-source:", "").replace("source:", "").trim()
-                result = await sql.search.searchSource(source, type, rating, style, sort, offset, limit, withTags, showChildren, req.session.username, negate)
-            } else if (query.startsWith("format:")) {
-                const format = query.replace("format:", "").trim()
-                result = await sql.search.searchFormat(format, type, rating, style, sort, offset, limit, withTags, showChildren, req.session.username)
-            } else if (query.startsWith("hash:")) {
+                if (post) {
+                    result = tags.length ? await sql.search.searchPostIDs([id], tags, type, rating, style, sort, 
+                        offset, limit, withTags, showChildren, req.session.username) : [{...post, postCount: "1"}] as PostSearch[]
+                }
+            } else if (specialQuery.startsWith("pixiv:") || specialQuery.includes("pixiv.net")) {
+                const pixivID = specialQuery.match(/(\d+)/g)?.[0] || ""
+                result = await sql.search.searchPixivID(pixivID, type, rating, style, sort, offset, 
+                    limit, withTags, showChildren, req.session.username, tags)
+            } else if (specialQuery.startsWith("twitter:") || specialQuery.includes("twitter.com") || specialQuery.includes("x.com")) {
+                const twitterID = specialQuery.match(/(\d{10,})/g)?.[0] || ""
+                result = await sql.search.searchTwitterID(twitterID, type, rating, style, sort, offset, limit,
+                     withTags, showChildren, req.session.username, tags)
+            } else if (specialQuery.startsWith("source:") || specialQuery.startsWith("-source:") || specialQuery.startsWith("http")) {
+                const negate = specialQuery.startsWith("-source:")
+                const source = specialQuery.replace("-source:", "").replace("source:", "").trim()
+                result = await sql.search.searchSource(source, type, rating, style, sort, offset, limit, 
+                    withTags, showChildren, req.session.username, negate, tags)
+            } else if (specialQuery.startsWith("format:") || specialQuery.startsWith("-format:")) {
+                const negate = specialQuery.startsWith("-format:")
+                const format = specialQuery.slice(specialQuery.indexOf(":") + 1).trim()
+                result = await sql.search.searchFormat(format, type, rating, style, sort, offset, limit, 
+                    withTags, showChildren, req.session.username, negate, tags)
+            } else if (specialQuery.startsWith("hash:")) {
                 const sqlQuery = {
                     text: `SELECT * FROM "images" WHERE "images".hash = $1`,
-                    values: [query.replace("hash:", "").trim()]
+                    values: [specialQuery.replace("hash:", "").trim()]
                 }
                 let images = await sql.run(sqlQuery) as Image[]
-                if (images?.length) result = await sql.search.posts(images.map((i) => i.postID)) as PostSearch[]
-            } else if (query.startsWith("favorites:")) {
-                const username = query.replace("favorites:", "").trim()
+                if (images?.length) {
+                    result = tags.length ? await sql.search.searchPostIDs(images.map((i) => i.postID), tags, type, rating, style, sort, offset, limit,
+                        withTags, showChildren, req.session.username) : await sql.search.posts(images.map((i) => i.postID)) as PostSearch[]
+                }
+            } else if (specialQuery.startsWith("favorites:")) {
+                const username = specialQuery.replace("favorites:", "").trim()
                 const user = await sql.user.user(username as string)
                 if (!user?.publicFavorites) return void res.status(403).send("Unauthorized")
-                result = await sql.favorite.favorites(username, limit, offset, type, rating, style, sort, showChildren, req.session.username)
-            } else if (query.startsWith("user:")) {
-                const username = query.replace("user:", "").trim()
+                result = await sql.favorite.favorites(username, limit, offset, type, rating, style, sort, 
+                    showChildren, req.session.username, tags)
+            } else if (specialQuery.startsWith("user:")) {
+                const username = specialQuery.replace("user:", "").trim()
                 const user = await sql.user.user(username as string)
                 if (!user) return void res.status(400).send("Bad username")
-                result = await sql.user.uploads(username, limit, offset, type, rating, style, sort, showChildren, req.session.username)
-            } else if (query.startsWith("group:")) {
-                const [g, name] = query.split(":")
+                result = await sql.user.uploads(username, limit, offset, type, rating, style, sort, 
+                    showChildren, req.session.username, tags)
+            } else if (specialQuery.startsWith("group:")) {
+                const [g, name] = specialQuery.split(":")
                 let group = await sql.group.group(functions.post.generateSlug(name))
                 if (!group) return void res.status(400).send("Bad group")
-                result = await sql.group.searchGroup(group.groupID, limit, offset, type, rating, style, sort, showChildren, req.session.username)
-            } else if (query.startsWith("favgroup:")) {
-                const [f, username, name] = query.split(":")
-                let favgroup = await sql.favorite.favgroup(username, name, type, rating, style, sort, showChildren, req.session.username)
+                result = await sql.group.searchGroup(group.groupID, limit, offset, type, rating, 
+                    style, sort, showChildren, req.session.username, tags)
+            } else if (specialQuery.startsWith("favgroup:")) {
+                const [f, username, name] = specialQuery.split(":")
+                let favgroup = await sql.favorite.favgroup(username, name, type, rating, style, 
+                    sort, showChildren, req.session.username, tags)
                 if (!favgroup) return void res.status(400).send("Bad favgroup")
                 if (favgroup.private) {
                     if (!permissions.isMod(req.session) && username !== req.session.username) return void res.status(403).send("Unauthorized")
                 }
                 result = favgroup.posts.map((p) => ({...p, postCount: favgroup.postCount}))
-            } else if (query.startsWith("history:")) {
-                const [h, username] = query.split(":")
+            } else if (specialQuery.startsWith("history:")) {
+                const [h, username] = specialQuery.split(":")
                 if (!permissions.isPremium(req.session)) return void res.status(402).send("Premium only")
                 if (username !== req.session.username && !permissions.isAdmin(req.session)) return void res.status(403).send("Unauthorized")
-                let history = await sql.history.userSearchHistory(username, limit, offset, "", type, rating, style, sort, showChildren, req.session.username)
+                let history = await sql.history.userSearchHistory(username, limit, offset, "", type, rating, style, 
+                    sort, showChildren, req.session.username, tags)
                 result = history.map((h) => ({...h.post, postCount: h.historyCount}))
             } else {
-                result = await sql.search.search(tags, type, rating, style, sort, offset, limit, withTags, showChildren, req.session.username, req.session)
+                result = await sql.search.search(tags, type, rating, style, sort, offset, limit, withTags, 
+                    showChildren, req.session.username, req.session)
             }
             result = result.map(serverFunctions.files.appendImageLinks).map((post) => {
                 if (post.images?.length > 1) {

@@ -44,10 +44,10 @@ export default class SQLFavorite {
 
     /** Get favorites. */
     public static favorites = async (username: string, limit?: number, offset?: number, type?: string, rating?: string, 
-        style?: string, sort?: string, showChildren?: boolean, sessionUsername?: string) => {
+        style?: string, sort?: string, showChildren?: boolean, sessionUsername?: string, tags: string[] = []) => {
         let condition = `favorites."username" = $1`
         const {postJSON, countJSON, values, countValues} = 
-        SQLQuery.search.boilerplate({i: 2, type, rating, style, sort, offset, condition,
+        SQLQuery.search.boilerplate({tags, i: 2, type, rating, style, sort, offset, condition,
         limit, showChildren, username: sessionUsername, intermLimit: true})
 
         const query: QueryConfig = {
@@ -181,19 +181,20 @@ export default class SQLFavorite {
 
     /** Get favgroup. */
     public static favgroup = async (username: string, slug: string, type = "", rating = "", style = "", 
-        sort = "", showChildren = true, sessionUsername = "") => {
+        sort = "", showChildren = true, sessionUsername = "", tags: string[] = []) => {
         if (!sessionUsername) sessionUsername = username
         const {postJSON, values} = 
-        SQLQuery.search.boilerplate({i: 3, type, rating, style, sort, showChildren, username: sessionUsername, favgroupOrder: true})
+        SQLQuery.search.boilerplate({tags, i: 3, type, rating, style, sort, showChildren, username: sessionUsername, favgroupOrder: true})
 
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 ${postJSON}
-                SELECT favgroups.*, json_agg(post_json.* ORDER BY "favgroup map"."order" ASC) AS posts,
+                SELECT favgroups.*, COALESCE(json_agg(post_json.* ORDER BY "favgroup map"."order" ASC)
+                    FILTER (WHERE post_json."postID" IS NOT NULL), '[]') AS posts,
                 COUNT(DISTINCT post_json."postID") AS "postCount"
-                FROM "favgroup map"
-                JOIN favgroups ON favgroups."favgroupID" = "favgroup map"."favgroupID"
-                JOIN post_json ON post_json."postID" = "favgroup map"."postID"
+                FROM favgroups
+                LEFT JOIN "favgroup map" ON favgroups."favgroupID" = "favgroup map"."favgroupID"
+                LEFT JOIN post_json ON post_json."postID" = "favgroup map"."postID"
                 WHERE favgroups."username" = $1 AND favgroups."slug" = $2 
                 GROUP BY favgroups."favgroupID"
             `),
