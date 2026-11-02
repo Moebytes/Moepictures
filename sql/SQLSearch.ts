@@ -811,7 +811,7 @@ export default class SQLSearch {
             `),
             values
         }
-        return SQLQuery.run(query) as Promise<TagCategorySearch[]>
+        return SQLQuery.run(query, "search/tagCategory") as Promise<TagCategorySearch[]>
     }
 
     /** Tag search */

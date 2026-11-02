@@ -31,7 +31,7 @@ export default class SQLGroup {
             `),
             values: [slug]
         }
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "group/group")
         return result[0] as Promise<GroupPosts | undefined>
     }
 
@@ -56,7 +56,7 @@ export default class SQLGroup {
             `),
             values: [slugs]
         }
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "group/groups")
         return result as Promise<GroupPosts[]>
     }
 
@@ -83,7 +83,7 @@ export default class SQLGroup {
             `),
             values: [postID]
         }
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "group/postGroups")
         return result as Promise<GroupPosts[]>
     }
 
@@ -162,7 +162,7 @@ export default class SQLGroup {
             `),
             values: [groupID, postID]
         }
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "group/groupPost")
         return result[0] as Promise<GroupPost | undefined>
     }
 
@@ -274,7 +274,7 @@ export default class SQLGroup {
             values: [groupID]
         }
         if (values?.[0]) query.values?.push(...values)
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "group/searchGroup")
         return result as Promise<PostSearchOrdered[]>
     }
 }

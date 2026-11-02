@@ -12,7 +12,9 @@ import functions from "../functions/Functions"
 import serverFunctions from "../server/ServerFunctions"
 import path from "path"
 import fs from "fs"
-import crypto from "crypto"
+import {createHash} from "crypto"
+import {serialize, deserialize} from "v8"
+import CacheInvalidation from "./CacheInvalidation.sql"
 import CreateDB from "./CreateDB.sql"
 import DBTriggers from "./DBTriggers.sql"
 import SQLPost from "./SQLPost"
@@ -38,8 +40,8 @@ const jsonStringIDs = (json: string) => {
 types.setTypeParser(types.builtins.JSON, jsonStringIDs)
 types.setTypeParser(types.builtins.JSONB, jsonStringIDs)
 
-if (!process.env.PG_USER || !process.env.PG_HOST || 
-    !process.env.PG_DATABASE || !process.env.PG_PASSWORD || 
+if (!process.env.PG_USER || !process.env.PG_HOST ||
+    !process.env.PG_DATABASE || !process.env.PG_PASSWORD ||
     !process.env.PG_PORT) {
   throw new Error("Database credentials PG_USER, PG_HOST, PG_DATABASE, PG_PASSWORD, and PG_PORT required.")
 }
@@ -78,15 +80,23 @@ const pgPool = functions.config.useLocalDB() ? new Pool({
   port: Number(localPort)
 })
 
+await pgPool.query(CacheInvalidation)
+
 const redis = Redis.createClient({
-  url: functions.config.useLocalDB() ? process.env.LOCAL_REDIS_URL : process.env.REDIS_URL
+  url: functions.config.useLocalDB() ? process.env.LOCAL_REDIS_URL : process.env.REDIS_URL,
+  disableOfflineQueue: true,
+  commandOptions: {timeout: 1000},
+  socket: {connectTimeout: 1000}
 })
 
-if (process.env.REDIS === "on") redis.connect()
+redis.on("error", (error) => console.error("Redis error:", error.message))
+if (process.env.REDIS !== "off") redis.connect()
 
-const hashQuery = (query: QueryConfig | QueryArrayConfig | string): string => {
-  return crypto.createHash("sha256").update(typeof query === "string" ? query : JSON.stringify(query)).digest("hex")
-}
+let resourceTables = await pgPool.query(functions.multiTrim(/*sql*/`
+    SELECT tablename
+    FROM pg_tables WHERE schemaname = 'public'
+    AND tablename NOT IN ('server cache', 'sessions')
+`)).then((result) => result.rows.map((row) => row.tablename as string))
 
 export default class SQLQuery {
   public static post = SQLPost
@@ -107,23 +117,17 @@ export default class SQLQuery {
 
   /** Run an SQL Query */
   public static run = async (query: QueryConfig | QueryArrayConfig | string, cacheEndpoint?: string) => {
-      let cacheKey: string | null = null
-      let redisResult: string | null = null
-      if (cacheEndpoint) {
-        try {
-          // cacheKey = `${cacheEndpoint}_${hashQuery(query)}`
-          // redisResult = await redis.get(cacheKey)
-          // if (redisResult) return JSON.parse(redisResult)
-        } catch (error) {
-          // ignore
+      const queryText = typeof query === "string" ? query : query.text ?? ""
+      if (cacheEndpoint && SQLQuery.isCacheableRead(queryText)) {
+        const dependencies = SQLQuery.getQueryTables(queryText)
+        if (dependencies.length > 0) {
+          const loadFromDatabase = () => SQLQuery.run(query)
+          return SQLQuery.cacheRead(cacheEndpoint, query, loadFromDatabase, 300, dependencies)
         }
       }
       const pgClient = await pgPool.connect()
       try {
           const result = await pgClient.query(query)
-          if (cacheKey) {
-            await redis.set(cacheKey, JSON.stringify(result.rows), {EX: 3600}).catch(() => null)
-          }
           return result.rows as any
       } catch (error) {
           console.log(query)
@@ -139,36 +143,90 @@ export default class SQLQuery {
     await SQLQuery.run(DBTriggers)
   }
 
-  /** Set cache */
+  private static pendingCacheReads = new Map<string, Promise<string>>()
+
+  private static isCacheableRead = (queryText: string) => {
+    const startsWithRead = /^\s*(SELECT|WITH)\b/i.test(queryText)
+    const containsWrite = /\b(INSERT|UPDATE|DELETE|MERGE|CALL|INTO)\b/i.test(queryText)
+    const usesRandomOrSequence = /\b(random|nextval|setval)\s*\(/i.test(queryText)
+    return startsWithRead && !containsWrite && !usesRandomOrSequence
+  }
+
+  private static getQueryTables = (queryText: string) => {
+    const quotedOrPlainIdentifier = /"[^"]+"|[a-zA-Z_][a-zA-Z_0-9]*/g
+    const identifiers = queryText.match(quotedOrPlainIdentifier) ?? []
+    const normalized = new Set(identifiers.map((identifier) => {
+      return identifier.replaceAll('"', "").toLowerCase()
+    }))
+    return resourceTables.filter((table) => normalized.has(table.toLowerCase()))
+  }
+
+  private static getCacheRevision = async (dependencies: string[]) => {
+    const result = await pgPool.query(functions.multiTrim(/*sql*/`
+      SELECT "resource", "revision" 
+      FROM "server cache"
+      WHERE "resource" = ANY($1::text[]) 
+      ORDER BY "resource"
+    `), [["*", ...dependencies]])
+    return JSON.stringify(result.rows)
+  }
+
+  /** Prioritize a read from the cache. */
+  public static cacheRead = async <T>(endpoint: string, params: unknown, load: () => Promise<T>, ttl = 300,
+      dependencies = resourceTables) => {
+    if (!redis.isReady) return load()
+    const revision = await SQLQuery.getCacheRevision(dependencies)
+    const versionHash = createHash("sha256").update(revision).digest("hex")
+    const queryHash = createHash("sha256").update(JSON.stringify([endpoint, params])).digest("hex")
+    const cacheKey = `moepictures:resources:v1:${versionHash}:${queryHash}`
+
+    try {
+      const cached = await redis.get(cacheKey)
+      if (cached !== null) return deserialize(Buffer.from(cached, "base64")) as T
+    } catch {
+      return load()
+    }
+
+    let pending = SQLQuery.pendingCacheReads.get(cacheKey)
+    if (!pending) {
+      pending = (async () => {
+        const value = serialize(await load()).toString("base64")
+        try { 
+          await redis.set(cacheKey, value, {EX: ttl}) 
+        } catch {}
+        return value
+      })()
+      SQLQuery.pendingCacheReads.set(cacheKey, pending)
+    }
+    try {
+      return deserialize(Buffer.from(await pending, "base64")) as T
+    } finally {
+      if (SQLQuery.pendingCacheReads.get(cacheKey) === pending) SQLQuery.pendingCacheReads.delete(cacheKey)
+    }
+  }
+
+  /** Set redis cache. */
   public static setCache = async (cacheKey: string, value: any, EX = 3600) => {
+    if (!redis.isReady) return
     await redis.set(cacheKey, JSON.stringify(value), {EX}).catch(() => null)
   }
 
-  /** Get cache */
+  /** Get redis cache. */
   public static getCache = async (cacheKey: string) => {
+    if (!redis.isReady) return null
     const result = await redis.get(cacheKey).catch(() => null)
     return result ? JSON.parse(result) : null
   }
 
-  /** Remove cache */
+  /** Remove redis cache. */
   public static removeCache = async (cacheKey: string) => {
+    if (!redis.isReady) return
     await redis.del(cacheKey).catch(() => null)
   }
 
-  /** Flush cache */
+  /** Invalidate cache. */
   public static flushCache = async () => {
-    await redis.flushDb().catch(() => null)
-  }
-
-  /** Invalidate cache */
-  public static invalidateCache = async (cacheEndpoint: string) => {
-    try {
-      for await (const key of redis.scanIterator({MATCH: `${cacheEndpoint}*`})) {
-        await redis.del(key).catch(() => null)
-      }
-    } catch {
-      // ignore
-    }
+    await pgPool.query(/*sql*/`UPDATE "server cache" SET "revision" = gen_random_uuid()::text WHERE "resource" = '*'`)
   }
 
   /** Backup the database */

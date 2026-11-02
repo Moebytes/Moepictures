@@ -48,7 +48,7 @@ export default class SQLComment {
             `),
             values: [postID]
         }
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "comment/comments")
         return result as Promise<UserComment[]>
     }
 
@@ -67,7 +67,7 @@ export default class SQLComment {
             `),
             values: [username]
         }
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "comment/userComments")
         return result as Promise<UserComment[]>
     }
 
@@ -119,7 +119,7 @@ export default class SQLComment {
         if (search) query.values?.push(search.toLowerCase())
         if (offset) query.values?.push(offset)
         if (limit) query.values?.push(limit)
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "comment/searchComments")
         return result as Promise<CommentSearch[]>
     }
 
@@ -171,7 +171,7 @@ export default class SQLComment {
         if (search) query.values?.push(search.toLowerCase())
         if (offset) query.values?.push(offset)
         if (limit) query.values?.push(limit)
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "comment/searchCommentsByUsername")
         return result as Promise<CommentSearch[]>
     }
 
@@ -190,7 +190,7 @@ export default class SQLComment {
             `),
             values: [commentID]
         }
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "comment/comment")
         return result[0] as Promise<UserComment | undefined>
     }
 

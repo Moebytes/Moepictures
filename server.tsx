@@ -44,7 +44,7 @@ import GroupRoutes from "./routes/GroupRoutes"
 import App from "./App"
 import torIPs from "./assets/json/tor-ip.json"
 import {imageLock, imageMissing} from "./structures/ImageLock"
-import {ServerSession, Storage, PostFull} from "./types/Types"
+import {ServerSession, Storage} from "./types/Types"
 const __dirname = path.resolve()
 
 const app = express() as any
@@ -226,11 +226,7 @@ for (let i = 0; i < folders.length; i++) {
       let r18 = false
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (!noCache.includes(folders[i]) && postID) {
-        let post = await sql.getCache(`cached-post/${postID}`) as PostFull | undefined
-        if (!post) {
-          post = await sql.post.post(postID)
-          await sql.setCache(`cached-post/${postID}`, post)
-        }
+        const post = await sql.post.post(postID)
         if (post && functions.post.isR18(post.rating)) {
           if (!req.session.showR18) return res.status(404).end()
           r18 = true
@@ -290,11 +286,7 @@ for (let i = 0; i < folders.length; i++) {
       let r18 = false
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (!noCache.includes(folders[i]) && postID) {
-        let post = await sql.getCache(`cached-post/${postID}`) as PostFull | undefined
-        if (!post) {
-          post = await sql.post.post(postID)
-          await sql.setCache(`cached-post/${postID}`, post)
-        }
+        const post = await sql.post.post(postID)
         if (post && functions.post.isR18(post.rating)) {
           if (!req.session.showR18) return res.status(404).end()
           r18 = true
@@ -459,11 +451,7 @@ app.post("/storage", imageUpdateLimiter, csrfProtection, async (req: Request, re
     const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
     let r18 = false
     if (postID) {
-      let post = await sql.getCache(`cached-post/${postID}`) as PostFull | undefined
-      if (!post) {
-        post = await sql.post.post(postID)
-        await sql.setCache(`cached-post/${postID}`, post)
-      }
+      const post = await sql.post.post(postID)
       if (post && functions.post.isR18(post.rating)) {
         if (!req.session.showR18) return res.status(404).end()
         r18 = true
@@ -521,11 +509,7 @@ app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response,
 
     let r18 = false
     if (postID) {
-      let post = await sql.getCache(`cached-post/${postID}`) as PostFull | undefined
-      if (!post) {
-        post = await sql.post.post(postID)
-        await sql.setCache(`cached-post/${postID}`, post)
-      }
+      const post = await sql.post.post(postID)
       if (post && functions.post.isR18(post.rating)) {
         if (!req.session.showR18) return void res.status(404).end()
         r18 = true
@@ -578,11 +562,7 @@ app.get("/{*page}", async (req: Request, res: Response) => {
     const key = decodeURIComponent(req.path.slice(1))
     const postID = key.match(/(?<=post\/)\d+(?=\/)/)?.[0]
     if (postID) {
-        let post = await sql.getCache(`cached-post/${postID}`) as PostFull | undefined
-        if (!post) {
-          post = await sql.post.post(postID)
-          await sql.setCache(`cached-post/${postID}`, post)
-        }
+        let post = await sql.post.post(postID)
         if (post && functions.post.isR18(post.rating)) {
           if (!req.session.showR18) post = undefined
         }

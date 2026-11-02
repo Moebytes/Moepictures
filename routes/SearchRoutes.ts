@@ -231,16 +231,7 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validation.validCategorySort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
 
-            let result = [] as TagCategorySearch[]
-            if (search) {
-                result = await sql.search.tagCategory("artists", sort, search, limit, offset)
-            } else {
-                result = await sql.getCache(`artists-${sort}-${limit}-${offset}`) as TagCategorySearch[]
-                if (!result) {
-                    result = await sql.search.tagCategory("artists", sort, search, limit, offset)
-                    await sql.setCache(`artists-${sort}-${limit}-${offset}`, result, 18000)
-                }
-            }
+            let result = await sql.search.tagCategory("artists", sort, search, limit, offset)
 
             for (let i = 0; i < result.length; i++) {
                 const artist = result[i]
@@ -278,16 +269,7 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validation.validCategorySort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
 
-            let result = [] as TagCategorySearch[]
-            if (search) {
-                result = await sql.search.tagCategory("characters", sort, search, limit, offset)
-            } else {
-                result = await sql.getCache(`characters-${sort}-${limit}-${offset}`) as TagCategorySearch[]
-                if (!result) {
-                    result = await sql.search.tagCategory("characters", sort, search, limit, offset)
-                    await sql.setCache(`characters-${sort}-${limit}-${offset}`, result, 18000)
-                }
-            }
+            let result = await sql.search.tagCategory("characters", sort, search, limit, offset)
 
             for (let i = 0; i < result.length; i++) {
                 const character = result[i]
@@ -325,16 +307,7 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validation.validCategorySort(sort)) return void res.status(400).send("Invalid sort")
             const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
 
-            let result = [] as TagCategorySearch[]
-            if (search) {
-                result = await sql.search.tagCategory("series", sort, search, limit, offset)
-            } else {
-                result = await sql.getCache(`series-${sort}-${limit}-${offset}`) as TagCategorySearch[]
-                if (!result) {
-                    result = await sql.search.tagCategory("series", sort, search, limit, offset)
-                    await sql.setCache(`series-${sort}-${limit}-${offset}`, result, 18000)
-                }
-            }
+            let result = await sql.search.tagCategory("series", sort, search, limit, offset)
 
             for (let i = 0; i < result.length; i++) {
                 const series = result[i]

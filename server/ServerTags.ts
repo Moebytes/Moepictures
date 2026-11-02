@@ -121,17 +121,13 @@ export default class ServerTags {
     }
 
     public static tagMap = async (cache: boolean = true) => {
-        if (cache) {
-            let cached = await sql.getCache("tag-map") as {[key: string]: Tag}
-            if (cached) return cached 
+        const load = async () => {
+            const result = await sql.tag.tags([])
+            const tagMap = {} as {[key: string]: Tag}
+            for (const tag of result) tagMap[tag.tag] = tag
+            return tagMap
         }
-        let result = await sql.tag.tags([])
-        const tagMap = {} as {[key: string]: Tag}
-        for (const tag of result) {
-            tagMap[tag.tag] = tag
-        }
-        sql.setCache("tag-map", tagMap, 60)
-        return tagMap
+        return cache ? sql.cacheRead("tag-map", null, load, 60, ["tags", "posts", "images", "aliases", "implications"]) : load()
     }
 
     public static wdtagger = async (bytes: number[]) => {

@@ -91,16 +91,7 @@ const TagRoutes = (app: Express) => {
             if (typeof tags === "string") tags = [tags]
             if (!tags) tags = []
 
-            let result = [] as TagCount[]
-            if (tags.length) {
-                result = await sql.tag.tagCounts(tags.filter(Boolean) ?? [])
-            } else {
-                result = await sql.getCache("tag-counts") as TagCount[]
-                if (!result) {
-                    result = await sql.tag.tagCounts([])
-                    await sql.setCache("tag-counts", result, 60)
-                }
-            }
+            let result = await sql.tag.tagCounts(tags.filter(Boolean))
             result = result.map(serverFunctions.files.appendTagLinks)
 
             if (!permissions.isMod(req.session)) {

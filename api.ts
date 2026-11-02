@@ -1251,6 +1251,7 @@ export const useInvalidatePost = () => {
     const dispatch = useDispatch()
 
     return (postID: string) => {
+        functions.cache.clearResponseCache()
         dispatch(api.util.invalidateTags([{type: "Post", id: postID}, "Posts", "History", "Mod", "Tags", "Groups"]))
     }
 }
@@ -1283,6 +1284,7 @@ export const useInvalidatePosts = () => {
     const dispatch = useDispatch()
 
     return () => {
+        functions.cache.clearResponseCache()
         dispatch(api.util.invalidateTags(["Post", "Posts", "History", "Mod", "Tags", "Groups"]))
     }
 }

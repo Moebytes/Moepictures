@@ -37,7 +37,7 @@ export default class SQLThread {
         `),
         values: [username]
         }
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "thread/userThreads")
         return result as Promise<Thread[]>
     }
 
@@ -56,7 +56,7 @@ export default class SQLThread {
             values: []
         }
         if (sessionUsername) query.values?.push(sessionUsername)
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "thread/stickyThreads")
         return result as Promise<Thread[]>
     }
 
@@ -94,7 +94,7 @@ export default class SQLThread {
             `)
         }
         if (values?.[0]) query.values = values
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "thread/searchThreads")
         return result as Promise<ThreadSearch[]>
     }
 
@@ -135,7 +135,7 @@ export default class SQLThread {
             values: [usernames]
         }
         if (values?.[0]) query.values?.push(...values)
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "thread/searchThreadsByUsername")
         return result as Promise<ThreadSearch[]>
     }
 
@@ -153,7 +153,7 @@ export default class SQLThread {
             `),
         values: [threadID]
         }
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "thread/thread")
         return result[0] as Promise<ThreadUser | undefined>
     }
 
@@ -211,7 +211,7 @@ export default class SQLThread {
         values: [threadID]
         }
         if (offset) query.values?.push(offset)
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "thread/replies")
         return result as Promise<ThreadReply[]>
     }
 
@@ -230,7 +230,7 @@ export default class SQLThread {
             `),
         values: [username]
         }
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "thread/userReplies")
         return result as Promise<ThreadReply[]>
     }
 
@@ -248,7 +248,7 @@ export default class SQLThread {
             `),
         values: [replyID]
         }
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "thread/reply")
         return result[0] as Promise<ThreadReply | undefined>
     }
 
@@ -304,7 +304,7 @@ export default class SQLThread {
             text: /*sql*/`SELECT * FROM "thread reads" WHERE "threadID" = $1 AND "username" = $2`,
             values: [threadID, username]
         }
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "thread/getRead")
         return result[0] as Promise<ThreadRead | undefined>
     }
 
@@ -332,7 +332,7 @@ export default class SQLThread {
             rowMode: "array",
             values: [username]
         }
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "thread/postCount")
         return Number(result[0] || 0)
     }
 
@@ -384,7 +384,7 @@ export default class SQLThread {
             values: [username]
         }
         if (values?.[0]) query.values?.push(...values)
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "thread/forumPosts")
         return result as Promise<ForumPostSearch[]>
     }
 }

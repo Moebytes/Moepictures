@@ -97,7 +97,7 @@ export default class SQLNote {
             `),
             values: [postID]
         }
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "note/postNotes")
         return result as Promise<Note[]>
     }
 
@@ -112,7 +112,7 @@ export default class SQLNote {
             `),
             values: [postID, order]
         }
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "note/notes")
         return result as Promise<Note[]>
     }
 
@@ -198,7 +198,7 @@ export default class SQLNote {
             `),
             values: [postID]
         }
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "note/unverifiedPostNotes")
         return result as Promise<UnverifiedNote[]>
     }
 
@@ -213,7 +213,7 @@ export default class SQLNote {
             `),
             values: [postID, order]
         }
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "note/unverifiedNotes")
         return result as Promise<UnverifiedNote[]>
     }
 
@@ -228,7 +228,7 @@ export default class SQLNote {
             `),
             values: [noteID]
         }
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "note/unverifiedNoteID")
         return result[0] as Promise<UnverifiedNote | undefined>
     }
 
@@ -279,7 +279,7 @@ export default class SQLNote {
             `)
         }
         if (offset) query.values = [offset]
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "note/allUnverifiedNotes")
         return result as Promise<UnverifiedNoteSearch[]>
     }
 
@@ -321,7 +321,7 @@ export default class SQLNote {
             `),
             values: [username]
         }
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "note/userUnverifiedNotes")
         return result as Promise<UnverifiedNoteSearch[]>
     }
 
@@ -388,7 +388,7 @@ export default class SQLNote {
         if (search) query.values?.push(search.toLowerCase())
         if (offset) query.values?.push(offset)
         if (limit) query.values?.push(limit)
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "note/searchNotes")
         return result as Promise<NoteSearch[]>
     }
 
@@ -455,7 +455,7 @@ export default class SQLNote {
         if (search) query.values?.push(search.toLowerCase())
         if (offset) query.values?.push(offset)
         if (limit) query.values?.push(limit)
-        const result = await SQLQuery.run(query)
+        const result = await SQLQuery.run(query, "note/searchNotesByUsername")
         return result as Promise<NoteSearch[]>
     }
 

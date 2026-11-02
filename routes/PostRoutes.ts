@@ -283,7 +283,6 @@ const PostRoutes = (app: Express) => {
             } else {
                 await sql.post.updatePost(postID, "hidden", true)
             }
-            await sql.invalidateCache("post")
             res.status(200).send("Success")
         } catch (e) {
             console.log(e) 
@@ -304,7 +303,6 @@ const PostRoutes = (app: Express) => {
             } else {
                 await sql.post.updatePost(postID, "locked", true)
             }
-            await sql.invalidateCache("post")
             res.status(200).send("Success")
         } catch (e) {
             console.log(e) 
@@ -326,7 +324,6 @@ const PostRoutes = (app: Express) => {
             } else {
                 await sql.post.updatePost(postID, "private", true)
             }
-            await sql.invalidateCache("post")
             res.status(200).send("Success")
         } catch (e) {
             console.log(e) 
@@ -870,8 +867,6 @@ const PostRoutes = (app: Express) => {
                     imageChanged: false, changes: changes ? JSON.stringify(changes) : null, reason})
             }
 
-            await sql.removeCache(`cached-post/${postID}`)
-
             res.status(200).send("Success")
           } catch (e) {
             console.log(e)
@@ -1008,7 +1003,6 @@ const PostRoutes = (app: Express) => {
             res.status(400).send("Bad request")
           }
     })
-
 
     app.get("/api/post/history", postLimiter, async (req: Request, res: Response) => {
         try {
@@ -1388,8 +1382,6 @@ const PostRoutes = (app: Express) => {
                 }
             }
 
-            await sql.removeCache(`cached-post/${postID}`)
-
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -1426,8 +1418,6 @@ const PostRoutes = (app: Express) => {
                 await serverFunctions.files.uploadFile(thumbPath, thumbBuffer, r18)
                 await sql.post.updateImage(image.imageID, "thumbnail", thumbnailFilename)
             }
-
-            await sql.removeCache(`cached-post/${postID}`)
 
             res.status(200).send("Success")
         } catch (e) {
@@ -1522,8 +1512,7 @@ const PostRoutes = (app: Express) => {
                     } catch {}
                 }
             }
-            
-            await sql.removeCache(`cached-post/${postID}`)
+
             
             res.status(200).send("Success")
         } catch (e) {

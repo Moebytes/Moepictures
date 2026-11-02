@@ -9,6 +9,7 @@ import {useNavigate, useLocation} from "react-router-dom"
 import {useSessionSelector, useSessionActions, useSearchSelector, useSearchActions, useInteractionSelector, 
 useFlagActions, useInteractionActions, useThemeSelector, useActiveActions, useLayoutSelector} from "../../store"
 import functions from "../../functions/Functions"
+import {useGetPostQuery} from "../../api"
 import pixiv from "../../assets/icons/pixiv.png"
 import twitter from "../../assets/icons/twitter.png"
 import deviantart from "../../assets/icons/deviantart.png"
@@ -38,7 +39,7 @@ import DakiIcon from "../../assets/svg/daki.svg"
 import SketchIcon from "../../assets/svg/sketch.svg"
 import LineartIcon from "../../assets/svg/lineart.svg"
 import PromoIcon from "../../assets/svg/promo.svg"
-import {TagCount, PostFull} from "../../types/Types"
+import {TagCount} from "../../types/Types"
 import "./styles/tooltip.less"
 
 const ToolTip: React.FunctionComponent = (props) => {
@@ -52,7 +53,7 @@ const ToolTip: React.FunctionComponent = (props) => {
     const {tooltipX, tooltipY, tooltipEnabled, tooltipPost, postTooltipID} = useInteractionSelector()
     const {setEnableDrag, setToolTipEnabled, setToolTipPost, setPostTooltipID} = useInteractionActions()
     const {setActionBanner} = useActiveActions()
-    const [post, setPost] = useState(null as PostFull | null)
+    const activePostID = postTooltipID ?? tooltipPost?.postID
     const [img, setImg] = useState("")
     const [tags, setTags] = useState([] as TagCount[])
     const [metaTags, setMetaTags] = useState([] as string[])
@@ -61,58 +62,66 @@ const ToolTip: React.FunctionComponent = (props) => {
     const navigate = useNavigate()
     const location = useLocation()
 
+    const {currentData: post, isFetching} = useGetPostQuery({postID: activePostID ?? ""}, {
+        skip: !tooltipEnabled || mobile || !activePostID || Boolean(session?.username && !session?.showTooltips),
+        refetchOnMountOrArgChange: true
+    })
+
     useEffect(() => {
         setToolTipEnabled(false)
         setToolTipPost(null)
         setPostTooltipID(null)
     }, [location.pathname])
 
-    const updatePost = async () => {
-        if (mobile) return
-        if (tooltipPost) setPost(tooltipPost)
-        if (postTooltipID) {
-            const post = await functions.http.get("/api/post", {postID: postTooltipID ?? ""}, session, setSessionFlag)
-            if (post) {
-                setPost(post)
-                const image = post.images[0]
-                const imageLink = typeof image === "string" ?
-                    await functions.link.getPostThumbnail(post, 0, "medium", session, mobile) : 
-                    functions.link.getThumbnailLink(image, "tiny", session, mobile)
-                let img = await functions.crypto.decryptThumb(imageLink, session, imageLink, mobile)
-                setImg(img)
-            }
-        }
-        
-    }
-
     useEffect(() => {
+        let cancelled = false
         setImg("")
-        updatePost()
-    }, [tooltipPost, postTooltipID, session, mobile])
-
-    const updateTags = async () => {
-        if (mobile) return
-        if (session?.username && !session?.showTooltips) return
-        if (!post) return
-        const result = await functions.tag.parseTags([post], session, setSessionFlag)
-        const artists = result.filter((t) => t.type === "artist")
-        const characters = result.filter((t) => t.type === "character")
-        const series = result.filter((t) => t.type === "series")
-        const meta = result.filter((t) => t.type === "meta")
-        const appearance = result.filter((t) => t.type === "appearance")
-        const outfit = result.filter((t) => t.type === "outfit")
-        const accessory = result.filter((t) => t.type === "accessory")
-        const action = result.filter((t) => t.type === "action")
-        const scenery = result.filter((t) => t.type === "scenery")
-        const tags = result.filter((t) => t.type === "tag")
-        setArtist(artists[0])
-        setTags([...characters, ...series, ...meta, ...appearance, ...outfit, ...accessory, ...action, ...scenery, ...tags.reverse()])
-        setMetaTags(meta.map((t) => t.tag))
-    }
+        if (!tooltipEnabled || mobile || !postTooltipID || !post || isFetching) return
+        const updateImage = async () => {
+            const image = post.images[0]
+            if (!image) return
+            const imageLink = typeof image === "string" ?
+                await functions.link.getPostThumbnail(post, 0, "medium", session, mobile) :
+                functions.link.getThumbnailLink(image, "tiny", session, mobile)
+            const thumbnail = await functions.crypto.decryptThumb(imageLink, session, imageLink, mobile)
+            if (!cancelled) setImg(thumbnail)
+        }
+        updateImage()
+        return () => {
+            cancelled = true 
+        }
+    }, [tooltipEnabled, postTooltipID, post, isFetching, session, mobile])
 
     useEffect(() => {
-        if (post) updateTags()
-    }, [post, session, mobile])
+        let cancelled = false
+        setArtist(null)
+        setTags([])
+        setMetaTags([])
+        if (!tooltipEnabled || mobile || isFetching || !post) return
+        if (session?.username && !session?.showTooltips) return
+        const updateTags = async () => {
+            const result = await functions.tag.parseTags([post], session, setSessionFlag)
+            if (cancelled) return
+            const artists = result.filter((t) => t.type === "artist")
+            const characters = result.filter((t) => t.type === "character")
+            const series = result.filter((t) => t.type === "series")
+            const meta = result.filter((t) => t.type === "meta")
+            const appearance = result.filter((t) => t.type === "appearance")
+            const outfit = result.filter((t) => t.type === "outfit")
+            const accessory = result.filter((t) => t.type === "accessory")
+            const action = result.filter((t) => t.type === "action")
+            const scenery = result.filter((t) => t.type === "scenery")
+            const tags = result.filter((t) => t.type === "tag")
+            setArtist(artists[0])
+            setTags([...characters, ...series, ...meta, ...appearance, ...outfit, 
+                ...accessory, ...action, ...scenery, ...tags.reverse()])
+            setMetaTags(meta.map((t) => t.tag))
+        }
+        updateTags()
+        return () => { 
+            cancelled = true 
+        }
+    }, [post, session, mobile, tooltipEnabled, isFetching])
 
     useEffect(() => {
        if (scrollRef.current) scrollRef.current.scrollTop = 0
@@ -244,7 +253,7 @@ const ToolTip: React.FunctionComponent = (props) => {
     }
 
     if (mobile || selectionMode) return null
-    if (!artist || !tags || !post) return null
+    if (!tooltipEnabled || isFetching || !artist || !tags || !post) return null
     if (session?.username && !session?.showTooltips) return null
 
     const openArtist = () => {
