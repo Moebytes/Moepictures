@@ -66,15 +66,17 @@ export default class CacheFunctions {
     
     public static tagCountsCache = async (session: Session, setSessionFlag: (value: boolean) => void) => {
         let tagCountMap = {} as {[key: string]: TagCount}
-        const cache = await localforage.getItem("tagCounts")
-        if (cache) {
+        const cache = await localforage.getItem<{[key: string]: TagCount}>("tagCounts").catch(() => null)
+        if (cache && Object.keys(cache).length) {
             return cache as {[key: string]: TagCount}
         } else {
             let tagCounts = await functions.http.get("/api/tag/counts", {tags: []}, session, setSessionFlag)
             for (const tagCount of tagCounts) {
                 tagCountMap[tagCount.tag] = tagCount
             }
-            localforage.setItem("tagCounts", tagCountMap)
+            if (Object.keys(tagCountMap).length) {
+                await localforage.setItem("tagCounts", tagCountMap).catch(() => {})
+            }
             return tagCountMap
         }
     }

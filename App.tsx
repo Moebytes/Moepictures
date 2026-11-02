@@ -4,7 +4,7 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import React, {useEffect, useEffectEvent, useState, useRef} from "react"
+import React, {useEffect, useLayoutEffect, useEffectEvent, useState, useRef} from "react"
 import {Routes, Route, Navigate, useNavigate, useLocation} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useLayoutActions, 
 useSessionSelector, useSessionActions, useInteractionSelector,
@@ -91,7 +91,7 @@ const App: React.FunctionComponent = (props) => {
     const {setMobile, setTablet, setHideSortbar} = useLayoutActions()
     const {enableDrag, sidebarHover} = useInteractionSelector()
     const {setMobileScrolling} = useInteractionActions()
-    const {activeDropdown, filterDropActive, activeGroup, activeFavgroup} = useActiveSelector()
+    const {activeDropdown, filterDropActive, activeGroup, activeFavgroup, settingsLoaded} = useActiveSelector()
     const {setActiveDropdown, setActiveGroup, setActiveFavgroup, setActionBanner} = useActiveActions()
     const {session, sessionFlag} = useSessionSelector()
     const {setSession, setSessionFlag, setUserImg, setUserImgPost, setHasNotification} = useSessionActions()
@@ -270,7 +270,7 @@ const App: React.FunctionComponent = (props) => {
         }
     }, [selectionMode, filterDropActive, hideTitlebar, activeDropdown, sidebarHover])
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         const resize = () => {
             const isMobile = window.matchMedia("(max-width: 900px)").matches
             const isTablet = window.matchMedia("(min-width: 901px) and (max-width: 1300px)").matches
@@ -288,11 +288,16 @@ const App: React.FunctionComponent = (props) => {
         }
         resize()
         window.addEventListener("resize", resize)
-        document.documentElement.style.visibility = "visible"
         return () => {
             window.removeEventListener("resize", resize)
         }
     }, [])
+
+    useLayoutEffect(() => {
+        if (settingsLoaded && mobile === window.matchMedia("(max-width: 900px)").matches) {
+            document.documentElement.classList.remove("app-loading")
+        }
+    }, [settingsLoaded, mobile])
 
     return (
         <div className={`app ${!loaded ? " stop-transitions" : ""}`}>

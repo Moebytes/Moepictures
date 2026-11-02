@@ -88,7 +88,7 @@ export type GridWrapperProps = Props & AddonProps
 const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridWrapperProps & React.RefAttributes<GridWrapperRef>>) => {
     const GridWrapper = forwardRef<Ref, Props>((props, componentRef) => {
         const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-        const {mobile} = useLayoutSelector()
+        const {mobile, hideSidebar} = useLayoutSelector()
         const {session} = useSessionSelector()
         const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter} = useFilterSelector()
         const {sizeType, tiling, scroll, format, selectionMode, selectionItems, selectionPosts} = useSearchSelector()
@@ -247,7 +247,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
     
         useEffect(() => {
             updateTiling()
-        }, [tiling, sizeType, imageSize, imageWidth, imageHeight])
+        }, [tiling, sizeType, imageSize, imageWidth, imageHeight, mobile, hideSidebar, props.height])
     
         useEffect(() => {
             if (!containerRef.current) return
@@ -280,7 +280,7 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
                     setImageSize(450)
                 }
             }
-        }, [sizeType])
+        }, [sizeType, mobile])
     
         useEffect(() => {
             if (!imageFiltersRef.current) return

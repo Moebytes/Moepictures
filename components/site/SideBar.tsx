@@ -131,12 +131,6 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const location = useLocation()
     const invalidatePost = useInvalidatePost()
 
-    const updateTags = async () => {
-        let tags = await functions.tag.parseTags(posts, session, setSessionFlag)
-        if (!tags.length && !props.post) tags = await functions.cache.sortedTagCounts("all", session, setSessionFlag)
-        setTags(tags)
-    }
-
     const updateUserImg = async () => {
         if (props.post) {
             const uploader = await functions.http.get("/api/user", {username: props.post.uploader}, session, setSessionFlag, true)
@@ -164,7 +158,6 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }, [tagFavoriteFlag, session])
 
     useEffect(() => {
-        updateTags()
         updateUserImg()
         if (!props.post) updateFavoriteTags()
     }, [session])
@@ -174,8 +167,36 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }, [props.post])
 
     useEffect(() => {
+        if (!session.cookie) return
+        let cancelled = false
+        let retryTimer: ReturnType<typeof setTimeout> | undefined
+        let attempt = 0
+        let loading = false
+        const updateTags = async () => {
+            if (cancelled || loading) return
+            loading = true
+            clearTimeout(retryTimer)
+            try {
+                let nextTags = await functions.tag.parseTags(posts, session, setSessionFlag)
+                if (!nextTags.length && !props.post) {
+                    nextTags = await functions.cache.sortedTagCounts("all", session, setSessionFlag)
+                }
+                if (!cancelled) setTags(nextTags)
+            } catch (error) {
+                if (cancelled) return
+                retryTimer = setTimeout(updateTags, Math.min(1000 * 2 ** attempt++, 30000))
+            } finally {
+                loading = false
+            }
+        }
         updateTags()
-    }, [posts])
+        window.addEventListener("online", updateTags)
+        return () => {
+            cancelled = true
+            clearTimeout(retryTimer)
+            window.removeEventListener("online", updateTags)
+        }
+    }, [posts, session, props.post])
 
     useEffect(() => {
         const scrollHandler = () => {
