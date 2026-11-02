@@ -1045,6 +1045,7 @@ const triggerFlip = async () => {
                 navigate(`/post/${posts[0].postID}/${posts[0].slug}`)
             }
             if (autoSearch) {
+                searchLoop()
                 interval = window.setInterval(searchLoop, Math.floor(Number(session.autosearchInterval || 3000)))
             }
         } else if (autoSearch && !location.pathname.includes("/posts")) {

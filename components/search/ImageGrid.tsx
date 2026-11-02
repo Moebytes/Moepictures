@@ -404,6 +404,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             await randomPosts(query)
         }
         if (autoSearch && !restoring) {
+            searchLoop()
             interval = window.setInterval(searchLoop, Math.floor(Number(session.autosearchInterval || 3000)))
         }
         return () => {
