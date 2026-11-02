@@ -542,12 +542,14 @@ const withGridWrapper = (WrappedComponent: React.ForwardRefExoticComponent<GridW
         
         const refWidth = getRef()?.clientWidth
         const preview = props.post.images[0]
-        const reservePreview = tiling === "column" && preview?.width > 0 && preview?.height > 0
+        const previewWidth = props.live2d ? naturalWidth || 1 : preview?.width
+        const previewHeight = props.live2d ? naturalHeight || 1 : preview?.height
+        const reservePreview = tiling === "column" && previewWidth > 0 && previewHeight > 0
     
         return (
             <div style={{opacity: visible && refWidth ? "1" : "0", transition: "opacity 0.1s", borderRadius: `${props.borderRadius || 5}px`}} className="image-box" id={String(props.id)} ref={containerRef} 
             onClick={onClick} onAuxClick={onClick} onContextMenu={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
-                <div className="image-filters" style={{aspectRatio: reservePreview ? `${preview.width} / ${preview.height}` : undefined}} ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
+                <div className="image-filters" style={{aspectRatio: reservePreview ? `${previewWidth} / ${previewHeight}` : undefined}} ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
                     {cornerIcon()}
                     <WrappedComponent 
                         {...props}
