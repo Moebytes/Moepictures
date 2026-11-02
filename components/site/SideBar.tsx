@@ -100,7 +100,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {mobile, relative, hideNavbar, hideSidebar, hideSortbar, hideTitlebar} = useLayoutSelector()
     const {search, autoSearch, saveSearch, favSearch} = useSearchSelector()
     const {setSearch, setSearchFlag, setAutoSearch, setSaveSearch, setFavSearch} = useSearchActions()
-    const {posts, unverifiedPosts, tags} = useCacheSelector()
+    const {posts, unverifiedPosts, tags, sortedTags} = useCacheSelector()
     const {setTags} = useCacheActions()
     const {mobileScrolling} = useInteractionSelector()
     const {setEnableDrag, setSidebarHover, setTagToolTipTag, setTagToolTipEnabled, setTagToolTipY} = useInteractionActions()
@@ -628,7 +628,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-        let currentTags = props.tags?.length ? organizeTags([...(props.meta || []), ...props.tags]) : tags
+        let currentTags = props.tags?.length ? organizeTags([...(props.meta || []), ...props.tags]) : (tags.length ? tags : sortedTags)
         let max = props.tags ? currentTags.length : Math.min(currentTags.length, 100)
         for (let i = 0; i < max; i++) {
             if (!currentTags[i]) break

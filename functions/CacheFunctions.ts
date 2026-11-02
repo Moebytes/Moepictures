@@ -8,7 +8,14 @@ import localforage from "localforage"
 import functions from "./Functions"
 import {GetEndpoint, TagCount, Alias, Session, PostSearchParams} from "../types/Types"
 
+interface TagCountCache {
+    scope: string
+    expires: number
+    tags: {[key: string]: TagCount}
+}
+
 export default class CacheFunctions {
+    private static tagCountRequests = new Map<string, Promise<{[key: string]: TagCount}>>()
     public static cachedThumbs = new Map<string, string>()
     public static cachedImages = new Map<string, string>()
     public static cachedResponses = new Map<string, {data: any, expires: number}>()
@@ -65,19 +72,32 @@ export default class CacheFunctions {
     }
     
     public static tagCountsCache = async (session: Session, setSessionFlag: (value: boolean) => void) => {
-        let tagCountMap = {} as {[key: string]: TagCount}
-        const cache = await localforage.getItem<{[key: string]: TagCount}>("tagCounts").catch(() => null)
-        if (cache && Object.keys(cache).length) {
-            return cache as {[key: string]: TagCount}
-        } else {
-            let tagCounts = await functions.http.get("/api/tag/counts", {tags: []}, session, setSessionFlag)
-            for (const tagCount of tagCounts) {
-                tagCountMap[tagCount.tag] = tagCount
+        const scope = session.username || ""
+        const requests = this.tagCountRequests
+        const pending = requests.get(scope)
+        if (pending) return pending
+
+        const request = async () => {
+            const cache = await localforage.getItem<TagCountCache>("tagCounts").catch(() => null)
+
+            if (cache?.scope === scope && cache.expires > Date.now() && Object.keys(cache.tags || {}).length) {
+                return cache.tags
             }
-            if (Object.keys(tagCountMap).length) {
-                await localforage.setItem("tagCounts", tagCountMap).catch(() => {})
+            const counts = await functions.http.get("/api/tag/counts", {tags: []}, session, setSessionFlag)
+            const tags = Object.fromEntries(counts.map((tag) => [tag.tag, tag]))
+
+            if (counts.length && requests === this.tagCountRequests) {
+                const expires = Date.now() + this.cacheExpiryTime
+                localforage.setItem("tagCounts", {scope, expires, tags})
             }
-            return tagCountMap
+            return tags
+        }
+        const promise = request()
+        requests.set(scope, promise)
+        try {
+            return await promise
+        } finally {
+            requests.delete(scope)
         }
     }
 
@@ -116,9 +136,12 @@ export default class CacheFunctions {
         }
     }
 
-    public static clearCache = () => {
+    public static clearCache = (options: {preserveTagCounts?: boolean} = {}) => {
         localforage.removeItem("aliases")
-        localforage.removeItem("tagCounts")
+        if (!options.preserveTagCounts) {
+            this.tagCountRequests = new Map()
+            localforage.removeItem("tagCounts")
+        }
         localforage.removeItem("emojis")
     }
 }

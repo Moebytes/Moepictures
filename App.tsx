@@ -115,17 +115,22 @@ const App: React.FunctionComponent = (props) => {
         setEmojis(emojis)
     }
 
-    const cacheSortedTags = async () => {
-        const sorted = await functions.cache.sortedTagCounts("all", session, setSessionFlag)
-        setSortedTags(sorted)
-    }
+    useEffect(() => {
+        if (!session.cookie) return
+        let cancelled = false
+        functions.cache.sortedTagCounts("all", session, setSessionFlag).then((sorted) => {
+            if (!cancelled) setSortedTags(sorted)
+        })
+        return () => {
+            cancelled = true
+        }
+    }, [session])
 
     useEffect(() => {
         const savedActiveGroup = localStorage.getItem("activeGroup")
         const savedActiveFavgroup = localStorage.getItem("activeFavgroup")
-        functions.cache.clearCache()
+        functions.cache.clearCache({preserveTagCounts: true})
         cacheEmojis()
-        cacheSortedTags()
         getSessionCookie()
         if (savedActiveGroup) setActiveGroup(JSON.parse(savedActiveGroup))
         if (savedActiveFavgroup) setActiveFavgroup(JSON.parse(savedActiveFavgroup))

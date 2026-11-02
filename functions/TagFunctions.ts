@@ -18,11 +18,12 @@ export default class TagFunctions {
     public static parseTags = async (posts: PostFull[] | PostSearch[] | PostOrdered[] | Post[], session: Session, 
         setSessionFlag: (value: boolean) => void, isBanner?: boolean) => {
         if (!posts.length) return []
-        let taggedPosts = posts.filter((p) => p.hasOwnProperty("tags")) as PostFull[] | PostSearch[] 
-        if (!taggedPosts.length) {
-            taggedPosts = await functions.http.get("/api/posts", 
-            {postIDs: posts.map((p: Post) => p.postID).slice(0, 20)}, session, setSessionFlag, true)
-        }
+        const postsWithTags = posts.filter((p) => p.hasOwnProperty("tags")) as PostFull[] | PostSearch[]
+        const [taggedPosts] = await Promise.all([
+            postsWithTags.length ? Promise.resolve(postsWithTags) : functions.http.get("/api/posts",
+                {postIDs: posts.map((p: Post) => p.postID).slice(0, 20)}, session, setSessionFlag, true),
+            functions.cache.tagCountsCache(session, setSessionFlag)
+        ])
         let uniqueTags = new Set<string>()
         for (let i = 0; i < taggedPosts.length; i++) {
             for (let j = 0; j < taggedPosts[i].tags.length; j++) {
