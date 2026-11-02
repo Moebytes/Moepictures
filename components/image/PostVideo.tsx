@@ -11,6 +11,7 @@ import withPostWrapper, {PostWrapperProps, PostWrapperRef} from "./withPostWrapp
 import {useSessionSelector, useLayoutSelector, useFilterSelector, usePlaybackSelector, usePlaybackActions, 
 useSearchSelector, useInteractionActions} from "../../store"
 import {FFmpeg} from "@ffmpeg/ffmpeg"
+import {fetchFile} from "@ffmpeg/util"
 import Slider from "react-slider" 
 import ReverseIcon from "../../assets/svg/reverse.svg"
 import SpeedIcon from "../../assets/svg/speed.svg"
@@ -137,7 +138,6 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
         }
         
         const reverseAudioStream = async () => {
-            const {fetchFile} = await import("@ffmpeg/util")
             const ffmpeg = ffmpegRef.current
             if (!ffmpeg.loaded) await ffmpeg.load()
             const name = path.basename(props.video!, path.extname(props.video!))
@@ -329,7 +329,6 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
     }, [reverse])
 
     const encodeVideo = async (frames: string[], audio: string) => {
-        const {fetchFile} = await import("@ffmpeg/util")
         const ffmpeg = ffmpegRef.current
         if (!ffmpeg.loaded) await ffmpeg.load()
         for (let i = 0; i < frames.length; i++) {
@@ -359,7 +358,6 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
     }
 
     const audioSpeed = async (audioFile: string) => {
-        const {fetchFile} = await import("@ffmpeg/util")
         const ffmpeg = ffmpegRef.current
         if (!ffmpeg.loaded) await ffmpeg.load()
         ffmpeg.writeFile("input.wav", await fetchFile(audioFile))

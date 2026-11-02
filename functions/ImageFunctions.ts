@@ -9,6 +9,8 @@ import permissions from "../structures/Permissions"
 import enLocale from "../assets/locales/en.json"
 import JSZip from "jszip"
 import path from "path"
+import ImageTracer from "imagetracerjs"
+import {optimize} from "svgo"
 import {UploadImage, Session, Dimensions, Post, SplatterOptions, PixelateOptions, CanvasDrawable,
 PostFull, PostHistory, UnverifiedPost, ImageFormat, SourceFile} from "../types/Types"
 
@@ -558,7 +560,7 @@ export default class ImageFunctions {
         return canvas.toDataURL("image/png") as T extends true ? ArrayBuffer : string
     }
 
-    public static jxlDimensions = async (image: string) => {
+    public static jxlDimensions = async (image: string) => {        
         const jxlJS = await import("../assets/wasm/jxl_dec").then((r) => r.default)
         const jxl = await jxlJS()
         const buffer = await functions.http.getBuffer(image)
@@ -568,7 +570,7 @@ export default class ImageFunctions {
 
     public static decodeJXL = async (image: string, format?: string) => {
         if (functions.util.isSafari()) return image
-        
+
         const jxlJS = await import("../assets/wasm/jxl_dec").then((r) => r.default)
         const jxl = await jxlJS()
         const buffer = await functions.http.getBuffer(image)
@@ -618,8 +620,6 @@ export default class ImageFunctions {
             return URL.createObjectURL(blob)
         } else if (format === "svg") {
             const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height)
-            const {default: ImageTracer} = await import("imagetracerjs")
-            const {optimize} = await import("svgo")
             const result = ImageTracer.imagedataToSVG(pixels, {numberofcolors: 24, mincolorratio: 0})
             const optimized = optimize(result)
             const blob = new Blob([optimized.data])

@@ -5,6 +5,8 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import functions from "./Functions"
+import audioEncoder from "audio-encoder"
+import * as mm from "music-metadata"
 
 export default class AudioFunctions {
     public static logSlider = (position: number) => {
@@ -69,7 +71,6 @@ export default class AudioFunctions {
                 source.connect(offlineAudioContext.destination)
                 source.start()
                 const audioBuffer = await offlineAudioContext.startRendering()
-                const {default: audioEncoder} = await import("audio-encoder")
                 audioEncoder(audioBuffer, null, null, async (blob: Blob) => {
                     resolve(URL.createObjectURL(blob))
                 })
@@ -82,8 +83,7 @@ export default class AudioFunctions {
     
     public static audioDimensions = async (audio: string) => {
         const buffer = await functions.http.getBuffer(audio)
-        const {parseBuffer} = await import("music-metadata")
-        const tagInfo = await parseBuffer(new Uint8Array(buffer))
+        const tagInfo = await mm.parseBuffer(new Uint8Array(buffer))
         const duration = tagInfo.format.duration || 0
         const size = buffer.byteLength
         const coverArt = await this.songCover(audio)
@@ -93,8 +93,7 @@ export default class AudioFunctions {
 
     public static songCover = async (audio: string) => {
         let buffer = await functions.http.getBuffer(audio)
-        const {parseBuffer} = await import("music-metadata")
-        const tagInfo = await parseBuffer(new Uint8Array(buffer))
+        const tagInfo = await mm.parseBuffer(new Uint8Array(buffer))
         const picture = tagInfo.common.picture
         if (picture) {
             let buffer = new Uint8Array()

@@ -6,6 +6,11 @@
 
 import functions from "./Functions"
 import JSZip from "jszip"
+import WebPXMux from "webpxmux"
+import parseAPNG from "apng-js"
+import gifFrames from "gif-frames"
+import GifEncoder from "gif-encoder"
+import pixels from "image-pixels"
 import {GIFFrame} from "../types/Types"
 
 export default class AnimationFunctions {
@@ -38,7 +43,6 @@ export default class AnimationFunctions {
             return this.extractAnimatedWebpFramesNative(webpBuffer)
         } else {
             if (nativeOnly) return []
-            const {default: WebPXMux} = await import("webpxmux")
             const xMux = WebPXMux("webpxmux.wasm")
             await xMux.waitRuntime()
             const data = await xMux.decodeFrames(new Uint8Array(webpBuffer))
@@ -96,7 +100,6 @@ export default class AnimationFunctions {
             return this.extractAnimatedPngFramesNative(pngBuffer)
         } else {
             if (nativeOnly) return []
-            const {default: parseAPNG} = await import("apng-js")
             const apng = parseAPNG(new Uint8Array(pngBuffer).buffer)
             if (apng instanceof Error) return []
             let frames = [] as GIFFrame[]
@@ -167,7 +170,6 @@ export default class AnimationFunctions {
             if (nativeOnly) return []
             const blob = new Blob([new Uint8Array(gifBuffer)])
             const url = URL.createObjectURL(blob)
-            const {default: gifFrames} = await import("gif-frames")
             const frames = await gifFrames({url, frames: "all", outputType: "canvas"})
             const newGIFData = [] as GIFFrame[]
             for (let i = 0; i < frames.length; i++) {
@@ -197,8 +199,6 @@ export default class AnimationFunctions {
 
     public static encodeGIF = async (frames: ArrayBuffer[], delays: number[], width: number, height: number, options?: {transparentColor?: string}) => {
         if (!options) options = {} as {transparentColor?: string}
-        const {default: GifEncoder} = await import("gif-encoder")
-        const {default: pixels} = await import("image-pixels")
         const gif = new GifEncoder(width, height, {highWaterMark: 5 * 1024 * 1024})
         gif.setQuality(10)
         gif.setRepeat(0)

@@ -37,7 +37,7 @@ export default defineConfig({
                 type: "asset/source",
             })
 
-            config.externals = [nodeExternals()]
+            config.externals = [nodeExternals({allowlist: ["@ffmpeg/util"]})]
 
             return config
         }
