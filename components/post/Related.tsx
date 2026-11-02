@@ -24,6 +24,7 @@ import GridModel from "../image/GridModel"
 import GridLive2D from "../image/GridLive2D"
 import PageControls from "../../components/site/PageControls"
 import {PostHistory, PostSearch, PostSearchParams} from "../../types/Types"
+import AnchoredPopup from "../../ui/AnchoredPopup"
 import "./styles/related.less"
 
 const limit = 100
@@ -129,20 +130,6 @@ const Related: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (props.count) setRelatedPage(page)
     }, [page, props.count])
-
-    const getSizeMargin = () => {
-        const rect = sizeRef.current?.getBoundingClientRect()
-        if (!rect || mobile) return "150px"
-        const raw = window.innerWidth - rect.x
-        let offset = -50
-        if (sizeType === "tiny") offset += -15
-        if (sizeType === "small") offset += -10
-        if (sizeType === "medium") offset += -5
-        if (sizeType === "large") offset += -10
-        if (sizeType === "massive") offset += -5
-        if (props.count) offset -= 20
-        return `${raw + offset}px`
-    }
 
     const getMarginLeft = () => {
         return mobile ? 5 : 15
@@ -317,8 +304,9 @@ const Related: React.FunctionComponent<Props> = (props) => {
                 {/* <Carousel images={getImages()} set={click} noKey={true} marginLeft={marginLeft} height={200} unlimited={true}/> */}
             </div>
             {!scroll && <PageControls page={page} maxPage={maxPage} setPage={setPage}/>}
-            <div className={`related-dropdown ${sizeDropdown ? "" : "hide-related-dropdown"}`} 
-            style={{marginRight: getSizeMargin(), top: `50px`}} onClick={() => setSizeDropdown(false)}>
+            <AnchoredPopup anchorRef={sizeRef} active={sizeDropdown} placement="bottom" 
+                zIndex={850} className={`related-dropdown ${sizeDropdown ? "" : "hide-related-dropdown"}`} 
+                onClick={() => setSizeDropdown(false)}>
                 <div className="related-dropdown-row" onClick={() => setSizeType("tiny")}>
                     <span className="related-dropdown-text">{i18n.sortbar.size.tiny}</span>
                 </div>
@@ -334,7 +322,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
                 <div className="related-dropdown-row" onClick={() => setSizeType("massive")}>
                     <span className="related-dropdown-text">{i18n.sortbar.size.massive}</span>
                 </div>
-            </div>
+            </AnchoredPopup>
         </div>
     )
 }

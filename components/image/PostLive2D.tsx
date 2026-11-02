@@ -24,6 +24,7 @@ import PartIcon from "../../assets/svg/part.svg"
 import {Live2DCubismModel} from "live2d-renderer"
 import path from "path"
 import functions from "../../functions/Functions"
+import AnchoredPopup from "../../ui/AnchoredPopup"
 import "./styles/postmodel.less"
 
 const PostLive2D = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef) => {
@@ -98,24 +99,6 @@ const PostLive2D = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRe
         model.zoomEnabled = !disableZoom
         model.speed = modelSpeed
     }, [model, disableZoom, paused, modelSpeed])
-
-    const getParameterMarginRight = () => {
-        const controlRect = live2dControls.current?.getBoundingClientRect()
-        const rect = live2dParameterRef.current?.getBoundingClientRect()
-        if (!rect || !controlRect) return "400px"
-        const raw = controlRect.right - rect.right
-        let offset = -200
-        return `${raw + offset}px`
-    }
-
-    const getPartMarginRight = () => {
-        const controlRect = live2dControls.current?.getBoundingClientRect()
-        const rect = live2dPartRef.current?.getBoundingClientRect()
-        if (!rect || !controlRect) return "400px"
-        const raw = controlRect.right - rect.right
-        let offset = -130
-        return `${raw + offset}px`
-    }
 
     const download = async () => {
         let filename = path.basename(props.live2d!).replace(/\?.*$/, "")
@@ -217,15 +200,15 @@ const PostLive2D = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRe
         }
 
         return (
-            <div className={`live2d-dropdown ${showParameterDropdown ? "" : "hide-live2d-dropdown"}`}
-            style={{marginRight: getParameterMarginRight(), top: `-300px`}}>
+            <AnchoredPopup anchorRef={live2dParameterRef} active={showParameterDropdown} placement="top" 
+                zIndex={1300} className={`live2d-dropdown ${showParameterDropdown ? "" : "hide-live2d-dropdown"}`}>
                 <div className="live2d-dropdown-container">
                     {jsx}
                     <div className="live2d-dropdown-row live2d-row">
                         <button className="live2d-button" onClick={() => resetParameters()}>Reset</button>
                     </div>
                 </div>
-            </div>
+            </AnchoredPopup>
         )
     }
 
@@ -257,15 +240,15 @@ const PostLive2D = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRe
         }
 
         return (
-            <div className={`live2d-dropdown ${showPartDropdown ? "" : "hide-live2d-dropdown"}`}
-            style={{marginRight: getPartMarginRight(), top: `-300px`}}>
+            <AnchoredPopup anchorRef={live2dPartRef} active={showPartDropdown} placement="top" 
+                zIndex={1300} className={`live2d-dropdown ${showPartDropdown ? "" : "hide-live2d-dropdown"}`}>
                 <div className="live2d-dropdown-container">
                     {jsx}
                     <div className="live2d-dropdown-row live2d-row">
                         <button className="live2d-button" onClick={() => resetParts()}>Reset</button>
                     </div>
                 </div>
-            </div>
+            </AnchoredPopup>
         )
     }
 

@@ -23,6 +23,7 @@ import ClearIcon from "../../assets/svg/clear.svg"
 import StopIcon from "../../assets/svg/stop.svg"
 import ExpandIcon from "../../assets/svg/expand-music.svg"
 import ContractIcon from "../../assets/svg/contract-music.svg"
+import AnchoredPopup from "../../ui/AnchoredPopup"
 import "./styles/miniaudioplayer.less"
 
 const MiniAudioPlayer: React.FunctionComponent = (props) => {
@@ -100,36 +101,6 @@ const MiniAudioPlayer: React.FunctionComponent = (props) => {
                 setShowSpeedDropdown(true)
             }
         }
-    }
-
-    const getAudioSpeedMarginRight = () => {
-        const controlRect = audioControls.current?.getBoundingClientRect()
-        const rect = audioSpeedRef.current?.getBoundingClientRect()
-        if (!rect || !controlRect) return "400px"
-        const raw = controlRect.right - rect.right
-        let offset = 5
-        if (mobile) offset -= 10
-        return `${raw + offset}px`
-    }
-
-    const getAudioPitchMarginRight = () => {
-        const controlRect = audioControls.current?.getBoundingClientRect()
-        const rect = audioPitchRef.current?.getBoundingClientRect()
-        if (!rect || !controlRect) return "400px"
-        const raw = controlRect.right - rect.right
-        let offset = 2
-        if (mobile) offset -= 10
-        return `${raw + offset}px`
-    }
-
-    const getAudioVolumeMarginRight = () => {
-        const controlRect = audioControls.current?.getBoundingClientRect()
-        const rect = audioVolumeRef.current?.getBoundingClientRect()
-        if (!rect || !controlRect) return "40px"
-        const raw = controlRect.right - rect.right
-        let offset = -5
-        if (mobile) offset -= 10
-        return `${raw + offset}px`
     }
 
     useEffect(() => {
@@ -263,8 +234,9 @@ const MiniAudioPlayer: React.FunctionComponent = (props) => {
                 </div>
                 {getTitleJSX()}
                 {playerJSX()}
-                <div className={`mini-audio-player-speed-dropdown ${showSpeedDropdown ? "" : "hide-mini-player-speed-dropdown"}`} style={{marginRight: getAudioSpeedMarginRight(), marginTop: "40px"}}
-                onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <AnchoredPopup anchorRef={audioSpeedRef} active={showSpeedDropdown && showMiniPlayer} 
+                    placement="bottom" zIndex={5001} className={`mini-audio-player-speed-dropdown ${showSpeedDropdown ? "" : "hide-mini-player-speed-dropdown"}`}
+                    onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="mini-audio-player-speed-dropdown-item" onClick={() => {setAudioSpeed(4); setShowSpeedDropdown(false)}}>
                         <span className="mini-audio-player-speed-dropdown-text">4x</span>
                     </div>
@@ -286,8 +258,8 @@ const MiniAudioPlayer: React.FunctionComponent = (props) => {
                     <div className="mini-audio-player-speed-dropdown-item" onClick={() => {setAudioSpeed(0.25); setShowSpeedDropdown(false)}}>
                         <span className="mini-audio-player-speed-dropdown-text">0.25x</span>
                     </div>
-                </div>
-                <div className={`mini-audio-player-pitch-dropdown ${showPitchDropdown ? "" : "hide-mini-player-pitch-dropdown"}`} style={{marginRight: getAudioPitchMarginRight(), marginTop: "40px"}}
+                </AnchoredPopup>
+                <AnchoredPopup anchorRef={audioPitchRef} active={showPitchDropdown && showMiniPlayer} placement="bottom" zIndex={5001} className={`mini-audio-player-pitch-dropdown ${showPitchDropdown ? "" : "hide-mini-player-pitch-dropdown"}`}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="mini-audio-player-pitch-dropdown-item" onClick={() => {setPitch(24); setShowPitchDropdown(false)}}>
                         <span className="mini-audio-player-pitch-dropdown-text">+24</span>
@@ -310,12 +282,13 @@ const MiniAudioPlayer: React.FunctionComponent = (props) => {
                     <div className="mini-audio-player-pitch-dropdown-item" onClick={() => {setPitch(-24); setShowPitchDropdown(false)}}>
                         <span className="mini-audio-player-pitch-dropdown-text">-24</span>
                     </div>
-                </div>
-                <div className={`mini-audio-player-volume-dropdown ${showVolumeSlider ? "" : "hide-mini-player-volume-dropdown"}`} style={{marginRight: getAudioVolumeMarginRight(), marginTop: "130px"}}
+                </AnchoredPopup>
+                <AnchoredPopup anchorRef={audioVolumeRef} active={showVolumeSlider && showMiniPlayer} 
+                placement="bottom" zIndex={5001} className={`mini-audio-player-volume-dropdown ${showVolumeSlider ? "" : "hide-mini-player-volume-dropdown"}`}
                 onMouseEnter={() => {setShowVolumeSlider(true); setEnableDrag(false)}} onMouseLeave={() => {setShowVolumeSlider(false); setEnableDrag(true)}}>
                     <Slider ref={audioVolumeSliderRef} invert orientation="vertical" className="mini-audio-player-volume-slider" trackClassName="mini-audio-player-volume-slider-track" thumbClassName="mini-audio-player-volume-slider-thumb"
                     value={audioVolume} min={0} max={1} step={0.05} onChange={(value) => updateVolume(value)}/>
-                </div>
+                </AnchoredPopup>
             </div>
         )
     }

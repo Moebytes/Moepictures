@@ -21,6 +21,7 @@ import PrevIcon from "../../assets/svg/prev.svg"
 import DeepLinkIcon from "../../assets/svg/deeplink.svg"
 import Filters from "../../ui/Filters"
 import {PostFull, PostHistory, UnverifiedPost} from "../../types/Types"
+import AnchoredPopup from "../../ui/AnchoredPopup"
 import "./styles/postimageoptions.less"
 
 interface Props {
@@ -126,61 +127,6 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         getFavorite()
         getFavgroup()
     }, [props.post, session])
-
-    const getFilterMarginRight = () => {
-        if (typeof document === "undefined") return 0
-        const rect = filterRef.current?.getBoundingClientRect()
-        if (!rect) return 0
-        const raw = window.innerWidth - rect.right
-        let offset = -120
-        if (mobile) offset += 110
-        if (noteMode) offset += 10
-        return raw + offset
-    }
-
-    const getFilterMarginTop = () => {
-        if (typeof document === "undefined") return 0
-        let elementName = ".post-image-box"
-        if (noteMode) elementName = ".note-editor"
-        const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
-        const rect = filterRef.current?.getBoundingClientRect()
-        if (!rect || !bodyRect) return 0
-        const raw = bodyRect.bottom - rect.bottom
-        let offset = -310
-        if (mobile) offset += 20
-        if (session.showR18) offset -= 35
-        return raw + offset
-    }
-
-    const getFormatMarginRight = () => {
-        if (typeof document === "undefined") return "0px"
-        const rect = formatRef.current?.getBoundingClientRect()
-        if (!rect) return "0px"
-        const raw = window.innerWidth - rect.right
-        let offset = -22
-        if (format === "png") offset += 2
-        if (format === "webp") offset += 8
-        if (format === "avif") offset += 4
-        if (format === "svg") offset += 1
-        if (mobile) offset += 10
-        return `${raw + offset}px`
-    }
-
-    const getFormatMarginTop = () => {
-        if (typeof document === "undefined") return "0px"
-        let elementName = ".post-image-box"
-        if (props.model) elementName = ".post-model-box"
-        if (props.live2d) elementName = ".post-model-box"
-        if (props.audio) elementName = ".post-song-box"
-        if (noteMode) elementName = ".note-editor"
-        const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
-        const rect = formatRef.current?.getBoundingClientRect()
-        if (!rect || !bodyRect) return "0px"
-        const raw = bodyRect.bottom - rect.bottom
-        let offset = -150
-        if (mobile) offset += 95
-        return `${raw + offset}px`
-    }
 
     const updateFavorite = async (value: boolean) => {
         if (!props.post || !session.username) return
@@ -330,16 +276,17 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                     </div>
                 </div>
             </div>}
-            <div className={`format-dropdown ${showFormatDropdown ? "" : "hide-format-dropdown"}`} style={{marginRight: getFormatMarginRight(), marginTop: getFormatMarginTop()}}
-            onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+            <AnchoredPopup anchorRef={formatRef} active={showFormatDropdown} placement="top" 
+                zIndex={1200} className={`format-dropdown ${showFormatDropdown ? "" : "hide-format-dropdown"}`}
+                onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <button className="format-dropdown-button" onClick={() => {setFormat("jpg"); setShowFormatDropdown(false)}}>JPG</button>
                 <button className="format-dropdown-button" onClick={() => {setFormat("png"); setShowFormatDropdown(false)}}>PNG</button>
                 <button className="format-dropdown-button" onClick={() => {setFormat("webp"); setShowFormatDropdown(false)}}>WEBP</button>
                 <button className="format-dropdown-button" onClick={() => {setFormat("avif"); setShowFormatDropdown(false)}}>AVIF</button>
                 <button className="format-dropdown-button" onClick={() => {setFormat("jxl"); setShowFormatDropdown(false)}}>JXL</button>
                 <button className="format-dropdown-button" onClick={() => {setFormat("svg"); setShowFormatDropdown(false)}}>SVG</button>
-            </div>
-            <Filters active={showFilterDropdown} right={getFilterMarginRight()} top={getFilterMarginTop()} origin="bottom"/>
+            </AnchoredPopup>
+            <Filters active={showFilterDropdown} anchorRef={filterRef} placement="top"/>
         </div>
     )
 }

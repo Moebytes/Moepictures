@@ -24,6 +24,7 @@ import VolumeLowIcon from "../../assets/svg/volume-low.svg"
 import VolumeMuteIcon from "../../assets/svg/volume-mute.svg"
 import path from "path"
 import functions from "../../functions/Functions"
+import AnchoredPopup from "../../ui/AnchoredPopup"
 import "./styles/postsong.less"
 
 const PostSong = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef) => {
@@ -102,33 +103,6 @@ const PostSong = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef)
             setAudioDragProgress(null)
         }
     }, [audioDragging, audioDragProgress, audioDuration])
-
-    const getSpeedMarginRight = () => {
-        const controlRect = audioControls.current?.getBoundingClientRect()
-        const rect = audioSpeedRef.current?.getBoundingClientRect()
-        if (!rect || !controlRect) return "400px"
-        const raw = controlRect.right - rect.right
-        let offset = -2
-        return `${raw + offset}px`
-    }
-
-    const getPitchMarginRight = () => {
-        const controlRect = audioControls.current?.getBoundingClientRect()
-        const rect = audioPitchRef.current?.getBoundingClientRect()
-        if (!rect || !controlRect) return "400px"
-        const raw = controlRect.right - rect.right
-        let offset = -2
-        return `${raw + offset}px`
-    }
-
-    const getVolumeMarginRight = () => {
-        const controlRect = audioControls.current?.getBoundingClientRect()
-        const rect = audioVolumeRef.current?.getBoundingClientRect()
-        if (!rect || !controlRect) return "400px"
-        const raw = controlRect.right - rect.right
-        let offset = -10
-        return `${raw + offset}px`
-    }
 
     const closeDropdowns = () => {
         setShowPitchDropdown(false)
@@ -260,8 +234,9 @@ const PostSong = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef)
                         <VolumeMuteIcon className="audio-control-img" ref={audioVolumeRef} onClick={updateMute}/>}
                     </div> 
                 </div>
-                <div className={`audio-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), marginTop: "-250px"}}
-                onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <AnchoredPopup anchorRef={audioSpeedRef} active={showSpeedDropdown} placement="top" 
+                    zIndex={1300} className={`audio-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`}
+                    onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(4); setShowSpeedDropdown(false)}}>
                         <span className="audio-speed-dropdown-text">4x</span>
                     </div>
@@ -289,8 +264,8 @@ const PostSong = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef)
                     <div className="audio-speed-dropdown-item" onClick={() => {setAudioSpeed(0.25); setShowSpeedDropdown(false)}}>
                         <span className="audio-speed-dropdown-text">0.25x</span>
                     </div>
-                </div>
-                <div className={`audio-pitch-dropdown ${showPitchDropdown ? "" : "hide-pitch-dropdown"}`} style={{marginRight: getPitchMarginRight(), marginTop: "-250px"}}
+                </AnchoredPopup>
+                <AnchoredPopup anchorRef={audioPitchRef} active={showPitchDropdown} placement="top" zIndex={1300} className={`audio-pitch-dropdown ${showPitchDropdown ? "" : "hide-pitch-dropdown"}`}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(24); setShowPitchDropdown(false)}}>
                         <span className="audio-pitch-dropdown-text">+24</span>
@@ -319,12 +294,13 @@ const PostSong = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef)
                     <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(-24); setShowPitchDropdown(false)}}>
                         <span className="audio-pitch-dropdown-text">-24</span>
                     </div>
-                </div>
-                <div className={`audio-volume-dropdown ${showVolumeSlider ? "" : "hide-volume-dropdown"}`} style={{marginRight: getVolumeMarginRight(), marginTop: "-110px"}}
+                </AnchoredPopup>
+                <AnchoredPopup anchorRef={audioVolumeRef} active={showVolumeSlider} placement="top" 
+                    zIndex={1300} className={`audio-volume-dropdown ${showVolumeSlider ? "" : "hide-volume-dropdown"}`}
                 onMouseEnter={() => {setShowVolumeSlider(true); setEnableDrag(false)}} onMouseLeave={() => {setShowVolumeSlider(false); setEnableDrag(true)}}>
                     <Slider ref={audioVolumeSliderRef} invert orientation="vertical" className="audio-volume-slider" trackClassName="audio-volume-slider-track" thumbClassName="audio-volume-slider-thumb"
                     value={audioVolume} min={0} max={1} step={0.05} onChange={(value) => updateVolume(value)}/>
-                </div>
+                </AnchoredPopup>
             </div>
         )
         return containerRef.current ? createPortal(controls, containerRef.current) : null

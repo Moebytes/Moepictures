@@ -30,6 +30,7 @@ import {OrbitControls, GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
 import {VRMLoaderPlugin} from "@pixiv/three-vrm"
 import path from "path"
 import functions from "../../functions/Functions"
+import AnchoredPopup from "../../ui/AnchoredPopup"
 import "./styles/postmodel.less"
 
 let imageTimer = null as any
@@ -381,33 +382,6 @@ const PostModel = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
         if (modelSliderRef.current) modelSliderRef.current.resize()
     })
 
-    const getSpeedMarginRight = () => {
-        const controlRect = modelControls.current?.getBoundingClientRect()
-        const rect = modelSpeedRef.current?.getBoundingClientRect()
-        if (!rect || !controlRect) return "400px"
-        const raw = controlRect.right - rect.right
-        let offset = -5
-        return `${raw + offset}px`
-    }
-
-    const getLightMarginRight = () => {
-        const controlRect = modelControls.current?.getBoundingClientRect()
-        const rect = modelLightRef.current?.getBoundingClientRect()
-        if (!rect || !controlRect) return "400px"
-        const raw = controlRect.right - rect.right
-        let offset = -150
-        return `${raw + offset}px`
-    }
-
-    const getMorphMarginRight = () => {
-        const controlRect = modelControls.current?.getBoundingClientRect()
-        const rect = modelMorphRef.current?.getBoundingClientRect()
-        if (!rect || !controlRect) return "400px"
-        const raw = controlRect.right - rect.right
-        let offset = -150
-        return `${raw + offset}px`
-    }
-
     const download = async () => {
         let filename = path.basename(props.model!).replace(/\?.*$/, "")
         functions.dom.download(filename, modelLink)
@@ -482,15 +456,15 @@ const PostModel = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
         }
 
         return (
-            <div className={`model-dropdown ${showMorphDropdown ? "" : "hide-model-dropdown"}`}
-            style={{marginRight: getMorphMarginRight(), top: `-300px`}}>
+            <AnchoredPopup anchorRef={modelMorphRef} active={showMorphDropdown} placement="top" 
+                zIndex={1300} className={`model-dropdown ${showMorphDropdown ? "" : "hide-model-dropdown"}`}>
                 <div className="model-dropdown-container">
                     {jsx}
                     <div className="model-dropdown-row model-row">
                         <button className="model-button" onClick={() => resetMorphTargets()}>Reset</button>
                     </div>
                 </div>
-            </div>
+            </AnchoredPopup>
         )
     }
 
@@ -546,8 +520,9 @@ const PostModel = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
                         <FullscreenIcon className="image-control-img-dark-blue" onClick={() => toggleFullscreen()}/>
                     </div> 
                 </div>
-                <div className={`model-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), marginTop: "-240px"}}
-                onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <AnchoredPopup anchorRef={modelSpeedRef} active={showSpeedDropdown} placement="top" 
+                    zIndex={1300} className={`model-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`}
+                    onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="model-speed-dropdown-item" onClick={() => {setSpeed(4); setShowSpeedDropdown(false)}}>
                         <span className="model-speed-dropdown-text">4x</span>
                     </div>
@@ -575,10 +550,10 @@ const PostModel = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
                     <div className="model-speed-dropdown-item" onClick={() => {setSpeed(0.25); setShowSpeedDropdown(false)}}>
                         <span className="model-speed-dropdown-text">0.25x</span>
                     </div>
-                </div>
+                </AnchoredPopup>
                 {shapeKeysDropdownJSX()}
-                <div className={`model-dropdown ${showLightDropdown ? "" : "hide-model-dropdown"}`}
-                style={{marginRight: getLightMarginRight(), top: `-140px`}}>
+                <AnchoredPopup anchorRef={modelLightRef} active={showLightDropdown} placement="top" 
+                    zIndex={1300} className={`model-dropdown ${showLightDropdown ? "" : "hide-model-dropdown"}`}>
                     <div className="model-dropdown-row model-row">
                         <AmbientLightIcon className="model-dropdown-img"/>
                         <span className="model-dropdown-text">Ambient</span>
@@ -597,7 +572,7 @@ const PostModel = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
                     <div className="model-dropdown-row model-row">
                         <button className="model-button" onClick={() => resetLights()}>Reset</button>
                     </div>
-                </div>
+                </AnchoredPopup>
             </div>
         )
         return containerRef.current ? createPortal(controls, containerRef.current) : null

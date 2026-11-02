@@ -261,14 +261,6 @@ const ReaderPage: React.FunctionComponent = () => {
         }
     }
 
-    const getFiltersMargin = () => {
-        const rect = filterRef.current?.getBoundingClientRect()
-        if (!rect) return 30
-        const raw = window.innerWidth - rect.right
-        let offset = -110
-        return raw + offset
-    }
-
     const triggerBack = () => {
         navigate(`/post/${postID}/${slug}`)
     }
@@ -399,7 +391,7 @@ const ReaderPage: React.FunctionComponent = () => {
                 {!mobile && generateThumbnails()}
                 {generateImages()}
             </div>
-            <Filters active={showFilterDropdown} right={getFiltersMargin()} top={40}/>
+            <Filters active={showFilterDropdown} anchorRef={filterRef} placement="bottom"/>
             <HSLDropdown active={showColorDropdown} top={40}/>
         </div>
         </>

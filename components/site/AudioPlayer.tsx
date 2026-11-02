@@ -24,6 +24,7 @@ import ClearIcon from "../../assets/svg/clear.svg"
 import StopIcon from "../../assets/svg/stop.svg"
 import * as Tone from "tone"
 import silence from "../../assets/images/silence.mp3"
+import AnchoredPopup from "../../ui/AnchoredPopup"
 import "./styles/audioplayer.less"
 
 let player: Tone.Player
@@ -453,36 +454,6 @@ const AudioPlayer: React.FunctionComponent = (props) => {
        }
     })
 
-    const getAudioSpeedMarginRight = () => {
-        const controlRect = audioControls.current?.getBoundingClientRect()
-        const rect = audioSpeedRef.current?.getBoundingClientRect()
-        if (!rect || !controlRect) return "400px"
-        const raw = controlRect.right - rect.right
-        let offset = -10
-        if (mobile) offset -= 10
-        return `${raw + offset}px`
-    }
-
-    const getAudioPitchMarginRight = () => {
-        const controlRect = audioControls.current?.getBoundingClientRect()
-        const rect = audioPitchRef.current?.getBoundingClientRect()
-        if (!rect || !controlRect) return "400px"
-        const raw = controlRect.right - rect.right
-        let offset = -10
-        if (mobile) offset -= 10
-        return `${raw + offset}px`
-    }
-
-    const getAudioVolumeMarginRight = () => {
-        const controlRect = audioControls.current?.getBoundingClientRect()
-        const rect = audioVolumeRef.current?.getBoundingClientRect()
-        if (!rect || !controlRect) return "400px"
-        const raw = controlRect.right - rect.right
-        let offset = 0
-        if (mobile) offset -= 10
-        return `${raw + offset}px`
-    }
-
     const updateProgressText = (value: number) => {
         let percent = value / 100
         if (audioReverse === true) {
@@ -684,8 +655,9 @@ const AudioPlayer: React.FunctionComponent = (props) => {
                     <span className="audio-player-title" onClick={() => navigate(`/post/${audioPost.postID}/${audioPost.slug}`)}>{audioPost.title || "Unknown"}</span>
                 </div> : null}
                 {playerJSX()}
-                <div className={`audio-player-speed-dropdown ${showSpeedDropdown ? "" : "hide-player-speed-dropdown"}`} style={{marginRight: getAudioSpeedMarginRight(), marginTop: "-340px"}}
-                onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <AnchoredPopup anchorRef={audioSpeedRef} active={showSpeedDropdown} placement="top" 
+                    zIndex={5001} className={`audio-player-speed-dropdown ${showSpeedDropdown ? "" : "hide-player-speed-dropdown"}`}
+                    onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="audio-player-speed-dropdown-item" onClick={() => {setAudioSpeed(4); setShowSpeedDropdown(false)}}>
                         <span className="audio-player-speed-dropdown-text">4x</span>
                     </div>
@@ -713,9 +685,10 @@ const AudioPlayer: React.FunctionComponent = (props) => {
                     <div className="audio-player-speed-dropdown-item" onClick={() => {setAudioSpeed(0.25); setShowSpeedDropdown(false)}}>
                         <span className="audio-player-speed-dropdown-text">0.25x</span>
                     </div>
-                </div>
-                <div className={`audio-player-pitch-dropdown ${showPitchDropdown ? "" : "hide-player-pitch-dropdown"}`} style={{marginRight: getAudioPitchMarginRight(), marginTop: "-340px"}}
-                onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                </AnchoredPopup>
+                <AnchoredPopup anchorRef={audioPitchRef} active={showPitchDropdown} placement="top" 
+                    zIndex={5001} className={`audio-player-pitch-dropdown ${showPitchDropdown ? "" : "hide-player-pitch-dropdown"}`}
+                    onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="audio-player-pitch-dropdown-item" onClick={() => {setPitch(24); setShowPitchDropdown(false)}}>
                         <span className="audio-player-pitch-dropdown-text">+24</span>
                     </div>
@@ -743,12 +716,13 @@ const AudioPlayer: React.FunctionComponent = (props) => {
                     <div className="audio-player-pitch-dropdown-item" onClick={() => {setPitch(-24); setShowPitchDropdown(false)}}>
                         <span className="audio-player-pitch-dropdown-text">-24</span>
                     </div>
-                </div>
-                <div className={`audio-player-volume-dropdown ${showVolumeSlider ? "" : "hide-player-volume-dropdown"}`} style={{marginRight: getAudioVolumeMarginRight(), marginTop: "-180px"}}
+                </AnchoredPopup>
+                <AnchoredPopup anchorRef={audioVolumeRef} active={showVolumeSlider} placement="top" 
+                zIndex={5001} className={`audio-player-volume-dropdown ${showVolumeSlider ? "" : "hide-player-volume-dropdown"}`}
                 onMouseEnter={() => {setShowVolumeSlider(true); setEnableDrag(false)}} onMouseLeave={() => {setShowVolumeSlider(false); setEnableDrag(true)}}>
                     <Slider ref={audioVolumeSliderRef} invert orientation="vertical" className="audio-player-volume-slider" trackClassName="audio-player-volume-slider-track" thumbClassName="audio-player-volume-slider-thumb"
                     value={audioVolume} min={0} max={1} step={0.05} onChange={(value) => updateVolume(value)}/>
-                </div>
+                </AnchoredPopup>
             </div>
         )
     }

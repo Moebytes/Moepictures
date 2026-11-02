@@ -25,6 +25,7 @@ import ThreadRow from "../../components/search/ThreadRow"
 import LoadingSpinner from "../../components/search/LoadingSpinner"
 import PageControls from "../../components/site/PageControls"
 import {ThreadSearch, CommentSort} from "../../types/Types"
+import AnchoredPopup from "../../ui/AnchoredPopup"
 import "./styles/itemspage.less"
 
 let limit = 100
@@ -160,16 +161,6 @@ const ForumPage: React.FunctionComponent = (props) => {
         setShowNewThreadDialog(!showNewThreadDialog)
     }
 
-    const getSortMargin = () => {
-        const rect = sortRef.current?.getBoundingClientRect()
-        if (!rect) return "0px"
-        const raw = window.innerWidth - rect.right
-        let offset = 0
-        if (sortType === "random") offset = -15
-        if (sortType === "date") offset = -20
-        return `${raw + offset}px`
-    }
-
     const getSortJSX = () => {
         return (
             <div className="itemsort-item" ref={sortRef}>
@@ -231,15 +222,16 @@ const ForumPage: React.FunctionComponent = (props) => {
                             <PagesIcon className="itemsort-img"/>}
                             <span className="itemsort-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                         </div> : null}
-                        <div className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 
-                        style={{marginRight: getSortMargin(), top: mobile ? "220px" : "190px"}} onClick={() => setActiveDropdown("none")}>
+                        <AnchoredPopup anchorRef={sortRef} active={activeDropdown === "sort"} 
+                            placement="bottom" zIndex={850} className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 
+                            onClick={() => setActiveDropdown("none")}>
                             <div className="item-dropdown-row" onClick={() => setSortType("random")}>
                                 <span className="item-dropdown-text">{i18n.sort.random}</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("date")}>
                                 <span className="item-dropdown-text">{i18n.sort.date}</span>
                             </div>
-                        </div>
+                        </AnchoredPopup>
                     </div>
                     {mobile ? <div className="item-row">{getNewThreadButton()}</div> : null}
                     {isLoading && <LoadingSpinner/>}

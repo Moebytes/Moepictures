@@ -19,6 +19,7 @@ import LinkIcon from "../assets/svg/link.svg"
 import DetailsIcon from "../assets/svg/details.svg"
 import HexcolorIcon from "../assets/svg/hash.svg"
 import CodeblockIcon from "../assets/svg/codeblock.svg"
+import AnchoredPopup from "./AnchoredPopup"
 import "./styles/minitextbox.less"
 
 export interface MiniTextBoxRef {
@@ -85,32 +86,6 @@ const MiniTextBox = forwardRef<MiniTextBoxRef, Props>((props, ref) => {
         updatePreviewText()
     }, [previewMode])
 
-    const getEmojiMarginRight = () => {
-        if (typeof document === "undefined") return "0px"
-        let elementName = ".minitextbox-textarea"
-        const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
-        const rect = props.emojiRef.current?.getBoundingClientRect()
-        if (!rect || !bodyRect) return "0px"
-        const raw = bodyRect.right - rect.right
-        let offset = -100
-        if (props.bio) offset = 500
-        if (mobile) offset -= 0
-        return `${raw + offset}px`
-    }
-
-    const getEmojiMarginBottom = () => {
-        if (typeof document === "undefined") return "0px"
-        let elementName = ".minitextbox-textarea"
-        const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
-        const rect = props.emojiRef.current?.getBoundingClientRect()
-        if (!rect || !bodyRect) return "0px"
-        const raw = bodyRect.bottom - rect.bottom
-        let offset = props.type === "comment" ? 100 : 160
-        if (props.bio) offset = 50
-        if (mobile) offset += 0
-        return `${raw + offset}px`
-    }
-
     const emojiGrid = () => {
         let rows = [] as React.ReactElement[]
         let rowAmount = 7
@@ -132,11 +107,11 @@ const MiniTextBox = forwardRef<MiniTextBoxRef, Props>((props, ref) => {
         }
 
         return (
-            <div className={`minitextbox-emoji-grid ${showEmojiDropdown ? "" : "hide-minitextbox-emoji-grid"}`}
-            onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}
-            style={{marginRight: getEmojiMarginRight(), marginBottom: getEmojiMarginBottom()}}>
+            <AnchoredPopup anchorRef={props.emojiRef} active={showEmojiDropdown} 
+                placement="top" scrollInside zIndex={7000} className={`minitextbox-emoji-grid ${showEmojiDropdown ? "" : "hide-minitextbox-emoji-grid"}`}
+                onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 {rows}
-            </div>
+            </AnchoredPopup>
         )
     }
 

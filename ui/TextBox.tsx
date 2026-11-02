@@ -25,6 +25,7 @@ import DetailsIcon from "../assets/svg/details.svg"
 import HexcolorIcon from "../assets/svg/hash.svg"
 import CodeblockIcon from "../assets/svg/codeblock.svg"
 import {ThreadUser, MessageUser} from "../types/Types"
+import AnchoredPopup from "./AnchoredPopup"
 import "./styles/textbox.less"
 
 export interface TextBoxRef {
@@ -96,28 +97,6 @@ const TextBox = forwardRef<TextBoxRef, Props>((props, ref) => {
         updatePreviewText()
     }, [previewMode])
 
-    const getEmojiMarginRight = () => {
-        if (typeof document === "undefined") return "0px"
-        const rect = emojiRef.current?.getBoundingClientRect()
-        if (!rect) return "0px"
-        const raw = window.innerWidth - rect.right
-        let offset = -145
-        if (mobile) offset -= 20
-        return `${raw + offset}px`
-    }
-
-    const getEmojiMarginBottom = () => {
-        if (typeof document === "undefined") return "0px"
-        let elementName = ".textbox-textarea"
-        const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
-        const rect = emojiRef.current?.getBoundingClientRect()
-        if (!rect || !bodyRect) return "0px"
-        const raw = bodyRect.bottom - rect.bottom
-        let offset = 110
-        if (mobile) offset += 0
-        return `${raw + offset}px`
-    }
-
     const emojiGrid = () => {
         let rows = [] as React.ReactElement[]
         let rowAmount = 7
@@ -138,10 +117,10 @@ const TextBox = forwardRef<TextBoxRef, Props>((props, ref) => {
             if (items.length) rows.push(<div className="emoji-row">{items}</div>)
         }
         return (
-            <div className={`emoji-grid ${showEmojiDropdown ? "" : "hide-emoji-grid"}`}
-            style={{marginRight: getEmojiMarginRight(), marginBottom: getEmojiMarginBottom()}}>
+            <AnchoredPopup anchorRef={emojiRef} active={showEmojiDropdown} 
+                placement="top" scrollInside zIndex={5000} className={`emoji-grid ${showEmojiDropdown ? "" : "hide-emoji-grid"}`}>
                 {rows}
-            </div>
+            </AnchoredPopup>
         )
     }
 

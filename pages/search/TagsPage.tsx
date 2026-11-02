@@ -27,6 +27,7 @@ import TagRow from "../../components/search/TagRow"
 import LoadingSpinner from "../../components/search/LoadingSpinner"
 import PageControls from "../../components/site/PageControls"
 import {TagSearch, TagSort, TagType} from "../../types/Types"
+import AnchoredPopup from "../../ui/AnchoredPopup"
 import "./styles/itemspage.less"
 
 let limit = 200
@@ -156,21 +157,6 @@ const TagsPage: React.FunctionComponent = (props) => {
         setTagsPage(page)
     }, [page])
 
-    const getSortMargin = () => {
-        const rect = sortRef.current?.getBoundingClientRect()
-        if (!rect) return "0px"
-        const raw = window.innerWidth - rect.right
-        let offset = 0
-        if (sortType === "random") offset = -15
-        if (sortType === "date") offset = -30
-        if (sortType === "alphabetic") offset = -10
-        if (sortType === "posts") offset = -30
-        if (sortType === "image") offset = -25
-        if (sortType === "aliases") offset = -25
-        if (mobile) offset += 12
-        return `${raw + offset}px`
-    }
-
     const getTypeMargin = () => {
         const rect = typeRef.current?.getBoundingClientRect()
         if (!rect) return "0px"
@@ -276,8 +262,9 @@ const TagsPage: React.FunctionComponent = (props) => {
                             <PagesIcon className="itemsort-img"/>}
                             <span className="itemsort-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                         </div> : null}
-                        <div className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 
-                        style={{marginRight: getSortMargin(), top: mobile ? "220px" : "190px"}} onClick={() => setActiveDropdown("none")}>
+                        <AnchoredPopup anchorRef={sortRef} active={activeDropdown === "sort"} 
+                            placement="bottom" zIndex={850} className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 
+                            onClick={() => setActiveDropdown("none")}>
                             <div className="item-dropdown-row" onClick={() => setSortType("random")}>
                                 <span className="item-dropdown-text">{i18n.sort.random}</span>
                             </div>
@@ -299,7 +286,7 @@ const TagsPage: React.FunctionComponent = (props) => {
                             <div className="item-dropdown-row" onClick={() => setSortType("length")}>
                                 <span className="item-dropdown-text">{i18n.sort.length}</span>
                             </div>
-                        </div>
+                        </AnchoredPopup>
                         {getTypeJSX()}
                         <div className={`item-dropdown ${activeDropdown === "type" ? "" : "hide-item-dropdown"}`} 
                         style={{marginRight: getTypeMargin(), top: mobile ? "220px" : "190px"}} onClick={() => setActiveDropdown("none")}>

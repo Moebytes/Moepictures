@@ -62,6 +62,7 @@
     "@aws-sdk/client-s3": "^3.1015.0",
     "@ffmpeg/ffmpeg": "^0.12.15",
     "@ffmpeg/util": "^0.12.2",
+    "@floating-ui/react-dom": "^2.1.9",
     "@napi-rs/canvas": "^0.1.97",
     "@pixiv/three-vrm": "^3.5.1",
     "@react-email/components": "^1.0.10",

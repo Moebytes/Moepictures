@@ -18,6 +18,7 @@ import PauseIcon from "../../assets/svg/pause.svg"
 import FullscreenIcon from "../../assets/svg/fullscreen.svg"
 import path from "path"
 import functions from "../../functions/Functions"
+import AnchoredPopup from "../../ui/AnchoredPopup"
 
 let timer = null as any
 let timeout = null as any
@@ -315,15 +316,6 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
         window.URL.revokeObjectURL(gif)
     }
 
-    const getSpeedMarginRight = () => {
-        const controlRect = gifControls.current?.getBoundingClientRect()
-        const rect = gifSpeedRef.current?.getBoundingClientRect()
-        if (!rect || !controlRect) return "400px"
-        const raw = controlRect.right - rect.right
-        let offset = -5
-        return `${raw + offset}px`
-    }
-
     const controlMouseEnter = () => {
         if (gifControls.current) gifControls.current.style.opacity = "1"
     }
@@ -362,8 +354,9 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
                         <FullscreenIcon className="gif-control-img" onClick={() => toggleFullscreen()}/>
                     </div> 
                 </div>
-                <div className={`gif-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), 
-                    marginTop: "-280px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <AnchoredPopup anchorRef={gifSpeedRef} active={showSpeedDropdown} placement="top" zIndex={1300} 
+                    className={`gif-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} 
+                    onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(4); setShowSpeedDropdown(false)}}>
                         <span className="gif-speed-dropdown-text">4x</span>
                     </div>
@@ -391,7 +384,7 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
                     <div className="gif-speed-dropdown-item" onClick={() => {setSpeed(0.25); setShowSpeedDropdown(false)}}>
                         <span className="gif-speed-dropdown-text">0.25x</span>
                     </div>
-                </div>
+                </AnchoredPopup>
             </div>
         )
         return containerRef.current ? createPortal(controls, containerRef.current) : null

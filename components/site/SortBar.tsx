@@ -71,6 +71,7 @@ import functions from "../../functions/Functions"
 import permissions from "../../structures/Permissions"
 import Filters from "../../ui/Filters"
 import {PostSort} from "../../types/Types"
+import AnchoredPopup from "../../ui/AnchoredPopup"
 import "./styles/sortbar.less"
 
 let interval = null as any
@@ -103,8 +104,6 @@ const SortBar: React.FunctionComponent = (props) => {
     const {posts} = useCacheSelector()
     const {setPosts} = useCacheActions()
     const [mouseOver, setMouseOver] = useState(false)
-    const [dropLeft, setDropLeft] = useState(0)
-    const [dropTop, setDropTop] = useState(-2)
     const imageRef = useRef<HTMLDivElement>(null)
     const ratingRef = useRef<HTMLDivElement>(null)
     const styleRef = useRef<HTMLDivElement>(null)
@@ -118,46 +117,15 @@ const SortBar: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const clickHandler = () => {
-            if (activeDropdown !== "filters") {
-                if (filterDropActive) setFilterDropActive(false)
-            }
-            if (mobile) setDropTop(21)
-            if (functions.dom.scrolledToTop()) setDropTop(-2)
-            if (activeDropdown === "none") return
-        }
-        const scrollHandler = () => {
-            if (functions.dom.scrolledToTop()) return setDropTop(-2)
-            let newDropTop = hideTitlebar ? -Number(document.querySelector(".titlebar")?.clientHeight) - 2 : 0
-            if (mobile) newDropTop = 23
-            if (dropTop === newDropTop) return
-            setDropTop(newDropTop - 2)
+            if (activeDropdown !== "filters" && filterDropActive) setFilterDropActive(false)
         }
         window.addEventListener("mousedown", clickHandler)
-        window.addEventListener("scroll", scrollHandler)
-        return () => {
-            window.removeEventListener("mousedown", clickHandler)
-            window.removeEventListener("scroll", scrollHandler)
-        }
-    })
+        return () => window.removeEventListener("mousedown", clickHandler)
+    }, [activeDropdown, filterDropActive])
 
     useEffect(() => {
         setActiveDropdown("none")
-        if (hideSidebar || mobile) {
-            setDropLeft(0)
-        } else {
-            setDropLeft(-Number(document.querySelector(".sidebar")?.clientWidth || 0))
-        }
-    }, [hideSidebar, mobile])
-
-    useEffect(() => {
-        setActiveDropdown("none")
-        if (hideTitlebar) {
-            if (functions.dom.scrolledToTop()) return setDropTop(-2)
-            setDropTop(-Number(document.querySelector(".titlebar")?.clientHeight) - 4)
-        } else {
-            setDropTop(-2)
-        }
-    }, [hideTitlebar])
+    }, [hideSidebar, mobile, hideTitlebar])
 
     const hideTheSidebar = () => {
         const newValue = !hideSidebar
@@ -253,24 +221,6 @@ const SortBar: React.FunctionComponent = (props) => {
         }
     }
 
-    const getImageMargin = () => {
-        if (mobile) return "40px"
-        const rect = imageRef.current?.getBoundingClientRect()
-        if (!rect) return "290px"
-        const raw = rect.x
-        let offset = 0
-        if (imageType === "all") offset = -40
-        if (imageType === "image") offset = -30
-        if (imageType === "animation") offset = -10
-        if (imageType === "video") offset = -25
-        if (imageType === "comic") offset = -25
-        if (imageType === "audio") offset = -25
-        if (imageType === "model") offset = -25
-        if (imageType === "live2d") offset = -25
-        if (!session.username) offset += 20
-        return `${raw + offset}px`
-    }
-
     const getRatingJSX = () => {
         if (ratingType === "cute") {
             return (
@@ -334,22 +284,6 @@ const SortBar: React.FunctionComponent = (props) => {
         } else {
             return <AllIcon className="sortbar-img rotate" style={{height: "30px"}} onClick={onClick}/>
         }
-    }
-
-    const getRatingMargin = () => {
-        if (mobile) return "90px"
-        const rect = ratingRef.current?.getBoundingClientRect()
-        if (!rect) return "325px"
-        const raw = rect.x
-        let offset = 0
-        if (ratingType === "all") offset = -25
-        if (ratingType === "all+l") offset = -10
-        if (ratingType === "cute") offset = -10
-        if (ratingType === "sexy") offset = -10
-        if (ratingType === "erotic") offset = -5
-        if (ratingType === "lewd") offset = -10
-        if (!session.username) offset += 10
-        return `${raw + offset}px`
     }
 
     const getStyleJSX = () => {
@@ -453,25 +387,6 @@ const SortBar: React.FunctionComponent = (props) => {
         }
     }
 
-    const getStyleMargin = () => {
-        if (mobile) return "115px"
-        const rect = styleRef.current?.getBoundingClientRect()
-        if (!rect) return "395px"
-        const raw = rect.x
-        let offset = 0
-        if (styleType === "all") offset = -25
-        if (styleType === "all+s") offset = -15
-        if (styleType === "2d") offset = -25
-        if (styleType === "3d") offset = -25
-        if (styleType === "pixel") offset = -15
-        if (styleType === "chibi") offset = -15
-        if (styleType === "daki") offset = -15
-        if (styleType === "sketch") offset = -10
-        if (styleType === "lineart") offset = -5
-        if (styleType === "promo") offset = -10
-        return `${raw + offset}px`
-    }
-
     const resetAll = () => {
         setImageType("all")
         setRatingType("all")
@@ -488,63 +403,6 @@ const SortBar: React.FunctionComponent = (props) => {
         )
     }
 
-    const getSizeMargin = () => {
-        const rect = sizeRef.current?.getBoundingClientRect()
-        if (!rect || mobile) return "25px"
-        const raw = window.innerWidth - rect.right
-        let offset = 0
-        if (sizeType === "tiny") offset = -15
-        if (sizeType === "small") offset = -10
-        if (sizeType === "medium") offset = -5
-        if (sizeType === "large") offset = -10
-        if (sizeType === "massive") offset = -5
-        return `${raw + offset}px`
-    }
-
-    const getPageMultiplierMargin = () => {
-        const rect = pageMultiplierRef.current?.getBoundingClientRect()
-        if (!rect || mobile) return "185px"
-        const raw = window.innerWidth - rect.right
-        let offset = -8
-        if (tablet) offset -= 0
-        return `${raw + offset}px`
-    }
-
-    const getSpeedMargin = () => {
-        const rect = speedRef.current?.getBoundingClientRect()
-        if (!rect) return "250px"
-        const raw = window.innerWidth - rect.right
-        let offset = -22
-        if (tablet) offset -= 0
-        return `${raw + offset}px`
-    }
-
-    const getSortMargin = () => {
-        const rect = sortRef.current?.getBoundingClientRect()
-        if (!rect || mobile) return "0px"
-        const raw = window.innerWidth - rect.right
-        let offset = 0
-        if (sortType === "random") offset = -30
-        if (sortType === "date") offset = -30
-        if (sortType === "posted") offset = -30
-        if (sortType === "cuteness") offset = -25
-        if (sortType === "favorites") offset = -20
-        if (sortType === "variants") offset = -20
-        if (sortType === "parent") offset = -25
-        if (sortType === "child") offset = -30
-        if (sortType === "groups") offset = -30
-        if (sortType === "popularity") offset = -20
-        if (sortType === "bookmarks") offset = -10
-        if (sortType === "tagcount") offset = -30
-        if (sortType === "filesize") offset = -30
-        if (sortType === "aspectRatio") offset = -10
-        if (sortType === "hidden") offset = -30
-        if (sortType === "locked") offset = -30
-        if (sortType === "private") offset = -30
-        if (!session.username) offset += 10
-        return `${raw + offset}px`
-    }
-
     const getSortJSX = () => {
         const getSort = () => {
             if (sortType === "bookmarks") return `${i18n.sort.bookmarks}`
@@ -553,20 +411,12 @@ const SortBar: React.FunctionComponent = (props) => {
         }
         return (
             <div className="sortbar-item" ref={sortRef}>
-                {sortReverse ? 
+                {sortReverse ?
                 <SortReverseIcon className="sortbar-img" onClick={() => setSortReverse(!sortReverse)}/> :
                 <SortIcon className="sortbar-img" onClick={() => setSortReverse(!sortReverse)}/>}
                 <span className="sortbar-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort"); setFilterDropActive(false)}}>{getSort()}</span>
             </div>
         )
-    }
-
-    const getFiltersMargin = () => {
-        const rect = filterRef.current?.getBoundingClientRect()
-        if (!rect) return 30
-        const raw = window.innerWidth - rect.right
-        let offset = -110
-        return raw + offset
     }
 
     const toggleFilterDrop = () => {
@@ -841,24 +691,24 @@ const SortBar: React.FunctionComponent = (props) => {
             <div className={`mobile-sortbar ${relative ? "mobile-sortbar-relative" : ""} ${mobileScrolling ? "hide-mobile-sortbar" : ""}`}>
                 <UploadIcon className="sortbar-img" style={{height: "30px"}} onClick={() => navigate("/upload")}/>
                 <DownloadIcon className="sortbar-img" style={{height: "30px"}} onClick={bulkDownload}/>
-                {getMobileImageJSX()}
-                {getMobileRatingJSX()}
-                {getMobileStyleJSX()}
+                <div ref={imageRef}>{getMobileImageJSX()}</div>
+                <div ref={ratingRef}>{getMobileRatingJSX()}</div>
+                <div ref={styleRef}>{getMobileStyleJSX()}</div>
                 {scroll ? <>
                 {autoScroll ?
                 <AutoscrollIcon className="sortbar-img-pink" onClick={() => toggleAutoScroll()}/> :
                 <AutoscrollIcon className="sortbar-img" onClick={() => toggleAutoScroll()}/>}
                 </> : 
-                <span className="sortbar-text-alt" onClick={() => togglePageMultiplierDrop()}>{pageMultiplier}x</span>}
+                <div ref={pageMultiplierRef}><span className="sortbar-text-alt" onClick={() => togglePageMultiplierDrop()}>{pageMultiplier}x</span></div>}
                 {scroll ? 
                 <ScrollIcon className="sortbar-img" style={{height: "30px"}} onClick={() => toggleScroll()}/> :
                 <PagesIcon className="sortbar-img" style={{height: "30px"}} onClick={() => toggleScroll()}/>}
                 <SquareIcon className="sortbar-img" style={{height: "30px"}} onClick={() => cycleTiling()}/>
-                <FiltersIcon className="sortbar-img" style={{height: "30px"}} onClick={() => toggleFilterDrop()}/>
-                <SizeIcon className="sortbar-img" style={{height: "30px"}} onClick={() => {setActiveDropdown(activeDropdown === "size" ? "none" : "size"); setFilterDropActive(false)}}/>
-                {sortReverse ? 
+                <div ref={filterRef}><FiltersIcon className="sortbar-img" style={{height: "30px"}} onClick={() => toggleFilterDrop()}/></div>
+                <div ref={sizeRef}><SizeIcon className="sortbar-img" style={{height: "30px"}} onClick={() => {setActiveDropdown(activeDropdown === "size" ? "none" : "size"); setFilterDropActive(false)}}/></div>
+                <div ref={sortRef}>{sortReverse ?
                 <SortReverseIcon className="sortbar-img" style={{height: "30px"}} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort"); setFilterDropActive(false)}}/> :
-                <SortIcon className="sortbar-img" style={{height: "30px"}} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort"); setFilterDropActive(false)}}/>}
+                <SortIcon className="sortbar-img" style={{height: "30px"}} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort"); setFilterDropActive(false)}}/>}</div>
             </div>
         )
         
@@ -984,8 +834,9 @@ const SortBar: React.FunctionComponent = (props) => {
         {sortBarJSX()}
         <div className="sortbar-dropdowns"
         onMouseEnter={() => setEnableDrag(false)}>
-            <div className={`dropdown ${activeDropdown === "image" ? "" : "hide-dropdown"}`}
-            style={{marginLeft: getImageMargin(), left: `${dropLeft}px`, top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
+            <AnchoredPopup anchorRef={imageRef} active={activeDropdown === "image"} 
+                placement="bottom" zIndex={850} className={`dropdown ${activeDropdown === "image" ? "" : "hide-dropdown"}`} 
+                onClick={() => setActiveDropdown("none")}>
                 <div className="sortbar-dropdown-row" onClick={() => setImageType("all")} >
                     <AllIcon className="sortbar-dropdown-img rotate"/>
                     <span className="sortbar-dropdown-text">{i18n.tag.all}</span>
@@ -1020,9 +871,10 @@ const SortBar: React.FunctionComponent = (props) => {
                     <span className="sortbar-dropdown-text">{i18n.sortbar.type.model}</span>
                 </div>
                 </> : null}
-            </div>
-            <div className={`dropdown ${activeDropdown === "rating" ? "" : "hide-dropdown"}`} 
-            style={{marginLeft: getRatingMargin(), left: `${dropLeft}px`, top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
+            </AnchoredPopup>
+            <AnchoredPopup anchorRef={ratingRef} active={activeDropdown === "rating"} 
+                placement="bottom" zIndex={850} className={`dropdown ${activeDropdown === "rating" ? "" : "hide-dropdown"}`} 
+                onClick={() => setActiveDropdown("none")}>
                 <div className="sortbar-dropdown-row" onClick={() => setRatingType("all")}>
                     <AllIcon className="sortbar-dropdown-img rotate"/>
                     <span className="sortbar-dropdown-text">{i18n.tag.all}</span>
@@ -1049,13 +901,15 @@ const SortBar: React.FunctionComponent = (props) => {
                     <LewdIcon className="sortbar-dropdown-img-red"/>
                     <span style={{color: "var(--r18Color)"}} className="sortbar-dropdown-text">{i18n.sortbar.rating.lewd}</span>
                 </div> : null}
-            </div>
-            <div className={`dropdown ${activeDropdown === "style" ? "" : "hide-dropdown"}`} 
-            style={{marginLeft: getStyleMargin(), left: `${dropLeft}px`, top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
+            </AnchoredPopup>
+            <AnchoredPopup anchorRef={styleRef} active={activeDropdown === "style"} 
+                placement="bottom" zIndex={850} className={`dropdown ${activeDropdown === "style" ? "" : "hide-dropdown"}`} 
+                onClick={() => setActiveDropdown("none")}>
                 {styleDropdownJSX()}
-            </div>
-            <div className={`dropdown-right ${activeDropdown === "page-multiplier" ? "" : "hide-dropdown"}`} 
-            style={{marginRight: getPageMultiplierMargin(), top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
+            </AnchoredPopup>
+            <AnchoredPopup anchorRef={pageMultiplierRef} active={activeDropdown === "page-multiplier"} 
+                placement="bottom" zIndex={850} className={`dropdown-right ${activeDropdown === "page-multiplier" ? "" : "hide-dropdown"}`} 
+                onClick={() => setActiveDropdown("none")}>
                 <div className="sortbar-dropdown-row" onClick={() => setPageMultiplier(1)}>
                     <span className="sortbar-dropdown-text">1x</span>
                 </div>
@@ -1071,9 +925,10 @@ const SortBar: React.FunctionComponent = (props) => {
                 <div className="sortbar-dropdown-row" onClick={() => setPageMultiplier(5)}>
                     <span className="sortbar-dropdown-text">5x</span>
                 </div>
-            </div>
-            <div className={`dropdown-right ${activeDropdown === "speed" ? "" : "hide-dropdown"}`} 
-            style={{marginRight: getSpeedMargin(), top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
+            </AnchoredPopup>
+            <AnchoredPopup anchorRef={speedRef} active={activeDropdown === "speed"} 
+                placement="bottom" zIndex={850} className={`dropdown-right ${activeDropdown === "speed" ? "" : "hide-dropdown"}`} 
+                onClick={() => setActiveDropdown("none")}>
                 <div className="sortbar-dropdown-row" onClick={() => setSpeed(4)}>
                     <span className="sortbar-dropdown-text">4x</span>
                 </div>
@@ -1101,9 +956,10 @@ const SortBar: React.FunctionComponent = (props) => {
                 <div className="sortbar-dropdown-row" onClick={() => setSpeed(0.25)}>
                     <span className="sortbar-dropdown-text">0.25x</span>
                 </div>
-            </div>
-            <div className={`dropdown-right ${activeDropdown === "size" ? "" : "hide-dropdown"}`} 
-            style={{marginRight: getSizeMargin(), top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
+            </AnchoredPopup>
+            <AnchoredPopup anchorRef={sizeRef} active={activeDropdown === "size"} 
+                placement="bottom" zIndex={850} className={`dropdown-right ${activeDropdown === "size" ? "" : "hide-dropdown"}`} 
+                onClick={() => setActiveDropdown("none")}>
                 <div className="sortbar-dropdown-row" onClick={() => setSizeType("tiny")}>
                     <span className="sortbar-dropdown-text">{i18n.sortbar.size.tiny}</span>
                 </div>
@@ -1119,9 +975,10 @@ const SortBar: React.FunctionComponent = (props) => {
                 <div className="sortbar-dropdown-row" onClick={() => setSizeType("massive")}>
                     <span className="sortbar-dropdown-text">{i18n.sortbar.size.massive}</span>
                 </div>
-            </div>
-            <div className={`dropdown-right ${activeDropdown === "sort" ? "" : "hide-dropdown"}`} 
-            style={{marginRight: getSortMargin(), top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
+            </AnchoredPopup>
+            <AnchoredPopup anchorRef={sortRef} active={activeDropdown === "sort"} placement="bottom" 
+                zIndex={850} className={`dropdown-right ${activeDropdown === "sort" ? "" : "hide-dropdown"}`} 
+                onClick={() => setActiveDropdown("none")}>
                 {mobile ? 
                 <div className="sortbar-dropdown-row" onClick={() => setSortReverse(!sortReverse)}>
                     <span className="sortbar-dropdown-text">{i18n.sort.reverse}</span>
@@ -1181,8 +1038,8 @@ const SortBar: React.FunctionComponent = (props) => {
                     <span className="sortbar-dropdown-text">{i18n.sort.private}</span>
                 </div>
                 </> : null}
-            </div>
-            <Filters active={activeDropdown === "filters"} right={getFiltersMargin()} top={dropTop}/>
+            </AnchoredPopup>
+            <Filters active={activeDropdown === "filters"} anchorRef={filterRef} placement="bottom"/>
         </div>
         </>
     )

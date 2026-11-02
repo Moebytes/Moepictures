@@ -5,6 +5,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import React from "react"
+import {Placement} from "@floating-ui/react-dom"
 import Slider from "react-slider"
 import ImageIcon from "../assets/svg/filter-image.svg"
 import MusicIcon from "../assets/svg/filter-music.svg"
@@ -25,21 +26,19 @@ import PhaserIcon from "../assets/svg/phaser.svg"
 import BitcrushIcon from "../assets/svg/bitcrush.svg"
 import functions from "../functions/Functions"
 import {useThemeSelector, useFilterActions, useFilterSelector, useSessionSelector, 
-useActiveActions, useActiveSelector, useLayoutSelector} from "../store"
+useActiveActions, useActiveSelector} from "../store"
+import AnchoredPopup from "./AnchoredPopup"
 import "./styles/filters.less"
 
 interface Props {
     active: boolean
-    right: number
-    top: number
-    origin?: string
-    useMargin?: boolean
+    anchorRef: React.RefObject<Element | null>
+    placement?: Placement
 }
 
 const Filters: React.FunctionComponent<Props> = (props) => {
     const {siteHue, siteSaturation, siteLightness, i18n} = useThemeSelector()
     const {session} = useSessionSelector()
-    const {mobile} = useLayoutSelector()
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, splatter,
     lowpass, highpass, reverb, delay, phaser, bitcrush} = useFilterSelector()
     const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate, setSplatter,
@@ -149,26 +148,11 @@ const Filters: React.FunctionComponent<Props> = (props) => {
         )
     }
 
-    const getMarginRight = () => {
-        let raw = props.right
-        let offset = 0
-        if (showMusicFilters) offset += 5
-        return `${raw + offset}px`
-    }
-
-    const getMarginTop = () => {
-        let raw = props.top
-        let offset = 0
-        if (props.origin === "bottom" && showMusicFilters) offset += 100
-        if (mobile) offset += props.origin === "bottom" ? 60 : 0
-        return `${raw + offset}px`
-    }
-
     return (
-        <div className={`filter-dropdown ${props.active ? "" : "hide-filter-dropdown"}`} 
-        style={{marginRight: getMarginRight(), marginTop: getMarginTop(), transformOrigin: props.origin === "bottom" ? "bottom" : "top"}}>
+        <AnchoredPopup anchorRef={props.anchorRef} active={props.active} placement={props.placement}
+            className={`filter-dropdown ${props.active ? "" : "hide-filter-dropdown"}`}>
                 {showMusicFilters ? musicFiltersJSX() : imageFiltersJSX()}
-        </div>
+        </AnchoredPopup>
     )
 }
 

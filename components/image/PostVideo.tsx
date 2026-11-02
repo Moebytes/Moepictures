@@ -27,6 +27,7 @@ import VolumeMuteIcon from "../../assets/svg/volume-mute.svg"
 import path from "path"
 import mime from "mime-types"
 import functions from "../../functions/Functions"
+import AnchoredPopup from "../../ui/AnchoredPopup"
 
 let timer = null as any
 let timeout = null as any
@@ -45,7 +46,7 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
     const videoControls = useRef<HTMLDivElement>(null)
     const videoSliderRef = useRef<Slider>(null)
     const videoSpeedRef = useRef<HTMLImageElement>(null)
-    const videoVolumeRef = useRef<HTMLImageElement>(null)
+    const videoVolumeRef = useRef<HTMLDivElement>(null)
     const videoVolumeSliderRef = useRef<Slider>(null)
     const [video, setVideo] = useState("")
     const [encodingOverlay, setEncodingOverlay] = useState(false)
@@ -412,24 +413,6 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
         window.URL.revokeObjectURL(video)
     }
 
-    const getSpeedMarginRight = () => {
-        const controlRect = videoControls.current?.getBoundingClientRect()
-        const rect = videoSpeedRef.current?.getBoundingClientRect()
-        if (!rect || !controlRect) return "400px"
-        const raw = controlRect.right - rect.right
-        let offset = -2
-        return `${raw + offset}px`
-    }
-
-    const getVolumeMarginRight = () => {
-        const controlRect = videoControls.current?.getBoundingClientRect()
-        const rect = videoVolumeRef.current?.getBoundingClientRect()
-        if (!rect || !controlRect) return "400px"
-        const raw = controlRect.right - rect.right
-        let offset = -7
-        return `${raw + offset}px`
-    }
-
     const changePreservesPitch = (value?: boolean) => {
         const secondsProgress = (progress / 100) * duration
         setPreservePitch(value !== undefined ? value : !preservePitch)
@@ -527,16 +510,17 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
                     <div className="video-control-row-container">
                         <FullscreenIcon className="video-control-img" onClick={() => toggleFullscreen()}/>
                     </div> 
-                    <div className="video-control-row-container" onMouseEnter={() => setShowVolumeSlider(true)} onMouseLeave={() => setShowVolumeSlider(false)}>
+                    <div className="video-control-row-container" ref={videoVolumeRef} onMouseEnter={() => setShowVolumeSlider(true)} onMouseLeave={() => setShowVolumeSlider(false)}>
                         {volume > 0.5 ?
-                        <VolumeIcon className="video-control-img" ref={videoVolumeRef} onClick={mute}/> :
+                        <VolumeIcon className="video-control-img" onClick={mute}/> :
                         volume > 0 ?
-                        <VolumeLowIcon className="video-control-img" ref={videoVolumeRef} onClick={mute}/> :
-                        <VolumeMuteIcon className="video-control-img" ref={videoVolumeRef} onClick={mute}/>}
+                        <VolumeLowIcon className="video-control-img" onClick={mute}/> :
+                        <VolumeMuteIcon className="video-control-img" onClick={mute}/>}
                     </div> 
                 </div>
-                <div className={`video-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getSpeedMarginRight(), marginTop: "-240px"}}
-                onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <AnchoredPopup anchorRef={videoSpeedRef} active={showSpeedDropdown} placement="top" 
+                    zIndex={1300} className={`video-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`}
+                    onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="video-speed-dropdown-item" onClick={() => {setSpeed(4); setShowSpeedDropdown(false)}}>
                         <span className="video-speed-dropdown-text">4x</span>
                     </div>
@@ -564,12 +548,13 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
                     <div className="video-speed-dropdown-item" onClick={() => {setSpeed(0.25); setShowSpeedDropdown(false)}}>
                         <span className="video-speed-dropdown-text">0.25x</span>
                     </div>
-                </div>
-                <div className={`video-volume-dropdown ${showVolumeSlider ? "" : "hide-volume-dropdown"}`} style={{marginRight: getVolumeMarginRight(), marginTop: "-110px"}}
+                </AnchoredPopup>
+                <AnchoredPopup anchorRef={videoVolumeRef} active={showVolumeSlider} placement="top" 
+                allowFlip={false} zIndex={1300} className={`video-volume-dropdown ${showVolumeSlider ? "" : "hide-volume-dropdown"}`}
                 onMouseEnter={() => {setShowVolumeSlider(true); setEnableDrag(false)}} onMouseLeave={() => {setShowVolumeSlider(false); setEnableDrag(true)}}>
                     <Slider ref={videoVolumeSliderRef} invert orientation="vertical" className="volume-slider" trackClassName="volume-slider-track" thumbClassName="volume-slider-thumb"
                     value={volume} min={0} max={1} step={0.01} onChange={(value) => changeVolume(value)}/>
-                </div>
+                </AnchoredPopup>
             </div>
         )
         return containerRef.current ? createPortal(controls, containerRef.current) : null

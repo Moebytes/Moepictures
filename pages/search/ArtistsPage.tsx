@@ -25,6 +25,7 @@ import ArtistRow from "../../components/search/ArtistRow"
 import LoadingSpinner from "../../components/search/LoadingSpinner"
 import PageControls from "../../components/site/PageControls"
 import {TagCategorySearch, CategorySort} from "../../types/Types"
+import AnchoredPopup from "../../ui/AnchoredPopup"
 import "./styles/itemspage.less"
 
 let pageAmount = 10
@@ -146,18 +147,6 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         setArtistsPage(page)
     }, [items, page])
 
-    const getSortMargin = () => {
-        const rect = sortRef.current?.getBoundingClientRect()
-        if (!rect) return "0px"
-        const raw = window.innerWidth - rect.right
-        let offset = 0
-        if (sortType === "random") offset = -25
-        if (sortType === "cuteness") offset = -25
-        if (sortType === "posts") offset = -30
-        if (sortType === "alphabetic") offset = -10
-        return `${raw + offset}px`
-    }
-
     const getSortJSX = () => {
         return (
             <div className="itemsort-item" ref={sortRef}>
@@ -206,8 +195,9 @@ const ArtistsPage: React.FunctionComponent = (props) => {
                             <PagesIcon className="itemsort-img"/>}
                             <span className="itemsort-text">{scroll ? i18n.sortbar.scrolling : i18n.sortbar.pages}</span>
                         </div> : null}
-                        <div className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 
-                        style={{marginRight: getSortMargin(), top: mobile ? "220px" : "190px"}} onClick={() => setActiveDropdown("none")}>
+                        <AnchoredPopup anchorRef={sortRef} active={activeDropdown === "sort"} 
+                            placement="bottom" zIndex={850} className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 
+                            onClick={() => setActiveDropdown("none")}>
                             <div className="item-dropdown-row" onClick={() => setSortType("random")}>
                                 <span className="item-dropdown-text">{i18n.sort.random}</span>
                             </div>
@@ -220,7 +210,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
                             <div className="item-dropdown-row" onClick={() => setSortType("cuteness")}>
                                 <span className="item-dropdown-text">{i18n.sort.cuteness}</span>
                             </div>
-                        </div>
+                        </AnchoredPopup>
                     </div>
                     {isLoading && <LoadingSpinner/>}
                     <div className="items-container">
