@@ -159,18 +159,22 @@ export default class SQLFavorite {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
-                    SELECT posts.*, "favgroup map"."order", json_agg(DISTINCT images.*) AS images
+                    SELECT posts.*, image_data.images
                     FROM posts
-                    JOIN images ON images."postID" = posts."postID"
-                    JOIN "favgroup map" ON "favgroup map"."postID" = posts."postID"
-                    GROUP BY posts."postID", "favgroup map"."order"
+                    CROSS JOIN LATERAL (
+                        SELECT json_agg(images.* ORDER BY images."order", images."imageID") AS images
+                        FROM images WHERE images."postID" = posts."postID"
+                    ) image_data
+                    WHERE posts."postID" = $1 AND image_data.images IS NOT NULL
                 )
-                SELECT favgroups.*, json_agg(post_json.* ORDER BY post_json."order" ASC) AS posts,
-                COUNT(DISTINCT post_json."postID") AS "postCount"
-                FROM "favgroup map"
-                JOIN favgroups ON favgroups."favgroupID" = "favgroup map"."favgroupID"
+                SELECT favgroups.*,
+                json_agg((to_jsonb(post_json) || jsonb_build_object('order', "favgroup map"."order"))
+                    ORDER BY "favgroup map"."order" ASC) AS posts,
+                COUNT(*) AS "postCount"
+                FROM favgroups
+                JOIN "favgroup map" ON "favgroup map"."favgroupID" = favgroups."favgroupID"
                 JOIN post_json ON post_json."postID" = "favgroup map"."postID"
-                WHERE "favgroup map"."postID" = $1 AND favgroups."username" = $2
+                WHERE favgroups."username" = $2 AND "favgroup map"."postID" = $1
                 GROUP BY favgroups."favgroupID"
             `),
             values: [postID, username]
@@ -183,14 +187,22 @@ export default class SQLFavorite {
     public static favgroup = async (username: string, slug: string, type = "", rating = "", style = "", 
         sort = "", showChildren = true, sessionUsername = "", tags: string[] = []) => {
         if (!sessionUsername) sessionUsername = username
-        const {postJSON, values} = 
-        SQLQuery.search.boilerplate({tags, i: 3, type, rating, style, sort, showChildren, username: sessionUsername, favgroupOrder: true})
+
+        const condition = /*sql*/`posts."postID" IN (
+            SELECT "favgroup map"."postID" FROM "favgroup map"
+            JOIN favgroups ON favgroups."favgroupID" = "favgroup map"."favgroupID"
+            WHERE favgroups."username" = $1 AND favgroups."slug" = $2
+        )`
+
+        const {postJSON, values} =
+        SQLQuery.search.boilerplate({tags, i: 3, type, rating, style, sort, showChildren, username: sessionUsername, condition})
 
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 ${postJSON}
-                SELECT favgroups.*, COALESCE(json_agg(post_json.* ORDER BY "favgroup map"."order" ASC)
-                    FILTER (WHERE post_json."postID" IS NOT NULL), '[]') AS posts,
+                SELECT favgroups.*, COALESCE(json_agg(
+                    (to_jsonb(post_json) || jsonb_build_object('order', "favgroup map"."order"))
+                    ORDER BY "favgroup map"."order" ASC) FILTER (WHERE post_json."postID" IS NOT NULL), '[]') AS posts,
                 COUNT(DISTINCT post_json."postID") AS "postCount"
                 FROM favgroups
                 LEFT JOIN "favgroup map" ON favgroups."favgroupID" = "favgroup map"."favgroupID"
@@ -209,18 +221,29 @@ export default class SQLFavorite {
     public static favgroups = async (username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                WITH post_json AS (
-                    SELECT posts.*, "favgroup map"."order", json_agg(DISTINCT images.*) AS images
-                    FROM posts
-                    JOIN images ON images."postID" = posts."postID"
-                    JOIN "favgroup map" ON "favgroup map"."postID" = posts."postID"
-                    GROUP BY posts."postID", "favgroup map"."order"
+                WITH user_mappings AS MATERIALIZED (
+                    SELECT "favgroup map".*
+                    FROM favgroups
+                    JOIN "favgroup map" ON "favgroup map"."favgroupID" = favgroups."favgroupID"
+                    WHERE favgroups."username" = $1
+                ), 
+                post_json AS MATERIALIZED (
+                    SELECT posts.*, image_data.images
+                    FROM (SELECT DISTINCT "postID" FROM user_mappings) selected_posts
+                    JOIN posts ON posts."postID" = selected_posts."postID"
+                    CROSS JOIN LATERAL (
+                        SELECT json_agg(images.* ORDER BY images."order", images."imageID") AS images
+                        FROM images WHERE images."postID" = posts."postID"
+                    ) image_data
+                    WHERE image_data.images IS NOT NULL
                 )
-                SELECT favgroups.*, json_agg(post_json.* ORDER BY post_json."order" ASC) AS posts,
-                COUNT(DISTINCT post_json."postID") AS "postCount"
-                FROM "favgroup map"
-                JOIN favgroups ON favgroups."favgroupID" = "favgroup map"."favgroupID"
-                JOIN post_json ON post_json."postID" = "favgroup map"."postID"
+                SELECT favgroups.*,
+                json_agg((to_jsonb(post_json) || jsonb_build_object('order', user_mappings."order"))
+                    ORDER BY user_mappings."order" ASC) AS posts,
+                COUNT(*) AS "postCount"
+                FROM favgroups
+                JOIN user_mappings ON user_mappings."favgroupID" = favgroups."favgroupID"
+                JOIN post_json ON post_json."postID" = user_mappings."postID"
                 WHERE favgroups."username" = $1
                 GROUP BY favgroups."favgroupID"
             `),
