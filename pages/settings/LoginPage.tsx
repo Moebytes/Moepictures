@@ -5,7 +5,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import React, {useEffect, useState, useRef} from "react"
-import {useNavigate} from "react-router-dom"
+import {useNavigate, useLocation} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
@@ -32,7 +32,9 @@ const LoginPage: React.FunctionComponent = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
     const [showPassword, setShowPassword] = useState(false)
-    const [username, setUsername] = useState("")
+    const location = useLocation()
+    const reauthenticate = Boolean(location.state?.reauthenticate)
+    const [username, setUsername] = useState(reauthenticate ? session.username || "" : "")
     const [password, setPassword] = useState("")
     const [captchaResponse, setCaptchaResponse] = useState("")
     const [captcha, setCaptcha] = useState(" ")
@@ -66,9 +68,10 @@ const LoginPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        if (sidebarText !== i18n.sidebar.loginRequired) setSidebarText("")
+        if (reauthenticate) setSidebarText(i18n.sidebar.loginRequired)
+        else if (sidebarText !== i18n.sidebar.loginRequired) setSidebarText("")
         functions.dom.changeTitle(i18n.navbar.login, i18n)
-    }, [i18n])
+    }, [i18n, reauthenticate])
 
     useEffect(() => {
         if (mobile) {
@@ -80,10 +83,10 @@ const LoginPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (!session.cookie) return
-        if (session.username) {
+        if (session.username && !reauthenticate) {
             navigate("/profile")
         }
-    }, [session])
+    }, [session, reauthenticate])
 
     const login = async () => {
         if (!captchaResponse) {
@@ -100,15 +103,17 @@ const LoginPage: React.FunctionComponent = (props) => {
             const result = await functions.http.post("/api/user/login", {username, password, captchaResponse}, session, setSessionFlag)
             invalidateSession()
             setSessionFlag(true)
+            if (result === "2fa") {
+                navigate("/2fa", {state: {reauthenticate}})
+                setError(false)
+                return
+            }
             if (redirect) {
                 await functions.timeout(20)
                 navigate(redirect)
                 setRedirect(null)
             } else {
                 navigate("/posts")
-            }
-            if (result === "2fa") {
-                navigate("/2fa")
             }
             setError(false)
         } catch (err: any) {
@@ -136,7 +141,7 @@ const LoginPage: React.FunctionComponent = (props) => {
                     </Link>
                     <div className="sitepage-row">
                         <span className="sitepage-text">{i18n.labels.username}:</span>
-                        <input className="sitepage-input" type="text" spellCheck={false} value={username} onChange={(event) => setUsername(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null}/>
+                        <input className="sitepage-input" type="text" spellCheck={false} value={username} readOnly={reauthenticate && Boolean(session.username)} onChange={(event) => setUsername(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null}/>
                     </div>
                     <div className="sitepage-row">
                         <span className="sitepage-text">{i18n.labels.password}:</span>

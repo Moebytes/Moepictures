@@ -4,12 +4,12 @@
  * Licensed under CC BY-NC 4.0. See license.txt for details. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import {Dispatcher, ProxyAgent, fetch as proxyFetch} from "undici"
+import {Agent, Client, ProxyAgent, fetch as proxyFetch} from "undici"
 import {lookup} from "dns/promises"
 import {isIP} from "net"
 
 export default class ServerHTTP {
-    private static proxyAgent: ProxyAgent | null = null
+    private static proxyURL: string | null = null
     private static proxyExpiration = 0
 
     public static isPublicIP = (address: string) => {
@@ -43,7 +43,7 @@ export default class ServerHTTP {
         return false
     }
 
-    public static validatePublicURL = async (input: string) => {
+    private static resolvePublicURL = async (input: string) => {
         const url = new URL(input)
         if ((url.protocol !== "http:" && url.protocol !== "https:") || url.username || url.password) {
             throw new Error("Invalid url")
@@ -57,25 +57,62 @@ export default class ServerHTTP {
         if (!addresses.length || addresses.some((entry) => !this.isPublicIP(entry.address))) {
             throw new Error("Invalid url")
         }
+        return {url, addresses}
+    }
+
+    public static validatePublicURL = async (input: string) => {
+        const url = await this.resolvePublicURL(input).then((r) => r.url)
         return url
     }
 
-    public static followRedirect = async (input: string, send: (url: URL) => Promise<Awaited<ReturnType<typeof proxyFetch>>> 
-        = (url) => proxyFetch(url, {method: "HEAD", redirect: "manual"})) => {
-        let current = await this.validatePublicURL(input)
+    private static sendPinned = async (url: URL, addresses: {address: string}[], method: string,
+        headers: {[key: string]: string}, proxyURL?: string) => {
+        const hostname = url.hostname.replace(/^\[|\]$/g, "")
+        const address = addresses[0].address
+        const target = `${isIP(address) === 6 ? `[${address}]` : address}:${url.port || 
+            (url.protocol === "https:" ? "443" : "80")}`
+
+        const dispatcher = proxyURL ? new ProxyAgent({
+            uri: proxyURL,
+            clientFactory: (origin, options) => {
+                const client = new Client(origin, options)
+                const connect = client.connect.bind(client) as any
+                client.connect = ((options: any, callback?: any) => connect({...options, path: target,
+                    headers: {...options.headers, host: target}}, callback)) as typeof client.connect
+                return client
+            }
+        }) : new Agent({connect: {
+            lookup: ((_host: string, options: any, callback: any) => {
+                const entries = addresses.map((entry) => ({address: entry.address, family: isIP(entry.address)}))
+                if (options.all) callback(null, entries)
+                else callback(null, entries[0].address, entries[0].family)
+            }) as any,
+            servername: isIP(hostname) ? undefined : hostname
+        }})
+        try {
+            return await proxyFetch(url, {method, headers, dispatcher, 
+                redirect: "manual", signal: AbortSignal.timeout(60000)})
+        } finally {
+            void dispatcher.close().catch(() => {})
+        }
+    }
+
+    public static followRedirect = async (input: string, method = "HEAD", headers: Record<string, string> = {}, proxyURL?: string) => {
+        let current = await this.resolvePublicURL(input)
         for (let redirects = 0; redirects <= 5; redirects++) {
-            const response = await send(current)
+            const response = await this.sendPinned(current.url, current.addresses, method, headers, proxyURL)
             const location = response.headers.get("location")
             if (response.status < 300 || response.status >= 400 || !location) return response
+            await response.body?.cancel()
             if (redirects === 5) throw new Error("Too many redirects")
-            current = await this.validatePublicURL(new URL(location, current).href)
+            current = await this.resolvePublicURL(new URL(location, current.url).href)
         }
         throw new Error("Too many redirects")
     }
 
     public static getProxy = async () => {
-        if (this.proxyAgent && Date.now() < this.proxyExpiration) {
-            return this.proxyAgent
+        if (this.proxyURL && Date.now() < this.proxyExpiration) {
+            return this.proxyURL
         }
 
         const proxies = await fetch("https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/http.txt")
@@ -83,28 +120,25 @@ export default class ServerHTTP {
             .then((text) => text.split("\n").map((p) => p.trim()).filter(Boolean))
         const proxy = proxies[Math.floor(Math.random() * proxies.length)]
 
-        this.proxyAgent = new ProxyAgent("http://" + proxy)
+        this.proxyURL = "http://" + proxy
         this.proxyExpiration = Date.now() + 60 * 60 * 1000
-        return this.proxyAgent
+        return this.proxyURL
     }
 
     public static proxyFetch = async (link: string, headers: any = {}) => {
         try {
-            const proxyAgent = await this.getProxy()
-            return this.fetch(link, headers, proxyAgent)
+            const proxyURL = await this.getProxy()
+            return await this.fetch(link, headers, proxyURL)
         } catch (e) {
             console.log(e)
             this.proxyExpiration = 0
-            if (this.proxyAgent) {
-                this.proxyAgent.close()
-                this.proxyAgent = null
-            }
+            this.proxyURL = null
             return this.fetch(link, headers)
         }
     }
 
-    public static fetch = async (link: string, headers: any = {}, dispatcher?: Dispatcher) => {
+    public static fetch = async (link: string, headers: any = {}, proxyURL?: string) => {
         if (link.includes("danbooru")) headers["user-agent"] = `user #${process.env.DANBOORU_USER}`
-        return this.followRedirect(link, (url) => proxyFetch(url, {headers, dispatcher, redirect: "manual"}))
+        return this.followRedirect(link, "GET", headers, proxyURL)
     }
 }

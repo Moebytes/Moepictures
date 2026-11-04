@@ -27,6 +27,9 @@ const $2FARoutes = (app: Express) => {
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
             if (!user) return void res.status(400).send("Bad username")
+            if (!req.session.authenticatedAt || Date.now() - req.session.authenticatedAt > 5 * 60 * 1000) {
+                return void res.status(403).send("Please log in again before changing 2FA")
+            }
             const enabled = !Boolean(user.$2fa)
             if (enabled) {
                 await sql.token.delete2faToken(req.session.username)
@@ -45,6 +48,7 @@ const $2FARoutes = (app: Express) => {
                 if ((user.role === "admin" || user.role === "mod" || user.role.includes("curator"))
                     && !permissions.isOwner(req.session)) {
                     await sql.user.updateUser(user.username, "role", "contributor")
+                    req.session.role = "contributor"
                     const message = `You must have 2fa enabled to maintain roles above curator. Your account was auto demoted back to contributor.\n\nEnable 2fa and contact us to consider restoring your role.`
                     await serverFunctions.systemMessage(user.username, `Notice: Your account was demoted due to removing 2fa`, message)
                 }
@@ -59,6 +63,8 @@ const $2FARoutes = (app: Express) => {
     app.post("/api/2fa/qr", csrfProtection, $2faLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
+            const user = await sql.user.user(req.session.username)
+            if (!user || user.$2fa) return void res.status(200).json("")
             const $2FAToken = await sql.token.$2faToken(req.session.username)
             if (!$2FAToken) return void res.status(400).send("User doesn't have 2FA token")
             res.status(200).json($2FAToken.qrcode)
@@ -78,7 +84,8 @@ const $2FARoutes = (app: Express) => {
             if (!user) return void res.status(400).send("Bad username")
             const $2FAToken = await sql.token.$2faToken(user.username)
             if (!$2FAToken) return void res.status(400).send("User doesn't have 2FA token")
-            const validToken = verifyToken($2FAToken.token, token, 60)
+            if (user.$2fa) return void res.status(400).send("2FA already enabled")
+            const validToken = verifyToken($2FAToken.token, token, 1)
             if (validToken) {
                 await sql.user.updateUser(req.session.username, "$2fa", true)
                 req.session.$2fa = true
@@ -100,19 +107,20 @@ const $2FARoutes = (app: Express) => {
         try {
             let {token} = req.body as {token: string}
             if (!req.session.$2fa || !req.session.email || !token) return void res.status(400).send("2FA isn't enabled")
-            if (req.session.username) return void res.status(400).send("Already authenticated")
             if (!req.session.$2faNeeded) return void res.status(400).send("2fa not requested")
             token = token.trim()
             const user = await sql.user.userByEmail(req.session.email)
             if (!user) return void res.status(400).send("Bad email")
+            if (req.session.username && req.session.username !== user.username) return void res.status(403).send("Bad username")
             let ip = serverFunctions.util.ip(req)
             const device = functions.util.parseUserAgent(req.headers["user-agent"])
             const region = await serverFunctions.util.ipRegion(ip)
             const $2FAToken = await sql.token.$2faToken(user.username)
-            const validToken = verifyToken($2FAToken?.token || "", token, 60)
+            const validToken = user.$2fa && $2FAToken && verifyToken($2FAToken.token, token, 1)
             if (validToken) {
                 req.session.$2faNeeded = false
                 await serverFunctions.users.login(req, user, ip)
+                req.session.authenticatedAt = Date.now()
                 await sql.user.updateUser(user.username, "lastLogin", new Date().toISOString())
                 await sql.user.insertLoginHistory(user.username, "login", ip, device, region)
                 res.status(200).send("Success")

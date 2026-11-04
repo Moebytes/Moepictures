@@ -35,6 +35,16 @@ const s3 = new S3({
 })
 
 export default class ServerFiles {
+    private static readLocalFile = (folder: string | undefined, file: string) => {
+        const root = fs.realpathSync(folder!)
+        const target = fs.realpathSync(file)
+        const relative = path.relative(root, target)
+        if (relative === ".." || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+            throw new Error("Invalid file path")
+        }
+        return fs.readFileSync(target)
+    }
+
     public static getFirstHistoryFile = async (file: string, upscaled: boolean, r18: boolean, pixelHash?: string) => {
         const defaultBuffer = Buffer.from("") 
         const isTag = file.includes("artist/") || file.includes("character/") || file.includes("series/") || file.includes("tag/") || file.includes("pfp/")
@@ -50,7 +60,7 @@ export default class ServerFiles {
             let firstHistory = `${historyFolder}/${folders[0]}`
             let files = fs.readdirSync(firstHistory).filter(f => f !== ".DS_Store").sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
             if (!files.length) return defaultBuffer
-            return fs.readFileSync(`${firstHistory}/${files[0]}`)
+            return this.readLocalFile(folder, `${firstHistory}/${files[0]}`)
         } else {
             let bucket = r18 ? remoteR18 : remote
             let publicBucket = r18 ? publicRemoteR18 : publicRemote
@@ -85,8 +95,8 @@ export default class ServerFiles {
                 upscaledKey = upscaledKey.replace("original/", "upscaled/").replace("history-upscaled", "history")
             }
             if (!fs.existsSync(upscaled ? upscaledKey : originalKey)) return this.getFirstHistoryFile(file, upscaled, r18, pixelHash)
-            if (upscaled) return fs.existsSync(upscaledKey) ? fs.readFileSync(upscaledKey) : Buffer.from("")
-            return fs.existsSync(originalKey) ? fs.readFileSync(originalKey) as Buffer : Buffer.from("")
+            if (upscaled) return fs.existsSync(upscaledKey) ? this.readLocalFile(folder, upscaledKey) : Buffer.from("")
+            return fs.existsSync(originalKey) ? this.readLocalFile(folder, originalKey) as Buffer : Buffer.from("")
         } else {
             let bucket = r18 ? remoteR18 : remote
             let publicBucket = r18 ? publicRemoteR18 : publicRemote
@@ -303,8 +313,8 @@ export default class ServerFiles {
             let originalKey = `${localUnverified}/${decodeURIComponent(file)}`
             let upscaledFile = `${file.split("/")[0].replace("-upscaled", "")}-upscaled/${file.split("/").slice(1).join("/")}`
             let upscaledKey = `${localUnverified}/${decodeURIComponent(upscaledFile)}`
-            if (upscaled) return fs.existsSync(upscaledKey) ? fs.readFileSync(upscaledKey) : Buffer.from("")
-            return fs.existsSync(originalKey) ? fs.readFileSync(originalKey) : Buffer.from("")
+            if (upscaled) return fs.existsSync(upscaledKey) ? this.readLocalFile(localUnverified, upscaledKey) : Buffer.from("")
+            return fs.existsSync(originalKey) ? this.readLocalFile(localUnverified, originalKey) : Buffer.from("")
         } else {
             let bucket = remoteUnverified
             let publicBucket = publicRemoteUnverified

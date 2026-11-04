@@ -74,15 +74,26 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
     }, [session])
 
     const toggle = async () => {
-        const qr = await functions.http.post("/api/2fa/create", null, session, setSessionFlag)
-        if (qr) {
-            setQR(qr)
-            setShowValidation(true)
-        } else {
-            setQR("")
-            setShowValidation(false)
+        try {
+            const qr = await functions.http.post("/api/2fa/create", null, session, setSessionFlag)
+            if (!session.$2fa && qr) {
+                setQR(qr)
+                setShowValidation(true)
+            } else {
+                setQR("")
+                setShowValidation(false)
+            }
+            setSessionFlag(true)
+        } catch (err: any) {
+            if (err.message.includes("Please log in again before changing 2FA")) {
+                setRedirect("/enable-2fa")
+                navigate("/login", {state: {reauthenticate: true}})
+                return
+            }
+            setError(true)
+            if (!errorRef.current) await functions.timeout(20)
+            errorRef.current!.innerText = i18n.pages.$2fa.badToken
         }
-        setSessionFlag(true)
     }
 
     useEffect(() => {
@@ -138,6 +149,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
                         <span className="sitepage-text">{i18n.labels.status}: </span>
                         <span className="sitepage-text" style={{cursor: "pointer", marginLeft: "10px"}} onClick={changeStatus}>{session.$2fa ? i18n.buttons.enabled : i18n.buttons.disabled}</span>
                     </div>
+                    {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
                     {qr ? <>
                     <div className="sitepage-row">
                         <span className="sitepage-link">{i18n.pages.enable2FA.scan}</span>
@@ -159,7 +171,6 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
                         <span className="sitepage-text">{i18n.pages.$2fa.token}:</span>
                         <input className="sitepage-input" type="text" spellCheck={false} value={token} onChange={(event) => setToken(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? enable2FA() : null}/>
                     </div>
-                    {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
                     <div className="sitepage-row">
                         <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => navigate("/profile")}>←{i18n.buttons.back}</button>
                         <button className="sitepage-button" onClick={enable2FA}>{i18n.pages.enable2FA.enable}</button>

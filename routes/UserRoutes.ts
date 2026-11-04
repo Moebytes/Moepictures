@@ -202,6 +202,7 @@ const UserRoutes = (app: Express) => {
             let {username, password, captchaResponse} = req.body as LoginParams
             if (!username || !password || !captchaResponse) return void res.status(400).send("Bad username, password, or captchaResponse")
             username = username.trim().toLowerCase()
+            if (req.session.username && req.session.username !== username) return void res.status(403).send("Bad username")
             password = password.trim()
             if (!serverFunctions.verifyCaptcha(req, captchaResponse)) return void res.status(400).send("Bad captchaResponse")
             const user = await sql.user.user(username)
@@ -233,6 +234,8 @@ const UserRoutes = (app: Express) => {
                     return void res.status(200).send("2fa")
                 }
                 await serverFunctions.users.login(req, user, ip)
+                req.session.$2faNeeded = false
+                req.session.authenticatedAt = Date.now()
                 await sql.user.updateUser(user.username, "lastLogin", new Date().toISOString())
                 await sql.user.insertLoginHistory(user.username, "login", ip, device, region)
                 res.status(200).send("Success")
@@ -333,6 +336,7 @@ const UserRoutes = (app: Express) => {
             const session = structuredClone(req.session)
             delete session.previousCaptchaAnswer
             delete session.captchaAnswer
+            delete session.authenticatedAt
             delete session.csrfSecret
             delete session.ips
 
@@ -814,7 +818,7 @@ const UserRoutes = (app: Express) => {
             let token = req.query.token as string
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
             if (!token) return void res.status(400).send("Bad token")
-            const hashToken = crypto.createHash("sha256").update(token.trim()).digest("hex")
+            const hashToken = crypto.createHash("sha256").update(`change-email:${req.session.username}:${token.trim()}`).digest("hex")
             const tokenData = await sql.token.emailToken(hashToken)
             if (!tokenData) return void res.status(400).send("Bad token")
             const expireDate = new Date(tokenData.expires)
@@ -851,7 +855,7 @@ const UserRoutes = (app: Express) => {
                 res.status(400).send("Email already sent")
             }
             const token = crypto.randomBytes(32).toString("hex")
-            const hashToken = crypto.createHash("sha256").update(token).digest("hex")
+            const hashToken = crypto.createHash("sha256").update(`change-email:${req.session.username}:${token}`).digest("hex")
             await sql.token.insertEmailToken(newEmail, hashToken)
             const username = functions.util.toProperCase(req.session.username)
             const link = `${functions.config.getDomain()}/api/user/changeemail?token=${token}`
@@ -876,8 +880,10 @@ const UserRoutes = (app: Express) => {
                 await sql.user.updateUser(user.username, "email", tokenData.email)
                 await sql.user.updateUser(user.username, "emailVerified", true)
                 serverFunctions.notifications.pushMessage(user.username, "email verified")
-                req.session.email = tokenData.email
-                req.session.emailVerified = true
+                if (req.session.username === user.username) {
+                    req.session.email = tokenData.email
+                    req.session.emailVerified = true
+                }
                 await sql.token.deleteEmailToken(tokenData.email)
                 let message = `Welcome to Moepictures ${user.username}!\n\nHope you enjoy your stay (ﾉ^_^)ﾉ*:･ﾟ✧`
                 await serverFunctions.systemMessage(user.username, "Welcome to Moepictures!", message)

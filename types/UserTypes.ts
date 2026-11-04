@@ -95,6 +95,7 @@ export interface Session extends Require<Omit<User, "password" | "ip">> {
 }
 
 export interface ServerSession extends Partial<Omit<User, "password">> {
+    authenticatedAt?: number
     captchaNeeded?: boolean
     previousCaptchaAnswer?: string
     captchaAnswer?: string

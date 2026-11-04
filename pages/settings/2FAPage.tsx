@@ -5,13 +5,13 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import React, {useEffect, useState, useRef} from "react"
-import {useNavigate} from "react-router-dom"
+import {useNavigate, useLocation} from "react-router-dom"
 import TitleBar from "../../components/site/TitleBar"
 import NavBar from "../../components/site/NavBar"
 import Footer from "../../components/site/Footer"
 import SideBar from "../../components/site/SideBar"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
-useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../../store"
+useLayoutActions, useActiveActions, useFlagActions, useFlagSelector, useLayoutSelector} from "../../store"
 import functions from "../../functions/Functions"
 import "./styles/sitepage.less"
 
@@ -21,6 +21,9 @@ const $2FAPage: React.FunctionComponent = (props) => {
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
     const {setRedirect} = useFlagActions()
+    const {redirect} = useFlagSelector()
+    const location = useLocation()
+    const reauthenticate = Boolean(location.state?.reauthenticate)
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
@@ -35,7 +38,7 @@ const $2FAPage: React.FunctionComponent = (props) => {
         setHideSidebar(false)
         setRelative(false)
         setHeaderText("")
-        setSidebarText("")
+        setSidebarText(reauthenticate ? i18n.sidebar.loginRequired : "")
         setEnableDrag(false)
     }, [])
 
@@ -53,10 +56,10 @@ const $2FAPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (!session.cookie) return
-        if (session.username) {
+        if (session.username && !reauthenticate) {
             navigate("/profile")
         }
-    }, [session])
+    }, [session, reauthenticate])
 
     const validate = async () => {
         if (!token.trim()) {
@@ -73,7 +76,8 @@ const $2FAPage: React.FunctionComponent = (props) => {
         try {
             await functions.http.post("/api/2fa", {token}, session, setSessionFlag)
             setSessionFlag(true)
-            navigate("/posts")
+            navigate(redirect || "/posts")
+            setRedirect(null)
             setError(false)
         } catch {
             errorRef.current!.innerText = i18n.pages.$2fa.badToken
