@@ -47,6 +47,8 @@ import {imageLock, imageMissing} from "./structures/ImageLock"
 import {ServerSession, Storage} from "./types/Types"
 const __dirname = path.resolve()
 
+let getDevDocument: (() => Promise<string>) | undefined
+
 const app = express() as any
 app.use(cors({credentials: true, origin: true}))
 app.disable("x-powered-by")
@@ -552,7 +554,8 @@ app.get("/{*page}", async (req: Request, res: Response) => {
     if (mimeType) res.setHeader("Content-Type", mimeType)
     //res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
     //res.setHeader("Cross-Origin-Embedder-Policy", "require-corp")
-    const document = fs.readFileSync(path.join(__dirname, "./dist/client/index.html"), {encoding: "utf-8"})
+    const document = getDevDocument ? await getDevDocument()
+      : fs.readFileSync(path.join(__dirname, "./dist/client/index.html"), {encoding: "utf-8"})
 
     let title = "Moepictures: Cute & Moe Anime Art"
     let description = "Search for cute and moe anime girl art! With our detailed tagging system you can easily find your favorite characters and artists. Create an account to manage your favorites and leave comments with emojis and MoeText formatting."
@@ -779,6 +782,9 @@ const run = async () => {
   if (process.env.TESTING === "yes") {
     const rsbuild = await createRsbuild({rsbuildConfig})
     const rsbuildServer = await rsbuild.createDevServer()
+    const clientEnvironment = Object.values(rsbuildServer.environments)[0]
+    getDevDocument = () => clientEnvironment.getTransformedHtml("index")
+    await getDevDocument()
     app.use(rsbuildServer.middlewares)
 
     app.listen(port, async () => {
