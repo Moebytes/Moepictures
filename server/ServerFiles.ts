@@ -85,7 +85,6 @@ export default class ServerFiles {
     }
 
     public static getFile = async (file: string, upscaled: boolean, r18: boolean, pixelHash?: string) => {
-        if (/%[0-9a-f]{2}|\\|(^|\/)\.\.?($|\/)/i.test(file)) throw new Error("Invalid encoded file path")
         if (functions.config.useLocalFiles()) {
             let folder = r18 ? localR18 : local
             let originalKey = `${folder}/${decodeURIComponent(file)}`
@@ -310,7 +309,6 @@ export default class ServerFiles {
     }
 
     public static getUnverifiedFile = async (file: string, upscaled?: boolean, pixelHash?: string) => {
-        if (/%[0-9a-f]{2}|\\|(^|\/)\.\.?($|\/)/i.test(file)) throw new Error("Invalid encoded file path")
         if (functions.config.useLocalFiles()) {
             let originalKey = `${localUnverified}/${decodeURIComponent(file)}`
             let upscaledFile = `${file.split("/")[0].replace("-upscaled", "")}-upscaled/${file.split("/").slice(1).join("/")}`
