@@ -771,6 +771,7 @@ const UserRoutes = (app: Express) => {
             if (matches) {
                 const newHash = await bcrypt.hash(newPassword, 13)
                 await sql.user.updateUser(req.session.username, "password", newHash)
+                await sql.user.destroyOtherSessions(req.session.username, req.sessionID)
                 let ip = serverFunctions.util.ip(req)
                 const device = functions.util.parseUserAgent(req.headers["user-agent"])
                 const region = await serverFunctions.util.ipRegion(ip)
@@ -911,6 +912,7 @@ const UserRoutes = (app: Express) => {
             if (badEmail) return void res.status(400).send("Bad email")
             const user = await sql.user.user(req.session.username)
             if (!user) return void res.status(400).send("Bad username")
+            if (user.emailVerified) return void res.status(403).send("Email already verified")
             const tokenData = await sql.token.emailTokenByEmail(email)
             if (tokenData && new Date() <= new Date(tokenData.expires)) {
                 res.status(400).send("Email already sent")
@@ -997,6 +999,7 @@ const UserRoutes = (app: Express) => {
                 await sql.token.deletePasswordToken(username)
                 const passwordHash = await bcrypt.hash(password, 13)
                 await sql.user.updateUser(username, "password", passwordHash)
+                await sql.user.destroyOtherSessions(username, req.session.username === username ? req.sessionID : "")
                 let ip = serverFunctions.util.ip(req)
                 const device = functions.util.parseUserAgent(req.headers["user-agent"])
                 const region = await serverFunctions.util.ipRegion(ip)

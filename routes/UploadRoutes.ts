@@ -19,7 +19,10 @@ const upload = multer({
     storage: multer.memoryStorage(),
     limits: {
       fileSize: 100 * 1024 * 1024, 
-      fieldSize: 50 * 1024 * 1024
+      fieldSize: 1024 * 1024,
+      fields: 1,
+      files: 1,
+      parts: 2
     }
 })
 
@@ -105,7 +108,11 @@ const clearChunkBytes = async (originalChunks: ImageChunk[], upscaledChunks: Ima
 }
 
 const CreateRoutes = (app: Express) => {
-  app.post("/api/post/image-chunk", upload.single("bytes"), csrfProtection, modLimiter, async (req: Request, res: Response) => {
+  app.post("/api/post/image-chunk", modLimiter, csrfProtection, (req: Request, res: Response, next: NextFunction) => {
+      if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
+      if (req.session.banned) return void res.status(403).send("You are banned")
+      next()
+  }, upload.single("bytes"), async (req: Request, res: Response) => {
       try {
         let {metadata} = req.body
         if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")

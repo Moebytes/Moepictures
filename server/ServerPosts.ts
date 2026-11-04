@@ -9,8 +9,9 @@ import dist from "sharp-phash/distance"
 import crypto from "crypto"
 import sql from "../sql/SQLQuery"
 import functions from "../functions/Functions"
+import permissions from "../structures/Permissions"
 import serverFunctions from "./ServerFunctions"
-import {Image, UploadImage, PostFull, DeletedPost, Note, UnverifiedPost, PostCuteness} from "../types/Types"
+import {Image, UploadImage, PostFull, DeletedPost, Note, UnverifiedPost, PostCuteness, ServerSession} from "../types/Types"
 
 export default class ServerPosts {
     public static imagesChanged = async (oldImages: Image[], newImages: UploadImage[], upscaled: boolean, r18: boolean) => {
@@ -288,5 +289,16 @@ export default class ServerPosts {
         }
 
         return null
+    }
+
+    public static filterPost = async <T extends PostFull>(post: T | undefined, session: ServerSession) => {
+        if (!post) return false
+        if (functions.post.isR18(post.rating) && !session.showR18) return false
+        if (post.hidden && !permissions.isMod(session)) return false
+        if (post.private) {
+            const categories = await serverFunctions.tags.tagCategories(post.tags)
+            if (!permissions.canPrivate(session, post, categories.artists)) return false
+        }
+        return true
     }
 }

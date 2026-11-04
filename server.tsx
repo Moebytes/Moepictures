@@ -226,9 +226,10 @@ for (let i = 0; i < folders.length; i++) {
       if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
       if (req.session.captchaNeeded) upscaled = false
       let r18 = false
-      const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
-      if (!noCache.includes(folders[i]) && postID) {
+      const postID = key.match(/^history\/post\/(\d+)\//)?.[1] || key.match(/(?<=\/)\d+(?=-)/)?.[0]
+      if ((!noCache.includes(folders[i]) || key.startsWith("history/post/")) && postID) {
         const post = await sql.post.post(postID)
+        if (!await serverFunctions.posts.filterPost(post, req.session)) return res.status(404).end()
         if (post && functions.post.isR18(post.rating)) {
           if (!req.session.showR18) return res.status(404).end()
           r18 = true
@@ -286,9 +287,10 @@ for (let i = 0; i < folders.length; i++) {
       res.setHeader("Cache-Control", "public, max-age=86400")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/`, ""))
       let r18 = false
-      const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
-      if (!noCache.includes(folders[i]) && postID) {
+      const postID = key.match(/^history\/post\/(\d+)\//)?.[1] || key.match(/(?<=\/)\d+(?=-)/)?.[0]
+      if ((!noCache.includes(folders[i]) || key.startsWith("history/post/")) && postID) {
         const post = await sql.post.post(postID)
+        if (!await serverFunctions.posts.filterPost(post, req.session)) return res.status(404).end()
         if (post && functions.post.isR18(post.rating)) {
           if (!req.session.showR18) return res.status(404).end()
           r18 = true
@@ -450,10 +452,11 @@ app.post("/storage", imageUpdateLimiter, csrfProtection, async (req: Request, re
       storageMap.delete(userKey)
       return res.status(403).end()
     }
-    const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
+    const postID = key.match(/^history\/post\/(\d+)\//)?.[1] || key.match(/(?<=\/)\d+(?=-)/)?.[0]
     let r18 = false
     if (postID) {
       const post = await sql.post.post(postID)
+      if (!await serverFunctions.posts.filterPost(post, req.session)) return res.status(404).end()
       if (post && functions.post.isR18(post.rating)) {
         if (!req.session.showR18) return res.status(404).end()
         r18 = true
@@ -512,6 +515,7 @@ app.get("/social-preview/:id", imageLimiter, async (req: Request, res: Response,
     let r18 = false
     if (postID) {
       const post = await sql.post.post(postID)
+      if (!await serverFunctions.posts.filterPost(post, req.session)) return res.status(404).end()
       if (post && functions.post.isR18(post.rating)) {
         if (!req.session.showR18) return void res.status(404).end()
         r18 = true
@@ -566,6 +570,7 @@ app.get("/{*page}", async (req: Request, res: Response) => {
     const postID = key.match(/(?<=post\/)\d+(?=\/)/)?.[0]
     if (postID) {
         let post = await sql.post.post(postID)
+        if (!await serverFunctions.posts.filterPost(post, req.session)) post = undefined
         if (post && functions.post.isR18(post.rating)) {
           if (!req.session.showR18) post = undefined
         }

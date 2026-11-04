@@ -42,6 +42,15 @@ export const csrfProtection = (req: Request, res: Response, next: NextFunction) 
 }
 
 export const apiKeyLogin = async (req: Request, res: Response, next: NextFunction) => {
+    if (req.session.apiKey) {
+        const key = req.headers["x-api-key"] as string
+        const token = await sql.token.apiKey(encryption.hashAPIKey(key))
+        if (!token || token.username !== req.session.username) {
+            return req.session.destroy(() => { 
+                res.status(401).send("API session expired") 
+            })
+        }
+    }
     if (req.session.username) {
         const user = await sql.user.user(req.session.username)
         if (!user || user.deleted) return req.session.destroy(() => { 

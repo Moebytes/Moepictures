@@ -1022,6 +1022,12 @@ const PostRoutes = (app: Express) => {
                 result = await sql.history.postHistory(postID, Number(offset), Number(limit), query)
                 if (req.session.captchaNeeded) result = functions.post.stripTags(result)
             }
+            for (let i = result.length - 1; i >= 0; i--) {
+                const history = result[i]
+                const post = await sql.post.post(history.postID)
+                if (!await serverFunctions.posts.filterPost(post, req.session) ||
+                    (!req.session.showR18 && functions.post.isR18(history.rating))) result.splice(i, 1)
+            }
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
