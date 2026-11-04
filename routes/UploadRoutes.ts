@@ -71,17 +71,21 @@ setInterval(() => {
   }
 }, 60000)
 
-const populateChunkBytes = async (originalChunks: ImageChunk[], upscaledChunks: ImageChunk[]) => {
+const chunkKey = (username: string, fileID: string) => {
+  return `image-chunk:${JSON.stringify([username, fileID])}`
+}
+
+const populateChunkBytes = async (username: string, originalChunks: ImageChunk[], upscaledChunks: ImageChunk[]) => {
   const populateChunkItem = async (chunkItem: ImageChunk[]) => {
     for (const chunk of chunkItem) {
       if (process.env.REDIS === "on") {
-        let cacheChunks = await sql.getCache(chunk.fileID) as ImageChunk[] | undefined
+        let cacheChunks = await sql.getCache(chunkKey(username, chunk.fileID)) as ImageChunk[] | undefined
         let referenceChunk = cacheChunks?.find((c) => c.index === chunk.index)
-        if (referenceChunk) chunk.bytes = referenceChunk.bytes
+        if (referenceChunk?.username === username) chunk.bytes = referenceChunk.bytes
       } else {
-        let item = imageChunks.get(chunk.fileID)
+        let item = imageChunks.get(chunkKey(username, chunk.fileID))
         let referenceChunk = item?.chunks.find(c => c.index === chunk.index)
-        if (referenceChunk) chunk.bytes = referenceChunk.bytes
+        if (referenceChunk?.username === username) chunk.bytes = referenceChunk.bytes
       }
     }
   }
@@ -89,15 +93,14 @@ const populateChunkBytes = async (originalChunks: ImageChunk[], upscaledChunks: 
   await populateChunkItem(upscaledChunks)
 }
 
-const clearChunkBytes = async (originalChunks: ImageChunk[], upscaledChunks: ImageChunk[]) => {
+const clearChunkBytes = async (username: string, originalChunks: ImageChunk[], upscaledChunks: ImageChunk[]) => {
   const clearChunkItem = async (chunkItem: ImageChunk[]) => {
-    let username = chunkItem[0]?.username ?? ""
     let userItems = userChunks.get(username) || []
     for (const chunk of chunkItem) {
       if (process.env.REDIS === "on") {
-        await sql.removeCache(chunk.fileID)
+        await sql.removeCache(chunkKey(username, chunk.fileID))
       } else {
-        imageChunks.delete(chunk.fileID)
+        imageChunks.delete(chunkKey(username, chunk.fileID))
       }
       userItems = userItems.filter((c) => !(c.fileID === chunk.fileID && c.index === chunk.index))
     }
@@ -133,23 +136,23 @@ const CreateRoutes = (app: Express) => {
 
         let added = true
         if (process.env.REDIS === "on") {
-          let chunks = await sql.getCache(chunk.fileID) as ImageChunk[]
+          let chunks = await sql.getCache(chunkKey(req.session.username, chunk.fileID)) as ImageChunk[]
           if (chunks) {
             const exists = chunks.find((c) => c.index === chunk.index)
             if (exists) added = false
-            if (!exists) await sql.setCache(chunk.fileID, [...chunks, chunk], 600)
+            if (!exists) await sql.setCache(chunkKey(req.session.username, chunk.fileID), [...chunks, chunk], 600)
           } else {
-              await sql.setCache(chunk.fileID, [chunk], 600)
+              await sql.setCache(chunkKey(req.session.username, chunk.fileID), [chunk], 600)
           }
         } else {
-          let item = imageChunks.get(chunk.fileID)
+          let item = imageChunks.get(chunkKey(req.session.username, chunk.fileID))
           if (item) {
             const exists = item.chunks.find((c) => c.index === chunk.index)
             if (exists) added = false
             if (!exists) item.chunks.push(chunk)
             item.expires = Date.now() + chunkLifetime
           } else {
-            imageChunks.set(chunk.fileID, {
+            imageChunks.set(chunkKey(req.session.username, chunk.fileID), {
               chunks: [chunk],
               expires: Date.now() + chunkLifetime
             })
@@ -180,9 +183,9 @@ const CreateRoutes = (app: Express) => {
         if (!functions.validation.validRating(rating)) return void res.status(400).send("Invalid rating")
         if (!functions.validation.validStyle(style)) return void res.status(400).send("Invalid style")
 
-        await populateChunkBytes(imageChunks, upscaledChunks)
+        await populateChunkBytes(req.session.username, imageChunks, upscaledChunks)
         let {images, upscaledImages} = functions.byte.mergeChunks(imageChunks, upscaledChunks)
-        await clearChunkBytes(imageChunks, upscaledChunks)
+        await clearChunkBytes(req.session.username, imageChunks, upscaledChunks)
 
         artists = functions.tag.cleanTags(artists, "artists")
         characters = functions.tag.cleanTags(characters, "characters")
@@ -255,9 +258,9 @@ const CreateRoutes = (app: Express) => {
         if (req.session.banned) return void res.status(403).send("You are banned")
         if (!permissions.isMod(req.session)) noImageUpdate = true
 
-        await populateChunkBytes(imageChunks, upscaledChunks)
+        await populateChunkBytes(req.session.username, imageChunks, upscaledChunks)
         let {images, upscaledImages} = functions.byte.mergeChunks(imageChunks, upscaledChunks)
-        await clearChunkBytes(imageChunks, upscaledChunks)
+        await clearChunkBytes(req.session.username, imageChunks, upscaledChunks)
 
         artists = functions.tag.cleanTags(artists, "artists")
         characters = functions.tag.cleanTags(characters, "characters")
@@ -372,9 +375,9 @@ const CreateRoutes = (app: Express) => {
         const pending = await sql.search.unverifiedUserPosts(req.session.username)
         if (functions.post.currentUploads(pending) >= permissions.getUploadLimit(req.session)) return void res.status(403).send("Upload limit reached")
 
-        await populateChunkBytes(imageChunks, upscaledChunks)
+        await populateChunkBytes(req.session.username, imageChunks, upscaledChunks)
         let {images, upscaledImages} = functions.byte.mergeChunks(imageChunks, upscaledChunks)
-        await clearChunkBytes(imageChunks, upscaledChunks)
+        await clearChunkBytes(req.session.username, imageChunks, upscaledChunks)
 
         artists = functions.tag.cleanTags(artists, "artists")
         characters = functions.tag.cleanTags(characters, "characters")
@@ -440,9 +443,9 @@ const CreateRoutes = (app: Express) => {
         if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
         if (req.session.banned) return void res.status(403).send("You are banned")
 
-        await populateChunkBytes(imageChunks, upscaledChunks)
+        await populateChunkBytes(req.session.username, imageChunks, upscaledChunks)
         let {images, upscaledImages} = functions.byte.mergeChunks(imageChunks, upscaledChunks)
-        await clearChunkBytes(imageChunks, upscaledChunks)
+        await clearChunkBytes(req.session.username, imageChunks, upscaledChunks)
         
         artists = functions.tag.cleanTags(artists, "artists")
         characters = functions.tag.cleanTags(characters, "characters")
