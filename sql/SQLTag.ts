@@ -338,22 +338,18 @@ export default class SQLTag {
                     "tags"."hidden", "tags"."r18", 
                     "tags"."social", "tags"."twitter", "tags"."website", 
                     "tags"."fandom", "tags"."wikipedia",
-                    ARRAY(
-                        SELECT implications.implication
-                        FROM implications
-                        JOIN tags AS series ON series.tag = implications.implication
-                        WHERE implications.tag = tags.tag
-                        AND tags.type = 'character' AND series.type = 'series'
-                        ORDER BY implications.implication
-                    ) AS "seriesImplications"
+                    COALESCE(series_implications."seriesImplications", ARRAY[]::text[]) AS "seriesImplications"
                     FROM tags
                     LEFT JOIN "tag map posts" ON "tag map posts".tag = tags.tag
+                    LEFT JOIN (
+                        SELECT implications.tag,
+                        array_agg(implications.implication ORDER BY implications.implication) AS "seriesImplications"
+                        FROM implications
+                        JOIN tags AS series ON series.tag = implications.implication
+                        WHERE series.type = 'series'
+                        GROUP BY implications.tag
+                    ) AS series_implications ON series_implications.tag = tags.tag AND tags.type = 'character'
                     ${whereQuery}
-                    GROUP BY "tags".tag, "tags".type, "tags".image,
-                    "tags"."imageHash", "tags"."hidden", "tags"."r18",
-                    "tags"."social", "tags"."twitter", "tags"."website", 
-                    "tags"."fandom", "tags"."wikipedia",
-                    "tag map posts"."posts"
                     ORDER BY count DESC
             `)
         }
