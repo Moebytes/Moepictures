@@ -19,6 +19,7 @@ export default class Permissions {
 
     public static isMod = (session: ServerSession) => {
         if (Permissions.isAdmin(session)) return true
+        if (Permissions.isSystem(session)) return true
         if (session.role === "mod") return true 
         return false
     }
