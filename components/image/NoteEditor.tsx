@@ -333,25 +333,13 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     }
 
     if (imageExpand) {
-        maxHeight = 3740
+        maxHeight = typeof window !== "undefined" ? window.innerHeight * 4.5 : 3740
     }
 
     let targetWidth = props.imageWidth
     let targetHeight = props.imageHeight
 
-    let scale = targetWidth > targetHeight ? maxWidth / targetWidth : maxHeight / targetHeight
-    if (mobile && targetWidth > maxWidth) scale =  maxWidth / targetWidth
-    if (targetWidth * scale > maxWidth) scale = maxWidth / targetWidth
-
-    let noteWidth = items[0]?.imageWidth
-    let noteHeight = items[0]?.imageHeight
-
-    if  (noteWidth === targetWidth && noteHeight === targetHeight 
-        && targetWidth < maxWidth && targetHeight < maxHeight) {
-        // workaround scaling issues?
-        scale = 1
-    }
-
+    let scale = Math.min(1, maxWidth / targetWidth, maxHeight / targetHeight)
     scale *= zoom
 
     const clearNotes = () => {
@@ -671,9 +659,9 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         const newX = (x / imageWidth) * targetWidth
                         const newY = (y / imageHeight) * targetHeight
 
-                        const newFontSize = (fontSize / imageHeight) * targetHeight
-                        const newStrokeWidth = (strokeWidth / imageHeight) * targetHeight
-                        const newBorderRadius = (borderRadius / imageHeight) * targetHeight
+                        const newFontSize = ((fontSize || 100) / imageHeight) * targetHeight
+                        const newStrokeWidth = ((strokeWidth ?? 0) / imageHeight) * targetHeight
+                        const newBorderRadius = ((borderRadius ?? 0) / imageHeight) * targetHeight
 
                         let rotationSpeed = targetWidth / 2000
                         if (session.upscaledImages) rotationSpeed *= 10
