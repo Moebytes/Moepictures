@@ -379,7 +379,7 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/api-key", csrfProtection, miscLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
-            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
+            if (!permissions.isAdmin(req.session) && !permissions.isSystem(req.session)) return void res.status(403).end()
             const key = encryption.generateAPIKey()
             const hashedKey = encryption.hashAPIKey(key)
             await sql.token.insertAPIKey(req.session.username, hashedKey)
@@ -393,7 +393,7 @@ const MiscRoutes = (app: Express) => {
     app.get("/api/misc/api-key/status", miscLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
-            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
+            if (!permissions.isAdmin(req.session) && !permissions.isSystem(req.session)) return void res.status(403).end()
             const apiKey = await sql.token.apiKeyByUsername(req.session.username)
             serverFunctions.sendEncrypted(apiKey ? true : false, req, res)
         } catch (e) {
@@ -405,7 +405,7 @@ const MiscRoutes = (app: Express) => {
     app.delete("/api/misc/api-key/delete", csrfProtection, miscLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
-            if (!permissions.isAdmin(req.session)) return void res.status(403).end()
+            if (!permissions.isAdmin(req.session) && !permissions.isSystem(req.session)) return void res.status(403).end()
             await sql.token.deleteAPIKey(req.session.username)
             res.status(200).send("Success")
         } catch (e) {

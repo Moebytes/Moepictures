@@ -60,7 +60,7 @@ const APIKeyPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (!session.cookie) return
-        if (!permissions.isAdmin(session)) {
+        if (!permissions.isAdmin(session) && !permissions.isSystem(session)) {
             return functions.dom.replaceLocation("/403")
         }
         updateStatus()
@@ -85,7 +85,7 @@ const APIKeyPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                {permissions.isAdmin(session) ?
+                {permissions.isAdmin(session) || permissions.isSystem(session) ?
                 <div className="sitepage">
                     <span className="sitepage-title">{i18n.user.apiKey}</span>
                     <span className="sitepage-link">{i18n.pages.apiKey.header}</span>
