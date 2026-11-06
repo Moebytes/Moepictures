@@ -271,26 +271,30 @@ const PostPage: React.FunctionComponent = () => {
     }, [postID])
 
     useEffect(() => {
-        setImage("")
         const historyParam = new URLSearchParams(window.location.search).get("history")
         if (historyParam) return
+        let cancelled = false
         const updatePost = async () => {
             setLoaded(false)
             let post = posts.find((p) => p.postID === postID) as PostSearch | undefined
             try {
                 if (!post) post = await functions.http.get("/api/post", {postID}, session, setSessionFlag) as PostSearch | undefined
             } catch (err: any) {
+                if (cancelled) return
                 if (err.message === "404") functions.dom.replaceLocation("/404")
                 if (err.message === "403") functions.dom.replaceLocation("/403")
                 return
             }
+            if (cancelled) return
             if (post) {
                 setPost(post)
                 if (!post.tags) {
                     try {
                         post = await functions.http.get("/api/post", {postID}, session, setSessionFlag) as PostSearch
+                        if (cancelled) return
                         if (post) setPost(post)
                     } catch (err: any) {
+                        if (cancelled) return
                         if (err.message === "404") functions.dom.replaceLocation("/404")
                         if (err.message === "403") functions.dom.replaceLocation("/403")
                         return
@@ -299,6 +303,7 @@ const PostPage: React.FunctionComponent = () => {
                 const tags = await functions.tag.parseTags([post], session, setSessionFlag)
                 const categories = await functions.tag.tagCategories(tags, session, setSessionFlag)
                 const groupCategories = await functions.tag.tagGroupCategories(post, session, setSessionFlag)
+                if (cancelled) return
                 setTagGroupCategories(groupCategories)
                 setTagCategories(categories)
                 setCategoriesPostID(post.postID)
@@ -309,11 +314,17 @@ const PostPage: React.FunctionComponent = () => {
             }
         }
         updatePost()
+        return () => { 
+            cancelled = true 
+        }
     }, [postID, posts])
 
     useEffect(() => {
+        setImage("")
+        setImages([])
+        let cancelled = false
         const updateImage = async () => {
-            if (!post) return
+            if (!post || post.postID !== postID) return
             let images = [] as string[]
             if (session.upscaledImages) {
                 let upscaledImages = post.upscaledImages || post.images
@@ -337,6 +348,7 @@ const PostPage: React.FunctionComponent = () => {
                     }
                 }
             }
+            if (cancelled) return
             setImages(images)
             if (images[order-1]) {
                 setImage(images[order-1])
@@ -346,7 +358,10 @@ const PostPage: React.FunctionComponent = () => {
             }
         }
         updateImage()
-    }, [post, order, session.upscaledImages])
+        return () => { 
+            cancelled = true 
+        }
+    }, [postID, post, order, session.upscaledImages])
 
     useEffect(() => {
         const historyParam = new URLSearchParams(window.location.search).get("history")
