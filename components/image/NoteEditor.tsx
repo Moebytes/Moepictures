@@ -306,14 +306,14 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const [noteTime, setNoteTime] = useState(props.noteTimeRef.current)
 
     const noteVisible = (item: Note, time = noteTime) => {
-        if (!props.timed || !item.animated) return true
+        if (noteDrawingEnabled || !props.timed || !item.animated) return true
         const startTime = item.startTime ?? 0
         const endTime = startTime + (item.duration ?? 0)
         return time >= startTime && time < endTime
     }
 
     useEffect(() => {
-        if (!props.timed || !noteMode || !items.some((item) => item?.animated)) return
+        if (noteDrawingEnabled || !props.timed || !noteMode || !items.some((item) => item?.animated)) return
         let previousTime = Infinity
         let frameID = 0
         const update = () => {
@@ -327,7 +327,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         }
         update()
         return () => window.cancelAnimationFrame(frameID)
-    }, [props.timed, props.noteTimeRef, noteMode, items])
+    }, [props.timed, props.noteTimeRef, noteMode, noteDrawingEnabled, items])
 
     const updateNotes = async () => {
         if (!props.post) return

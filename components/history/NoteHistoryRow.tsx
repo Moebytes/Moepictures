@@ -139,12 +139,12 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const printNote = (note: Note) => {
+        if (note.svg) return "SVG"
         if (note.character) return `${functions.util.toProperCase(i18n.tag.character)} -> ${note.characterTag}`
         return `${note.transcript} -> ${note.translation}`
     }
 
     const diffText = () => {
-        if (!props.noteHistory.notes[0]) return []
         if (!hasChanges) return props.noteHistory.notes.map((item) => printNote(item))
         let noteChanges = props.noteHistory.addedEntries?.length || props.noteHistory.removedEntries?.length
         if (!noteChanges) return []
@@ -157,13 +157,70 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
         return [...addedJSX, ...removedJSX]
     }
 
+    const timingChanged = (note: Note, oldNote?: Note) => {
+        if (!oldNote) return Boolean(note.animated)
+        const animationChanged = Boolean(note.animated) !== Boolean(oldNote.animated)
+        const startTimeChanged = (note.startTime ?? 0) !== (oldNote.startTime ?? 0)
+        const durationChanged = (note.duration ?? 0) !== (oldNote.duration ?? 0)
+        return animationChanged || startTimeChanged || durationChanged
+    }
+
+    const timingText = () => {
+        const previous = props.previousHistory
+        let previousNotes: Note[] = []
+        if (previous?.postID === postID && previous.order === order) {
+            previousNotes = previous.notes
+        }
+
+        for (const note of props.noteHistory.notes) {
+            const oldNote = previousNotes.find((item) => item.noteID === note.noteID)
+            if (!timingChanged(note, oldNote)) continue
+
+            const animated = note.animated ? i18n.buttons.yes : i18n.buttons.no
+            return [
+                `${i18n.labels.animated}: ${animated}\n` +
+                `${i18n.labels.startTime}: ${note.startTime ?? 0}s\n` +
+                `${i18n.dialogs.postInfo.duration}: ${note.duration ?? 0}s`
+            ]
+        }
+        return []
+    }
+
+    const svgChanged = () => {
+        const previous = props.previousHistory
+        let previousNotes: Note[] = []
+        if (previous?.postID === postID && previous.order === order) {
+            previousNotes = previous.notes
+        }
+
+        const svgData = (notes: Note[]) => {
+            return notes.filter((note) => note.svg)
+                .map((note) => ({
+                    svg: note.svg,
+                    x: note.x,
+                    y: note.y,
+                    width: note.width,
+                    height: note.height,
+                    rotation: note.rotation,
+                    imageWidth: note.imageWidth,
+                    imageHeight: note.imageHeight
+            }))
+        }
+        
+        const oldSVGs = svgData(previousNotes)
+        const newSVGs = svgData(props.noteHistory.notes)
+        return JSON.stringify(oldSVGs) !== JSON.stringify(newSVGs)
+    }
+
+    const styleChanged = props.noteHistory.styleChanged || svgChanged()
+
     const diffJSX = () => {
         let jsx = [] as React.ReactElement[]
-        const diffs = diffText()
+        const diffs = [...diffText(), ...timingText()]
         for (let i = 0; i < diffs.length; i++) {
             jsx.push(<span className="historyrow-text">{diffs[i]}</span>)
         }
-        if (!jsx.length && !props.noteHistory.styleChanged) {
+        if (!jsx.length && !styleChanged) {
             jsx.push(<span className="historyrow-text">{i18n.labels.noData}</span>)
         }
         return jsx
@@ -179,7 +236,7 @@ const NoteHistoryRow: React.FunctionComponent<Props> = (props) => {
                 <div className="historyrow-container">
                     <div className="historyrow-user-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         {dateTextJSX()}
-                        {props.noteHistory.styleChanged ? <span className="historyrow-text-strong">[{i18n.labels.styleUpdated}]</span> : null}
+                        {styleChanged ? <span className="historyrow-text-strong">[{i18n.labels.styleUpdated}]</span> : null}
                         {diffJSX()}
                         {props.noteHistory.reason ? <span className="historyrow-text"><span className="historyrow-label-text">{i18n.labels.reason}:</span> {props.noteHistory.reason}</span> : null}
                     </div>

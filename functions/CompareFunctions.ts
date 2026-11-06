@@ -272,9 +272,6 @@ export default class CompareFunctions {
                 note.strokeWidth !== match.strokeWidth || 
                 note.borderRadius !== match.borderRadius || 
                 note.breakWord !== match.breakWord ||
-                note.animated !== match.animated ||
-                note.startTime !== match.startTime ||
-                note.duration !== match.duration,
                 note.svg !== match.svg) {
                     styleChanged = true
                     break
