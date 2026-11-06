@@ -15,10 +15,11 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
     zIndex?: number
     allowFlip?: boolean
     scrollInside?: boolean
+    interactive?: boolean
 }
 
 const AnchoredPopup: React.FunctionComponent<Props> = ({anchorRef, active, placement = "bottom", 
-    zIndex = 2500, allowFlip = true, scrollInside = false, children, style, ...props}) => {
+    zIndex = 2500, allowFlip = true, scrollInside = false, interactive = true, children, style, ...props}) => {
     const [portalTarget, setPortalTarget] = useState<Element | null>(null)
 
     const {refs, elements, floatingStyles, placement: resolvedPlacement, 
@@ -61,10 +62,10 @@ const AnchoredPopup: React.FunctionComponent<Props> = ({anchorRef, active, place
         <div ref={refs.setFloating} aria-hidden={!active} inert={!active} style={{
             ...floatingStyles,
             width: "max-content",
-            zIndex: Math.max(zIndex, 2500),
+            zIndex,
             visibility: !elements.reference || (active && !isPositioned) || middlewareData.hide?.referenceHidden ? "hidden" : undefined,
-            pointerEvents: active ? "auto" : "none",
-            overflow: scrollInside ? "visible" : "auto",
+            pointerEvents: active && interactive ? "auto" : "none",
+            overflow: scrollInside || !interactive ? "visible" : "auto",
             overscrollBehavior: "contain"
         }}>
             <div {...props} style={{
@@ -75,7 +76,7 @@ const AnchoredPopup: React.FunctionComponent<Props> = ({anchorRef, active, place
                 maxWidth: "inherit",
                 maxHeight: scrollInside ? "inherit" : undefined,
                 boxSizing: "border-box",
-                overflow: scrollInside ? "auto" : "visible",
+                overflow: scrollInside && interactive ? "auto" : "visible",
                 overscrollBehavior: "contain",
                 transformOrigin: resolvedPlacement.startsWith("top") ? "bottom" : "top"
             }}>

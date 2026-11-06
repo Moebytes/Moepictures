@@ -64,6 +64,7 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
     const {showSpeedDropdown, setShowSpeedDropdown} = props
     const [showVolumeSlider, setShowVolumeSlider] = useState(false)
     const {videoRef, lightnessRef, overlayRef, effectRef, pixelateRef, backFrameRef, onLoaded} = props
+    const {noteTimeRef} = props
     const ffmpegRef = useRef(new FFmpeg())
     const navigate = useNavigate()
 
@@ -182,6 +183,18 @@ const PostVideo = forwardRef<PostWrapperRef, PostWrapperProps>((props, parentRef
             processFrames()
         }
     }, [imageLoaded, reverse, videoData])
+
+    useEffect(() => {
+        if (!imageLoaded || !videoRef.current) return
+        let frameID = 0
+        const updateNoteTime = () => {
+            const video = videoRef.current
+            if (video) noteTimeRef.current = reverse ? video.duration - video.currentTime : video.currentTime
+            frameID = window.requestAnimationFrame(updateNoteTime)
+        }
+        updateNoteTime()
+        return () => window.cancelAnimationFrame(frameID)
+    }, [imageLoaded, reverse, videoRef, noteTimeRef])
 
     useEffect(() => {
         if (!videoRef.current || !pixelateRef.current || !overlayRef.current) return

@@ -25,7 +25,10 @@ export const defaultNoteData = {
     breakWord: true,
     borderRadius: 0,
     character: false,
-    characterTag: ""
+    characterTag: "",
+    animated: false,
+    startTime: 0,
+    duration: 0
 }
 
 interface SaveNoteID {

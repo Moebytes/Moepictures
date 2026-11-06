@@ -271,7 +271,10 @@ export default class CompareFunctions {
                 note.strokeColor !== match.strokeColor || 
                 note.strokeWidth !== match.strokeWidth || 
                 note.borderRadius !== match.borderRadius || 
-                note.breakWord !== match.breakWord) {
+                note.breakWord !== match.breakWord ||
+                note.animated !== match.animated ||
+                note.startTime !== match.startTime ||
+                note.duration !== match.duration) {
                     styleChanged = true
                     break
                 }

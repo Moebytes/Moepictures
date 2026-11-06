@@ -522,6 +522,8 @@
         "strokeColor": "ストロークの色",
         "strokeWidth": "ストローク幅",
         "breakWord": "ブレイクワード",
+        "animated": "アニメーション",
+        "startTime": "開始時刻",
         "pending": "申請中",
         "upscaledSize": "拡大サイズ",
         "fileType": "ファイルタイプ",

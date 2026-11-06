@@ -15,22 +15,22 @@ export default class SQLNote {
         x: number, y: number, width: number, height: number, imageWidth: number, imageHeight: number, imageHash: string,
         overlay: boolean, fontSize: number, backgroundColor: string, textColor: string, fontFamily: string, backgroundAlpha: number,
         bold: boolean, italic: boolean, strokeColor: string, strokeWidth: number, breakWord: boolean, rotation: number, borderRadius: number,
-        character: boolean, characterTag: string | null) => {
+        character: boolean, characterTag: string | null, animated: boolean, startTime: number, duration: number) => {
         const now = new Date().toISOString()
         const query: QueryArrayConfig = {
             text: functions.multiTrim(/*sql*/`
                 INSERT INTO "notes" ("postID", "updater", "updatedDate", "order", "transcript", "translation", "x", "y", 
                 "width", "height", "imageWidth", "imageHeight", "imageHash", "overlay", "fontSize", "backgroundColor", "textColor",
                 "fontFamily", "backgroundAlpha", "bold", "italic", "strokeColor", "strokeWidth", "breakWord", "rotation", "borderRadius",
-                "character", "characterTag") 
+                "character", "characterTag", "animated", "startTime", "duration") 
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25,
-                $26, $27, $28) 
+                $26, $27, $28, $29, $30, $31)
                 RETURNING "noteID"
             `),
             rowMode: "array",
             values: [postID, updater, now, order, transcript, translation, x, y, width, height, imageWidth, imageHeight, imageHash, overlay,
             fontSize, backgroundColor, textColor, fontFamily, backgroundAlpha, bold, italic, strokeColor, strokeWidth, breakWord, rotation,
-            borderRadius, character, characterTag]
+            borderRadius, character, characterTag, animated, startTime, duration]
         }
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
@@ -41,17 +41,17 @@ export default class SQLNote {
         x: number, y: number, width: number, height: number, imageWidth: number, imageHeight: number, imageHash: string,
         overlay: boolean, fontSize: number, backgroundColor: string, textColor: string, fontFamily: string, backgroundAlpha: number,
         bold: boolean, italic: boolean, strokeColor: string, strokeWidth: number, breakWord: boolean, rotation: number, borderRadius: number,
-        character: boolean, characterTag: string | null) => {
+        character: boolean, characterTag: string | null, animated: boolean, startTime: number, duration: number) => {
         const now = new Date().toISOString()
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "notes" SET "updater" = $1, "updatedDate" = $2, "transcript" = $3, "translation" = $4, "x" = $5, "y" = $6, 
             "width" = $7, "height" = $8, "imageWidth" = $9, "imageHeight" = $10, "imageHash" = $11, "overlay" = $12, "fontSize" = $13, 
             "backgroundColor" = $14, "textColor" = $15, "fontFamily" = $16, "backgroundAlpha" = $17, "bold" = $18, "italic" = $19, 
             "strokeColor" = $20, "strokeWidth" = $21, "breakWord" = $22, "rotation" = $23, "borderRadius" = $24, "character" = $25,
-            "characterTag" = $26 WHERE "noteID" = $27`,
+            "characterTag" = $26, "animated" = $27, "startTime" = $28, "duration" = $29 WHERE "noteID" = $30`,
             values: [updater, now, transcript, translation, x, y, width, height, imageWidth, imageHeight, imageHash, overlay, fontSize,
             backgroundColor, textColor, fontFamily, backgroundAlpha, bold, italic, strokeColor, strokeWidth, breakWord, rotation, 
-            borderRadius, character, characterTag, noteID]
+            borderRadius, character, characterTag, animated, startTime, duration, noteID]
         }
         await SQLQuery.run(query)
     }
@@ -61,7 +61,7 @@ export default class SQLNote {
         let whitelist = ["order", "transcript", "translation", "x", "y", "width", "height", "rotation", 
             "imageWidth", "imageHeight", "imageHash", "overlay", "fontSize", "fontFamily", "bold", "italic",
             "textColor", "backgroundColor", "backgroundAlpha", "strokeColor", "strokeWidth", "breakWord", "borderRadius",
-            "character", "characterTag"]
+            "character", "characterTag", "animated", "startTime", "duration"]
         if (!whitelist.includes(column)) {
             return Promise.reject(`Invalid column: ${column}`)
         }
@@ -145,22 +145,22 @@ export default class SQLNote {
         translation: string, x: number, y: number, width: number, height: number, imageWidth: number, imageHeight: number, imageHash: string,
         overlay: boolean, fontSize: number, backgroundColor: string, textColor: string, fontFamily: string, backgroundAlpha: number,
         bold: boolean, italic: boolean, strokeColor: string, strokeWidth: number, breakWord: boolean, rotation: number, borderRadius: number,
-        character: boolean, characterTag: string | null, addedEntries: any, removedEntries: any, reason?: string) => {
+        character: boolean, characterTag: string | null, animated: boolean, startTime: number, duration: number, addedEntries: any, removedEntries: any, reason?: string) => {
         const now = new Date().toISOString()
         const query: QueryArrayConfig = {
             text: functions.multiTrim(/*sql*/`
                 INSERT INTO "unverified notes" ("postID", "originalID", "updater", "updatedDate", "order", "transcript", "translation", 
                 "x", "y", "width", "height", "imageWidth", "imageHeight", "imageHash", "overlay", "fontSize", "backgroundColor", "textColor", 
                 "fontFamily", "backgroundAlpha", "bold", "italic", "strokeColor", "strokeWidth", "breakWord", "rotation", "borderRadius", 
-                "character", "characterTag", "addedEntries", "removedEntries", "reason") 
+                "character", "characterTag", "animated", "startTime", "duration", "addedEntries", "removedEntries", "reason") 
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28,
-                $29, $30, $31, $32) 
+                $29, $30, $31, $32, $33, $34, $35) 
                 RETURNING "noteID"
             `),
             rowMode: "array",
             values: [postID, originalID, updater, now, order, transcript, translation, x, y, width, height, imageWidth, imageHeight, 
             imageHash, overlay, fontSize, backgroundColor, textColor, fontFamily, backgroundAlpha, bold, italic, strokeColor, strokeWidth, 
-            breakWord, rotation, borderRadius, character, characterTag, addedEntries, removedEntries, reason]
+            breakWord, rotation, borderRadius, character, characterTag, animated, startTime, duration, addedEntries, removedEntries, reason]
         }
         const result = await SQLQuery.run(query)
         return String(result.flat(Infinity)[0])
@@ -171,17 +171,18 @@ export default class SQLNote {
         y: number, width: number, height: number, imageWidth: number, imageHeight: number, imageHash: string,
         overlay: boolean, fontSize: number, backgroundColor: string, textColor: string, fontFamily: string, backgroundAlpha: number,
         bold: boolean, italic: boolean, strokeColor: string, strokeWidth: number, breakWord: boolean, rotation: number, borderRadius: number,
-        character: boolean, characterTag: string | null, reason?: string) => {
+        character: boolean, characterTag: string | null, animated: boolean, startTime: number, duration: number, reason?: string) => {
         const now = new Date().toISOString()
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "unverified notes" SET "updatedDate" = $1, "transcript" = $2, "translation" = $3, 
             "x" = $4, "y" = $5, "width" = $6, "height" = $7, "imageWidth" = $8, "imageHeight" = $9, 
             "imageHash" = $10, "overlay" = $11, "fontSize" = $12, "backgroundColor" = $13, "textColor" = $14, "fontFamily" = $15,
             "backgroundAlpha" = $16, "bold" = $17, "italic" = $18, "strokeColor" = $19, "strokeWidth" = $20, "breakWord" = $21, 
-            "rotation" = $22, "borderRadius" = $23, "character" = $24, "characterTag" = $25, "reason" = $26 WHERE "noteID" = $27`,
+            "rotation" = $22, "borderRadius" = $23, "character" = $24, "characterTag" = $25, "animated" = $26, "startTime" = $27, 
+            "duration" = $28, "reason" = $29 WHERE "noteID" = $30`,
             values: [now, transcript, translation, x, y, width, height, imageWidth, imageHeight, imageHash, overlay, fontSize,
             backgroundColor, textColor, fontFamily, backgroundAlpha, bold, italic, strokeColor, strokeWidth, breakWord, rotation,
-            borderRadius, character, characterTag, reason, noteID]
+            borderRadius, character, characterTag, animated, startTime, duration, reason, noteID]
         }
         await SQLQuery.run(query)
     }

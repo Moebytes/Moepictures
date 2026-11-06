@@ -464,7 +464,10 @@ CREATE TABLE IF NOT EXISTS "notes" (
     "breakWord" boolean,
     "borderRadius" int,
     "character" boolean,
-    "characterTag" text REFERENCES "tags" ("tag") ON UPDATE CASCADE ON DELETE SET NULL
+    "characterTag" text REFERENCES "tags" ("tag") ON UPDATE CASCADE ON DELETE SET NULL,
+    "animated" boolean,
+    "startTime" double precision,
+    "duration" double precision
 );
 
 CREATE TABLE IF NOT EXISTS "unverified notes" (
@@ -498,6 +501,9 @@ CREATE TABLE IF NOT EXISTS "unverified notes" (
     "borderRadius" int,
     "character" boolean,
     "characterTag" text REFERENCES "tags" ("tag") ON UPDATE CASCADE ON DELETE SET NULL,
+    "animated" boolean,
+    "startTime" double precision,
+    "duration" double precision,
     "addedEntries" text[],
     "removedEntries" text[],
     "reason" text

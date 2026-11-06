@@ -521,6 +521,8 @@
         "strokeColor": "Stroke Color",
         "strokeWidth": "Stroke Width",
         "breakWord": "Break Word",
+        "animated": "Animated",
+        "startTime": "Start Time",
         "pending": "Pending",
         "upscaledSize": "Upscaled Size",
         "fileType": "Filetype",

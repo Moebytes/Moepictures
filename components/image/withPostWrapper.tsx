@@ -81,6 +81,7 @@ interface AddonProps {
     overlayRef: React.RefObject<HTMLImageElement | null>
     pixelateRef: React.RefObject<HTMLCanvasElement | null>
     effectRef: React.RefObject<HTMLCanvasElement | null>
+    noteTimeRef: React.RefObject<number>
     imageLoaded: boolean
     setImageLoaded: React.Dispatch<React.SetStateAction<boolean>>
     onLoaded: (event: React.SyntheticEvent) => void
@@ -168,6 +169,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
         const lightnessRef = useRef<HTMLImageElement>(null)
         const pixelateRef = useRef<HTMLCanvasElement>(null)
         const effectRef = useRef<HTMLCanvasElement>(null)
+        const noteTimeRef = useRef(0)
         const [imageLoaded, setImageLoaded] = useState(false)
         const [naturalWidth, setNaturalWidth] = useState(0)
         const [naturalHeight, setNaturalHeight] = useState(0)
@@ -176,6 +178,10 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
         const [audioTempLink, setAudioTempLink] = useState("")
         const [gifData, setGIFData] = useState(null as GIFFrame[] | null)
         const [backFrame, setBackFrame] = useState("")
+
+        useEffect(() => {
+            noteTimeRef.current = 0
+        }, [props.anim, props.video])
 
         const getRef = () => {
             return imageRef.current || animationRef.current || videoRef.current ||
@@ -732,7 +738,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
 
         return (
             <div className="post-image-container" style={{zoom: props.scale ? props.scale : 1}}>
-                {!props.noNotes ? <NoteEditor post={props.post} img={getImg()!} order={props.order} unverified={props.unverified} noteID={props.noteID} imageWidth={naturalWidth} imageHeight={naturalHeight} reader={props.reader}/> : null}
+                {!props.noNotes ? <NoteEditor post={props.post} img={getImg()!} order={props.order} unverified={props.unverified} noteID={props.noteID} imageWidth={naturalWidth} imageHeight={naturalHeight} reader={props.reader} timed={Boolean(props.anim || props.video)} noteTimeRef={noteTimeRef}/> : null}
                 <div className="post-image-box" ref={containerRef}>
                     <div className="post-image-filters" ref={fullscreenRef}>
                         {topButtonsJSX()}
@@ -760,6 +766,7 @@ const withPostWrapper = (WrappedComponent: React.ForwardRefExoticComponent<PostW
                                 lightnessRef={lightnessRef}
                                 overlayRef={overlayRef}
                                 effectRef={effectRef}
+                                noteTimeRef={noteTimeRef}
                                 pixelateRef={pixelateRef}
                                 imageLoaded={imageLoaded}
                                 setImageLoaded={setImageLoaded}

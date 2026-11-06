@@ -48,6 +48,7 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
     const {fullscreen, setFullscreen} = props
     const {showSpeedDropdown, setShowSpeedDropdown} = props
     const {animationRef, imageRef, lightnessRef, overlayRef, effectRef, pixelateRef, onLoaded} = props
+    const {noteTimeRef} = props
     const playbackTime = useRef(0)
 
     useImperativeHandle(parentRef, () => ({
@@ -173,6 +174,12 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
         if (!animationRef.current || !imageRef.current) return
         if (gifData?.length) {
             const adjustedData = functions.anim.gifSpeed(gifData, speed)
+            let frameTime = 0
+            const frameTimes = new Map(gifData.map(({frame, delay}) => {
+                const entry = [frame, {time: frameTime, duration: delay / 1000}] as const
+                frameTime += delay / 1000
+                return entry
+            }))
             const gifCanvas = animationRef.current
             gifCanvas.style.opacity = "1"
             const landscape = gifCanvas.width >= gifCanvas.height
@@ -194,11 +201,20 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
             if (seekTo !== null) setSeekTo(null)
             if (dragging) sp = dragProgress || 0
             playbackTime.current = sp * speed * 1000
+            setSecondsProgress(sp)
+            setProgress((sp / duration) * 100)
             let pos = Math.floor(sp / interval)
             if (!adjustedData[pos]) pos = 0
             let frame = adjustedData[pos].frame
             let delay = adjustedData[pos].delay
             setDuration(duration)
+
+            const updateNoteTime = (elapsed = 0) => {
+                const timing = frameTimes.get(frame)!
+                const seconds = Math.min(timing.duration, Math.max(0, elapsed * speed / 1000))
+                noteTimeRef.current = timing.time + (reverse ? timing.duration - seconds : seconds)
+            }
+            updateNoteTime()
 
             let lastProgress = -Infinity
             const update = (now: number) => {
@@ -256,6 +272,7 @@ const PostAnimation = forwardRef<PostWrapperRef, PostWrapperProps>((props, paren
                     update(now)
                     lastTime = now
                 }
+                updateNoteTime(paused || dragging ? 0 : now - lastTime)
                 if (pos !== lastFrame) {
                     draw()
                     lastFrame = pos

@@ -26,6 +26,7 @@ import NoteEditIcon from "../../assets/svg/edit-note.svg"
 import NoteViewIcon from "../../assets/svg/view-note.svg"
 import NoteToggleOffIcon from "../../assets/svg/note-toggle-off.svg"
 import {PostFull, PostHistory, UnverifiedPost, Note, BubbleData} from "../../types/Types"
+import AnchoredPopup from "../../ui/AnchoredPopup"
 import "./styles/noteeditor.less"
 
 interface Props {
@@ -37,6 +38,8 @@ interface Props {
     imageWidth: number
     imageHeight: number
     reader?: boolean
+    timed?: boolean
+    noteTimeRef: React.RefObject<number>
 }
 
 const CircleHandle = ({active, cursor, onMouseDown, onDoubleClick, scale, x, y}) => {
@@ -111,9 +114,10 @@ const splitTextIntoLines = (text: string, maxWidth: number, fontSize = 100, spli
 
 const RectShape = wrapShape(({width, height, scale, onMouseEnter, onMouseMove, onMouseLeave, onDoubleClick, onMouseDown, onContextMenu,
     text, showTranscript, breakWord, overlay, fontSize, backgroundColor, textColor, backgroundAlpha,
-    fontFamily, bold, italic, strokeColor, strokeWidth, borderRadius}) => {
+    fontFamily, bold, italic, strokeColor, strokeWidth, borderRadius, animatedBubble, bubbleText}) => {
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {session} = useSessionSelector()
+    const shapeRef = useRef<SVGSVGElement>(null)
 
     let filter = functions.color.filter({siteHue, siteSaturation, siteLightness})
     if (overlay && !session.forceNoteBubbles) filter = ""
@@ -144,7 +148,8 @@ const RectShape = wrapShape(({width, height, scale, onMouseEnter, onMouseMove, o
     const textStartY = (height - totalTextHeight) / 2 + lineHeight - padding
 
     return (
-        <svg width={width} height={height} onMouseEnter={onMouseEnter} onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} 
+        <>
+        <svg ref={shapeRef} width={width} height={height} onMouseEnter={onMouseEnter} onMouseMove={onMouseMove} onMouseLeave={onMouseLeave}
         onContextMenu={onContextMenu} onDoubleClick={onDoubleClick} onMouseDown={onMouseDown} style={{pointerEvents: "all"}}>
             <rect width={width} height={height} fill={getBGColor()} opacity={(backgroundAlpha ?? 100) / 100} stroke={getStrokeColor()} 
             strokeWidth={rectStrokeWidth} strokeDasharray={rectStrokeArray} style={{filter}} rx={borderRadius} ry={borderRadius}/>
@@ -156,6 +161,14 @@ const RectShape = wrapShape(({width, height, scale, onMouseEnter, onMouseMove, o
                 </text>
             ))}
         </svg>
+        {animatedBubble && !overlay && bubbleText ?
+        <AnchoredPopup anchorRef={shapeRef} active interactive={false} placement="bottom-start" zIndex={2000} className="note-bubble"
+        style={{minWidth: Math.max(125, width * scale), minHeight: 25, transform: "translateY(5px)",
+        fontFamily: fontFamily || "Tahoma", fontSize: `${(fontSize || 100) / 5}px`,
+        fontWeight: bold ? "bold" : "normal", fontStyle: italic ? "italic" : "normal"}}>
+            {bubbleText}
+        </AnchoredPopup> : null}
+        </>
     )
 })
 
@@ -257,6 +270,31 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const [bubbleWidth, setBubbleWidth] = useState(bubbleData.width)
     const bubbleRef = useRef<HTMLDivElement>(null)
     const navigate = useNavigate()
+    const [noteTime, setNoteTime] = useState(props.noteTimeRef.current)
+
+    const noteVisible = (item: Note, time = noteTime) => {
+        if (!props.timed || !item.animated) return true
+        const startTime = item.startTime ?? 0
+        const endTime = startTime + (item.duration ?? 0)
+        return time >= startTime && time < endTime
+    }
+
+    useEffect(() => {
+        if (!props.timed || !noteMode || !items.some((item) => item?.animated)) return
+        let previousTime = Infinity
+        let frameID = 0
+        const update = () => {
+            const time = props.noteTimeRef.current
+            const visibilityChanged = items.some((item) => {
+                return item && noteVisible(item, time) !== noteVisible(item, previousTime)
+            })
+            if (!Number.isFinite(previousTime) || visibilityChanged) setNoteTime(time)
+            previousTime = time
+            frameID = window.requestAnimationFrame(update)
+        }
+        update()
+        return () => window.cancelAnimationFrame(frameID)
+    }, [props.timed, props.noteTimeRef, noteMode, items])
 
     const updateNotes = async () => {
         if (!props.post) return
@@ -397,7 +435,10 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                 breakWord: item.breakWord ?? editNoteData.breakWord,
                 borderRadius: item.borderRadius ?? editNoteData.borderRadius,
                 character: item.character ?? editNoteData.character,
-                characterTag: item.characterTag ?? editNoteData.characterTag
+                characterTag: item.characterTag ?? editNoteData.characterTag,
+                animated: item.animated ?? editNoteData.animated,
+                startTime: item.startTime ?? editNoteData.startTime,
+                duration: item.duration ?? editNoteData.duration
             })
             setEditNoteID(activeIndex)
         } else {
@@ -427,6 +468,9 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
             item.borderRadius = editNoteData.borderRadius
             item.character = editNoteData.character
             item.characterTag = editNoteData.characterTag
+            item.animated = editNoteData.animated
+            item.startTime = editNoteData.startTime
+            item.duration = editNoteData.duration
             return functions.util.insertAtIndex(prev, index, item)
         })
     }
@@ -599,7 +643,11 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     }
 
     const bubbleJSX = () => {
-        if (!bubbleToggle) return null
+        if (!noteMode || !bubbleToggle) return null
+
+        const note = items.find((item) => item && (item.id ?? Number(item.noteID)) === bubbleData.id)
+        if (!note || !noteVisible(note) || (props.timed && note.animated)) return null
+
         const bubble = bubbleData.character ? (
             <div className="note-character-bubble" ref={bubbleRef} style={{width: `${bubbleWidth}px`, 
             minHeight: "25px", left: `${bubbleData.x}px`, top: `${bubbleData.y}px`}}>
@@ -649,6 +697,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         })
                     }} DrawPreviewComponent={RectShape}/>
                     {items.map((item: Note, index: number) => {
+                        if (!item || !noteVisible(item)) return null
                         let {id, height, width, x, y, fontSize, strokeWidth, borderRadius} = item
 
                         const imageWidth = item.imageWidth || targetWidth
@@ -715,12 +764,16 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                                 breakWord: item.breakWord ?? editNoteData.breakWord,
                                 borderRadius: item.borderRadius ?? editNoteData.borderRadius,
                                 character: item.character ?? editNoteData.character,
-                                characterTag: item.characterTag ?? editNoteData.characterTag
+                                characterTag: item.characterTag ?? editNoteData.characterTag,
+                                animated: item.animated ?? editNoteData.animated,
+                                startTime: item.startTime ?? editNoteData.startTime,
+                                duration: item.duration ?? editNoteData.duration
                             })
                             setEditNoteID(index)
                         }
 
                         const onMouseEnter = (event: React.MouseEvent<SVGRectElement>) => {
+                            if (props.timed && item.animated) return
                             if (item.overlay && !session.forceNoteBubbles) return
                             if (item.character) {
                                 if (!item.characterTag) return setBubbleToggle(false)
@@ -751,6 +804,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         }
 
                         const onMouseMove = (event: React.MouseEvent<SVGRectElement>) => {
+                            if (props.timed && item.animated) return
                             if (item.overlay && !session.forceNoteBubbles) return
                             if (item.character) {
                                 if (!item.characterTag) return setBubbleToggle(false)
@@ -819,6 +873,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                                 backgroundColor={item.backgroundColor} textColor={item.textColor} backgroundAlpha={item.backgroundAlpha} 
                                 fontFamily={item.fontFamily} bold={item.bold} italic={item.italic} strokeColor={item.strokeColor} strokeWidth={newStrokeWidth} 
                                 breakWord={item.breakWord} borderRadius={newBorderRadius}
+                                animatedBubble={noteMode && props.timed && item.animated}
+                                bubbleText={shiftKey ? (showTranscript ? item.translation : item.transcript) : text}
                                 />
                             )
                         }

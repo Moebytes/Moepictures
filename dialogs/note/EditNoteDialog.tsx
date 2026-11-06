@@ -204,6 +204,23 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
                             <CheckboxCheckedIcon className="edit-note-checkbox" onClick={() => setEditNoteData({...editNoteData, character: !editNoteData.character})}/> :
                             <CheckboxIcon className="edit-note-checkbox" onClick={() => setEditNoteData({...editNoteData, character: !editNoteData.character})}/>}
                         </div> : null}
+                        {!editNoteData.character ?
+                        <div className="edit-note-dialog-row-start">
+                            <span className="edit-note-dialog-text">{i18n.labels.animated}?</span>
+                            {editNoteData.animated ?
+                            <CheckboxCheckedIcon className="edit-note-checkbox" onClick={() => setEditNoteData({...editNoteData, animated: !editNoteData.animated})}/> :
+                            <CheckboxIcon className="edit-note-checkbox" onClick={() => setEditNoteData({...editNoteData, animated: !editNoteData.animated})}/>}
+                        </div> : null}
+                        {editNoteData.animated ? <>
+                        <div className="edit-note-dialog-row-start">
+                            <span className="edit-note-dialog-text">{i18n.labels.startTime}:</span>
+                            <input className="edit-note-input" type="number" spellCheck={false} value={editNoteData.startTime} onChange={(event) => setEditNoteData({...editNoteData, startTime: Number(event.target.value)})}/>
+                        </div>
+                        <div className="edit-note-dialog-row-start">
+                            <span className="edit-note-dialog-text">{i18n.dialogs.postInfo.duration}:</span>
+                            <input className="edit-note-input" type="number" spellCheck={false} value={editNoteData.duration} onChange={(event) => setEditNoteData({...editNoteData, duration: Number(event.target.value)})}/>
+                        </div>
+                        </> : null}
                         <div className="edit-note-dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{i18n.buttons.cancel}</button>
                             <button style={{marginRight: "5px"}} onClick={reset} className="dialog-button">{i18n.filters.reset}</button>
