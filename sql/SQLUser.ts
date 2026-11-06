@@ -147,7 +147,6 @@ export default class SQLUser {
                 SELECT "login history".*
                 FROM "login history"
                 WHERE "login history"."username" = $1
-                GROUP BY "login history"."loginID"
                 ORDER BY "login history"."timestamp" DESC
             `),
             values: [username]

@@ -892,8 +892,23 @@ CREATE INDEX IF NOT EXISTS "idx_tag_map_tagid_postid" ON "tag map" ("tagID", "po
 CREATE INDEX IF NOT EXISTS "idx_posts_search_date" ON posts ("uploadDate" DESC, "postID" DESC);
 CREATE INDEX IF NOT EXISTS "idx_favorites_search_date" ON favorites (username, "favoriteDate" DESC, "postID" DESC);
 CREATE INDEX IF NOT EXISTS "idx_group_map_postid" ON "group map" ("postID");
+CREATE INDEX IF NOT EXISTS "idx_post_history_date" ON "post history" ("date" DESC);
+CREATE INDEX IF NOT EXISTS "idx_post_history_item_date" ON "post history" ("postID", "date" DESC);
+CREATE INDEX IF NOT EXISTS "idx_post_history_user_date" ON "post history" ("user", "date" DESC);
+CREATE INDEX IF NOT EXISTS "idx_tag_history_date" ON "tag history" ("date" DESC);
+CREATE INDEX IF NOT EXISTS "idx_tag_history_item_date" ON "tag history" ("tag", "date" DESC);
+CREATE INDEX IF NOT EXISTS "idx_tag_history_user_date" ON "tag history" ("user", "date" DESC);
+CREATE INDEX IF NOT EXISTS "idx_note_history_date" ON "note history" ("updatedDate" DESC);
+CREATE INDEX IF NOT EXISTS "idx_note_history_item_date" ON "note history" ("postID", "updatedDate" DESC);
+CREATE INDEX IF NOT EXISTS "idx_note_history_user_date" ON "note history" ("updater", "updatedDate" DESC);
+CREATE INDEX IF NOT EXISTS "idx_group_history_date" ON "group history" ("date" DESC);
+CREATE INDEX IF NOT EXISTS "idx_group_history_item_date" ON "group history" ("groupID", "date" DESC);
+CREATE INDEX IF NOT EXISTS "idx_group_history_user_date" ON "group history" ("user", "date" DESC);
+CREATE INDEX IF NOT EXISTS "idx_note_history_post_order_date" ON "note history" ("postID", "order", "updatedDate" DESC);
+CREATE INDEX IF NOT EXISTS "idx_alias_history_date" ON "alias history" ("date" DESC);
+CREATE INDEX IF NOT EXISTS "idx_implication_history_date" ON "implication history" ("date" DESC);
+CREATE INDEX IF NOT EXISTS "idx_login_history_username_timestamp" ON "login history" ("username", "timestamp" DESC);
 
 CREATE INDEX IF NOT EXISTS "idx_posts_search_guest_date" ON posts ("uploadDate" DESC, "postID" DESC)
     WHERE "parentID" IS NULL AND rating = 'cute' AND (type = 'image' OR type = 'comic') 
     AND NOT (style = 'promo' OR style = 'sketch' OR style = 'lineart');
-    

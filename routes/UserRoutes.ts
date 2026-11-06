@@ -1518,16 +1518,13 @@ const UserRoutes = (app: Express) => {
             let username = req.query.username as string
             if (!username) username = req.session.username!
             if (!username) return void res.status(400).send("No username")
-            const postHistory = await sql.history.userPostHistory(username)
-            const tagHistory = await sql.history.userTagHistory(username)
-            const noteHistory = await sql.history.userNoteHistory(username)
-            const groupHistory = await sql.history.userGroupHistory(username)
-            const json = {
-                postEdits: Number(postHistory[0]?.historyCount || 0),
-                tagEdits: Number(tagHistory[0]?.historyCount || 0),
-                noteEdits: Number(noteHistory[0]?.historyCount || 0),
-                groupEdits: Number(groupHistory[0]?.historyCount || 0)
-            } as EditCounts
+            const [postEdits, tagEdits, noteEdits, groupEdits] = await Promise.all([
+                sql.history.userPostHistoryCount(username),
+                sql.history.userTagHistoryCount(username),
+                sql.history.userNoteHistoryCount(username),
+                sql.history.userGroupHistoryCount(username)
+            ])
+            const json = {postEdits, tagEdits, noteEdits, groupEdits} as EditCounts
             serverFunctions.sendEncrypted(json, req, res)
         } catch (e) {
             console.log(e)

@@ -1016,7 +1016,7 @@ const PostRoutes = (app: Express) => {
                 if (history) result = [history]
                 if (req.session.captchaNeeded) result = functions.post.stripTags(result)
             } else if (username) {
-                result = await sql.history.userPostHistory(username)
+                result = await sql.history.userPostHistory(username, Number(offset), Number(limit), query)
                 if (req.session.captchaNeeded) result = functions.post.stripTags(result)
             } else {
                 result = await sql.history.postHistory(postID, Number(offset), Number(limit), query)

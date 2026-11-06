@@ -54,7 +54,7 @@ export default class SQLHistory {
     }
 
     /** Get tag history */
-    public static tagHistory = async (tag?: string, offset?: number, limit?: number, search?: string) => {
+    public static tagHistory = async (tag?: string, offset?: number, limit?: number, search?: string, username?: string) => {
         let i = 1
         let values = [] as (string | number)[]
         let searchValue = i
@@ -72,6 +72,11 @@ export default class SQLHistory {
             tagQuery = `"tag history"."tag" = $${tagValue}`
             i++
         }
+        let userQuery = ""
+        if (username !== undefined) {
+            values.push(username)
+            userQuery = `"tag history"."user" = $${i++}`
+        }
         let limitValue = i
         if (limit) {
             if (Number(limit) > 100) limit = 100
@@ -79,11 +84,16 @@ export default class SQLHistory {
             i++
         }
         if (offset) values.push(offset)
-        const whereQueries = [searchQuery, tagQuery].filter(Boolean).join(" AND ")
+        const whereQueries = [searchQuery, tagQuery, userQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                WITH history_page AS MATERIALIZED (
-                    SELECT "tag history".*, COUNT(*) OVER() AS "historyCount"
+                WITH history_count AS (
+                    SELECT COUNT(*) AS "historyCount"
+                    FROM "tag history"
+                    ${whereQueries ? `WHERE ${whereQueries}` : ""}
+                ),
+                history_page AS MATERIALIZED (
+                    SELECT "tag history".*
                     FROM "tag history"
                     ${whereQueries ? `WHERE ${whereQueries}` : ""}
                     ORDER BY "tag history"."date" DESC
@@ -96,7 +106,7 @@ export default class SQLHistory {
                     WHERE posts."postID" IN (SELECT "featuredPost" FROM history_page)
                     GROUP BY posts."postID"
                 )
-                SELECT "tag history".*,
+                SELECT "tag history".*, history_count."historyCount",
                 jsonb_build_object(
                     'username', users."username",
                     'role', users."role",
@@ -107,13 +117,14 @@ export default class SQLHistory {
                 ) AS "user",
                 to_json(post_json.*) AS "featuredPost"
                 FROM history_page AS "tag history"
+                CROSS JOIN history_count
                 LEFT JOIN users ON users."username" = "tag history"."user"
                 LEFT JOIN post_json ON post_json."postID" = "tag history"."featuredPost"
                 ORDER BY "tag history"."date" DESC
             `),
             values: []
         }
-        if (values?.[0]) query.values = values
+        query.values = values
         const result = await SQLQuery.run(query, `history/tag${tag ? `/${tag}` : ""}`)
         return result as Promise<TagHistory[]>
     }
@@ -122,10 +133,14 @@ export default class SQLHistory {
     public static tagHistoryID = async (tag: string, historyID: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                WITH post_json AS (
+                WITH matching_history AS MATERIALIZED (
+                    SELECT * FROM "tag history" WHERE "tag history"."tag" = $1 AND "tag history"."historyID" = $2
+                ),
+                post_json AS (
                         SELECT posts.*, json_agg(DISTINCT images.*) AS images
                         FROM posts
                         JOIN images ON images."postID" = posts."postID"
+                        WHERE posts."postID" IN (SELECT "featuredPost" FROM matching_history)
                         GROUP BY posts."postID"
                 )
                 SELECT "tag history".*,
@@ -137,14 +152,11 @@ export default class SQLHistory {
                     'deleted', users."deleted",
                     'imagePost', users."imagePost"
                 ) AS "user",
-                to_json((array_agg(post_json.*))[1]) AS "featuredPost",
+                to_json(post_json.*) AS "featuredPost",
                 COUNT(*) OVER() AS "historyCount"
-                FROM "tag history"
+                FROM matching_history AS "tag history"
                 LEFT JOIN users ON users."username" = "tag history"."user"
                 LEFT JOIN post_json ON post_json."postID" = "tag history"."featuredPost"
-                WHERE "tag history"."tag" = $1 AND "tag history"."historyID" = $2
-                GROUP BY "tag history"."historyID", users."username", users."role", 
-                users."premium", users."banned", users."deleted", users."imagePost"
             `),
             values: [tag, historyID]
         }
@@ -152,39 +164,61 @@ export default class SQLHistory {
         return result[0] as Promise<TagHistory | undefined>
     }
 
-    /** Get user tag history */
-    public static userTagHistory = async (username: string) => {
+    /** Get user tag history. */
+    public static userTagHistory = async (username: string, offset?: number, limit?: number, search?: string) => {
+        if (offset !== undefined || limit !== undefined || search) {
+            return SQLHistory.tagHistory(undefined, offset, limit, search, username)
+        }
         const query: QueryConfig = {
-        text: functions.multiTrim(/*sql*/`
-                WITH post_json AS (
-                        SELECT posts.*, json_agg(DISTINCT images.*) AS images
-                        FROM posts
-                        JOIN images ON images."postID" = posts."postID"
-                        GROUP BY posts."postID"
+            text: functions.multiTrim(/*sql*/`
+                WITH history_count AS (
+                    SELECT COUNT(*) AS "historyCount"
+                    FROM "tag history" WHERE "user" = $1
+                ), 
+                user_data AS MATERIALIZED (
+                    SELECT jsonb_build_object(
+                        'username', users."username",
+                        'role', users."role",
+                        'premium', users."premium",
+                        'banned', users."banned",
+                        'deleted', users."deleted",
+                        'imagePost', users."imagePost"
+                    ) AS "user"
+                    FROM users WHERE users."username" = $1
+                ), 
+                matching_history AS MATERIALIZED (
+                    SELECT * FROM "tag history" WHERE "user" = $1
+                ), 
+                post_json AS (
+                    SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                    FROM posts
+                    JOIN images ON images."postID" = posts."postID"
+                    WHERE posts."postID" IN (SELECT "featuredPost" FROM matching_history)
+                    GROUP BY posts."postID"
                 )
-                SELECT "tag history".*,
-                jsonb_build_object(
-                    'username', users."username",
-                    'role', users."role",
-                    'premium', users."premium", 
-                    'banned', users."banned",
-                    'deleted', users."deleted",
-                    'imagePost', users."imagePost"
-                ) AS "user",
-                to_json((array_agg(post_json.*))[1]) AS "featuredPost",
-                COUNT(*) OVER() AS "historyCount"
-                FROM "tag history"
-                LEFT JOIN users ON users."username" = "tag history"."user"
+                SELECT "tag history".*, user_data."user", history_count."historyCount",
+                to_json(post_json.*) AS "featuredPost"
+                FROM matching_history AS "tag history"
+                CROSS JOIN history_count
+                CROSS JOIN user_data
                 LEFT JOIN post_json ON post_json."postID" = "tag history"."featuredPost"
                 WHERE "tag history"."user" = $1
-                GROUP BY "tag history"."historyID", users."username", users."role", 
-                users."premium", users."banned", users."deleted", users."imagePost"
                 ORDER BY "tag history"."date" DESC
             `),
             values: [username]
         }
         const result = await SQLQuery.run(query, `history/tag/user/${username}`)
         return result as Promise<TagHistory[]>
+    }
+
+    /** Count user tag history. */
+    public static userTagHistoryCount = async (username: string) => {
+        const query: QueryConfig = {
+            text: /*sql*/`SELECT COUNT(*) AS "historyCount" FROM "tag history" WHERE "user" = $1`,
+            values: [username]
+        }
+        const result = await SQLQuery.run(query, `history/tag/user/${username}`)
+        return Number(result[0]?.historyCount || 0)
     }
 
     /** Insert post history */
@@ -243,7 +277,7 @@ export default class SQLHistory {
     }
 
     /** Get post history */
-    public static postHistory = async (postID?: string | number, offset?: number, limit?: number, search?: string) => {
+    public static postHistory = async (postID?: string | number, offset?: number, limit?: number, search?: string, username?: string) => {
         let i = 1
         let values = [] as (string | number)[]
         let searchValue = i
@@ -263,6 +297,11 @@ export default class SQLHistory {
             postQuery =`"post history"."postID" = $${postValue}`
             i++
         }
+        let userQuery = ""
+        if (username) {
+            values.push(username)
+            userQuery = `"post history"."user" = $${i++}`
+        }
         let limitValue = i
         if (limit) {
             if (Number(limit) > 100) limit = 100
@@ -270,17 +309,22 @@ export default class SQLHistory {
             i++
         }
         if (offset) values.push(offset)
-        const whereQueries = [searchQuery, postQuery].filter(Boolean).join(" AND ")
+        const whereQueries = [searchQuery, postQuery, userQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                WITH history_page AS MATERIALIZED (
-                    SELECT "post history".*, COUNT(*) OVER() AS "historyCount"
+                WITH history_count AS (
+                    SELECT COUNT(*) AS "historyCount"
+                    FROM "post history"
+                    ${whereQueries ? `WHERE ${whereQueries}` : ""}
+                ),
+                history_page AS MATERIALIZED (
+                    SELECT "post history".*
                     FROM "post history"
                     ${whereQueries ? `WHERE ${whereQueries}` : ""}
                     ORDER BY "post history"."date" DESC
                     ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
                 )
-                SELECT "post history".*, 
+                SELECT "post history".*, history_count."historyCount",
                 jsonb_build_object(
                     'username', users."username",
                     'role', users."role",
@@ -292,13 +336,14 @@ export default class SQLHistory {
                 posts.locked, posts.hidden, posts.private, 
                 posts.approver, posts."approveDate", posts.deleted, posts."deletionDate"
                 FROM history_page AS "post history"
+                CROSS JOIN history_count
                 LEFT JOIN users ON users."username" = "post history"."user"
                 LEFT JOIN posts ON posts."postID" = "post history"."postID"
                 ORDER BY "post history"."date" DESC
             `),
             values: []
         }
-        if (values?.[0]) query.values = values
+        query.values = values
         const result = await SQLQuery.run(query, `history/post${postID ? `/${postID}` : ""}`)
         return result as Promise<PostHistory[]>
     }
@@ -322,9 +367,6 @@ export default class SQLHistory {
                 LEFT JOIN users ON users."username" = "post history"."user"
                 LEFT JOIN posts ON posts."postID" = "post history"."postID"
                 WHERE "post history"."postID" = $1 AND "post history"."historyID" = $2
-                GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
-                posts.approver, posts."approveDate", posts.deleted, posts."deletionDate", users."username", 
-                users."premium", users."role", users."banned", users."deleted", users."imagePost"
             `),
             values: [postID, historyID]
         }
@@ -332,35 +374,53 @@ export default class SQLHistory {
         return result[0] as Promise<PostHistory | undefined>
     }
 
-    /** Get user post history */
-    public static userPostHistory = async (username: string) => {
+    /** Get user post history. */
+    public static userPostHistory = async (username: string, offset?: number, limit?: number, search?: string) => {
+        if (offset !== undefined || limit !== undefined || search) {
+            return SQLHistory.postHistory(undefined, offset, limit, search, username)
+        }
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT "post history".*,
-                jsonb_build_object(
-                    'username', users."username",
-                    'role', users."role",
-                    'premium', users."premium", 
-                    'banned', users."banned",
-                    'deleted', users."deleted",
-                    'imagePost', users."imagePost"
-                ) AS "user",
-                posts.locked, posts.hidden, posts.private, 
+                WITH history_count AS (
+                    SELECT COUNT(*) AS "historyCount"
+                    FROM "post history" WHERE "user" = $1
+                ),
+                user_data AS MATERIALIZED (
+                    SELECT jsonb_build_object(
+                        'username', users."username",
+                        'role', users."role",
+                        'premium', users."premium",
+                        'banned', users."banned",
+                        'deleted', users."deleted",
+                        'imagePost', users."imagePost"
+                    ) AS "user"
+                    FROM users WHERE users."username" = $1
+                )
+                SELECT "post history".*, user_data."user",
+                posts.locked, posts.hidden, posts.private,
                 posts.approver, posts."approveDate", posts.deleted, posts."deletionDate",
-                COUNT(*) OVER() AS "historyCount"
+                history_count."historyCount"
                 FROM "post history"
-                LEFT JOIN users ON users."username" = "post history"."user"
+                CROSS JOIN history_count
+                CROSS JOIN user_data
                 LEFT JOIN posts ON posts."postID" = "post history"."postID"
                 WHERE "post history"."user" = $1
-                GROUP BY "post history"."historyID", posts.locked, posts.hidden, posts.private, 
-                posts.approver, posts."approveDate", posts.deleted, posts."deletionDate", users."username", 
-                users."premium", users."role", users."banned", users."deleted", users."imagePost"
                 ORDER BY "post history"."date" DESC
             `),
             values: [username]
         }
         const result = await SQLQuery.run(query, `history/post/user/${username}`)
         return result as Promise<PostHistory[]>
+    }
+
+    /** Count user post history. */
+    public static userPostHistoryCount = async (username: string) => {
+        const query: QueryConfig = {
+            text: /*sql*/`SELECT COUNT(*) AS "historyCount" FROM "post history" WHERE "user" = $1`,
+            values: [username]
+        }
+        const result = await SQLQuery.run(query, `history/post/user/${username}`)
+        return Number(result[0]?.historyCount || 0)
     }
 
     /** Insert note history */
@@ -388,7 +448,7 @@ export default class SQLHistory {
     }
 
     /** Get note history */
-    public static noteHistory = async (postID?: string, order?: number, offset?: number, limit?: number, search?: string) => {
+    public static noteHistory = async (postID?: string, order?: number, offset?: number, limit?: number, search?: string, username?: string) => {
         let i = 1
         let values = [] as (string | number)[]
         let searchValue = i
@@ -413,17 +473,28 @@ export default class SQLHistory {
             orderQuery = `"note history"."order" = $${orderValue}`
             i++
         }
+        let userQuery = ""
+        if (username !== undefined) {
+            values.push(username)
+            userQuery = `"note history"."updater" = $${i++}`
+        }
         let limitValue = i
         if (limit) {
             values.push(limit)
             i++
         }
         if (offset) values.push(offset)
-        const whereQueries = [searchQuery, postQuery, orderQuery].filter(Boolean).join(" AND ")
+        const whereQueries = [searchQuery, postQuery, orderQuery, userQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                WITH history_page AS MATERIALIZED (
-                    SELECT "note history".*, COUNT(*) OVER() AS "historyCount"
+                WITH history_count AS (
+                    SELECT COUNT(*) AS "historyCount"
+                    FROM "note history"
+                    ${whereQueries ? `WHERE ${whereQueries}` : ""}
+                    ${whereQueries ? "AND" : "WHERE"} EXISTS (SELECT 1 FROM images WHERE images."postID" = "note history"."postID")
+                ),
+                history_page AS MATERIALIZED (
+                    SELECT "note history".*
                     FROM "note history"
                     ${whereQueries ? `WHERE ${whereQueries}` : ""}
                     ${whereQueries ? "AND" : "WHERE"} EXISTS (SELECT 1 FROM images WHERE images."postID" = "note history"."postID")
@@ -437,7 +508,7 @@ export default class SQLHistory {
                     WHERE posts."postID" IN (SELECT "postID" FROM history_page)
                     GROUP BY posts."postID"
                 )
-                SELECT "note history".*, 
+                SELECT "note history".*, history_count."historyCount",
                 jsonb_build_object(
                     'username', users."username",
                     'role', users."role",
@@ -448,13 +519,14 @@ export default class SQLHistory {
                 ) AS "updater",
                 to_json(post_json.*) AS post
                 FROM history_page AS "note history"
+                CROSS JOIN history_count
                 LEFT JOIN "users" ON users."username" = "note history"."updater"
                 JOIN post_json ON post_json."postID" = "note history"."postID"
                 ORDER BY "note history"."updatedDate" DESC
         `),
         values: []
         }
-        if (values?.[0]) query.values = values
+        query.values = values
         const result = await SQLQuery.run(query)
         return result as Promise<NoteHistory[]>
     }
@@ -463,47 +535,17 @@ export default class SQLHistory {
     public static noteHistoryID = async (postID?: string, historyID?: string) => {
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                    WITH post_json AS (
-                        SELECT posts.*, json_agg(DISTINCT images.*) AS images
-                        FROM posts
-                        JOIN images ON images."postID" = posts."postID"
-                        GROUP BY posts."postID"
-                    )
-                    SELECT "note history".*, 
-                    jsonb_build_object(
-                        'username', users."username",
-                        'role', users."role",
-                        'premium', users."premium", 
-                        'banned', users."banned",
-                        'deleted', users."deleted",
-                        'imagePost', users."imagePost"
-                    ) AS "updater",
-                    COUNT(*) OVER() AS "historyCount",
-                    to_json((array_agg(post_json.*))[1]) AS post
-                    FROM "note history"
-                    LEFT JOIN "users" ON users."username" = "note history"."updater"
-                    JOIN post_json ON post_json."postID" = "note history"."postID"
-                    WHERE "note history"."postID" = $1 AND "note history"."historyID" = $2
-                    GROUP BY "note history"."historyID", users."username", users."role", 
-                    users."premium", users."banned", users."deleted", users."imagePost"
-            `),
-            values: [postID, historyID]
-        }
-        const result = await SQLQuery.run(query)
-        return result[0] as Promise<NoteHistory | undefined>
-    }
-
-    /** Get user note history */
-    public static userNoteHistory = async (username: string) => {
-        const query: QueryConfig = {
-        text: functions.multiTrim(/*sql*/`
-                WITH post_json AS (
+                WITH matching_history AS MATERIALIZED (
+                    SELECT * FROM "note history" WHERE "note history"."postID" = $1 AND "note history"."historyID" = $2
+                ),
+                post_json AS (
                     SELECT posts.*, json_agg(DISTINCT images.*) AS images
                     FROM posts
                     JOIN images ON images."postID" = posts."postID"
+                    WHERE posts."postID" IN (SELECT "postID" FROM matching_history)
                     GROUP BY posts."postID"
                 )
-                SELECT "note history".*, 
+                SELECT "note history".*,
                 jsonb_build_object(
                     'username', users."username",
                     'role', users."role",
@@ -513,19 +555,72 @@ export default class SQLHistory {
                     'imagePost', users."imagePost"
                 ) AS "updater",
                 COUNT(*) OVER() AS "historyCount",
-                to_json((array_agg(post_json.*))[1]) AS post
-                FROM "note history"
+                to_json(post_json.*) AS post
+                FROM matching_history AS "note history"
                 LEFT JOIN "users" ON users."username" = "note history"."updater"
                 JOIN post_json ON post_json."postID" = "note history"."postID"
-                WHERE "note history"."updater" = $1
-                GROUP BY "note history"."historyID", users."username", users."role", 
-                users."premium", users."banned", users."deleted", users."imagePost"
-                ORDER BY "note history"."updatedDate" DESC
-        `),
-        values: [username]
+            `),
+            values: [postID, historyID]
         }
         const result = await SQLQuery.run(query)
+        return result[0] as Promise<NoteHistory | undefined>
+    }
+
+    /** Get user note history. */
+    public static userNoteHistory = async (username: string, offset?: number, limit?: number, search?: string) => {
+        if (offset !== undefined || limit !== undefined || search) {
+            return SQLHistory.noteHistory(undefined, undefined, offset, limit === undefined ? undefined : Math.min(limit, 100), search, username)
+        }
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                WITH history_count AS (
+                    SELECT COUNT(*) AS "historyCount"
+                    FROM "note history" WHERE "updater" = $1 AND EXISTS (SELECT 1 FROM images WHERE images."postID" = "note history"."postID")
+                ), 
+                user_data AS MATERIALIZED (
+                    SELECT jsonb_build_object(
+                        'username', users."username",
+                        'role', users."role",
+                        'premium', users."premium",
+                        'banned', users."banned",
+                        'deleted', users."deleted",
+                        'imagePost', users."imagePost"
+                    ) AS "updater"
+                    FROM users WHERE users."username" = $1
+                ), 
+                matching_history AS MATERIALIZED (
+                    SELECT * FROM "note history" WHERE "updater" = $1 AND EXISTS (SELECT 1 FROM images WHERE images."postID" = "note history"."postID")
+                ), 
+                post_json AS (
+                    SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                    FROM posts
+                    JOIN images ON images."postID" = posts."postID"
+                    WHERE posts."postID" IN (SELECT "postID" FROM matching_history)
+                    GROUP BY posts."postID"
+                )
+                SELECT "note history".*, user_data."updater", history_count."historyCount",
+                to_json(post_json.*) AS post
+                FROM matching_history AS "note history"
+                CROSS JOIN history_count
+                CROSS JOIN user_data
+                JOIN post_json ON post_json."postID" = "note history"."postID"
+                WHERE "note history"."updater" = $1
+                ORDER BY "note history"."updatedDate" DESC
+            `),
+            values: [username]
+        }
+        const result = await SQLQuery.run(query, `history/note/user/${username}`)
         return result as Promise<NoteHistory[]>
+    }
+
+    /** Count user note history. */
+    public static userNoteHistoryCount = async (username: string) => {
+        const query: QueryConfig = {
+            text: /*sql*/`SELECT COUNT(*) AS "historyCount" FROM "note history" WHERE "updater" = $1 AND EXISTS (SELECT 1 FROM images WHERE images."postID" = "note history"."postID")`,
+            values: [username]
+        }
+        const result = await SQLQuery.run(query, `history/note/user/${username}`)
+        return Number(result[0]?.historyCount || 0)
     }
 
     /** Insert group history */
@@ -556,7 +651,7 @@ export default class SQLHistory {
     }
 
     /** Get group history */
-    public static groupHistory = async (groupID?: string, offset?: number, limit?: number, search?: string) => {
+    public static groupHistory = async (groupID?: string, offset?: number, limit?: number, search?: string, username?: string) => {
         let i = 1
         let values = [] as (string | number)[]
         let searchValue = i
@@ -576,6 +671,11 @@ export default class SQLHistory {
             groupQuery = `"group history"."groupID" = $${groupValue}`
             i++
         }
+        let userQuery = ""
+        if (username !== undefined) {
+            values.push(username)
+            userQuery = `"group history"."user" = $${i++}`
+        }
         let limitValue = i
         if (limit) {
             if (Number(limit) > 100) limit = 100
@@ -583,17 +683,22 @@ export default class SQLHistory {
             i++
         }
         if (offset) values.push(offset)
-        const whereQueries = [searchQuery, groupQuery].filter(Boolean).join(" AND ")
+        const whereQueries = [searchQuery, groupQuery, userQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                WITH history_page AS MATERIALIZED (
-                    SELECT "group history".*, COUNT(*) OVER() AS "historyCount"
+                WITH history_count AS (
+                    SELECT COUNT(*) AS "historyCount"
+                    FROM "group history"
+                    ${whereQueries ? `WHERE ${whereQueries}` : ""}
+                ),
+                history_page AS MATERIALIZED (
+                    SELECT "group history".*
                     FROM "group history"
                     ${whereQueries ? `WHERE ${whereQueries}` : ""}
                     ORDER BY "group history"."date" DESC
                     ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
                 )
-                SELECT "group history".*,
+                SELECT "group history".*, history_count."historyCount",
                 jsonb_build_object(
                     'username', users."username",
                     'role', users."role",
@@ -603,12 +708,13 @@ export default class SQLHistory {
                     'imagePost', users."imagePost"
                 ) AS "user"
                 FROM history_page AS "group history"
+                CROSS JOIN history_count
                 LEFT JOIN users ON users."username" = "group history"."user"
                 ORDER BY "group history"."date" DESC
             `),
             values: []
         }
-        if (values?.[0]) query.values = values
+        query.values = values
         const result = await SQLQuery.run(query, `history/group${groupID ? `/${groupID}` : ""}`)
         return result as Promise<GroupHistory[]>
     }
@@ -629,8 +735,6 @@ export default class SQLHistory {
                 FROM "group history"
                 LEFT JOIN users ON users."username" = "group history"."user"
                 WHERE "group history"."groupID" = $1 AND "group history"."historyID" = $2
-                GROUP BY "group history"."historyID", users."username", users."role", 
-                users."premium", users."banned", users."deleted", users."imagePost"
             `),
             values: [groupID, historyID]
         }
@@ -638,31 +742,49 @@ export default class SQLHistory {
         return result[0] as Promise<GroupHistory | undefined>
     }
 
-    /** Get user group history */
-    public static userGroupHistory = async (username: string) => {
+    /** Get user group history. */
+    public static userGroupHistory = async (username: string, offset?: number, limit?: number, search?: string) => {
+        if (offset !== undefined || limit !== undefined || search) {
+            return SQLHistory.groupHistory(undefined, offset, limit, search, username)
+        }
         const query: QueryConfig = {
-        text: functions.multiTrim(/*sql*/`
-                SELECT "group history".*,
-                jsonb_build_object(
-                    'username', users."username",
-                    'role', users."role",
-                    'premium', users."premium", 
-                    'banned', users."banned",
-                    'deleted', users."deleted",
-                    'imagePost', users."imagePost"
-                ) AS "user",
-                COUNT(*) OVER() AS "historyCount"
+            text: functions.multiTrim(/*sql*/`
+                WITH history_count AS (
+                    SELECT COUNT(*) AS "historyCount"
+                    FROM "group history" WHERE "user" = $1
+                ), 
+                user_data AS MATERIALIZED (
+                    SELECT jsonb_build_object(
+                        'username', users."username",
+                        'role', users."role",
+                        'premium', users."premium",
+                        'banned', users."banned",
+                        'deleted', users."deleted",
+                        'imagePost', users."imagePost"
+                    ) AS "user"
+                    FROM users WHERE users."username" = $1
+                )
+                SELECT "group history".*, user_data."user", history_count."historyCount"
                 FROM "group history"
-                LEFT JOIN users ON users."username" = "group history"."user"
+                CROSS JOIN history_count
+                CROSS JOIN user_data
                 WHERE "group history"."user" = $1
-                GROUP BY "group history"."historyID", users."username", users."role", 
-                users."premium", users."banned", users."deleted", users."imagePost"
                 ORDER BY "group history"."date" DESC
             `),
             values: [username]
         }
         const result = await SQLQuery.run(query, `history/group/user/${username}`)
         return result as Promise<GroupHistory[]>
+    }
+
+    /** Count user group history. */
+    public static userGroupHistoryCount = async (username: string) => {
+        const query: QueryConfig = {
+            text: /*sql*/`SELECT COUNT(*) AS "historyCount" FROM "group history" WHERE "user" = $1`,
+            values: [username]
+        }
+        const result = await SQLQuery.run(query, `history/group/user/${username}`)
+        return Number(result[0]?.historyCount || 0)
     }
 
     /** Update search history view date */
@@ -708,9 +830,16 @@ export default class SQLHistory {
         const options = {i: 2, tags, search, type, rating, style, sort, offset, limit, showChildren,
             username: sessionUsername, outerSort: true}
 
-        const {postJSON, values, searchValue, sortQuery, limitValue, offsetValue, whereQueries, includeTags} =
-            SQLQuery.search.boilerplate({...options, condition: historyDateSort ? undefined :
-                `EXISTS (SELECT 1 FROM history WHERE history."postID" = posts."postID" AND history.username = $1)`})
+        const historyCondition = `EXISTS (SELECT 1 FROM history WHERE history."postID" = posts."postID" AND history.username = $1)`
+        const initial = SQLQuery.search.boilerplate(options)
+
+        const textCondition = search ? `(${["title", "englishTitle", "artist", "source", "mirrors"].map((field) =>
+            `posts."${field}"${field === "mirrors" ? "::text" : ""} ILIKE '%' || $${initial.searchValue} || '%'`).join(" OR ")})` : ""
+
+        const {postJSON, countJSON, values, searchValue, sortQuery, limitValue, offsetValue, whereQueries, includeTags} =
+            SQLQuery.search.boilerplate({...options, pageFirst: !historyDateSort,
+                condition: historyDateSort ? undefined : [historyCondition, textCondition,
+                    `EXISTS (SELECT 1 FROM images WHERE images."postID" = posts."postID")`].filter(Boolean).join(" AND ")})
 
         const postTable = historyDateSort ? "posts" : "post_json"
         const searchQuery = search ? `AND (${["title", "englishTitle", "artist", "source", "mirrors"].map((field) =>
@@ -720,12 +849,22 @@ export default class SQLHistory {
         let historyQuery = postJSON
 
         if (historyDateSort) {
-            const filteredPostJSON = SQLQuery.search.boilerplate({...options,
+            const filteredPostJSON = SQLQuery.search.boilerplate({...options, pageFirst: true, sort: "date", offset: undefined,
                 condition: `posts."postID" IN (SELECT "postID" FROM history_page)`}).postJSON
                 
             historyQuery = functions.multiTrim(/*sql*/`
-                WITH history_page AS MATERIALIZED (
-                    SELECT history.*, COUNT(*) OVER() AS "historyCount"
+                WITH history_count AS (
+                    SELECT COUNT(*) AS "historyCount"
+                    FROM history
+                    JOIN posts ON posts."postID" = history."postID"
+                    ${includeTags ? `JOIN "tag map tags" ON posts."postID" = "tag map tags"."postID"` : ""}
+                    WHERE history.username = $1
+                    ${whereQueries ? `AND ${whereQueries}` : ""}
+                    ${searchQuery}
+                    AND EXISTS (SELECT 1 FROM images WHERE images."postID" = posts."postID")
+                ),
+                history_page AS MATERIALIZED (
+                    SELECT history.*
                     FROM history
                     JOIN posts ON posts."postID" = history."postID"
                     ${includeTags ? `JOIN "tag map tags" ON posts."postID" = "tag map tags"."postID"` : ""}
@@ -743,15 +882,14 @@ export default class SQLHistory {
             text: functions.multiTrim(/*sql*/`
                 ${historyQuery}
                 SELECT history.*,
-                ${historyDateSort ? "" : `COUNT(*) OVER() AS "historyCount",`}
+                ${historyDateSort ? `history_count."historyCount",` :
+                    `( ${countJSON} SELECT COUNT(*) FROM post_json ) AS "historyCount",`}
                 to_json(post_json.*) AS post
                 FROM ${historyDateSort ? "history_page" : "history"} AS history
                 JOIN post_json ON post_json."postID" = history."postID"
-                ${historyDateSort ? sortQuery : `
+                ${historyDateSort ? `CROSS JOIN history_count ${sortQuery}` : `
                     WHERE history.username = $1
-                    ${searchQuery}
                     ${sortQuery.replace(/posts\./g, "post_json.").replace(/favorites\./g, "post_json.")}
-                    ${pagination}
                 `}
             `),
             values: [username, ...values]

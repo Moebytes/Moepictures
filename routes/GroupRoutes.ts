@@ -656,12 +656,14 @@ const GroupRoutes = (app: Express) => {
                     const history = await sql.history.groupHistoryID(group.groupID, historyID)
                     if (history) result = [history]
                 } else if (username) {
-                    result = await sql.history.userGroupHistory(username)
+                    result = await sql.history.userGroupHistory(username, Number(offset), Number(limit), query)
                 } else {
                     result = await sql.history.groupHistory(group.groupID, Number(offset), Number(limit), query)
                 }
+            } else if (username) {
+                result = await sql.history.userGroupHistory(username, Number(offset), Number(limit), query)
             } else {
-                result = await sql.history.groupHistory(undefined, Number(offset), Number(limit))
+                result = await sql.history.groupHistory(undefined, Number(offset), Number(limit), query)
             }
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {

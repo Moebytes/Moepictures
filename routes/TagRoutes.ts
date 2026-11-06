@@ -784,7 +784,7 @@ const TagRoutes = (app: Express) => {
                 const history = await sql.history.tagHistoryID(tag, historyID)
                 if (history) result = [history]
             } else if (username) {
-                result = await sql.history.userTagHistory(username)
+                result = await sql.history.userTagHistory(username, Number(offset), Number(limit), query)
             } else {
                 result = await sql.history.tagHistory(tag, Number(offset), Number(limit), query)
             }

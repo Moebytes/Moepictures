@@ -664,7 +664,7 @@ export default class SQLTag {
         const whereQueries = [searchQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                WITH history AS (
+                WITH history AS NOT MATERIALIZED (
                     SELECT "historyID", "user", "date", "source", "target",
                     "type", "affectedPosts", "sourceData", "reason"
                     FROM "alias history"
@@ -673,14 +673,18 @@ export default class SQLTag {
                     "type", "affectedPosts", NULL::jsonb AS "sourceData", "reason"
                     FROM "implication history"
                 ),
+                history_count AS (
+                    SELECT COUNT(*) AS "historyCount" FROM history
+                    ${whereQueries ? `WHERE ${whereQueries}` : ""}
+                ),
                 history_page AS MATERIALIZED (
-                    SELECT history.*, COUNT(*) OVER() AS "historyCount"
+                    SELECT history.*
                     FROM history
                     ${whereQueries ? `WHERE ${whereQueries}` : ""}
                     ORDER BY history."date" DESC
                     ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
                 )
-                SELECT "history".*,
+                SELECT "history".*, history_count."historyCount",
                 jsonb_build_object(
                     'username', users."username",
                     'role', users."role",
@@ -690,6 +694,7 @@ export default class SQLTag {
                     'imagePost', users."imagePost"
                 ) AS "user"
                 FROM history_page AS history
+                CROSS JOIN history_count
                 LEFT JOIN users ON users."username" = "history"."user"
                 ORDER BY "history"."date" DESC
             `),
