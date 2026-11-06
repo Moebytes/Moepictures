@@ -953,8 +953,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                             return (
                                 <BackdropShape key={id} shapeId={String(id)} x={newX} y={newY} width={newWidth} height={newHeight}
                                 svg={item.svg} rotation={item.rotation} rotationSpeed={rotationSpeed}
-                                constrainResize={({startCorner, movingCorner, originalMovingCorner}) => shiftKey ?
-                                    proportionalResize(startCorner, movingCorner, originalMovingCorner, newWidth, newHeight) : movingCorner}
+                                constrainResize={({startCorner, movingCorner, originalMovingCorner}) => shiftKey ? movingCorner :
+                                    proportionalResize(startCorner, movingCorner, originalMovingCorner, newWidth, newHeight)}
                                 onFocus={() => setActiveIndex(index)} keyboardTransformMultiplier={30} onChange={insertItem as any}
                                 onDelete={deleteItem} ResizeHandleComponent={BackdropResizeHandle} RotateHandleComponent={CircleHandle}
                                 onContextMenu={onContextMenu} onMouseDown={onMouseDown}/>
