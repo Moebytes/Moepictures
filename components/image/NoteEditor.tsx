@@ -16,6 +16,7 @@ import {ShapeEditor, DrawLayer, wrapShape} from "react-shape-editor"
 import NoteHistoryIcon from "../../assets/svg/history.svg"
 import NoteOCRIcon from "../../assets/svg/ocr.svg"
 import NoteCharSplitIcon from "../../assets/svg/charactersplit.svg"
+import NoteSVGIcon from "../../assets/svg/svg.svg"
 import NoteSaveIcon from "../../assets/svg/save.svg"
 import NoteClearIcon from "../../assets/svg/clear-all.svg"
 import NoteCopyIcon from "../../assets/svg/copy-notes.svg"
@@ -27,6 +28,7 @@ import NoteViewIcon from "../../assets/svg/view-note.svg"
 import NoteToggleOffIcon from "../../assets/svg/note-toggle-off.svg"
 import {PostFull, PostHistory, UnverifiedPost, Note, BubbleData} from "../../types/Types"
 import AnchoredPopup from "../../ui/AnchoredPopup"
+import {defaultNoteData} from "../../reducers/noteDialogReducer"
 import "./styles/noteeditor.less"
 
 interface Props {
@@ -172,6 +174,36 @@ const RectShape = wrapShape(({width, height, scale, onMouseEnter, onMouseMove, o
     )
 })
 
+
+const proportionalResize = (start: {x: number, y: number}, move: {x: number, y: number}, 
+    original: {x: number, y: number}, width: number, height: number) => {
+    if (width <= 0 || height <= 0) return move
+    const dx = move.x - start.x
+    const dy = move.y - start.y
+    const factor = Math.max(Math.abs(dx) / width, Math.abs(dy) / height)
+
+    const directionX = Math.sign(dx) || Math.sign(original.x - start.x) || 1
+    const directionY = Math.sign(dy) || Math.sign(original.y - start.y) || 1
+    return {
+        x: start.x + directionX * width * factor, 
+        y: start.y + directionY * height * factor
+    }
+}
+
+const BackdropResizeHandle = (props: React.ComponentProps<typeof RectHandle> & {name: string}) => {
+    if (["n", "s", "e", "w"].includes(props.name)) return null
+    return <RectHandle {...props}/>
+}
+
+const BackdropShape = wrapShape(({width, height, svg, onMouseDown, onDoubleClick, onContextMenu}) => (
+    <svg width={width} height={height} onMouseDown={onMouseDown} onDoubleClick={onDoubleClick}
+    onContextMenu={onContextMenu} style={{pointerEvents: "all"}}>
+        <image href={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`}
+        width={width} height={height} preserveAspectRatio="none" pointerEvents="none"/>
+        <rect width={width} height={height} fill="transparent"/>
+    </svg>
+))
+
 const EmptyHandle = (props: any) => {
     return (<></>)
 }
@@ -269,6 +301,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     const [shiftKey, setShiftKey] = useState(false)
     const [bubbleWidth, setBubbleWidth] = useState(bubbleData.width)
     const bubbleRef = useRef<HTMLDivElement>(null)
+    const svgInputRef = useRef<HTMLInputElement>(null)
     const navigate = useNavigate()
     const [noteTime, setNoteTime] = useState(props.noteTimeRef.current)
 
@@ -419,6 +452,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         if (!noteDrawingEnabled) return
         if (editNoteID === null) {
             const item = items[activeIndex]
+            if (!item || item.svg) return
             setEditNoteData({
                 translation: item.translation,
                 transcript: item.transcript,
@@ -438,7 +472,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                 characterTag: item.characterTag ?? editNoteData.characterTag,
                 animated: item.animated ?? editNoteData.animated,
                 startTime: item.startTime ?? editNoteData.startTime,
-                duration: item.duration ?? editNoteData.duration
+                duration: item.duration ?? editNoteData.duration,
+                svg: item.svg || ""
             })
             setEditNoteID(activeIndex)
         } else {
@@ -471,6 +506,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
             item.animated = editNoteData.animated
             item.startTime = editNoteData.startTime
             item.duration = editNoteData.duration
+            item.svg = editNoteData.svg
             return functions.util.insertAtIndex(prev, index, item)
         })
     }
@@ -527,7 +563,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                     return {...item, id: currentID, imageHash: targetHash} as Note
                 })
                 setID(currentID)
-                const characterNotes = prev.filter((p) => p.character)
+                const characterNotes = prev.filter((p) => p && (p.character || p.svg))
                 return [...characterNotes, ...notes]
             })
         }
@@ -607,6 +643,55 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         navigate(`/note/history/${props.post.postID}/${props.post.slug}/${props.order || 1}`)
     }
 
+    const importSVG = () => {
+        svgInputRef.current?.click()
+    }
+
+    const loadSVG = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0]
+        event.target.value = ""
+        if (!file) return
+        try {
+            const source = await file.text()
+            const document = new DOMParser().parseFromString(source, "image/svg+xml")
+            const root = document.documentElement as unknown as SVGSVGElement
+
+            if (document.querySelector("parsererror") || root.localName !== "svg" ||
+                root.namespaceURI !== "http://www.w3.org/2000/svg") {
+                throw new Error("invalid SVG")
+            }
+            const viewBox = root.getAttribute("viewBox")?.trim().split(/[\s,]+/).map(Number)
+            const hasViewBox = viewBox?.length === 4 && viewBox.every(Number.isFinite) && viewBox[2] > 0 && viewBox[3] > 0
+
+            const svgLength = (name: "width" | "height") => {
+                const value = root.getAttribute(name)
+                if (!value || value.trim().endsWith("%")) return 0
+                const length = root[name].baseVal.value
+                return Number.isFinite(length) && length > 0 ? length : 0
+            }
+            const svgWidth = svgLength("width")
+            const svgHeight = svgLength("height")
+            const ratio = hasViewBox ? viewBox![2] / viewBox![3] : 2
+
+            const naturalWidth = svgWidth || (svgHeight ? svgHeight * ratio : hasViewBox ? viewBox![2] : 300)
+            const naturalHeight = svgHeight || (svgWidth ? svgWidth / ratio : hasViewBox ? viewBox![3] : 150)
+            const fit = Math.min(1, targetWidth / naturalWidth, targetHeight / naturalHeight)
+
+            const width = naturalWidth * fit
+            const height = naturalHeight * fit
+
+            setItems((prev) => {
+                const nextID = Math.max(id, ...prev.map((item) => item?.id || 0)) + 1
+                setID(nextID)
+                return [...prev, {...defaultNoteData, id: nextID, svg: source,
+                    x: (targetWidth - width) / 2, y: (targetHeight - height) / 2,
+                    width, height, rotation: 0, imageWidth: targetWidth, imageHeight: targetHeight,
+                    imageHash: targetHash} as Note]
+            })
+            setNoteDrawingEnabled(true)
+        } catch {}
+    }
+
     useEffect(() => {
         if (!bubbleToggle || !bubbleRef.current) return
 
@@ -646,7 +731,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
         if (!noteMode || !bubbleToggle) return null
 
         const note = items.find((item) => item && (item.id ?? Number(item.noteID)) === bubbleData.id)
-        if (!note || !noteVisible(note) || (props.timed && note.animated)) return null
+        if (!note || note.svg || !noteVisible(note) || (props.timed && note.animated)) return null
 
         const bubble = bubbleData.character ? (
             <div className="note-character-bubble" ref={bubbleRef} style={{width: `${bubbleWidth}px`, 
@@ -668,12 +753,14 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
     return (
         <>
         {bubbleJSX()}
+        <input ref={svgInputRef} type="file" accept=".svg,image/svg+xml" hidden onChange={loadSVG}/>
         <div className="note-editor" style={{display: noteMode ? "flex" : "none", marginTop: props.reader ? "0px" : "20px", marginBottom: props.reader ? "0px" : "20px"}}>
             <div className="note-editor-filters" ref={filtersRef} onMouseDown={() => {if (enableDrag) setEnableDrag(false)}}>
                 <div className={`note-editor-buttons ${buttonHover ? "show-note-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
                     {!props.unverified ? <NoteHistoryIcon className="note-editor-button" onClick={() => showHistory()}/> : null}
                     <NoteOCRIcon className="note-editor-button" onClick={() => ocrDialog()}/>
                     <NoteCharSplitIcon className="note-editor-button" onClick={() => characterSplitDialog()}/>
+                    <NoteSVGIcon className="note-editor-button" onClick={() => importSVG()}/>
                     <NoteSaveIcon className="note-editor-button" onClick={() => saveTextDialog()}/>
                     <NoteClearIcon className="note-editor-button" onClick={() => clearNotes()}/>
                     <NoteCopyIcon className="note-editor-button" onClick={() => copyNotes()}/>
@@ -696,7 +783,9 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                             imageHeight: targetHeight, imageHash: targetHash, transcript: "", translation: ""} as Note]
                         })
                     }} DrawPreviewComponent={RectShape}/>
-                    {items.map((item: Note, index: number) => {
+                    {items.map((item, index) => ({item, index}))
+                        .sort((a, b) => Number(Boolean(b.item?.svg)) - Number(Boolean(a.item?.svg)))
+                        .map(({item, index}) => {
                         if (!item || !noteVisible(item)) return null
                         let {id, height, width, x, y, fontSize, strokeWidth, borderRadius} = item
 
@@ -715,7 +804,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         let rotationSpeed = targetWidth / 2000
                         if (session.upscaledImages) rotationSpeed *= 10
 
-                        const insertItem = (newRect: BubbleData) => {
+                        const insertItem = (newRect: BubbleData & {rotation?: number}) => {
                             if (!noteDrawingEnabled) return
 
                             const storedWidth = item.imageWidth || targetWidth
@@ -725,7 +814,8 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                                 x: (newRect.x / targetWidth) * storedWidth,
                                 y: (newRect.y / targetHeight) * storedHeight,
                                 width: (newRect.width / targetWidth) * storedWidth,
-                                height: (newRect.height / targetHeight) * storedHeight
+                                height: (newRect.height / targetHeight) * storedHeight,
+                                rotation: newRect.rotation ?? item.rotation
                             }
 
                             setItems((prev) => functions.util.insertAtIndex(prev, index, {...item, ...scaledRect}))
@@ -739,6 +829,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         const onContextMenu = (event: React.MouseEvent) => {
                             event.preventDefault()
                             if (!noteDrawingEnabled) {
+                                if (item.svg) return
                                 if (item.character) return navigator.clipboard.writeText(item.characterTag)
                                 navigator.clipboard.writeText(item.transcript)
                             } else {
@@ -747,7 +838,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         }
 
                         const onDoubleClick = () => {
-                            if (!noteDrawingEnabled) return
+                            if (!noteDrawingEnabled || item.svg) return
                             setEditNoteData({
                                 translation: item.translation,
                                 transcript: item.transcript,
@@ -767,12 +858,14 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                                 characterTag: item.characterTag ?? editNoteData.characterTag,
                                 animated: item.animated ?? editNoteData.animated,
                                 startTime: item.startTime ?? editNoteData.startTime,
-                                duration: item.duration ?? editNoteData.duration
+                                duration: item.duration ?? editNoteData.duration,
+                                svg: item.svg || ""
                             })
                             setEditNoteID(index)
                         }
 
                         const onMouseEnter = (event: React.MouseEvent<SVGRectElement>) => {
+                            if (item.svg) return
                             if (props.timed && item.animated) return
                             if (item.overlay && !session.forceNoteBubbles) return
                             if (item.character) {
@@ -804,6 +897,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         }
 
                         const onMouseMove = (event: React.MouseEvent<SVGRectElement>) => {
+                            if (item.svg) return
                             if (props.timed && item.animated) return
                             if (item.overlay && !session.forceNoteBubbles) return
                             if (item.character) {
@@ -840,6 +934,7 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
                         const onMouseDown = (event: React.MouseEvent) => {
                             if (!noteDrawingEnabled) {
                                 event.stopPropagation()
+                                if (item.svg) return
                                 if (item.character) {
                                     navigator.clipboard.writeText(item.characterTag)
                                 } else {
@@ -854,7 +949,17 @@ const NoteEditor: React.FunctionComponent<Props> = (props) => {
 
                         const text = showTranscript ? item.transcript : item.translation
 
-                        if (item.character) {
+                        if (item.svg) {
+                            return (
+                                <BackdropShape key={id} shapeId={String(id)} x={newX} y={newY} width={newWidth} height={newHeight}
+                                svg={item.svg} rotation={item.rotation} rotationSpeed={rotationSpeed}
+                                constrainResize={({startCorner, movingCorner, originalMovingCorner}) => shiftKey ?
+                                    proportionalResize(startCorner, movingCorner, originalMovingCorner, newWidth, newHeight) : movingCorner}
+                                onFocus={() => setActiveIndex(index)} keyboardTransformMultiplier={30} onChange={insertItem as any}
+                                onDelete={deleteItem} ResizeHandleComponent={BackdropResizeHandle} RotateHandleComponent={CircleHandle}
+                                onContextMenu={onContextMenu} onMouseDown={onMouseDown}/>
+                            )
+                        } else if (item.character) {
                             return (
                                 <CharacterRectShape key={id} shapeId={String(id)} x={newX} y={newY} width={newWidth} height={newHeight}
                                 onFocus={() => setActiveIndex(index)} keyboardTransformMultiplier={30} onChange={insertItem as any} 

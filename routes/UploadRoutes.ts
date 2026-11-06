@@ -653,7 +653,7 @@ const CreateRoutes = (app: Express) => {
               item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, 
               item.overlay, item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, 
               item.bold, item.italic, item.strokeColor, item.strokeWidth, item.breakWord, item.rotation, item.borderRadius, 
-              item.character, item.characterTag || null, item.animated, item.startTime, item.duration)
+              item.character, item.characterTag || null, item.animated, item.startTime, item.duration, item.svg)
               await sql.note.deleteUnverifiedNote(item.noteID)
           }
         }

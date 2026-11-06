@@ -467,7 +467,8 @@ CREATE TABLE IF NOT EXISTS "notes" (
     "characterTag" text REFERENCES "tags" ("tag") ON UPDATE CASCADE ON DELETE SET NULL,
     "animated" boolean,
     "startTime" double precision,
-    "duration" double precision
+    "duration" double precision,
+    "svg" text
 );
 
 CREATE TABLE IF NOT EXISTS "unverified notes" (
@@ -504,6 +505,7 @@ CREATE TABLE IF NOT EXISTS "unverified notes" (
     "animated" boolean,
     "startTime" double precision,
     "duration" double precision,
+    "svg" text,
     "addedEntries" text[],
     "removedEntries" text[],
     "reason" text

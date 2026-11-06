@@ -9,7 +9,7 @@ import {UserRole, Post, UnverifiedPost, NoteHistory} from "./Types"
 export type NoteUpdateColumns = "order" | "transcript" | "translation" | "x" | "y" | "width" |
 "height" | "rotation" | "imageWidth" | "imageHeight" | "imageHash" | "overlay" | "fontSize" | "fontFamily" |
 "bold" | "italic" | "textColor" | "backgroundColor" | "backgroundAlpha" | "strokeColor" | "strokeWidth" | 
-"breakWord" | "borderRadius" | "character" | "characterTag" | "animated" | "startTime" | "duration"
+"breakWord" | "borderRadius" | "character" | "characterTag" | "animated" | "startTime" | "duration" | "svg"
 
 export interface Note {
     id?: number
@@ -45,6 +45,7 @@ export interface Note {
     animated: boolean
     startTime: number
     duration: number
+    svg: string
 }
 
 export interface BubbleData {

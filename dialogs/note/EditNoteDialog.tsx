@@ -66,7 +66,7 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
     }
 
     const reset = () => {
-        setEditNoteData({...defaultNoteData, transcript: editNoteData.transcript, translation: editNoteData.translation})
+        setEditNoteData({...defaultNoteData, transcript: editNoteData.transcript, translation: editNoteData.translation, svg: editNoteData.svg})
     }
 
     useEffect(() => {
@@ -108,7 +108,6 @@ const EditNoteDialog: React.FunctionComponent = (props) => {
             </div>
             </>
         )
-
     }
 
     const noteJSX = () => {

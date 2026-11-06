@@ -28,7 +28,8 @@ export const defaultNoteData = {
     characterTag: "",
     animated: false,
     startTime: 0,
-    duration: 0
+    duration: 0,
+    svg: ""
 }
 
 interface SaveNoteID {

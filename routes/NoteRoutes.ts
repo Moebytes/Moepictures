@@ -60,7 +60,8 @@ const noteEquality = (a: Note, b: Note) => {
         a.characterTag === b.characterTag &&
         a.animated === b.animated &&
         a.startTime === b.startTime &&
-        a.duration === b.duration
+        a.duration === b.duration &&
+        a.svg === b.svg
     )
 }
 
@@ -77,13 +78,13 @@ const insertNotes = async (oldNotes: Note[], newNotes: Note[], data: {postID: st
                 item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
                 item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
                 item.strokeColor, item.strokeWidth, item.breakWord, item.rotation, item.borderRadius, item.character, item.characterTag || null,
-                item.animated, item.startTime, item.duration, addedEntries, removedEntries, reason)
+                item.animated, item.startTime, item.duration, item.svg, addedEntries, removedEntries, reason)
             } else {
                 await sql.note.insertNote(postID, username, order, item.transcript, item.translation,
                 item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
                 item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
                 item.strokeColor, item.strokeWidth, item.breakWord, item.rotation, item.borderRadius, item.character, item.characterTag || null,
-                item.animated, item.startTime, item.duration, )
+                item.animated, item.startTime, item.duration, item.svg)
             }
         }
     } else {
@@ -101,13 +102,13 @@ const insertNotes = async (oldNotes: Note[], newNotes: Note[], data: {postID: st
                     match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay,
                     match.fontSize, match.backgroundColor, match.textColor, match.fontFamily, match.backgroundAlpha, match.bold, match.italic,
                     match.strokeColor, match.strokeWidth, match.breakWord, match.rotation, match.borderRadius, match.character, match.characterTag || null, 
-                    match.animated, match.startTime, match.duration, reason)
+                    match.animated, match.startTime, match.duration, match.svg, reason)
                 } else {
                     await sql.note.resaveNote(note.noteID, username, match.transcript, match.translation, match.x,
                     match.y, match.width, match.height, match.imageWidth, match.imageHeight, match.imageHash, match.overlay,
                     match.fontSize, match.backgroundColor, match.textColor, match.fontFamily, match.backgroundAlpha, match.bold, match.italic,
                     match.strokeColor, match.strokeWidth, match.breakWord, match.rotation, match.borderRadius, match.character, match.characterTag || null,
-                    match.animated, match.startTime, match.duration)
+                    match.animated, match.startTime, match.duration, match.svg)
                 }
             } else {
                 // Delete oldNotes not in newNotes
@@ -129,13 +130,13 @@ const insertNotes = async (oldNotes: Note[], newNotes: Note[], data: {postID: st
                 item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
                 item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
                 item.strokeColor, item.strokeWidth, item.breakWord, item.rotation, item.borderRadius, item.character, item.characterTag || null,
-                item.animated, item.startTime, item.duration, addedEntries, removedEntries, reason)
+                item.animated, item.startTime, item.duration, item.svg, addedEntries, removedEntries, reason)
             } else {
                 await sql.note.insertNote(postID, username, order, item.transcript, item.translation,
                 item.x, item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay,
                 item.fontSize, item.backgroundColor, item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic,
                 item.strokeColor, item.strokeWidth, item.breakWord, item.rotation, item.borderRadius, item.character, item.characterTag || null,
-                item.animated, item.startTime, item.duration)
+                item.animated, item.startTime, item.duration, item.svg)
             }
         }
     }
@@ -265,7 +266,7 @@ const NoteRoutes = (app: Express) => {
                 await sql.note.insertUnverifiedNote(postID, originalPostID, req.session.username, order, item.transcript, item.translation, item.x, 
                 item.y, item.width, item.height, item.imageWidth, item.imageHeight, item.imageHash, item.overlay, item.fontSize, item.backgroundColor,
                 item.textColor, item.fontFamily, item.backgroundAlpha, item.bold, item.italic, item.strokeColor, item.strokeWidth, item.breakWord,
-                item.rotation, item.borderRadius, item.character, item.characterTag || null, item.animated, item.startTime, item.duration, 
+                item.rotation, item.borderRadius, item.character, item.characterTag || null, item.animated, item.startTime, item.duration, item.svg,
                 addedEntries, removedEntries, reason)
             }
             res.status(200).send("Success")
@@ -453,8 +454,8 @@ const NoteRoutes = (app: Express) => {
                 overlay: "overlay", fontSize: "fontSize", fontFamily: "fontFamily", bold: "bold",
                 italic: "italic", textColor: "textColor", backgroundColor: "backgroundColor",
                 backgroundAlpha: "backgroundAlpha", strokeColor: "strokeColor", strokeWidth: "strokeWidth",
-                breakWord: "breakWord", borderRadius: "borderRadius", character: "character", 
-                characterTag: "characterTag", animated: "animated", startTime: "startTime", duration: "duration"
+                breakWord: "breakWord", borderRadius: "borderRadius", character: "character", characterTag: "characterTag",
+                animated: "animated", startTime: "startTime", duration: "duration", svg: "svg"
             }
             
             await sql.note.updateNote(noteID, columns[column], value)
