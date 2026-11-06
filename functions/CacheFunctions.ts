@@ -83,7 +83,9 @@ export default class CacheFunctions {
             if (cache?.scope === scope && cache.expires > Date.now() && Object.keys(cache.tags || {}).length) {
                 return cache.tags
             }
-            const counts = await functions.http.get("/api/tag/counts", {tags: []}, session, setSessionFlag)
+            const counts = await functions.http.get("/api/tag/counts", {
+                tags: [], compress: typeof DecompressionStream !== "undefined"
+            }, session, setSessionFlag)
             const tags = Object.fromEntries(counts.map((tag) => [tag.tag, tag]))
 
             if (counts.length && requests === this.tagCountRequests) {

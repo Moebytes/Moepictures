@@ -126,6 +126,16 @@ export default class HTTPFunctions {
             if (!response.ok) throw new Error(await response.text())
 
             let arrayBuffer = await response.clone().arrayBuffer()
+
+            if (response.headers.get("X-Encrypted-Content-Encoding") === "gzip") {
+                const compressed = decryption.decryptAPI(arrayBuffer, privateKey, serverPublicKey, session)
+                if (!compressed?.byteLength) throw new Error("Failed to decrypt gzip response")
+                const stream = new Blob([new Uint8Array(compressed)]).stream().pipeThrough(new DecompressionStream("gzip"))
+                const data = await new Response(stream).json()
+                functions.cache.cachedResponses.set(cacheKey, {data, expires: Date.now() + functions.cache.cacheDuration})
+                return data as GetEndpoint<T>["response"]
+            }
+
             const json = functions.http.arrayBufferToJSON(arrayBuffer)
             if (json !== null) {
                 functions.cache.cachedResponses.set(cacheKey, {data: json, expires: Date.now() + functions.cache.cacheDuration})

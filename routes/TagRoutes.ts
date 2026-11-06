@@ -100,6 +100,9 @@ const TagRoutes = (app: Express) => {
             if (!req.session.showR18) {
                 result = result.filter((tag) => !tag.r18)
             }
+            if (req.query.compress === "true") {
+                return serverFunctions.sendEncryptedGZip(result, req, res)
+            }
             serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)

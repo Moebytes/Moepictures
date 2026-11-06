@@ -224,7 +224,7 @@ export interface TagEditRequestParams extends Omit<TagEditParams, "updater" | "u
 export type TagGetEndpoint<T extends string> = 
     T extends "/api/tag" ? {params: {tag: string}, response: Tag | undefined} :
     T extends "/api/tag/related" ? {params: {tag: string}, response: string[]} :
-    T extends "/api/tag/counts" ? {params: {tags: string[]}, response: TagCount[]} :
+    T extends "/api/tag/counts" ? {params: {tags: string[], compress?: boolean}, response: TagCount[]} :
     T extends "/api/tag/list" ? {params: {tags: string[]}, response: Tag[]} :
     T extends "/api/tag/aliases" ? {params: {aliases: string[]}, response: Alias[]} :
     T extends "/api/tag/list/unverified" ? {params: {tags: string[]}, response: Tag[]} :

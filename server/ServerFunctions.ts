@@ -5,6 +5,8 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import nodemailer from "nodemailer"
+import {gzip} from "zlib"
+import {promisify} from "util"
 import {Request, Response, NextFunction} from "express"
 import sql from "../sql/SQLQuery"
 import {ipKeyGenerator} from "express-rate-limit"
@@ -25,6 +27,7 @@ import ServerUpload from "./ServerUpload"
 import {Attachment} from "../types/Types"
 
 const csrf = new CSRF()
+const gzipAsync = promisify(gzip)
 
 export const keyGenerator = (req: Request, res: Response) => {
     return req.session.username || ipKeyGenerator(req.ip ?? "")
@@ -122,6 +125,21 @@ export default class ServerFunctions {
         if (!req.session.publicKey) return res.status(401).send("No public key")
         const encrypted = encryption.encryptAPI(data, req.session.publicKey, req.session)
         return res.status(200).send(encrypted)
+    }
+
+    public static sendEncryptedGZip = async (data: any, req: Request, res: Response) => {
+        const encrypt = !req.session.apiKey && !permissions.noAPIEncryption(req.session)
+        if (encrypt && !req.session.publicKey) return res.status(401).send("No public key")
+
+        const compressed = await gzipAsync(Buffer.from(JSON.stringify(data)))
+        if (!encrypt) {
+            res.setHeader("Content-Type", "application/json")
+            res.setHeader("Content-Encoding", "gzip")
+            return res.status(200).send(compressed)
+        }
+        res.setHeader("X-Encrypted-Content-Encoding", "gzip")
+        res.append("Access-Control-Expose-Headers", "X-Encrypted-Content-Encoding")
+        return res.status(200).send(encryption.encrypt(compressed, req.session.publicKey!, req.session, true))
     }
 
     public static email = async (email: string, subject: string, jsx: React.ReactElement) => {
