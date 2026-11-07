@@ -76,7 +76,7 @@ export default class LinkFunctions {
 
     public static getThumbnailLink = (image: Image, sizeType: string, session: Session, mobile?: boolean, forceLive?: boolean) => {
         if (!image.thumbnail && !image.filename) return ""
-        let originalFilename = `${image.postID}-${image.order}-${encodeURIComponent(image.filename)}`
+        let originalFilename = `${image.postID}-${image.order}-${image.filename}`
         let filename = image.thumbnail || originalFilename
         if (forceLive) return this.getImageLink(image, false)
         if (image.type === "image" || image.type === "comic") {

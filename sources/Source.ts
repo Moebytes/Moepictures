@@ -14,7 +14,19 @@ import {RedditSource} from "./RedditSource"
 import {SkebSource} from "./SkebSource"
 import {TumblrSource} from "./TumblrSource"
 import {TwitterSource} from "./TwitterSource"
+import {AbstractSource} from "./AbstractSource"
 import serverFunctions from "../server/ServerFunctions"
+
+class DirectImageSource extends AbstractSource {
+    public matches(url: string) { 
+        return true 
+    }
+
+    public async extractImages(url: string): Promise<Buffer[]> {
+        const buffer = await this.readBody(await serverFunctions.http.fetch(url))
+        return [buffer]
+    }
+}
 
 export default class Source {
     public static extractImages = async (url: string) => {
@@ -36,13 +48,13 @@ export default class Source {
                 try {
                     let images = await source.extractImages(url)
                     return images
-                } catch {}
+                } catch (error) {
+                    if (error instanceof RangeError) throw error
+                }
             }
         }
 
-        let arrayBuffer = await serverFunctions.http.fetch(url).then((r) => r.arrayBuffer())
-        let buffer = Buffer.from(arrayBuffer)
-        return [buffer]
+        return new DirectImageSource(url).extractImages(url)
     }
 
     public static pixivIllust = async (url: string) => {

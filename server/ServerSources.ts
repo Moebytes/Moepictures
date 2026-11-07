@@ -342,7 +342,7 @@ export default class ServerSources {
     public static sourceLookup = async (current: UploadImage, rating: PostRating) => {
         let bytes = [] as number[]
         if (current.thumbnail) {
-            bytes = await functions.byte.base64toUint8Array(current.thumbnail).then((r) => Object.values(r))
+            bytes = Array.from(functions.byte.decodeThumbnail(current.thumbnail))
         } else {
             bytes = current.bytes
         }

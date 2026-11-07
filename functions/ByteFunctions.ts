@@ -41,6 +41,10 @@ export default class ByteFunctions {
         return /^data:([A-Za-z-+\/]+);base64,(.+)$/.test(unknown)
     }
 
+    public static decodeThumbnail = (data: string) => {
+        return Buffer.from(data.slice(data.indexOf(",") + 1), "base64")
+    }
+
     public static base64toUint8Array = async (base64: string) => {
         return functions.http.getBuffer(base64).then((a) => new Uint8Array(a))
     }

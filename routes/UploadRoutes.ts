@@ -117,42 +117,41 @@ const CreateRoutes = (app: Express) => {
       next()
   }, upload.single("bytes"), async (req: Request, res: Response) => {
       try {
+        const username = req.session.username!
         let {metadata} = req.body
-        if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
-        if (req.session.banned) return void res.status(403).send("You are banned")
         const bytes = req.file?.buffer
         if (!bytes?.byteLength) return void res.status(400).send("No chunk bytes")
         const MB = bytes.byteLength / (1024*1024)
         if (MB > 100) return void res.status(400).send("Chunk size exceeded")
 
-        let userItems = userChunks.get(req.session.username) || []
+        let userItems = userChunks.get(username) || []
         let userMemory = userItems.reduce((a, c) => a + c.size, 0)
         if (userMemory + bytes.byteLength > userMemoryLimit) return void res.status(400).send("Memory limit exceeded")
 
         let chunk = JSON.parse(metadata) as ImageChunk
         if (!chunk.fileID || !chunk.index) return void res.status(400).send("Missing fileID or index")
         chunk.bytes = [...bytes]
-        chunk.username = req.session.username
+        chunk.username = username
 
         let added = true
         if (process.env.REDIS === "on") {
-          let chunks = await sql.getCache(chunkKey(req.session.username, chunk.fileID)) as ImageChunk[]
+          let chunks = await sql.getCache(chunkKey(username, chunk.fileID)) as ImageChunk[]
           if (chunks) {
             const exists = chunks.find((c) => c.index === chunk.index)
             if (exists) added = false
-            if (!exists) await sql.setCache(chunkKey(req.session.username, chunk.fileID), [...chunks, chunk], 600)
+            if (!exists) await sql.setCache(chunkKey(username, chunk.fileID), [...chunks, chunk], 600)
           } else {
-              await sql.setCache(chunkKey(req.session.username, chunk.fileID), [chunk], 600)
+              await sql.setCache(chunkKey(username, chunk.fileID), [chunk], 600)
           }
         } else {
-          let item = imageChunks.get(chunkKey(req.session.username, chunk.fileID))
+          let item = imageChunks.get(chunkKey(username, chunk.fileID))
           if (item) {
             const exists = item.chunks.find((c) => c.index === chunk.index)
             if (exists) added = false
             if (!exists) item.chunks.push(chunk)
             item.expires = Date.now() + chunkLifetime
           } else {
-            imageChunks.set(chunkKey(req.session.username, chunk.fileID), {
+            imageChunks.set(chunkKey(username, chunk.fileID), {
               chunks: [chunk],
               expires: Date.now() + chunkLifetime
             })
@@ -161,7 +160,7 @@ const CreateRoutes = (app: Express) => {
 
         if (added) {
           userItems.push({fileID: chunk.fileID, index: chunk.index, size: bytes.byteLength, expires: Date.now() + chunkLifetime})
-          userChunks.set(req.session.username, userItems)
+          userChunks.set(username, userItems)
         }
         
         res.status(200).send("Success")

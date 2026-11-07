@@ -44,7 +44,7 @@ import GroupRoutes from "./routes/GroupRoutes"
 import App from "./App"
 import torIPs from "./assets/json/tor-ip.json"
 import {imageLock, imageMissing} from "./structures/ImageLock"
-import {ServerSession, Storage} from "./types/Types"
+import {ServerSession, Storage, Image} from "./types/Types"
 const __dirname = path.resolve()
 
 let getDevDocument: (() => Promise<string>) | undefined
@@ -205,6 +205,37 @@ let noCache = ["artist", "character", "series", "pfp", "tag", "history"]
 let folders = [...originalFolders, ...originalFolders.map((folder) => `${folder}-upscaled`), ...noCache]
 let encrypted = [...originalEncrypted, ...originalEncrypted.map((folder) => `${folder}-upscaled`)]
 
+const mediaKey = (encoded: string) => {
+  const key = decodeURIComponent(encoded)
+  const parts = key.split("/")
+  if (/%[\da-f]{2}|[\\\0]/i.test(key) || 
+    parts.some((p) => ["", ".", ".."].includes(p))) {
+    throw new Error("Invalid media path")
+  }
+
+  if (parts[0] === "history") {
+    const [_history, type, id, version, revision] = parts
+    if (type === "tag" && parts.length === 5 && /^\d+$/.test(version)) return key
+    if (type === "post" && parts.length === 6 && ["original", "upscaled"].includes(version) &&
+        [id, revision].every((n) => /^\d+$/.test(n))) return key
+  } else {
+    if (parts[0] === "thumbnail") parts.shift()
+    const [folder, file] = parts
+    if (parts.length === 2 && folder !== "history" && folders.includes(folder) && 
+      (noCache.includes(folder) || /^\d+-\d+[-.]/.test(file))) return key
+  }
+
+  throw new Error("Invalid media path")
+}
+
+const matchesImageKey = (key: string, image: Image) => {
+  const [folder, filename] = key.replace(/^thumbnail\//, "").split("/")
+  if (folder.replace(/-upscaled$/, "") !== image.type) return false
+  if (filename === image.thumbnail) return true
+  return [image.filename, image.upscaledFilename]
+    .some(name => name && filename === `${image.postID}-${image.order}-${name}`)
+}
+
 for (let i = 0; i < folders.length; i++) {
   app.get(`/${folders[i]}/{*page}`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -220,7 +251,7 @@ for (let i = 0; i < folders.length; i++) {
         !url.endsWith(".webp") && !url.endsWith(".gif")) return next()
       }
       res.setHeader("Cache-Control", "public, max-age=86400")
-      const key = decodeURIComponent(req.path.slice(1))
+      const key = mediaKey(req.path.slice(1))
       let upscaled = req.session.upscaledImages ?? false
       if (upscaleParam) upscaled = upscaleParam === "true"
       if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
@@ -238,9 +269,9 @@ for (let i = 0; i < folders.length; i++) {
           if (!permissions.isMod(req.session)) return res.status(404).end()
         }
         if (post) {
-          let matches = req.path.includes("history/post")
+          let matches = key.startsWith("history/post/")
           for (const image of post.images) {
-            if (image.pixelHash === pixelHash) matches = true
+            if (image.pixelHash === pixelHash && matchesImageKey(key, image)) matches = true
           }
           if (!matches) return res.status(404).end()
         }
@@ -285,7 +316,7 @@ for (let i = 0; i < folders.length; i++) {
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
       res.setHeader("Cache-Control", "public, max-age=86400")
-      const key = decodeURIComponent(req.path.replace(`/thumbnail/`, ""))
+      const key = mediaKey(req.path.replace(`/thumbnail/`, ""))
       let r18 = false
       const postID = key.match(/^history\/post\/(\d+)\//)?.[1] || key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if ((!noCache.includes(folders[i]) || key.startsWith("history/post/")) && postID) {
@@ -299,9 +330,9 @@ for (let i = 0; i < folders.length; i++) {
           if (!permissions.isMod(req.session)) return res.status(404).end()
         }
         if (post) {
-          let matches = req.path.includes("history/post")
+          let matches = key.startsWith("history/post/")
           for (const image of post.images) {
-            if (image.pixelHash === pixelHash) matches = true
+            if (image.pixelHash === pixelHash && matchesImageKey(key, image)) matches = true
           }
           if (!matches) return res.status(404).end()
         }
@@ -349,7 +380,7 @@ for (let i = 0; i < folders.length; i++) {
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
       res.setHeader("Cache-Control", "public, max-age=86400")
-      const key = decodeURIComponent(req.path.replace("/unverified/", ""))
+      const key = mediaKey(req.path.replace("/unverified/", ""))
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (!noCache.includes(folders[i]) && postID) {
         const post = await sql.post.unverifiedPost(postID)
@@ -397,7 +428,7 @@ for (let i = 0; i < folders.length; i++) {
       const mimeType = mime.getType(req.path)
       if (mimeType) res.setHeader("Content-Type", mimeType)
       res.setHeader("Cache-Control", "public, max-age=86400")
-      const key = decodeURIComponent(req.path.replace(`/thumbnail/unverified/`, ""))
+      const key = mediaKey(req.path.replace(`/thumbnail/unverified/`, ""))
       const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
       if (!noCache.includes(folders[i]) && postID) {
         const post = await sql.post.unverifiedPost(postID)
@@ -444,7 +475,7 @@ app.post("/storage", imageUpdateLimiter, csrfProtection, async (req: Request, re
     let ip = serverFunctions.util.ip(req)
     let userKey = req.session.username ? req.session.username : ip
     const pixelHash = new URL(link).searchParams.get("hash") ?? ""
-    const key = decodeURIComponent(link.replace(/\?.*$/, "").split("/").slice(3).join("/"))
+    const key = mediaKey(new URL(link).pathname.slice(1))
     let upscaled = req.session.upscaledImages ?? false
     if (upscaleParam) upscaled = upscaleParam === "true"
     if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
@@ -465,9 +496,9 @@ app.post("/storage", imageUpdateLimiter, csrfProtection, async (req: Request, re
         if (!permissions.isMod(req.session)) return res.status(404).end()
       }
       if (post) {
-        let matches = req.path.includes("history/post")
+        let matches = key.startsWith("history/post/")
         for (const image of post.images) {
-          if (image.pixelHash === pixelHash) matches = true
+          if (image.pixelHash === pixelHash && matchesImageKey(key, image)) matches = true
         }
         if (!matches) return res.status(404).end()
       }
@@ -489,13 +520,14 @@ app.get("/storage/:username", imageLimiter, async (req: Request, res: Response, 
     if (!storage) return res.status(404).json({message: "Not found"})
     if (secret !== storage.secret) return res.status(403).json({message: "Unauthorized"})
     
+    const ext = storage.songCover ? ".jpg" : path.extname(storage.key)
+    if (path.extname(req.params.username) !== ext) return res.sendStatus(404)
     let body = await serverFunctions.files.getFile(storage.key, storage.upscaled, storage.r18, storage.pixelHash)
     if (!body.byteLength) body = await serverFunctions.files.getFile(storage.key, false, storage.r18, storage.pixelHash)
 
     if (storage.songCover) body = await serverFunctions.util.songCover(body)
   
-    const mimeType = mime.getType(req.path)
-    if (mimeType) res.setHeader("Content-Type", mimeType)
+    res.setHeader("Content-Type", mime.getType(ext) || "application/octet-stream")
     res.setHeader("Content-Length", body.byteLength)
     res.status(200).send(body)
   } catch (e) {

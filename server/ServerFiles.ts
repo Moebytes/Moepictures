@@ -48,7 +48,13 @@ export default class ServerFiles {
     public static getFirstHistoryFile = async (file: string, upscaled: boolean, r18: boolean, pixelHash?: string) => {
         const defaultBuffer = Buffer.from("") 
         const isTag = file.includes("artist/") || file.includes("character/") || file.includes("series/") || file.includes("tag/") || file.includes("pfp/")
-        const id = file.split("-")?.[0]?.match(/\d+/)?.[0]
+        let id = path.basename(file).match(/^(\d+)-/)?.[1]
+        if (isTag) {
+            id = file.split("-")[0].match(/\d+/)?.[0]
+        } else if (file.startsWith("history/post/")) {
+            const historyID = path.dirname(file).split("/")[2]
+            if (/^\d+$/.test(historyID)) id = historyID
+        }
         if (!id) return defaultBuffer
 
         if (functions.config.useLocalFiles()) {

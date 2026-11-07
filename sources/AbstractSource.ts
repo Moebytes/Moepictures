@@ -22,19 +22,33 @@ export abstract class AbstractSource {
     }
 
     public abstract matches(url: string): boolean
-
     public abstract extractImages(url: string): Promise<Buffer[]>
 
+    private remainingBytes = 32 * 1024 * 1024
+
+    public readBody = async (response: Awaited<ReturnType<typeof serverFunctions.http.fetch>>) => {
+        if (!response.body) return Buffer.alloc(0)
+        const chunks: Uint8Array[] = []
+        for await (const chunk of response.body) {
+            this.remainingBytes -= chunk.length
+            if (this.remainingBytes < 0) throw new RangeError("Exceeded size limit")
+            chunks.push(chunk)
+        }
+        return Buffer.concat(chunks)
+    }
+
     public fetchBuffer = async (url: string) => {
-        const arrayBuffer = await serverFunctions.http.proxyFetch(url, this.headers).then((r) => r.arrayBuffer())
-        return Buffer.from(arrayBuffer)
+        const buffer = await serverFunctions.http.proxyFetch(url, this.headers)
+        return this.readBody(buffer)
     }
 
     public fetchJSON = async (url: string) => {
-        return serverFunctions.http.fetch(url, this.headers).then((r) => r.json()) as any
+        const text = await this.fetchText(url)
+        return JSON.parse(text)
     }
 
     public fetchText = async (url: string) => {
-        return serverFunctions.http.fetch(url, this.headers).then((r) => r.text())
+        const buffer = await serverFunctions.http.fetch(url, this.headers)
+        return this.readBody(buffer).toString()
     }
 }

@@ -24,6 +24,7 @@ import {OCRResponse, CharSplitEntry, SourceLookupParams, TagLookupParams} from "
 
 svgCaptcha.loadFont(path.join(__dirname, dotline))
 
+let activeImageProxies = 0
 let processingQueue = new Set<string>()
 
 const exec = util.promisify(child_process.exec)
@@ -132,6 +133,8 @@ const MiscRoutes = (app: Express) => {
     })
 
     app.post("/api/misc/proxy-images", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        if (activeImageProxies >= 5) return void res.sendStatus(429)
+        activeImageProxies++
         try {
             const link = decodeURIComponent(req.body.url as string)
             if (!link) return void res.status(400).send("No url")
@@ -140,6 +143,8 @@ const MiscRoutes = (app: Express) => {
             res.status(200).send(images)
         } catch {
             res.status(400).end()
+        } finally {
+            activeImageProxies--
         }
     })
 
