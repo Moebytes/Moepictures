@@ -64,6 +64,14 @@ export const addToGroup = async (postIDs: string[], name: string, username: stri
         }
     }
 
+    if (name.trim().toLowerCase().startsWith("twitter")) {
+        const twitterID = name.match(/\d{10,}/)?.[0]
+        if (twitterID && groupID) {
+            let desc = `https://twitter.com/i/status/${twitterID}`
+            await sql.group.updateGroup(groupID, "description", desc)
+        }
+    }
+
     let existingPosts = group?.posts ?? []
     let maxOrder = Math.max(0, ...existingPosts.map((post) => post.order))
     let toAdd = remap ? posts.filter((p) => !existingPosts.some((e) => p.postID === e.postID)) : posts

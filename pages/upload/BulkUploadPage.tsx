@@ -318,8 +318,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     key = `${id}_g${num}`
                     lastGroupKey = key
 
-                    current.groupName = `Pixiv ${id}`
-                    upscaledCurrent.groupName = `Pixiv ${id}`
+                    current.groupName = /\d{10,}/.test(current.name) ? `Twitter ${id}` : `Pixiv ${id}`
+                    upscaledCurrent.groupName = current.groupName
                     break
                 case "g!":
                     key = lastGroupKey
