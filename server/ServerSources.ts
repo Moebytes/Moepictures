@@ -143,9 +143,9 @@ export default class ServerSources {
         let artists = [{}] as UploadTag[]
         let sourceLinks = [] as {link: string, hash: string}[]
 
-        if (!twitter.isLoggedIn) {
-            await twitter.login(process.env.TWITTER_USERNAME!, 
-                process.env.TWITTER_PASSWORD!, process.env.TWITTER_EMAIL!)
+        if (!await twitter.isLoggedIn()) {
+            const cookies = process.env.TWITTER_COOKIE!.split(";").map((cookie) => cookie.trim()).filter(Boolean)
+            await twitter.setCookies(cookies.map((cookie) => `${cookie}; Domain=x.com; Path=/; Secure`))
         }
         const twitterID = twitterLink.match(/\d{10,}/gm)?.[0] ?? ""
         const tweet = await twitter.getTweet(twitterID)

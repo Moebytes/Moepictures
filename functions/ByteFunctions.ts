@@ -104,9 +104,10 @@ export default class ByteFunctions {
             for (const chunk of chunks) {
                 const form = new FormData()
                 form.append("bytes", new Blob([new Uint8Array(chunk.bytes!)]))
-                delete chunk.bytes
-                form.append("metadata", JSON.stringify({...chunk}))
+                const {bytes, ...metadata} = chunk
+                form.append("metadata", JSON.stringify(metadata))
                 await functions.http.postForm("/api/post/image-chunk", form, session, setSessionFlag)
+                delete chunk.bytes
             }
         }
         await sendChunks(originalChunks)

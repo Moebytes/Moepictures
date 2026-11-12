@@ -78,19 +78,22 @@ const chunkKey = (username: string, fileID: string) => {
 const populateChunkBytes = async (username: string, originalChunks: ImageChunk[], upscaledChunks: ImageChunk[]) => {
   const populateChunkItem = async (chunkItem: ImageChunk[]) => {
     for (const chunk of chunkItem) {
+      let referenceChunk: ImageChunk | undefined
       if (process.env.REDIS === "on") {
         let cacheChunks = await sql.getCache(chunkKey(username, chunk.fileID)) as ImageChunk[] | undefined
-        let referenceChunk = cacheChunks?.find((c) => c.index === chunk.index)
-        if (referenceChunk?.username === username) chunk.bytes = referenceChunk.bytes
+        referenceChunk = cacheChunks?.find((c) => c.index === chunk.index)
       } else {
         let item = imageChunks.get(chunkKey(username, chunk.fileID))
-        let referenceChunk = item?.chunks.find(c => c.index === chunk.index)
-        if (referenceChunk?.username === username) chunk.bytes = referenceChunk.bytes
+        referenceChunk = item?.chunks.find(c => c.index === chunk.index)
       }
+      if (referenceChunk?.username !== username || !referenceChunk.bytes?.length) {
+        return `Missing image chunk ${chunk.index} for ${chunk.name}.`
+      }
+      chunk.bytes = referenceChunk.bytes
     }
+    return null
   }
-  await populateChunkItem(originalChunks)
-  await populateChunkItem(upscaledChunks)
+  return await populateChunkItem(originalChunks) || await populateChunkItem(upscaledChunks)
 }
 
 const clearChunkBytes = async (username: string, originalChunks: ImageChunk[], upscaledChunks: ImageChunk[]) => {
@@ -182,7 +185,8 @@ const CreateRoutes = (app: Express) => {
         if (!functions.validation.validRating(rating)) return void res.status(400).send("Invalid rating")
         if (!functions.validation.validStyle(style)) return void res.status(400).send("Invalid style")
 
-        await populateChunkBytes(req.session.username, imageChunks, upscaledChunks)
+        const chunkError = await populateChunkBytes(req.session.username, imageChunks, upscaledChunks)
+        if (chunkError) return void res.status(400).send(chunkError)
         let {images, upscaledImages} = functions.byte.mergeChunks(imageChunks, upscaledChunks)
         await clearChunkBytes(req.session.username, imageChunks, upscaledChunks)
 
@@ -257,7 +261,8 @@ const CreateRoutes = (app: Express) => {
         if (req.session.banned) return void res.status(403).send("You are banned")
         if (!permissions.isMod(req.session)) noImageUpdate = true
 
-        await populateChunkBytes(req.session.username, imageChunks, upscaledChunks)
+        const chunkError = await populateChunkBytes(req.session.username, imageChunks, upscaledChunks)
+        if (chunkError) return void res.status(400).send(chunkError)
         let {images, upscaledImages} = functions.byte.mergeChunks(imageChunks, upscaledChunks)
         await clearChunkBytes(req.session.username, imageChunks, upscaledChunks)
 
@@ -374,7 +379,8 @@ const CreateRoutes = (app: Express) => {
         const pending = await sql.search.unverifiedUserPosts(req.session.username)
         if (functions.post.currentUploads(pending) >= permissions.getUploadLimit(req.session)) return void res.status(403).send("Upload limit reached")
 
-        await populateChunkBytes(req.session.username, imageChunks, upscaledChunks)
+        const chunkError = await populateChunkBytes(req.session.username, imageChunks, upscaledChunks)
+        if (chunkError) return void res.status(400).send(chunkError)
         let {images, upscaledImages} = functions.byte.mergeChunks(imageChunks, upscaledChunks)
         await clearChunkBytes(req.session.username, imageChunks, upscaledChunks)
 
@@ -442,7 +448,8 @@ const CreateRoutes = (app: Express) => {
         if (!req.session.username || !req.session.emailVerified) return void res.status(403).send("Unauthorized")
         if (req.session.banned) return void res.status(403).send("You are banned")
 
-        await populateChunkBytes(req.session.username, imageChunks, upscaledChunks)
+        const chunkError = await populateChunkBytes(req.session.username, imageChunks, upscaledChunks)
+        if (chunkError) return void res.status(400).send(chunkError)
         let {images, upscaledImages} = functions.byte.mergeChunks(imageChunks, upscaledChunks)
         await clearChunkBytes(req.session.username, imageChunks, upscaledChunks)
         
